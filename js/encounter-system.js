@@ -81,7 +81,7 @@ class EncounterSystem {
         
         // Create debug panel (visible for testing)
         this.createDebugPanel();
-        // this.hideIndividualDebugPanel(); // Show the panel for testing
+        // Don't hide the panel - keep it visible for testing
     }
 
     setupUI() {
@@ -269,6 +269,7 @@ class EncounterSystem {
         `;
         
         document.body.appendChild(panel);
+        console.log('🎭 Debug panel created and added to DOM');
         
         // Add event listeners
         document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
@@ -278,10 +279,22 @@ class EncounterSystem {
         });
         
         // Stats debug buttons
-        document.getElementById('heal-player').addEventListener('click', () => this.healPlayer());
-        document.getElementById('restore-sanity').addEventListener('click', () => this.restoreSanity());
-        document.getElementById('lose-health').addEventListener('click', () => this.loseHealth(10, 'Debug test'));
-        document.getElementById('lose-sanity').addEventListener('click', () => this.loseSanity(10, 'Debug test'));
+        document.getElementById('heal-player').addEventListener('click', () => {
+            console.log('🎭 Heal Player button clicked');
+            this.healPlayer();
+        });
+        document.getElementById('restore-sanity').addEventListener('click', () => {
+            console.log('🎭 Restore Sanity button clicked');
+            this.restoreSanity();
+        });
+        document.getElementById('lose-health').addEventListener('click', () => {
+            console.log('🎭 Lose Health button clicked');
+            this.loseHealth(10, 'Debug test');
+        });
+        document.getElementById('lose-sanity').addEventListener('click', () => {
+            console.log('🎭 Lose Sanity button clicked');
+            this.loseSanity(10, 'Debug test');
+        });
         
         // Initialize displays
         this.updateSimpleStatsDisplay();
@@ -1222,6 +1235,22 @@ class EncounterSystem {
         const roll = Math.floor(Math.random() * sides) + 1;
         const total = roll + modifier;
         return { roll, modifier, total };
+    }
+
+    // Show modal method
+    showModal() {
+        const modal = document.getElementById('encounter-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    // Hide modal method
+    hideModal() {
+        const modal = document.getElementById('encounter-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
     }
 
     // Enhanced combat system with dice
