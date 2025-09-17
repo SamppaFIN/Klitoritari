@@ -145,6 +145,19 @@ class BaseSystem {
             return;
         }
 
+        // Wait for geolocation manager to be available
+        if (!window.geolocationManager) {
+            this.showNotification('System still initializing. Please wait a moment and try again.', 'info');
+            
+            // Retry after a short delay
+            setTimeout(() => {
+                if (window.geolocationManager) {
+                    this.showBaseEstablishmentModal();
+                }
+            }, 1000);
+            return;
+        }
+
         // Get current location - try multiple approaches
         let currentPosition = null;
         

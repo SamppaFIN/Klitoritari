@@ -301,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.mapEngine = app.getSystem('mapEngine');
     window.investigationSystem = app.getSystem('investigation');
     window.websocketClient = app.getSystem('websocket');
+    window.baseSystem = app.getSystem('baseSystem');
 });
 
 // Handle page unload
