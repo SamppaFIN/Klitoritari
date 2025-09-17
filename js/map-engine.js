@@ -477,6 +477,20 @@ class MapEngine {
         this.createTerritoryCircle(latlng, base.radius);
     }
 
+    removePlayerBaseMarker() {
+        if (this.playerBaseMarker) {
+            this.map.removeLayer(this.playerBaseMarker);
+            this.playerBaseMarker = null;
+            console.log('🏗️ Base marker removed from map');
+        }
+
+        if (this.territoryPolygon) {
+            this.map.removeLayer(this.territoryPolygon);
+            this.territoryPolygon = null;
+            console.log('🏗️ Territory circle removed from map');
+        }
+    }
+
     animateBaseMarker() {
         if (!this.playerBaseMarker) return;
 

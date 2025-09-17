@@ -153,6 +153,25 @@ class DatabaseClient {
         }
     }
 
+    async deleteBase(baseId) {
+        if (!this.isInitialized) {
+            return this.deleteBaseLocal(baseId);
+        }
+
+        try {
+            const { error } = await this.supabase
+                .from('player_bases')
+                .delete()
+                .eq('id', baseId);
+
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.error('🗄️ Error deleting base:', error);
+            return this.deleteBaseLocal(baseId);
+        }
+    }
+
     // Territory management
     async addTerritoryPoint(baseId, pointData) {
         if (!this.isInitialized) {
@@ -329,6 +348,13 @@ class DatabaseClient {
             return bases[index];
         }
         return null;
+    }
+
+    deleteBaseLocal(baseId) {
+        const bases = this.getLocalData('player_bases', []);
+        const filteredBases = bases.filter(b => b.id !== baseId);
+        this.setLocalData('player_bases', filteredBases);
+        return true;
     }
 
     addTerritoryPointLocal(baseId, pointData) {

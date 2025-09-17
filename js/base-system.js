@@ -94,6 +94,9 @@ class BaseSystem {
                 <button id="manage-base-btn" class="sacred-button secondary">
                     <span class="icon">⚙️</span> Manage Base
                 </button>
+                <button id="delete-base-btn" class="sacred-button" style="background: var(--cosmic-red);">
+                    <span class="icon">🗑️</span> Delete Base
+                </button>
             </div>
             <div id="territory-expansion" class="hidden">
                 <div class="expansion-info">
@@ -135,6 +138,11 @@ class BaseSystem {
         const manageBtn = document.getElementById('manage-base-btn');
         if (manageBtn) {
             manageBtn.addEventListener('click', () => this.showBaseManagementModal());
+        }
+
+        const deleteBtn = document.getElementById('delete-base-btn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => this.confirmDeleteBase());
         }
     }
 
@@ -711,9 +719,60 @@ class BaseSystem {
         this.showNotification('Base management features coming soon!', 'info');
     }
 
+    confirmDeleteBase() {
+        if (!this.playerBase) {
+            this.showNotification('No base to delete!', 'info');
+            return;
+        }
+
+        const confirmed = confirm(
+            `Are you sure you want to delete your base "${this.playerBase.name}"?\n\n` +
+            'This action cannot be undone. You will need to establish a new base to continue.'
+        );
+
+        if (confirmed) {
+            this.deletePlayerBase();
+        }
+    }
+
     // Public API methods
     getPlayerBase() {
         return this.playerBase;
+    }
+
+    deletePlayerBase() {
+        try {
+            if (!this.playerBase) {
+                this.showNotification('No base to delete!', 'info');
+                return false;
+            }
+
+            // Remove from local storage
+            localStorage.removeItem('eldritch-player-base');
+            
+            // Remove from database
+            if (window.databaseClient && this.playerBase.id) {
+                window.databaseClient.deleteBase(this.playerBase.id);
+            }
+
+            // Clear from memory
+            this.playerBase = null;
+
+            // Update UI
+            this.updateBaseUI();
+
+            // Notify other systems
+            if (this.onBaseDeleted) {
+                this.onBaseDeleted();
+            }
+
+            this.showNotification('🏗️ Base deleted successfully! You can now establish a new one.', 'success');
+            return true;
+        } catch (error) {
+            console.error('Error deleting base:', error);
+            this.showNotification('Failed to delete base. Please try again.', 'error');
+            return false;
+        }
     }
 
     getTerritoryPoints() {

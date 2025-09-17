@@ -178,6 +178,11 @@ class EldritchSanctuaryApp {
             this.showNotification(`🏗️ Base "${base.name}" established!`, 'success');
         };
 
+        this.systems.baseSystem.onBaseDeleted = () => {
+            this.systems.mapEngine.removePlayerBaseMarker();
+            this.showNotification('🏗️ Base deleted. You can now establish a new one.', 'info');
+        };
+
         this.systems.baseSystem.onTerritoryUpdated = (territoryPoints) => {
             this.systems.mapEngine.updateTerritoryVisualization(territoryPoints);
         };
