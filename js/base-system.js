@@ -343,6 +343,13 @@ class BaseSystem {
         }
     }
 
+    loadNearbyBases() {
+        // TODO: Implement nearby bases loading from server
+        // For now, just initialize empty array
+        this.nearbyBases = [];
+        console.log('🏗️ Nearby bases loaded (empty for now)');
+    }
+
     updateBaseUI() {
         const basePanel = document.getElementById('base-management-panel');
         const baseStatus = document.querySelector('.base-status');
@@ -584,6 +591,11 @@ class BaseSystem {
                 notification.parentNode.removeChild(notification);
             }
         }, 3000);
+    }
+
+    showBaseManagementModal() {
+        // TODO: Implement base management modal
+        this.showNotification('Base management features coming soon!', 'info');
     }
 
     // Public API methods
