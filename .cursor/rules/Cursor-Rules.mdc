@@ -63,3 +63,14 @@ Cosmic map reboot with Leaflet + WebGL for infinite scrolling. Mobile-first desi
 - If a key/feature is missing, the UI must display a clear, non-blocking message
 - Provide sensible local defaults and disable actions that cannot work without config
 - Log diagnostic info to console (no secrets) to aid local debugging
+
+## Documentation & Fallback Requirements
+- Every feature MUST be documented with clear purpose and usage
+- Every API request MUST have a fallback mechanism for failures
+- Every button MUST return descriptive feedback about its intended action
+- Test all API endpoints and ensure graceful degradation
+- Document fallback behavior in user-facing messages
+- Implement loading states and error states for all interactions
+- Provide clear user feedback for every action, successful or failed
+- No silent failures - always inform users what happened
+- Every new feature must include both success and failure scenarios
