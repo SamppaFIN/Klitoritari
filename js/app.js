@@ -111,6 +111,12 @@ class EldritchSanctuaryApp {
         this.systems.mapEngine = new MapEngine();
         this.systems.mapEngine.init();
         
+        // Set up map ready callback immediately
+        this.systems.mapEngine.onMapReady = () => {
+            this.loadMysteryZones();
+            this.loadPlayerBases();
+        };
+        
         // Initialize investigation system
         this.systems.investigation = new InvestigationSystem();
         this.systems.investigation.init();
@@ -166,11 +172,7 @@ class EldritchSanctuaryApp {
             }
         };
 
-        // Map Engine ready
-        this.systems.mapEngine.onMapReady = () => {
-            this.loadMysteryZones();
-            this.loadPlayerBases();
-        };
+        // Map Engine ready callback is set in initCoreSystems()
 
         // Base System integration
         this.systems.baseSystem.onBaseEstablished = (base) => {
