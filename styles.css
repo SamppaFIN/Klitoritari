@@ -827,3 +827,54 @@ body {
 .custom-marker.pulsing {
     animation: pulse 2s infinite;
 }
+
+/* Multilayered marker animations */
+@keyframes playerGlow {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.3;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.6;
+    }
+}
+
+@keyframes baseEnergy {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.2;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 0.4;
+    }
+}
+
+.multilayered {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* POI and Monster animations */
+@keyframes poiAura {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.2;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.4;
+    }
+}
+
+@keyframes monsterThreat {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 0.4;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 0.6;
+    }
+}

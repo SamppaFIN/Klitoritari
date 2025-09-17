@@ -15,6 +15,9 @@ class MapEngine {
         this.isInitialized = false;
         this.onMapReady = null;
         this.onMarkerClick = null;
+        this.pointsOfInterest = [];
+        this.monsters = [];
+        this.monsterMovementInterval = null;
     }
 
     init() {
@@ -146,21 +149,27 @@ class MapEngine {
         const latlng = [position.lat, position.lng];
         
         if (!this.playerMarker) {
-            // Create player marker
-            this.playerMarker = L.circleMarker(latlng, {
-                radius: 12,
-                fillColor: '#00ff00',
-                color: '#ffffff',
-                weight: 4,
-                opacity: 1,
-                fillOpacity: 0.9,
-                className: 'player-marker'
-            }).addTo(this.map);
-
-            // Add pulsing animation
-            this.animatePlayerMarker();
+            // Create multilayered player marker
+            const playerIcon = L.divIcon({
+                className: 'player-marker multilayered',
+                html: `
+                    <div style="position: relative; width: 40px; height: 40px;">
+                        <!-- Outer glow ring -->
+                        <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, rgba(0, 255, 0, 0.3) 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
+                        <!-- Middle ring -->
+                        <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #00ff00; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.8; box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);"></div>
+                        <!-- Inner core -->
+                        <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; background: linear-gradient(45deg, #00ff00, #00cc00); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">👤</div>
+                    </div>
+                `,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
             
-            console.log('📍 Player marker created at:', latlng);
+            this.playerMarker = L.marker(latlng, { icon: playerIcon }).addTo(this.map);
+            this.playerMarker.bindPopup('<b>Player Location</b><br>Your current position in the cosmic realm');
+            
+            console.log('📍 Multilayered player marker created at:', latlng);
         } else {
             // Update existing marker position
             this.playerMarker.setLatLng(latlng);
@@ -448,17 +457,26 @@ class MapEngine {
         const latlng = [base.lat, base.lng];
         console.log('🏗️ Base marker coordinates:', latlng);
 
-        // Create base marker with simple circle first (for testing)
-        this.playerBaseMarker = L.circleMarker(latlng, {
-            radius: 25,
-            fillColor: '#ff0000',
-            color: '#ffffff',
-            weight: 3,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(this.map);
+        // Create multilayered base marker
+        const baseIcon = L.divIcon({
+            className: 'base-marker multilayered',
+            html: `
+                <div style="position: relative; width: 50px; height: 50px;">
+                    <!-- Outer energy field -->
+                    <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite;"></div>
+                    <!-- Middle ring -->
+                    <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: #ff0000; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);"></div>
+                    <!-- Inner star -->
+                    <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; background: linear-gradient(45deg, #ff0000, #cc0000); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);">⭐</div>
+                </div>
+            `,
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
+        });
         
-        console.log('🏗️ Created simple circle marker for testing');
+        this.playerBaseMarker = L.marker(latlng, { icon: baseIcon }).addTo(this.map);
+        
+        console.log('🏗️ Created multilayered base marker');
         
         console.log('🏗️ Base marker created and added to map:', this.playerBaseMarker);
         console.log('🏗️ Base marker position:', this.playerBaseMarker.getLatLng());
@@ -517,6 +535,10 @@ class MapEngine {
         
         // Create marker showcase
         this.createMarkerShowcase();
+        
+        // Generate points of interest and monsters
+        this.generatePointsOfInterest();
+        this.generateMonsters();
     }
 
     createStarIcon() {
@@ -774,8 +796,173 @@ class MapEngine {
         console.log('🎨 Marker showcase created with', this.showcaseMarkers.length, 'markers');
     }
 
+    generatePointsOfInterest() {
+        if (!this.map) return;
+        
+        console.log('🗺️ Generating points of interest...');
+        
+        // Clear existing POIs
+        this.pointsOfInterest.forEach(poi => this.map.removeLayer(poi));
+        this.pointsOfInterest = [];
+        
+        // Base location for POI generation
+        const baseLat = 61.4978;
+        const baseLng = 23.7608;
+        
+        // POI types with different visual styles
+        const poiTypes = [
+            { name: 'Ancient Ruins', emoji: '🏛️', color: '#8B4513', rarity: 'rare' },
+            { name: 'Energy Crystal', emoji: '💎', color: '#00BFFF', rarity: 'common' },
+            { name: 'Mystic Shrine', emoji: '⛩️', color: '#9370DB', rarity: 'uncommon' },
+            { name: 'Cosmic Portal', emoji: '🌀', color: '#FF1493', rarity: 'legendary' },
+            { name: 'Wisdom Stone', emoji: '🗿', color: '#708090', rarity: 'rare' },
+            { name: 'Healing Spring', emoji: '💧', color: '#00CED1', rarity: 'uncommon' },
+            { name: 'Shadow Grove', emoji: '🌲', color: '#2F4F4F', rarity: 'common' },
+            { name: 'Stellar Observatory', emoji: '🔭', color: '#FFD700', rarity: 'rare' }
+        ];
+        
+        // Generate 15 random POIs
+        for (let i = 0; i < 15; i++) {
+            const poiType = poiTypes[Math.floor(Math.random() * poiTypes.length)];
+            const lat = baseLat + (Math.random() - 0.5) * 0.01; // Within ~500m radius
+            const lng = baseLng + (Math.random() - 0.5) * 0.01;
+            
+            const poiIcon = L.divIcon({
+                className: 'poi-marker multilayered',
+                html: `
+                    <div style="position: relative; width: 35px; height: 35px;">
+                        <!-- Outer aura -->
+                        <div style="position: absolute; top: -3px; left: -3px; width: 41px; height: 41px; background: radial-gradient(circle, ${poiType.color}20 0%, transparent 70%); border-radius: 50%; animation: poiAura 4s infinite;"></div>
+                        <!-- Middle ring -->
+                        <div style="position: absolute; top: 2px; left: 2px; width: 31px; height: 31px; background: ${poiType.color}; border: 2px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 10px ${poiType.color}80;"></div>
+                        <!-- Inner emoji -->
+                        <div style="position: absolute; top: 6px; left: 6px; width: 23px; height: 23px; background: linear-gradient(45deg, ${poiType.color}, ${poiType.color}CC); border: 1px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">${poiType.emoji}</div>
+                    </div>
+                `,
+                iconSize: [35, 35],
+                iconAnchor: [17.5, 17.5]
+            });
+            
+            const poi = L.marker([lat, lng], { icon: poiIcon }).addTo(this.map);
+            poi.bindPopup(`
+                <b>${poiType.name}</b><br>
+                <span style="color: ${poiType.color}; font-weight: bold;">Rarity: ${poiType.rarity.toUpperCase()}</span><br>
+                A mysterious location that may hold secrets or resources.
+            `);
+            
+            this.pointsOfInterest.push(poi);
+        }
+        
+        console.log('🗺️ Generated', this.pointsOfInterest.length, 'points of interest');
+    }
+
+    generateMonsters() {
+        if (!this.map) return;
+        
+        console.log('👹 Generating monsters...');
+        
+        // Clear existing monsters
+        this.monsters.forEach(monster => this.map.removeLayer(monster.marker));
+        this.monsters = [];
+        
+        // Monster types
+        const monsterTypes = [
+            { name: 'Shadow Stalker', emoji: '👻', color: '#4B0082', speed: 0.0001 },
+            { name: 'Cosmic Beast', emoji: '🐉', color: '#FF4500', speed: 0.00008 },
+            { name: 'Void Walker', emoji: '🌑', color: '#2F4F4F', speed: 0.00012 },
+            { name: 'Energy Phantom', emoji: '⚡', color: '#FFD700', speed: 0.00015 },
+            { name: 'Crystal Guardian', emoji: '🛡️', color: '#00BFFF', speed: 0.00006 }
+        ];
+        
+        // Generate 5 random monsters
+        for (let i = 0; i < 5; i++) {
+            const monsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
+            const baseLat = 61.4978;
+            const baseLng = 23.7608;
+            const lat = baseLat + (Math.random() - 0.5) * 0.008;
+            const lng = baseLng + (Math.random() - 0.5) * 0.008;
+            
+            const monsterIcon = L.divIcon({
+                className: 'monster-marker multilayered',
+                html: `
+                    <div style="position: relative; width: 30px; height: 30px;">
+                        <!-- Threat aura -->
+                        <div style="position: absolute; top: -4px; left: -4px; width: 38px; height: 38px; background: radial-gradient(circle, ${monsterType.color}40 0%, transparent 70%); border-radius: 50%; animation: monsterThreat 2s infinite;"></div>
+                        <!-- Monster body -->
+                        <div style="position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: ${monsterType.color}; border: 2px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 8px ${monsterType.color}80;"></div>
+                        <!-- Monster face -->
+                        <div style="position: absolute; top: 6px; left: 6px; width: 18px; height: 18px; background: linear-gradient(45deg, ${monsterType.color}, ${monsterType.color}CC); border: 1px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">${monsterType.emoji}</div>
+                    </div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+            
+            const monster = L.marker([lat, lng], { icon: monsterIcon }).addTo(this.map);
+            monster.bindPopup(`
+                <b>${monsterType.name}</b><br>
+                <span style="color: #ff4444; font-weight: bold;">⚠️ DANGEROUS</span><br>
+                A hostile creature roaming the cosmic realm.
+            `);
+            
+            this.monsters.push({
+                marker: monster,
+                type: monsterType,
+                lat: lat,
+                lng: lng,
+                targetLat: lat,
+                targetLng: lng,
+                moveTimer: 0
+            });
+        }
+        
+        console.log('👹 Generated', this.monsters.length, 'monsters');
+        
+        // Start monster movement
+        this.startMonsterMovement();
+    }
+
+    startMonsterMovement() {
+        if (this.monsterMovementInterval) {
+            clearInterval(this.monsterMovementInterval);
+        }
+        
+        this.monsterMovementInterval = setInterval(() => {
+            this.monsters.forEach(monster => {
+                // Update move timer
+                monster.moveTimer++;
+                
+                // Change direction every 3-8 seconds
+                if (monster.moveTimer > Math.random() * 5 + 3) {
+                    const baseLat = 61.4978;
+                    const baseLng = 23.7608;
+                    monster.targetLat = baseLat + (Math.random() - 0.5) * 0.008;
+                    monster.targetLng = baseLng + (Math.random() - 0.5) * 0.008;
+                    monster.moveTimer = 0;
+                }
+                
+                // Move towards target
+                const latDiff = monster.targetLat - monster.lat;
+                const lngDiff = monster.targetLng - monster.lng;
+                const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+                
+                if (distance > 0.0001) {
+                    const moveSpeed = monster.type.speed;
+                    monster.lat += (latDiff / distance) * moveSpeed;
+                    monster.lng += (lngDiff / distance) * moveSpeed;
+                    
+                    monster.marker.setLatLng([monster.lat, monster.lng]);
+                }
+            });
+        }, 100); // Update every 100ms
+    }
+
     // Cleanup
     destroy() {
+        if (this.monsterMovementInterval) {
+            clearInterval(this.monsterMovementInterval);
+        }
+        
         if (this.map) {
             this.map.remove();
             this.map = null;
