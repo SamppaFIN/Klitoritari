@@ -15,7 +15,9 @@ class EldritchSanctuaryApp {
             mapEngine: null,
             investigation: null,
             websocket: null,
-            baseSystem: null
+            baseSystem: null,
+            encounter: null,
+            npc: null
         };
     }
 
@@ -120,6 +122,10 @@ class EldritchSanctuaryApp {
         this.systems.encounter = new EncounterSystem();
         this.systems.encounter.init();
         
+        // Initialize NPC system
+        this.systems.npc = new NPCSystem();
+        this.systems.npc.init();
+        
         // Initialize map engine
         this.systems.mapEngine = new MapEngine();
         
@@ -128,6 +134,7 @@ class EldritchSanctuaryApp {
             console.log('🗺️ onMapReady callback triggered!');
             this.loadMysteryZones();
             this.loadPlayerBases();
+            this.loadNPCs();
         };
         console.log('🗺️ onMapReady callback set:', this.systems.mapEngine.onMapReady);
         
@@ -253,6 +260,24 @@ class EldritchSanctuaryApp {
         }
     }
 
+    loadNPCs() {
+        console.log('👥 Loading NPCs...');
+        
+        try {
+            // Check if NPC system and map engine are ready
+            if (!this.systems.npc || !this.systems.mapEngine || !this.systems.mapEngine.map) {
+                console.log('👥 NPC system or map engine not ready');
+                return;
+            }
+            
+            // Generate NPCs (this will create markers on the map)
+            this.systems.npc.generateNPCs();
+            console.log('👥 NPCs loaded successfully');
+        } catch (error) {
+            console.error('👥 Error loading NPCs:', error);
+        }
+    }
+
     showNotification(message) {
         // Create notification element
         const notification = document.createElement('div');
@@ -344,6 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.websocketClient = app.getSystem('websocket');
     window.baseSystem = app.getSystem('baseSystem');
     window.encounterSystem = app.getSystem('encounter');
+    window.npcSystem = app.getSystem('npc');
     
     // Debug: Check what systems are available
     console.log('🔍 Global systems check:');
