@@ -25,6 +25,12 @@ class InvestigationSystem {
                 color: '#00ff88',
                 icon: '🔍',
                 description: 'Government cover-ups and secret organizations'
+            },
+            main_quest: {
+                name: 'Main Quest',
+                color: '#9C27B0',
+                icon: '🌌',
+                description: 'The primary storyline of the Härmälä Mystery'
             }
         };
         this.onInvestigationStart = null;
@@ -71,7 +77,8 @@ class InvestigationSystem {
                 description: 'Something ancient stirs beneath the streets of Härmälä. The cosmic entities whisper of a convergence that will reshape reality itself... or at least the local bus schedule.',
                 requirements: 'Investigate the cosmic anomalies appearing around Härmälä',
                 difficulty: 'Main Quest',
-                rewards: ['Reality Anchor', 'Void Pocket', 'Härmälä Mystery Solver Title']
+                rewards: ['Reality Anchor', 'Void Pocket', 'Härmälä Mystery Solver Title'],
+                icon: '🌌'
             }
         ];
 
@@ -95,7 +102,10 @@ class InvestigationSystem {
         div.className = 'zone-item';
         div.dataset.zoneId = zone.id;
         
-        const typeInfo = this.investigationTypes[zone.type];
+        const typeInfo = this.investigationTypes[zone.type] || {
+            icon: zone.icon || '🔍',
+            name: zone.type || 'Unknown'
+        };
         
         div.innerHTML = `
             <div class="zone-name">${typeInfo.icon} ${zone.name}</div>
