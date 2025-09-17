@@ -513,8 +513,9 @@ class MapEngine {
         console.log('🏗️ Base marker interactive?', this.playerBaseMarker.options.interactive);
         console.log('🏗️ Base marker clickable?', this.playerBaseMarker.options.clickable);
 
-        // Create territory circle
-        this.createTerritoryCircle(latlng, base.radius);
+        // Create territory circle (temporarily disabled for testing)
+        // this.createTerritoryCircle(latlng, base.radius);
+        console.log('🏗️ Territory circle disabled for testing');
     }
 
     createStarIcon() {
