@@ -2135,6 +2135,129 @@ input[type="range"]::-moz-range-thumb {
     75% { transform: translateX(5px); }
 }
 
+/* Sanity Bar Styles */
+.sanity-bar {
+    flex: 1;
+    height: 20px;
+    background: #333;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #555;
+}
+
+.sanity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #9C27B0, #E91E63);
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.sanity-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: sanityShimmer 3s infinite;
+}
+
+@keyframes sanityShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Death Screen Styles */
+.death-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(10px);
+}
+
+.death-content {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 3px solid #ff4444;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(255, 68, 68, 0.5);
+    animation: deathPulse 2s infinite;
+}
+
+@keyframes deathPulse {
+    0%, 100% { box-shadow: 0 0 50px rgba(255, 68, 68, 0.5); }
+    50% { box-shadow: 0 0 80px rgba(255, 68, 68, 0.8); }
+}
+
+.death-header h2 {
+    color: #ff4444;
+    font-size: 32px;
+    margin: 0 0 20px 0;
+    text-shadow: 0 0 20px rgba(255, 68, 68, 0.8);
+    animation: deathGlow 1.5s infinite alternate;
+}
+
+@keyframes deathGlow {
+    0% { text-shadow: 0 0 20px rgba(255, 68, 68, 0.8); }
+    100% { text-shadow: 0 0 40px rgba(255, 68, 68, 1); }
+}
+
+.death-message {
+    margin: 20px 0;
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.death-message p {
+    margin: 10px 0;
+}
+
+.death-subtitle {
+    color: #ffaa00;
+    font-style: italic;
+    font-size: 16px;
+}
+
+.death-actions {
+    margin-top: 30px;
+}
+
+.death-btn {
+    background: linear-gradient(45deg, #ff4444, #ff6666);
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+}
+
+.death-btn:hover {
+    background: linear-gradient(45deg, #ff6666, #ff4444);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(255, 68, 68, 0.6);
+}
+
+.death-btn:active {
+    transform: translateY(0);
+}
+
 /* Debug Toggle Button */
 .debug-toggle-button {
     position: fixed;

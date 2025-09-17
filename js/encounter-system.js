@@ -13,22 +13,34 @@ class EncounterSystem {
         this.stepGainRate = 0.1; // Steps per position update
         this.lastPosition = null;
         
-        // Player stats
+        // Player stats - The cosmic horror comedy begins!
         this.playerStats = {
             health: 100,
             maxHealth: 100,
+            sanity: 100,
+            maxSanity: 100,
+            steps: 0, // Integer only - no half steps in the cosmic realm!
             attack: 15,
             defense: 10,
             luck: 12,
             experience: 0,
             level: 1,
             inventory: [],
+            equipment: {
+                weapon: null,
+                armor: null,
+                accessory: null
+            },
             skills: {
                 combat: 1,
                 diplomacy: 1,
                 investigation: 1,
                 survival: 1
-            }
+            },
+            traits: [],
+            reputation: {},
+            isDead: false,
+            deathReason: null
         };
         
         // Encounter types
@@ -779,6 +791,115 @@ class EncounterSystem {
         if (counter) {
             counter.querySelector('.step-value').textContent = this.playerSteps;
         }
+        
+        // Sync with player stats and check for death
+        this.playerStats.steps = this.playerSteps;
+        this.checkPlayerDeath();
+    }
+
+    // Death mechanics - because cosmic horror is no joke... or is it?
+    checkPlayerDeath() {
+        if (this.playerStats.health <= 0) {
+            this.playerStats.isDead = true;
+            this.playerStats.deathReason = "Your physical form has been consumed by the cosmic void. The eldritch entities found your health bar... lacking.";
+            this.handlePlayerDeath();
+        } else if (this.playerStats.sanity <= 0) {
+            this.playerStats.isDead = true;
+            this.playerStats.deathReason = "Your mind has shattered like a cosmic egg dropped from the 47th dimension. The forbidden knowledge was simply too much to bear.";
+            this.handlePlayerDeath();
+        } else if (this.playerStats.steps <= 0) {
+            this.playerStats.isDead = true;
+            this.playerStats.deathReason = "You have run out of steps in the cosmic dance of existence. Even the eldritch entities are impressed by your dedication to standing still.";
+            this.handlePlayerDeath();
+        }
+    }
+
+    handlePlayerDeath() {
+        console.log('💀 Player has died:', this.playerStats.deathReason);
+        
+        // Show death screen
+        this.showDeathScreen();
+        
+        // Reset player stats (but keep some progression)
+        this.playerStats.health = Math.floor(this.playerStats.maxHealth * 0.5);
+        this.playerStats.sanity = Math.floor(this.playerStats.maxSanity * 0.5);
+        this.playerStats.steps = Math.max(0, this.playerStats.steps - 50); // Lose some steps
+        this.playerStats.isDead = false;
+        this.playerStats.deathReason = null;
+    }
+
+    showDeathScreen() {
+        const deathModal = document.createElement('div');
+        deathModal.id = 'death-modal';
+        deathModal.className = 'death-modal';
+        deathModal.innerHTML = `
+            <div class="death-content">
+                <div class="death-header">
+                    <h2>💀 Cosmic Demise</h2>
+                </div>
+                <div class="death-message">
+                    <p>${this.playerStats.deathReason}</p>
+                    <p class="death-subtitle">The cosmic realm is not without mercy... mostly.</p>
+                </div>
+                <div class="death-actions">
+                    <button class="death-btn" onclick="window.encounterSystem.resurrectPlayer()">
+                        🌌 Embrace Cosmic Rebirth
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(deathModal);
+    }
+
+    resurrectPlayer() {
+        const deathModal = document.getElementById('death-modal');
+        if (deathModal) {
+            deathModal.remove();
+        }
+        
+        // Update UI
+        this.updateHealthBars();
+        this.updateStepCounter();
+        
+        console.log('🌌 Player resurrected with cosmic mercy!');
+    }
+
+    // Sanity system - because knowing too much is... problematic
+    loseSanity(amount, reason = "The cosmic truth weighs heavily on your mind.") {
+        this.playerStats.sanity = Math.max(0, this.playerStats.sanity - amount);
+        console.log(`🧠 Sanity lost: ${amount}. Reason: ${reason}`);
+        
+        // Check for sanity effects
+        if (this.playerStats.sanity < 30) {
+            console.log('⚠️ Warning: Your sanity is dangerously low! The cosmic entities are starting to look... reasonable.');
+        }
+        
+        this.updateHealthBars();
+        this.checkPlayerDeath();
+    }
+
+    gainSanity(amount, reason = "A moment of clarity in the cosmic chaos.") {
+        this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + amount);
+        console.log(`🧠 Sanity gained: ${amount}. Reason: ${reason}`);
+        
+        this.updateHealthBars();
+    }
+
+    // Health system - because physical damage is... physical
+    loseHealth(amount, reason = "The cosmic realm is not kind to the unprepared.") {
+        this.playerStats.health = Math.max(0, this.playerStats.health - amount);
+        console.log(`❤️ Health lost: ${amount}. Reason: ${reason}`);
+        
+        this.updateHealthBars();
+        this.checkPlayerDeath();
+    }
+
+    gainHealth(amount, reason = "Cosmic energy flows through your being.") {
+        this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + amount);
+        console.log(`❤️ Health gained: ${amount}. Reason: ${reason}`);
+        
+        this.updateHealthBars();
     }
 
     // Rewards system
@@ -866,48 +987,53 @@ class EncounterSystem {
             monster: {
                 shadowStalker: {
                     name: "Shadow Stalker",
-                    description: "A creature born from the darkness between dimensions, the Shadow Stalker hunts those who venture too close to the cosmic rifts. Its form shifts and writhes like living smoke, and its eyes burn with the cold fire of the void.",
-                    intro: "The air grows cold as shadows begin to move independently around you. A figure materializes from the darkness - tall, gaunt, and radiating an otherworldly menace. The Shadow Stalker has found its prey.",
-                    combatIntro: "The Shadow Stalker lets out a bone-chilling shriek as it lunges forward, its form becoming more solid as it prepares for battle!",
-                    victory: "The Shadow Stalker shrieks in agony as your attack strikes true! It dissolves into wisps of dark smoke, leaving behind only a faint whisper on the wind.",
-                    defeat: "The Shadow Stalker's claws find their mark, and you feel your consciousness slipping away as the darkness claims you...",
-                    loot: ["Shadow Essence", "Void Crystal", "Dark Knowledge"]
+                    description: "A creature born from the darkness between dimensions, the Shadow Stalker hunts those who venture too close to the cosmic rifts. Its form shifts and writhes like living smoke, and its eyes burn with the cold fire of the void. It's been stalking you for 47 dimensions now, and frankly, it's getting a bit tired of your evasive maneuvers.",
+                    intro: "The air grows cold as shadows begin to move independently around you. A figure materializes from the darkness - tall, gaunt, and radiating an otherworldly menace. The Shadow Stalker has found its prey. It looks at you with eyes that have seen the end of 12 universes and sighs audibly, as if this is just another Tuesday in the cosmic void.",
+                    combatIntro: "The Shadow Stalker lets out a bone-chilling shriek as it lunges forward, its form becoming more solid as it prepares for battle! It's actually quite impressive how it manages to look menacing while muttering about 'another day, another mortal to terrify' under its breath.",
+                    victory: "The Shadow Stalker shrieks in agony as your attack strikes true! It dissolves into wisps of dark smoke, leaving behind only a faint whisper on the wind that sounds suspiciously like 'Finally, some excitement in this eternal void...'",
+                    defeat: "The Shadow Stalker's claws find their mark, and you feel your consciousness slipping away as the darkness claims you... The last thing you hear is it muttering 'Well, that was easier than expected. I should probably update my resume.'",
+                    loot: ["Shadow Essence", "Void Crystal", "Dark Knowledge", "Stalker's Business Card"],
+                    sanityDamage: 2
                 },
                 cosmicBeast: {
                     name: "Cosmic Beast",
-                    description: "A magnificent creature that has adapted to the cosmic energies of this realm. Its scales shimmer with starlight, and its roar echoes across dimensions.",
-                    intro: "A massive creature emerges from a shimmering portal - its form is both beautiful and terrifying. The Cosmic Beast has been drawn by the cosmic energies in this area.",
-                    combatIntro: "The Cosmic Beast roars, and you feel the very fabric of space tremble around you! It charges forward with cosmic fury!",
-                    victory: "The Cosmic Beast's roar turns to a whimper as it falls. Starlight pours from its wounds, and you feel a surge of cosmic energy.",
-                    defeat: "The Cosmic Beast's cosmic power overwhelms you, and you collapse under the weight of its otherworldly might...",
-                    loot: ["Starlight Scale", "Cosmic Essence", "Dimensional Fragment"]
+                    description: "A magnificent creature that has adapted to the cosmic energies of this realm. Its scales shimmer with starlight, and its roar echoes across dimensions. It's been trying to start a cosmic book club for eons, but no one ever shows up to the meetings. The loneliness is driving it to violence.",
+                    intro: "A massive creature emerges from a shimmering portal - its form is both beautiful and terrifying. The Cosmic Beast has been drawn by the cosmic energies in this area. It looks at you with eyes full of starlight and what appears to be... hope? 'Finally,' it rumbles, 'someone to discuss the latest cosmic literature with!'",
+                    combatIntro: "The Cosmic Beast roars, and you feel the very fabric of space tremble around you! It charges forward with cosmic fury! 'You WILL join my book club!' it bellows, 'Even if I have to beat you into submission!'",
+                    victory: "The Cosmic Beast's roar turns to a whimper as it falls. Starlight pours from its wounds, and you feel a surge of cosmic energy. As it fades, it whispers, 'At least... at least I tried to share my love of cosmic poetry...'",
+                    defeat: "The Cosmic Beast's cosmic power overwhelms you, and you collapse under the weight of its otherworldly might... The last thing you hear is it excitedly planning your first book club meeting.",
+                    loot: ["Starlight Scale", "Cosmic Essence", "Dimensional Fragment", "Cosmic Poetry Anthology"],
+                    sanityDamage: 1
                 },
                 voidWalker: {
                     name: "Void Walker",
-                    description: "An entity that exists in the spaces between reality. It appears as a humanoid figure wrapped in shifting darkness, with eyes that show the infinite void.",
-                    intro: "Reality itself seems to tear as a figure steps through the fabric of space. The Void Walker has crossed dimensions to reach this place.",
-                    combatIntro: "The Void Walker's form becomes more solid as it prepares for combat, its void-touched claws extending menacingly!",
-                    victory: "The Void Walker's form begins to unravel, returning to the void from whence it came. You feel a strange sense of completion.",
-                    defeat: "The Void Walker's touch sends you spiraling into the void, your consciousness fading into nothingness...",
-                    loot: ["Void Fragment", "Dimensional Tear", "Void Knowledge"]
+                    description: "An entity that exists in the spaces between reality. It appears as a humanoid figure wrapped in shifting darkness, with eyes that show the infinite void. It's been walking between dimensions for so long that it's forgotten what it was originally looking for. Now it just wanders around asking people if they've seen its keys.",
+                    intro: "Reality itself seems to tear as a figure steps through the fabric of space. The Void Walker has crossed dimensions to reach this place. It looks around confusedly and mutters, 'I know I left them somewhere... maybe in the 23rd dimension? Or was it the 47th? This is why I never get anything done.'",
+                    combatIntro: "The Void Walker's form becomes more solid as it prepares for combat, its void-touched claws extending menacingly! 'Look, I don't want to fight,' it says, 'but you might have my keys, and I've been looking for them for 12 eons!'",
+                    victory: "The Void Walker's form begins to unravel, returning to the void from whence it came. You feel a strange sense of completion. As it fades, it calls out, 'If you find my keys, just leave them in the void! I'll check back in a few millennia!'",
+                    defeat: "The Void Walker's touch sends you spiraling into the void, your consciousness fading into nothingness... The last thing you hear is it muttering about checking the 89th dimension for its keys.",
+                    loot: ["Void Fragment", "Dimensional Tear", "Void Knowledge", "Mysterious Keys"],
+                    sanityDamage: 3
                 },
                 energyPhantom: {
                     name: "Energy Phantom",
-                    description: "A being of pure energy that has gained consciousness. It crackles with electrical power and moves with the speed of lightning.",
-                    intro: "The air crackles with energy as a being of pure electricity materializes before you. The Energy Phantom pulses with raw power.",
-                    combatIntro: "The Energy Phantom crackles with electrical fury, bolts of lightning arcing around it as it prepares to strike!",
-                    victory: "The Energy Phantom explodes in a shower of sparks, leaving behind pure energy crystals that pulse with power.",
-                    defeat: "Electricity courses through your body as the Energy Phantom's power overwhelms you, leaving you unconscious...",
-                    loot: ["Energy Crystal", "Lightning Essence", "Power Fragment"]
+                    description: "A being of pure energy that has gained consciousness. It crackles with electrical power and moves with the speed of lightning. It's been trying to learn to play the electric guitar, but every time it gets excited, it accidentally electrocutes the audience. The cosmic music scene is not kind to energy beings.",
+                    intro: "The air crackles with energy as a being of pure electricity materializes before you. The Energy Phantom pulses with raw power. 'Finally!' it crackles excitedly, 'Someone who might appreciate my latest cosmic metal solo! You're going to love this - I've been practicing for 500 years!'",
+                    combatIntro: "The Energy Phantom crackles with electrical fury, bolts of lightning arcing around it as it prepares to strike! 'This is going to be EPIC!' it screams, 'Prepare for the most electrifying performance of your life!'",
+                    victory: "The Energy Phantom explodes in a shower of sparks, leaving behind pure energy crystals that pulse with power. As it fades, it whispers, 'At least... at least I got to play one last time...'",
+                    defeat: "Electricity courses through your body as the Energy Phantom's power overwhelms you, leaving you unconscious... The last thing you hear is it excitedly planning your next jam session.",
+                    loot: ["Energy Crystal", "Lightning Essence", "Power Fragment", "Cosmic Guitar Pick"],
+                    sanityDamage: 2
                 },
                 crystalGuardian: {
                     name: "Crystal Guardian",
-                    description: "An ancient construct of living crystal that has stood guard over this area for centuries. Its form is both beautiful and deadly.",
-                    intro: "A massive crystal formation begins to move, revealing itself as a living guardian. The Crystal Guardian has awakened to protect its domain.",
-                    combatIntro: "The Crystal Guardian's form shimmers as it prepares for battle, its crystalline structure becoming more defined!",
-                    victory: "The Crystal Guardian shatters into beautiful fragments, each one pulsing with ancient magic and wisdom.",
-                    defeat: "The Crystal Guardian's crystalline structure proves too strong, and you are overwhelmed by its ancient power...",
-                    loot: ["Crystal Shard", "Ancient Wisdom", "Guardian Essence"]
+                    description: "An ancient construct of living crystal that has stood guard over this area for centuries. Its form is both beautiful and deadly. It's been standing in the same spot for so long that it's developed a severe case of existential dread and a bad back. The cosmic realm's health insurance doesn't cover pre-existing conditions.",
+                    intro: "A massive crystal formation begins to move, revealing itself as a living guardian. The Crystal Guardian has awakened to protect its domain. It stretches its crystalline limbs with a series of audible cracks. 'Oh, my aching facets,' it groans, 'I've been standing here for 3,000 years waiting for something interesting to happen. You'll do.'",
+                    combatIntro: "The Crystal Guardian's form shimmers as it prepares for battle, its crystalline structure becoming more defined! 'Look, I don't want to fight,' it says, 'but I've got a quota to meet, and you're the first interesting thing that's happened since the last ice age.'",
+                    victory: "The Crystal Guardian shatters into beautiful fragments, each one pulsing with ancient magic and wisdom. As it falls, it sighs with relief, 'Finally... I can rest... Maybe I'll try being a coffee table in my next life...'",
+                    defeat: "The Crystal Guardian's crystalline structure proves too strong, and you are overwhelmed by its ancient power... The last thing you hear is it muttering about finally getting some exercise.",
+                    loot: ["Crystal Shard", "Ancient Wisdom", "Guardian Essence", "Crystal Guardian's Back Brace"],
+                    sanityDamage: 1
                 }
             },
             poi: {
@@ -1035,6 +1161,13 @@ class EncounterSystem {
                                     <div class="health-fill" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
                                 </div>
                                 <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
+                            </div>
+                            <div class="stat-bar">
+                                <span class="stat-label">Sanity:</span>
+                                <div class="sanity-bar">
+                                    <div class="sanity-fill" style="width: ${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%"></div>
+                                </div>
+                                <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
                             </div>
                             <div class="stat-item">
                                 <span class="stat-label">Attack:</span>
@@ -1167,8 +1300,15 @@ class EncounterSystem {
         
         if (attackRoll.total > defenseRoll.total) {
             const damage = this.rollDice(6, monster.attack);
-            this.playerStats.health -= damage.total;
+            this.loseHealth(damage.total, `${monster.name}'s attack strikes true!`);
             log.innerHTML += `<div class="log-entry danger">Hit! ${monster.name} deals ${damage.total} damage!</div>`;
+            
+            // Some monsters also cause sanity damage
+            if (monster.sanityDamage) {
+                const sanityLoss = this.rollDice(4, monster.sanityDamage);
+                this.loseSanity(sanityLoss.total, `The eldritch nature of ${monster.name} assaults your mind!`);
+                log.innerHTML += `<div class="log-entry danger">Your sanity trembles! -${sanityLoss.total} sanity!</div>`;
+            }
             
             if (this.playerStats.health <= 0) {
                 this.defeat(monster);
@@ -1218,10 +1358,15 @@ class EncounterSystem {
 
     updateHealthBars() {
         const playerHealthFill = document.querySelector('.health-fill');
+        const playerSanityFill = document.querySelector('.sanity-fill');
         const monsterHealthFill = document.querySelector('.monster-health-fill');
         
         if (playerHealthFill) {
             playerHealthFill.style.width = `${(this.playerStats.health / this.playerStats.maxHealth) * 100}%`;
+        }
+        
+        if (playerSanityFill) {
+            playerSanityFill.style.width = `${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%`;
         }
         
         if (monsterHealthFill) {
