@@ -18,6 +18,11 @@ class MapEngine {
     }
 
     init() {
+        if (this.isInitialized) {
+            console.log('🗺️ Map engine already initialized, skipping');
+            return;
+        }
+        
         this.setupMap();
         this.setupMapEvents();
         this.isInitialized = true;
@@ -433,13 +438,15 @@ class MapEngine {
         if (!this.map) return;
 
         console.log('🏗️ Adding base marker for:', base);
+        
+        // Prevent duplicate base marker creation
+        if (this.playerBaseMarker) {
+            console.log('🏗️ Base marker already exists, skipping duplicate creation');
+            return;
+        }
+        
         const latlng = [base.lat, base.lng];
         console.log('🏗️ Base marker coordinates:', latlng);
-        
-        // Remove existing base marker
-        if (this.playerBaseMarker) {
-            this.map.removeLayer(this.playerBaseMarker);
-        }
 
         // Create base marker with star shape
         const starIcon = L.divIcon({
