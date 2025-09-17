@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eldritch Sanctuary - Cosmic Map Explorer</title>
+    <meta name="description" content="Explore cosmic mysteries and paranormal phenomena in an infinite scrolling map">
+    <meta name="theme-color" content="#1a0a2e">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Three.js for WebGL effects -->
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+</head>
+<body>
+    <!-- Cosmic Background Canvas -->
+    <canvas id="cosmic-canvas"></canvas>
+    
+    <!-- Main Map Container -->
+    <div id="map-container">
+        <div id="map"></div>
+        
+        <!-- UI Overlay -->
+        <div id="ui-overlay">
+            <!-- Header -->
+            <header id="header">
+                <h1>🌌 Eldritch Sanctuary</h1>
+                <div id="connection-status" class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Connecting...</span>
+                </div>
+            </header>
+            
+            <!-- Geolocation Controls -->
+            <div id="geolocation-panel" class="control-panel">
+                <button id="locate-btn" class="sacred-button">
+                    <span class="icon">📍</span>
+                    Locate Me
+                </button>
+                <div id="accuracy-display" class="accuracy-info">
+                    <span class="accuracy-label">Accuracy:</span>
+                    <span id="accuracy-value">--</span>
+                </div>
+            </div>
+            
+            <!-- Investigation Panel -->
+            <div id="investigation-panel" class="control-panel hidden">
+                <h3>🔍 Active Investigation</h3>
+                <div id="investigation-info">
+                    <div class="investigation-title"></div>
+                    <div class="investigation-type"></div>
+                    <div class="investigation-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+                <button id="abandon-investigation" class="sacred-button secondary">
+                    Abandon Investigation
+                </button>
+            </div>
+            
+            <!-- Mystery Zones -->
+            <div id="mystery-zones" class="control-panel">
+                <h3>🌙 Mystery Zones</h3>
+                <div id="zone-list"></div>
+            </div>
+        </div>
+        
+        <!-- Investigation Modal -->
+        <div id="investigation-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modal-title">Investigation Details</h2>
+                    <button id="close-modal" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="modal-description"></div>
+                    <div id="modal-requirements"></div>
+                    <div class="modal-actions">
+                        <button id="start-investigation" class="sacred-button">
+                            Begin Investigation
+                        </button>
+                        <button id="cancel-investigation" class="sacred-button secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="cosmic-loader">
+            <div class="loader-ring"></div>
+            <div class="loader-text">Initializing Cosmic Map...</div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/cosmic-effects.js"></script>
+    <script src="js/geolocation.js"></script>
+    <script src="js/investigation-system.js"></script>
+    <script src="js/websocket-client.js"></script>
+    <script src="js/map-engine.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

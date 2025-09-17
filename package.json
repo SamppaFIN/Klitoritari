@@ -1,0 +1,23 @@
+{
+  "name": "eldritch-sanctuary",
+  "version": "1.0.0",
+  "description": "Cosmic map exploration platform for mystery investigation and community healing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step needed for vanilla JS'",
+    "test": "echo 'Tests will be added'"
+  },
+  "keywords": ["cosmic", "map", "mystery", "investigation", "paranormal", "community"],
+  "author": "Infinite & Aurora",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

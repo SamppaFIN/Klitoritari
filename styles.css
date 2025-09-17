@@ -1,0 +1,485 @@
+/* Eldritch Sanctuary - Cosmic Map Styles */
+
+:root {
+    --cosmic-purple: #6a0dad;
+    --cosmic-green: #00ff88;
+    --cosmic-red: #ff0040;
+    --cosmic-blue: #0080ff;
+    --cosmic-dark: #0a0a0a;
+    --cosmic-darker: #050505;
+    --cosmic-light: #f0f0f0;
+    --cosmic-glow: rgba(106, 13, 173, 0.3);
+    --cosmic-shadow: rgba(0, 0, 0, 0.8);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--cosmic-dark);
+    color: var(--cosmic-light);
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Cosmic Background Canvas */
+#cosmic-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Map Container */
+#map-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* UI Overlay */
+#ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+#ui-overlay > * {
+    pointer-events: auto;
+}
+
+/* Header */
+#header {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, var(--cosmic-darker), var(--cosmic-dark));
+    padding: 15px 20px;
+    border-radius: 15px;
+    border: 2px solid var(--cosmic-purple);
+    box-shadow: 0 0 20px var(--cosmic-glow);
+    backdrop-filter: blur(10px);
+}
+
+#header h1 {
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, var(--cosmic-purple), var(--cosmic-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 10px var(--cosmic-glow);
+}
+
+/* Status Indicator */
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--cosmic-red);
+    animation: pulse 2s infinite;
+}
+
+.status-dot.connected {
+    background: var(--cosmic-green);
+}
+
+.status-dot.connecting {
+    background: var(--cosmic-blue);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Control Panels */
+.control-panel {
+    position: absolute;
+    background: linear-gradient(135deg, var(--cosmic-darker), var(--cosmic-dark));
+    border: 2px solid var(--cosmic-purple);
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 0 20px var(--cosmic-glow);
+    backdrop-filter: blur(10px);
+    min-width: 250px;
+}
+
+#geolocation-panel {
+    top: 100px;
+    left: 20px;
+}
+
+#investigation-panel {
+    top: 200px;
+    left: 20px;
+}
+
+#mystery-zones {
+    bottom: 20px;
+    left: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Sacred Buttons */
+.sacred-button {
+    background: linear-gradient(45deg, var(--cosmic-purple), var(--cosmic-blue));
+    border: none;
+    color: var(--cosmic-light);
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px var(--cosmic-glow);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sacred-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--cosmic-glow);
+    background: linear-gradient(45deg, var(--cosmic-blue), var(--cosmic-green));
+}
+
+.sacred-button:active {
+    transform: translateY(0);
+}
+
+.sacred-button.secondary {
+    background: linear-gradient(45deg, var(--cosmic-dark), var(--cosmic-darker));
+    border: 2px solid var(--cosmic-red);
+}
+
+.sacred-button.secondary:hover {
+    background: linear-gradient(45deg, var(--cosmic-red), var(--cosmic-purple));
+}
+
+/* Geolocation Panel */
+#locate-btn {
+    width: 100%;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.accuracy-info {
+    font-size: 0.8rem;
+    color: var(--cosmic-green);
+    text-align: center;
+}
+
+.accuracy-label {
+    opacity: 0.7;
+}
+
+#accuracy-value {
+    font-weight: 600;
+    color: var(--cosmic-green);
+}
+
+/* Investigation Panel */
+.investigation-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cosmic-green);
+    margin-bottom: 5px;
+}
+
+.investigation-type {
+    font-size: 0.9rem;
+    color: var(--cosmic-purple);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.investigation-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--cosmic-darker);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--cosmic-purple);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cosmic-purple), var(--cosmic-green));
+    width: 0%;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px var(--cosmic-glow);
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--cosmic-light);
+    min-width: 35px;
+}
+
+/* Mystery Zones */
+#zone-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.zone-item {
+    background: var(--cosmic-darker);
+    border: 1px solid var(--cosmic-purple);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.zone-item:hover {
+    background: var(--cosmic-dark);
+    border-color: var(--cosmic-green);
+    box-shadow: 0 0 10px var(--cosmic-glow);
+}
+
+.zone-name {
+    font-weight: 600;
+    color: var(--cosmic-light);
+    margin-bottom: 3px;
+}
+
+.zone-type {
+    font-size: 0.8rem;
+    color: var(--cosmic-purple);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.zone-distance {
+    font-size: 0.7rem;
+    color: var(--cosmic-green);
+    margin-top: 3px;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: linear-gradient(135deg, var(--cosmic-darker), var(--cosmic-dark));
+    border: 2px solid var(--cosmic-purple);
+    border-radius: 15px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 30px var(--cosmic-glow);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--cosmic-purple);
+}
+
+.modal-header h2 {
+    color: var(--cosmic-green);
+    font-size: 1.3rem;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--cosmic-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    background: var(--cosmic-red);
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions .sacred-button {
+    flex: 1;
+}
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--cosmic-darker);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.cosmic-loader {
+    text-align: center;
+}
+
+.loader-ring {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--cosmic-darker);
+    border-top: 4px solid var(--cosmic-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loader-text {
+    color: var(--cosmic-light);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    #header {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 10px 15px;
+    }
+    
+    #header h1 {
+        font-size: 1.2rem;
+    }
+    
+    .control-panel {
+        min-width: 200px;
+    }
+    
+    #geolocation-panel {
+        top: 80px;
+        left: 10px;
+    }
+    
+    #investigation-panel {
+        top: 160px;
+        left: 10px;
+    }
+    
+    #mystery-zones {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        max-height: 200px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* Leaflet Map Customization */
+.leaflet-container {
+    background: var(--cosmic-dark) !important;
+}
+
+.leaflet-tile {
+    filter: hue-rotate(200deg) saturate(1.5) contrast(1.2) brightness(0.8);
+}
+
+.leaflet-popup-content-wrapper {
+    background: var(--cosmic-darker);
+    border: 2px solid var(--cosmic-purple);
+    border-radius: 10px;
+    box-shadow: 0 0 20px var(--cosmic-glow);
+}
+
+.leaflet-popup-content {
+    color: var(--cosmic-light);
+}
+
+.leaflet-popup-tip {
+    background: var(--cosmic-darker);
+    border: 2px solid var(--cosmic-purple);
+}

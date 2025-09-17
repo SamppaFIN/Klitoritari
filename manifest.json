@@ -1,0 +1,114 @@
+{
+  "name": "Eldritch Sanctuary - Cosmic Map Explorer",
+  "short_name": "Eldritch Sanctuary",
+  "description": "Explore cosmic mysteries and paranormal phenomena in an infinite scrolling map",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#6a0dad",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["entertainment", "games", "lifestyle"],
+  "icons": [
+    {
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Cosmic map exploration interface"
+    },
+    {
+      "src": "screenshots/mobile-1.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile cosmic exploration"
+    }
+  ],
+  "features": [
+    "Infinite scrolling cosmic map",
+    "Real-time geolocation tracking",
+    "Mystery investigation system",
+    "Multiplayer collaboration",
+    "Offline exploration support"
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Investigation",
+      "short_name": "Investigate",
+      "description": "Begin a new cosmic investigation",
+      "url": "/?action=investigate",
+      "icons": [
+        {
+          "src": "icons/shortcut-investigate.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "View Mystery Zones",
+      "short_name": "Zones",
+      "description": "Explore available mystery zones",
+      "url": "/?action=zones",
+      "icons": [
+        {
+          "src": "icons/shortcut-zones.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
