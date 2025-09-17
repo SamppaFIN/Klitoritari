@@ -156,7 +156,7 @@ class BaseSystem {
             console.log('❌ System not ready - showing retry notification');
             this.showNotification('System still initializing. Please wait a moment and try again.', 'info');
             
-            // Retry after a short delay
+            // Retry after a longer delay to ensure systems are ready
             setTimeout(() => {
                 console.log('🔄 Retrying base establishment...');
                 console.log('  - geolocationManager:', !!window.geolocationManager);
@@ -166,9 +166,17 @@ class BaseSystem {
                 if (window.geolocationManager && window.databaseClient && window.databaseClient.isInitialized) {
                     this.showBaseEstablishmentModal();
                 } else {
-                    this.showNotification('System not ready. Please refresh the page and try again.', 'error');
+                    // Try one more time after another delay
+                    setTimeout(() => {
+                        console.log('🔄 Final retry...');
+                        if (window.geolocationManager && window.databaseClient && window.databaseClient.isInitialized) {
+                            this.showBaseEstablishmentModal();
+                        } else {
+                            this.showNotification('System not ready. Please refresh the page and try again.', 'error');
+                        }
+                    }, 3000);
                 }
-            }, 2000);
+            }, 3000);
             return;
         }
         
