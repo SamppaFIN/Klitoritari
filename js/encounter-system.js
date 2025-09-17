@@ -209,7 +209,7 @@ class EncounterSystem {
     startProximityDetection() {
         this.proximityCheckInterval = setInterval(() => {
             this.checkProximityEncounters();
-        }, 1000); // Check every second
+        }, 500); // Check every 500ms for better responsiveness
     }
 
     checkProximityEncounters() {
@@ -230,6 +230,9 @@ class EncounterSystem {
         this.checkMonsterProximity(playerPos);
         this.checkPOIProximity(playerPos);
         this.checkMysteryProximity(playerPos);
+        
+        // Check for proximity warnings (within 100m)
+        this.checkProximityWarnings(playerPos);
     }
 
     checkMonsterProximity(playerPos) {
@@ -248,7 +251,7 @@ class EncounterSystem {
             
             console.log(`🎭 Monster ${index} distance:`, distance, 'meters');
             
-            if (distance < 0.0005 && !monster.encountered) { // ~50m
+            if (distance < 50 && !monster.encountered) { // 50m
                 console.log('🎭 Monster encounter triggered!');
                 monster.encountered = true;
                 this.startMonsterEncounter(monster);
@@ -257,15 +260,23 @@ class EncounterSystem {
     }
 
     checkPOIProximity(playerPos) {
-        if (!window.eldritchApp.systems.mapEngine.pointsOfInterest) return;
+        if (!window.eldritchApp.systems.mapEngine.pointsOfInterest) {
+            console.log('🎭 No POIs available');
+            return;
+        }
         
-        window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach(poi => {
+        console.log('🎭 Checking', window.eldritchApp.systems.mapEngine.pointsOfInterest.length, 'POIs');
+        
+        window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach((poi, index) => {
             const distance = this.calculateDistance(
                 playerPos.lat, playerPos.lng,
                 poi.getLatLng().lat, poi.getLatLng().lng
             );
             
-            if (distance < 0.0003 && !poi.encountered) { // ~30m
+            console.log(`🎭 POI ${index} distance:`, distance, 'meters');
+            
+            if (distance < 50 && !poi.encountered) { // 50m
+                console.log('🎭 POI encounter triggered!');
                 poi.encountered = true;
                 this.startPOIEncounter(poi);
             }
@@ -273,19 +284,102 @@ class EncounterSystem {
     }
 
     checkMysteryProximity(playerPos) {
-        if (!window.eldritchApp.systems.mapEngine.mysteryZoneMarkers) return;
+        if (!window.eldritchApp.systems.mapEngine.mysteryZoneMarkers) {
+            console.log('🎭 No mystery zones available');
+            return;
+        }
         
-        window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach(mystery => {
+        console.log('🎭 Checking', window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.length, 'mystery zones');
+        
+        window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach((mystery, index) => {
             const distance = this.calculateDistance(
                 playerPos.lat, playerPos.lng,
                 mystery.getLatLng().lat, mystery.getLatLng().lng
             );
             
-            if (distance < 0.0004 && !mystery.encountered) { // ~40m
+            console.log(`🎭 Mystery ${index} distance:`, distance, 'meters');
+            
+            if (distance < 50 && !mystery.encountered) { // 50m
+                console.log('🎭 Mystery encounter triggered!');
                 mystery.encountered = true;
                 this.startMysteryEncounter(mystery);
             }
         });
+    }
+
+    checkProximityWarnings(playerPos) {
+        let closestDistance = Infinity;
+        let closestType = '';
+        
+        // Check monsters
+        if (window.eldritchApp.systems.mapEngine.monsters) {
+            window.eldritchApp.systems.mapEngine.monsters.forEach(monster => {
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    monster.lat, monster.lng
+                );
+                if (distance < closestDistance && distance < 100) {
+                    closestDistance = distance;
+                    closestType = 'monster';
+                }
+            });
+        }
+        
+        // Check POIs
+        if (window.eldritchApp.systems.mapEngine.pointsOfInterest) {
+            window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach(poi => {
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    poi.getLatLng().lat, poi.getLatLng().lng
+                );
+                if (distance < closestDistance && distance < 100) {
+                    closestDistance = distance;
+                    closestType = 'poi';
+                }
+            });
+        }
+        
+        // Check mystery zones
+        if (window.eldritchApp.systems.mapEngine.mysteryZoneMarkers) {
+            window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach(mystery => {
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    mystery.getLatLng().lat, mystery.getLatLng().lng
+                );
+                if (distance < closestDistance && distance < 100) {
+                    closestDistance = distance;
+                    closestType = 'mystery';
+                }
+            });
+        }
+        
+        // Show proximity warning if close
+        if (closestDistance < 100 && closestDistance > 50) {
+            this.showProximityWarning(closestType, Math.round(closestDistance));
+        } else if (closestDistance >= 100) {
+            this.hideProximityWarning();
+        }
+    }
+
+    showProximityWarning(type, distance) {
+        let warning = document.getElementById('proximity-warning');
+        if (!warning) {
+            warning = document.createElement('div');
+            warning.id = 'proximity-warning';
+            warning.className = 'proximity-warning';
+            document.body.appendChild(warning);
+        }
+        
+        const typeEmoji = type === 'monster' ? '👹' : type === 'poi' ? '💎' : '🔍';
+        warning.innerHTML = `${typeEmoji} ${type.toUpperCase()} nearby! ${distance}m away`;
+        warning.classList.remove('hidden');
+    }
+
+    hideProximityWarning() {
+        const warning = document.getElementById('proximity-warning');
+        if (warning) {
+            warning.classList.add('hidden');
+        }
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {

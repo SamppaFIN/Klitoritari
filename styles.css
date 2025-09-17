@@ -1249,3 +1249,37 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
 }
+
+/* Proximity Warning */
+.proximity-warning {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+    z-index: 1001;
+    animation: proximityPulse 2s infinite;
+    border: 3px solid #ffffff;
+}
+
+.proximity-warning.hidden {
+    display: none;
+}
+
+@keyframes proximityPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
+    }
+}
