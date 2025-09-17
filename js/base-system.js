@@ -145,8 +145,22 @@ class BaseSystem {
             return;
         }
 
-        // Get current location
-        let currentPosition = window.geolocationManager?.getCurrentPositionData();
+        // Get current location - try multiple approaches
+        let currentPosition = null;
+        
+        // Try the method first
+        if (window.geolocationManager && typeof window.geolocationManager.getCurrentPositionData === 'function') {
+            currentPosition = window.geolocationManager.getCurrentPositionData();
+        }
+        
+        // If method didn't work, try direct property access
+        if (!currentPosition && window.geolocationManager && window.geolocationManager.currentPosition) {
+            currentPosition = window.geolocationManager.currentPosition;
+        }
+        
+        // Debug logging
+        console.log('Base establishment - current position:', currentPosition);
+        console.log('Geolocation manager:', window.geolocationManager);
         
         // Fallback: use simulator position if available
         if (!currentPosition && window.geolocationManager?.simulatorMode) {
@@ -157,6 +171,15 @@ class BaseSystem {
                 timestamp: Date.now()
             };
             this.showNotification('Using simulator location for base establishment', 'info');
+        }
+        
+        // Additional fallback: try to get position from geolocation manager directly
+        if (!currentPosition && window.geolocationManager) {
+            // Check if geolocation manager has current position stored
+            if (window.geolocationManager.currentPosition) {
+                currentPosition = window.geolocationManager.currentPosition;
+                console.log('Using geolocation manager current position:', currentPosition);
+            }
         }
         
         if (!currentPosition) {
