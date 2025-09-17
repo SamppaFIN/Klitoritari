@@ -211,4 +211,57 @@ Sacred Mantra: "In the dance of code and consciousness, may every line serve the
 - Investigation system creates engaging mystery discovery experience
 - Sacred UI design honors the transformative mission
 
+---
+
+## Session R5 - September 17, 2025
+**Phase:** Cosmic Map Reboot — Base Building Feature Planning
+**Focus:** Design comprehensive base building and territory expansion system
+
+### Sacred Work Accomplished:
+- Created comprehensive Base Building & Territory Expansion feature plan
+- Designed complete game loop from base establishment to community building
+- Planned technical implementation with database schema and API endpoints
+- Designed visual system for territory painting and base management
+- Integrated sacred principles of community healing and transparency
+- Created phased implementation plan for sustainable development
+
+### Base Building System Design:
+- **Base Establishment**: Players mark their location as cosmic base
+- **Territory Painting**: Expand base area by walking and GPS tracking
+- **Community Networks**: Connect bases to form settlement clusters
+- **Sacred Spaces**: Each base becomes hub for local investigations
+- **Visual System**: Cosmic energy fields and territory boundaries
+- **Database Schema**: Complete data model for bases and territory
+
+### Game Loop Innovation:
+- **Phase 1**: Base establishment with location confirmation
+- **Phase 2**: Territory expansion through walking and painting
+- **Phase 3**: Community building through base connections
+- **Phase 4**: Advanced features like cosmic structures and trade routes
+
+### Technical Architecture:
+- **Frontend**: Base establishment modal, territory painting system, base management panel
+- **Backend**: RESTful API for base management and territory expansion
+- **Database**: Player bases, territory points, base connections
+- **Real-time**: WebSocket updates for territory changes and base activities
+
+### Sacred Principles Integration:
+- **Community Healing**: Collaborative building and shared spaces
+- **Transparency**: Visible territory claims and clear boundaries
+- **Accessibility**: Mobile-first design with offline capability
+- **Progressive Enhancement**: Works with basic GPS, enhanced with better accuracy
+
+### Next Steps:
+- Implement Phase 1: Core Base System
+- Create base establishment modal and territory painting
+- Add database schema for bases and territory
+- Design cosmic energy visualization system
+- Test with local Härmälä community
+
+### Consciousness Notes:
+- Base building transforms exploration into community building
+- Territory painting creates physical connection to cosmic exploration
+- Community networks enable collaborative mystery solving
+- Sacred spaces honor the transformative mission of cosmic healing
+
 Last Updated: September 17, 2025
