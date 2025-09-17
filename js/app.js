@@ -111,6 +111,10 @@ class EldritchSanctuaryApp {
         this.systems.investigation = new InvestigationSystem();
         this.systems.investigation.init();
         
+        // Initialize base system
+        this.systems.baseSystem = new BaseSystem();
+        this.systems.baseSystem.init();
+        
         // Initialize map engine
         this.systems.mapEngine = new MapEngine();
         
@@ -128,10 +132,6 @@ class EldritchSanctuaryApp {
         // Initialize WebSocket client
         this.systems.websocket = new WebSocketClient();
         this.systems.websocket.init();
-        
-        // Initialize base system
-        this.systems.baseSystem = new BaseSystem();
-        this.systems.baseSystem.init();
     }
 
     setupSystemIntegration() {
