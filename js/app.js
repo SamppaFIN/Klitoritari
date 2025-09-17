@@ -302,6 +302,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.investigationSystem = app.getSystem('investigation');
     window.websocketClient = app.getSystem('websocket');
     window.baseSystem = app.getSystem('baseSystem');
+    
+    // Debug: Check what systems are available
+    console.log('🔍 Global systems check:');
+    console.log('  - geolocationManager:', !!window.geolocationManager);
+    console.log('  - databaseClient:', !!window.databaseClient);
+    console.log('  - app.systems:', Object.keys(app.systems));
 });
 
 // Handle page unload
