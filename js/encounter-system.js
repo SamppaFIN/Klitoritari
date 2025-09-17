@@ -34,6 +34,13 @@ class EncounterSystem {
         this.isInitialized = true;
         this.startProximityDetection();
         this.setupUI();
+        
+        // Add some initial steps for testing
+        this.addSteps(100);
+        console.log('🎭 Added 100 initial steps for testing');
+        
+        // Create debug panel
+        this.createDebugPanel();
     }
 
     setupUI() {
@@ -167,6 +174,38 @@ class EncounterSystem {
         });
     }
 
+    createDebugPanel() {
+        const existingPanel = document.getElementById('debug-panel');
+        if (existingPanel) {
+            existingPanel.remove();
+        }
+
+        const panel = document.createElement('div');
+        panel.id = 'debug-panel';
+        panel.className = 'debug-panel';
+        panel.innerHTML = `
+            <div class="debug-content">
+                <h3>🎭 Debug Panel</h3>
+                <button id="test-monster" class="debug-btn">Test Monster Encounter</button>
+                <button id="test-poi" class="debug-btn">Test POI Encounter</button>
+                <button id="test-mystery" class="debug-btn">Test Mystery Encounter</button>
+                <button id="add-steps" class="debug-btn">Add 50 Steps</button>
+                <button id="toggle-debug" class="debug-btn">Toggle Debug Panel</button>
+            </div>
+        `;
+        
+        document.body.appendChild(panel);
+        
+        // Add event listeners
+        document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
+        document.getElementById('test-poi').addEventListener('click', () => this.triggerPOIEncounter());
+        document.getElementById('test-mystery').addEventListener('click', () => this.triggerMysteryEncounter());
+        document.getElementById('add-steps').addEventListener('click', () => this.addSteps(50));
+        document.getElementById('toggle-debug').addEventListener('click', () => {
+            panel.classList.toggle('hidden');
+        });
+    }
+
     startProximityDetection() {
         this.proximityCheckInterval = setInterval(() => {
             this.checkProximityEncounters();
@@ -174,10 +213,18 @@ class EncounterSystem {
     }
 
     checkProximityEncounters() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) return;
+        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) {
+            console.log('🎭 No app or geolocation system available');
+            return;
+        }
         
         const playerPos = window.eldritchApp.systems.geolocation.currentPosition;
-        if (!playerPos) return;
+        if (!playerPos) {
+            console.log('🎭 No player position available');
+            return;
+        }
+
+        console.log('🎭 Checking proximity encounters at:', playerPos);
 
         // Check distance to all markers
         this.checkMonsterProximity(playerPos);
@@ -186,15 +233,23 @@ class EncounterSystem {
     }
 
     checkMonsterProximity(playerPos) {
-        if (!window.eldritchApp.systems.mapEngine.monsters) return;
+        if (!window.eldritchApp.systems.mapEngine.monsters) {
+            console.log('🎭 No monsters available');
+            return;
+        }
         
-        window.eldritchApp.systems.mapEngine.monsters.forEach(monster => {
+        console.log('🎭 Checking', window.eldritchApp.systems.mapEngine.monsters.length, 'monsters');
+        
+        window.eldritchApp.systems.mapEngine.monsters.forEach((monster, index) => {
             const distance = this.calculateDistance(
                 playerPos.lat, playerPos.lng,
                 monster.lat, monster.lng
             );
             
+            console.log(`🎭 Monster ${index} distance:`, distance, 'meters');
+            
             if (distance < 0.0005 && !monster.encountered) { // ~50m
+                console.log('🎭 Monster encounter triggered!');
                 monster.encountered = true;
                 this.startMonsterEncounter(monster);
             }
