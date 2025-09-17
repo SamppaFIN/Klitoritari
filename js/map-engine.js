@@ -805,9 +805,9 @@ class MapEngine {
         this.pointsOfInterest.forEach(poi => this.map.removeLayer(poi));
         this.pointsOfInterest = [];
         
-        // Base location for POI generation
-        const baseLat = 61.4978;
-        const baseLng = 23.7608;
+        // Base location for POI generation - Härmälä/Partola area
+        const baseLat = 61.4950;  // Slightly south of current location
+        const baseLng = 23.7500;  // Slightly west of current location
         
         // POI types with different visual styles
         const poiTypes = [
@@ -881,8 +881,8 @@ class MapEngine {
         // Generate 5 random monsters
         for (let i = 0; i < 5; i++) {
             const monsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
-            const baseLat = 61.4978;
-            const baseLng = 23.7608;
+            const baseLat = 61.4950;  // Härmälä/Partola area
+            const baseLng = 23.7500;
             const lat = baseLat + (Math.random() - 0.5) * 0.008;
             const lng = baseLng + (Math.random() - 0.5) * 0.008;
             
