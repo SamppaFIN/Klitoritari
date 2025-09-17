@@ -138,9 +138,9 @@ class EldritchSanctuaryApp {
         this.systems.pathPainting = new PathPaintingSystem();
         this.systems.pathPainting.init();
         
-        // Initialize unified debug panel
-        this.systems.unifiedDebug = new UnifiedDebugPanel();
-        this.systems.unifiedDebug.init();
+        // Initialize unified debug panel (disabled for testing)
+        // this.systems.unifiedDebug = new UnifiedDebugPanel();
+        // this.systems.unifiedDebug.init();
         
         // Initialize map engine
         this.systems.mapEngine = new MapEngine();

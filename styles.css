@@ -2259,6 +2259,15 @@ input[type="range"]::-moz-range-thumb {
 }
 
 /* Simple Debug Panel */
+.debug-panel {
+    background: #1a1a2e;
+    border: 2px solid #00ff88;
+    border-radius: 10px;
+    padding: 0;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    min-width: 300px;
+}
+
 .debug-content-simple {
     padding: 15px;
 }

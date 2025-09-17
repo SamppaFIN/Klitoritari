@@ -79,9 +79,9 @@ class EncounterSystem {
         this.addSteps(100);
         console.log('🎭 Added 100 initial steps for testing');
         
-        // Create debug panel (hidden by default, use unified panel instead)
+        // Create debug panel (visible for testing)
         this.createDebugPanel();
-        this.hideIndividualDebugPanel();
+        // this.hideIndividualDebugPanel(); // Show the panel for testing
     }
 
     setupUI() {
@@ -224,6 +224,10 @@ class EncounterSystem {
         const panel = document.createElement('div');
         panel.id = 'debug-panel';
         panel.className = 'debug-panel';
+        panel.style.position = 'fixed';
+        panel.style.top = '20px';
+        panel.style.right = '20px';
+        panel.style.zIndex = '10000';
         panel.innerHTML = `
             <div class="debug-content">
                 <h3>🎭 Debug Panel</h3>
