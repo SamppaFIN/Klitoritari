@@ -502,6 +502,10 @@ class MapEngine {
                             class="sacred-button" style="margin-top: 10px; width: 100%;">
                         Manage Base
                     </button>
+                    <button onclick="window.baseSystem.confirmDeleteBase()" 
+                            class="sacred-button" style="background: var(--cosmic-red); margin-top: 5px; width: 100%;">
+                        🗑️ Delete Base
+                    </button>
                 </div>
             </div>
         `;

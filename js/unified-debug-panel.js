@@ -20,6 +20,7 @@ class UnifiedDebugPanel {
 
     init() {
         this.createPanel();
+        this.createToggleButton();
         this.setupEventListeners();
         this.loadPanelState();
         this.startStatsUpdate();
@@ -72,6 +73,30 @@ class UnifiedDebugPanel {
         `;
 
         document.body.appendChild(this.panel);
+    }
+
+    createToggleButton() {
+        // Remove existing toggle button if it exists
+        const existingButton = document.getElementById('debug-toggle-button');
+        if (existingButton) {
+            existingButton.remove();
+        }
+
+        this.toggleButton = document.createElement('button');
+        this.toggleButton.id = 'debug-toggle-button';
+        this.toggleButton.className = 'debug-toggle-button';
+        this.toggleButton.innerHTML = '🔧';
+        this.toggleButton.title = 'Toggle Debug Panel';
+        
+        // Position in top-right corner
+        this.toggleButton.style.position = 'fixed';
+        this.toggleButton.style.top = '20px';
+        this.toggleButton.style.right = '20px';
+        this.toggleButton.style.zIndex = '1500';
+        
+        this.toggleButton.addEventListener('click', () => this.toggle());
+        
+        document.body.appendChild(this.toggleButton);
     }
 
     createEncounterTab() {

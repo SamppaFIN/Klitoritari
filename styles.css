@@ -2134,3 +2134,52 @@ input[type="range"]::-moz-range-thumb {
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
 }
+
+/* Debug Toggle Button */
+.debug-toggle-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+    transition: all 0.3s ease;
+    user-select: none;
+}
+
+.debug-toggle-button:hover {
+    background: linear-gradient(135deg, #66BB6A, #4CAF50);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.debug-toggle-button:active {
+    transform: scale(0.95);
+}
+
+.debug-toggle-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.debug-toggle-button:hover::before {
+    opacity: 1;
+}

@@ -239,7 +239,7 @@ class EncounterSystem {
     startProximityDetection() {
         this.proximityCheckInterval = setInterval(() => {
             this.checkProximityEncounters();
-        }, 500); // Check every 500ms for better responsiveness
+        }, 3000); // Check every 3 seconds to slow down encounters
     }
 
     checkProximityEncounters() {

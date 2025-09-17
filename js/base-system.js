@@ -148,6 +148,9 @@ class BaseSystem {
             deleteBtn.addEventListener('click', () => this.confirmDeleteBase());
         }
 
+        // Add delete button to base popup
+        this.addDeleteButtonToBasePopup();
+
         const closePanelBtn = document.getElementById('close-base-panel');
         if (closePanelBtn) {
             closePanelBtn.addEventListener('click', () => this.closeBasePanel());
@@ -751,6 +754,11 @@ class BaseSystem {
         if (basePanel) {
             basePanel.classList.add('hidden');
         }
+    }
+
+    addDeleteButtonToBasePopup() {
+        // This will be called when the base popup is created in map-engine.js
+        // We'll add the delete button there
     }
 
     openBasePanel() {
