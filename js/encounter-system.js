@@ -13,6 +13,24 @@ class EncounterSystem {
         this.stepGainRate = 0.1; // Steps per position update
         this.lastPosition = null;
         
+        // Player stats
+        this.playerStats = {
+            health: 100,
+            maxHealth: 100,
+            attack: 15,
+            defense: 10,
+            luck: 12,
+            experience: 0,
+            level: 1,
+            inventory: [],
+            skills: {
+                combat: 1,
+                diplomacy: 1,
+                investigation: 1,
+                survival: 1
+            }
+        };
+        
         // Encounter types
         this.encounterTypes = {
             MONSTER: 'monster',
@@ -27,6 +45,10 @@ class EncounterSystem {
             experience: 0,
             discoveries: []
         };
+
+        // Story database
+        this.stories = this.initializeStories();
+        this.npcBackstories = this.initializeNPCBackstories();
     }
 
     init() {
@@ -418,8 +440,8 @@ class EncounterSystem {
             }
         };
         
-        this.showEncounterModal();
-        this.showMonsterCutscene(monster);
+        // Use the new dice combat system
+        this.startDiceCombat(monster);
     }
 
     startPOIEncounter(poi) {
@@ -836,6 +858,377 @@ class EncounterSystem {
         if (window.eldritchApp && window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.size > 0) {
             const mystery = Array.from(window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.values())[0];
             this.startMysteryEncounter(mystery);
+        }
+    }
+
+    initializeStories() {
+        return {
+            monster: {
+                shadowStalker: {
+                    name: "Shadow Stalker",
+                    description: "A creature born from the darkness between dimensions, the Shadow Stalker hunts those who venture too close to the cosmic rifts. Its form shifts and writhes like living smoke, and its eyes burn with the cold fire of the void.",
+                    intro: "The air grows cold as shadows begin to move independently around you. A figure materializes from the darkness - tall, gaunt, and radiating an otherworldly menace. The Shadow Stalker has found its prey.",
+                    combatIntro: "The Shadow Stalker lets out a bone-chilling shriek as it lunges forward, its form becoming more solid as it prepares for battle!",
+                    victory: "The Shadow Stalker shrieks in agony as your attack strikes true! It dissolves into wisps of dark smoke, leaving behind only a faint whisper on the wind.",
+                    defeat: "The Shadow Stalker's claws find their mark, and you feel your consciousness slipping away as the darkness claims you...",
+                    loot: ["Shadow Essence", "Void Crystal", "Dark Knowledge"]
+                },
+                cosmicBeast: {
+                    name: "Cosmic Beast",
+                    description: "A magnificent creature that has adapted to the cosmic energies of this realm. Its scales shimmer with starlight, and its roar echoes across dimensions.",
+                    intro: "A massive creature emerges from a shimmering portal - its form is both beautiful and terrifying. The Cosmic Beast has been drawn by the cosmic energies in this area.",
+                    combatIntro: "The Cosmic Beast roars, and you feel the very fabric of space tremble around you! It charges forward with cosmic fury!",
+                    victory: "The Cosmic Beast's roar turns to a whimper as it falls. Starlight pours from its wounds, and you feel a surge of cosmic energy.",
+                    defeat: "The Cosmic Beast's cosmic power overwhelms you, and you collapse under the weight of its otherworldly might...",
+                    loot: ["Starlight Scale", "Cosmic Essence", "Dimensional Fragment"]
+                },
+                voidWalker: {
+                    name: "Void Walker",
+                    description: "An entity that exists in the spaces between reality. It appears as a humanoid figure wrapped in shifting darkness, with eyes that show the infinite void.",
+                    intro: "Reality itself seems to tear as a figure steps through the fabric of space. The Void Walker has crossed dimensions to reach this place.",
+                    combatIntro: "The Void Walker's form becomes more solid as it prepares for combat, its void-touched claws extending menacingly!",
+                    victory: "The Void Walker's form begins to unravel, returning to the void from whence it came. You feel a strange sense of completion.",
+                    defeat: "The Void Walker's touch sends you spiraling into the void, your consciousness fading into nothingness...",
+                    loot: ["Void Fragment", "Dimensional Tear", "Void Knowledge"]
+                },
+                energyPhantom: {
+                    name: "Energy Phantom",
+                    description: "A being of pure energy that has gained consciousness. It crackles with electrical power and moves with the speed of lightning.",
+                    intro: "The air crackles with energy as a being of pure electricity materializes before you. The Energy Phantom pulses with raw power.",
+                    combatIntro: "The Energy Phantom crackles with electrical fury, bolts of lightning arcing around it as it prepares to strike!",
+                    victory: "The Energy Phantom explodes in a shower of sparks, leaving behind pure energy crystals that pulse with power.",
+                    defeat: "Electricity courses through your body as the Energy Phantom's power overwhelms you, leaving you unconscious...",
+                    loot: ["Energy Crystal", "Lightning Essence", "Power Fragment"]
+                },
+                crystalGuardian: {
+                    name: "Crystal Guardian",
+                    description: "An ancient construct of living crystal that has stood guard over this area for centuries. Its form is both beautiful and deadly.",
+                    intro: "A massive crystal formation begins to move, revealing itself as a living guardian. The Crystal Guardian has awakened to protect its domain.",
+                    combatIntro: "The Crystal Guardian's form shimmers as it prepares for battle, its crystalline structure becoming more defined!",
+                    victory: "The Crystal Guardian shatters into beautiful fragments, each one pulsing with ancient magic and wisdom.",
+                    defeat: "The Crystal Guardian's crystalline structure proves too strong, and you are overwhelmed by its ancient power...",
+                    loot: ["Crystal Shard", "Ancient Wisdom", "Guardian Essence"]
+                }
+            },
+            poi: {
+                ancientRuins: {
+                    name: "Ancient Ruins",
+                    description: "The crumbling remains of a civilization that once thrived here. Strange energies still pulse through the weathered stones.",
+                    story: "As you approach the ancient ruins, you feel the weight of centuries pressing down on you. The stones seem to whisper secrets of a time long past, when this place was a center of great power and knowledge.",
+                    puzzle: "The ruins contain a series of ancient symbols that seem to respond to your presence. Can you decipher the pattern and unlock the secrets within?",
+                    success: "The symbols glow with ancient power as you solve the puzzle! The ruins reveal their secrets, and you feel wiser for the experience.",
+                    failure: "The ancient symbols remain silent, their secrets locked away for another time. Perhaps you need more knowledge to unlock them.",
+                    loot: ["Ancient Artifact", "Historical Knowledge", "Mystical Insight"]
+                },
+                energyCrystal: {
+                    name: "Energy Crystal",
+                    description: "A massive crystal formation that pulses with raw cosmic energy. It seems to be a natural amplifier for the area's mystical properties.",
+                    story: "The Energy Crystal hums with power as you approach. You can feel the cosmic energies flowing through it, and it seems to respond to your presence.",
+                    puzzle: "The crystal's energy patterns form a complex sequence. You must match the rhythm to harmonize with its frequency.",
+                    success: "The crystal's energy synchronizes with your own! You feel a surge of power and understanding flow through you.",
+                    failure: "The crystal's energy remains chaotic and unresponsive. Perhaps you need to approach it differently.",
+                    loot: ["Energy Fragment", "Cosmic Insight", "Power Crystal"]
+                },
+                mysticShrine: {
+                    name: "Mystic Shrine",
+                    description: "A small shrine dedicated to an unknown deity. The air around it shimmers with mystical energy.",
+                    story: "The Mystic Shrine radiates an aura of peace and wisdom. You feel drawn to it, as if it has something important to tell you.",
+                    puzzle: "The shrine contains a series of meditation stones. You must arrange them in the correct order to unlock its power.",
+                    success: "The shrine's power awakens, and you feel a deep sense of peace and understanding wash over you.",
+                    failure: "The shrine remains silent, its secrets locked away. Perhaps you need to approach it with a clearer mind.",
+                    loot: ["Blessing", "Spiritual Insight", "Mystical Fragment"]
+                }
+            }
+        };
+    }
+
+    initializeNPCBackstories() {
+        return {
+            Aurora: {
+                name: "Aurora",
+                title: "The Cosmic Navigator",
+                backstory: "Aurora was once a star pilot who got lost in a cosmic storm and found herself in this realm. She's been exploring the cosmic mysteries ever since, using her knowledge of stellar navigation to help others find their way through the dimensional rifts.",
+                personality: "Wise, mysterious, and deeply connected to the cosmic forces. She speaks in riddles and metaphors, often referencing stars and cosmic phenomena.",
+                goals: "To find a way back to her home dimension and help others navigate the cosmic mysteries.",
+                secrets: "She carries a fragment of her home star that glows with inner light, and she's been having visions of a great cosmic convergence.",
+                relationships: "She's friends with Zephyr, who she met during her travels, and has a deep respect for Sage's wisdom.",
+                dialogue: {
+                    greeting: "Greetings, fellow cosmic traveler! The stars have whispered of your arrival.",
+                    topics: {
+                        cosmic: "The cosmic forces are in flux today. Can you feel the dimensional rifts shifting?",
+                        navigation: "I've been mapping the cosmic currents. There's something strange happening near the ancient ruins.",
+                        home: "I dream of my home star every night. One day, I'll find my way back through the cosmic storms.",
+                        help: "If you need guidance through the cosmic mysteries, I'm here to help. The stars have much to teach us."
+                    }
+                }
+            },
+            Zephyr: {
+                name: "Zephyr",
+                title: "The Wandering Wind",
+                backstory: "Zephyr is a free spirit who's been traveling between dimensions for as long as he can remember. He's never stayed in one place for long, always seeking new adventures and experiences. He's become something of a legend among travelers.",
+                personality: "Cheerful, adventurous, and always ready for a new challenge. He's the kind of person who makes friends wherever he goes.",
+                goals: "To see every dimension and experience every adventure the cosmos has to offer.",
+                secrets: "He's actually been to the other side of the cosmic rifts and has seen things that would drive most people mad, but he keeps his cheerful demeanor.",
+                relationships: "He's close friends with Aurora and has a playful rivalry with Sage, who he often teases about being too serious.",
+                dialogue: {
+                    greeting: "Hey there, fellow adventurer! Ready for some excitement?",
+                    topics: {
+                        adventure: "I've been to some amazing places! Want to hear about the time I found a floating city made of light?",
+                        travel: "The best part of traveling is meeting new people like you! Every journey is an adventure waiting to happen.",
+                        danger: "I've faced some pretty scary creatures in my travels. The key is to stay calm and think on your feet.",
+                        friendship: "You seem like someone I could travel with! What do you say we explore together sometime?"
+                    }
+                }
+            },
+            Sage: {
+                name: "Sage",
+                title: "The Keeper of Ancient Wisdom",
+                backstory: "Sage is an ancient being who has been studying the cosmic mysteries for millennia. He's seen civilizations rise and fall, and he's accumulated vast knowledge about the nature of reality itself. He's become a living repository of cosmic wisdom.",
+                personality: "Wise, patient, and deeply philosophical. He speaks slowly and deliberately, choosing his words carefully.",
+                goals: "To preserve and share the ancient wisdom he's accumulated, and to help others understand the deeper truths of existence.",
+                secrets: "He's actually one of the last survivors of the first civilization that discovered the cosmic rifts, and he's been waiting for someone worthy to inherit his knowledge.",
+                relationships: "He has a deep respect for Aurora's cosmic knowledge and enjoys Zephyr's youthful enthusiasm, though he sometimes finds it exhausting.",
+                dialogue: {
+                    greeting: "Welcome, seeker of knowledge. I sense you have questions that only time and wisdom can answer.",
+                    topics: {
+                        wisdom: "The ancient texts speak of a time when all dimensions were connected. Perhaps we're witnessing the beginning of a new era.",
+                        history: "I've seen civilizations rise and fall like waves on the cosmic ocean. Each one teaches us something new about the nature of existence.",
+                        mystery: "The cosmic rifts are not random occurrences. They're part of a greater pattern that we're only beginning to understand.",
+                        guidance: "If you seek wisdom, you must first learn to listen to the silence between the stars. There, you'll find the answers you seek."
+                    }
+                }
+            }
+        };
+    }
+
+    // Dice rolling system
+    rollDice(sides = 20, modifier = 0) {
+        const roll = Math.floor(Math.random() * sides) + 1;
+        const total = roll + modifier;
+        return { roll, modifier, total };
+    }
+
+    // Enhanced combat system with dice
+    startDiceCombat(monster) {
+        const monsterData = this.stories.monster[monster.type] || this.stories.monster.shadowStalker;
+        
+        this.showModal();
+        this.encounterType = 'battle';
+        
+        const modal = document.getElementById('encounter-modal');
+        modal.innerHTML = `
+            <div class="encounter-content">
+                <div class="encounter-header">
+                    <h3>⚔️ ${monsterData.name}</h3>
+                    <button class="close-btn" onclick="window.encounterSystem.hideModal()">×</button>
+                </div>
+                <div class="encounter-dialog">
+                    <div class="story-text">${monsterData.combatIntro}</div>
+                </div>
+                <div class="battle-interface">
+                    <div class="battle-stats">
+                        <div class="player-stats">
+                            <h4>Your Stats</h4>
+                            <div class="stat-bar">
+                                <span class="stat-label">Health:</span>
+                                <div class="health-bar">
+                                    <div class="health-fill" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
+                                </div>
+                                <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Attack:</span>
+                                <span class="stat-value">${this.playerStats.attack}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Defense:</span>
+                                <span class="stat-value">${this.playerStats.defense}</span>
+                            </div>
+                        </div>
+                        <div class="monster-stats">
+                            <h4>${monsterData.name}</h4>
+                            <div class="stat-bar">
+                                <span class="stat-label">Health:</span>
+                                <div class="health-bar">
+                                    <div class="monster-health-fill" style="width: ${(monster.health / monster.maxHealth) * 100}%"></div>
+                                </div>
+                                <span class="stat-value">${monster.health}/${monster.maxHealth}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Attack:</span>
+                                <span class="stat-value">${monster.attack}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Defense:</span>
+                                <span class="stat-value">${monster.defense}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="battle-actions">
+                        <button class="battle-btn" onclick="window.encounterSystem.playerAttack('${monster.id}')">⚔️ Attack</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.playerDefend('${monster.id}')">🛡️ Defend</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.playerFlee('${monster.id}')">🏃 Flee</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.useItem('${monster.id}')">🧪 Use Item</button>
+                    </div>
+                    <div class="battle-log" id="battle-log">
+                        <div class="log-entry">Battle begins! Roll for initiative...</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Roll for initiative
+        this.rollInitiative(monster);
+    }
+
+    rollInitiative(monster) {
+        const playerRoll = this.rollDice(20, this.playerStats.luck);
+        const monsterRoll = this.rollDice(20, monster.luck || 10);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You roll ${playerRoll.roll} + ${playerRoll.modifier} = ${playerRoll.total}</div>`;
+        log.innerHTML += `<div class="log-entry">${monster.name} rolls ${monsterRoll.roll} + ${monsterRoll.modifier} = ${monsterRoll.total}</div>`;
+        
+        if (playerRoll.total >= monsterRoll.total) {
+            log.innerHTML += `<div class="log-entry">You go first!</div>`;
+            this.playerTurn = true;
+        } else {
+            log.innerHTML += `<div class="log-entry">${monster.name} goes first!</div>`;
+            this.playerTurn = false;
+            setTimeout(() => this.monsterTurn(monster), 1000);
+        }
+    }
+
+    playerAttack(monsterId) {
+        if (!this.playerTurn) return;
+        
+        const monster = this.encounters.get(monsterId);
+        if (!monster) return;
+        
+        const attackRoll = this.rollDice(20, this.playerStats.attack);
+        const defenseRoll = this.rollDice(20, monster.defense);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You attack! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
+        log.innerHTML += `<div class="log-entry">${monster.name} defends! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
+        
+        if (attackRoll.total > defenseRoll.total) {
+            const damage = this.rollDice(8, this.playerStats.attack);
+            monster.health -= damage.total;
+            log.innerHTML += `<div class="log-entry success">Hit! You deal ${damage.total} damage!</div>`;
+            
+            if (monster.health <= 0) {
+                this.victory(monster);
+                return;
+            }
+        } else {
+            log.innerHTML += `<div class="log-entry miss">Miss! ${monster.name} dodges your attack!</div>`;
+        }
+        
+        this.playerTurn = false;
+        setTimeout(() => this.monsterTurn(monster), 1000);
+    }
+
+    playerDefend(monsterId) {
+        if (!this.playerTurn) return;
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You take a defensive stance! Defense increased for this turn.</div>`;
+        
+        this.playerStats.defense += 5; // Temporary defense boost
+        this.playerTurn = false;
+        setTimeout(() => this.monsterTurn(monsterId), 1000);
+    }
+
+    playerFlee(monsterId) {
+        const fleeRoll = this.rollDice(20, this.playerStats.luck);
+        const monsterRoll = this.rollDice(20, 10);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You attempt to flee! Roll: ${fleeRoll.roll} + ${fleeRoll.modifier} = ${fleeRoll.total}</div>`;
+        
+        if (fleeRoll.total > monsterRoll.total) {
+            log.innerHTML += `<div class="log-entry success">You successfully flee!</div>`;
+            this.hideModal();
+        } else {
+            log.innerHTML += `<div class="log-entry miss">You can't escape! ${monster.name} blocks your path!</div>`;
+            this.playerTurn = false;
+            setTimeout(() => this.monsterTurn(monsterId), 1000);
+        }
+    }
+
+    monsterTurn(monster) {
+        const attackRoll = this.rollDice(20, monster.attack);
+        const defenseRoll = this.rollDice(20, this.playerStats.defense);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">${monster.name} attacks! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
+        log.innerHTML += `<div class="log-entry">You defend! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
+        
+        if (attackRoll.total > defenseRoll.total) {
+            const damage = this.rollDice(6, monster.attack);
+            this.playerStats.health -= damage.total;
+            log.innerHTML += `<div class="log-entry danger">Hit! ${monster.name} deals ${damage.total} damage!</div>`;
+            
+            if (this.playerStats.health <= 0) {
+                this.defeat(monster);
+                return;
+            }
+        } else {
+            log.innerHTML += `<div class="log-entry miss">Miss! You dodge ${monster.name}'s attack!</div>`;
+        }
+        
+        this.playerTurn = true;
+        this.updateHealthBars();
+    }
+
+    victory(monster) {
+        const monsterData = this.stories.monster[monster.type] || this.stories.monster.shadowStalker;
+        const experience = monster.experience || 50;
+        const loot = monsterData.loot || ["Mysterious Item"];
+        
+        this.playerStats.experience += experience;
+        this.playerStats.inventory.push(...loot);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry victory">${monsterData.victory}</div>`;
+        log.innerHTML += `<div class="log-entry reward">You gain ${experience} experience!</div>`;
+        log.innerHTML += `<div class="log-entry reward">You found: ${loot.join(", ")}</div>`;
+        
+        setTimeout(() => {
+            this.hideModal();
+            this.showRewards(experience, loot);
+        }, 2000);
+    }
+
+    defeat(monster) {
+        const monsterData = this.stories.monster[monster.type] || this.stories.monster.shadowStalker;
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry defeat">${monsterData.defeat}</div>`;
+        log.innerHTML += `<div class="log-entry">You are defeated! Your health will regenerate over time.</div>`;
+        
+        // Regenerate health
+        this.playerStats.health = Math.floor(this.playerStats.maxHealth * 0.5);
+        
+        setTimeout(() => {
+            this.hideModal();
+        }, 3000);
+    }
+
+    updateHealthBars() {
+        const playerHealthFill = document.querySelector('.health-fill');
+        const monsterHealthFill = document.querySelector('.monster-health-fill');
+        
+        if (playerHealthFill) {
+            playerHealthFill.style.width = `${(this.playerStats.health / this.playerStats.maxHealth) * 100}%`;
+        }
+        
+        if (monsterHealthFill) {
+            const monster = this.encounters.get(this.activeEncounter);
+            if (monster) {
+                monsterHealthFill.style.width = `${(monster.health / monster.maxHealth) * 100}%`;
+            }
         }
     }
 }
