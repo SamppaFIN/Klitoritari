@@ -116,6 +116,10 @@ class EldritchSanctuaryApp {
         this.systems.baseSystem = new BaseSystem();
         this.systems.baseSystem.init();
         
+        // Initialize encounter system
+        this.systems.encounter = new EncounterSystem();
+        this.systems.encounter.init();
+        
         // Initialize map engine
         this.systems.mapEngine = new MapEngine();
         
@@ -141,6 +145,11 @@ class EldritchSanctuaryApp {
             this.systems.mapEngine.updatePlayerPosition(position);
             this.systems.websocket.sendPositionUpdate(position);
             this.systems.investigation.updateInvestigationProgress(position);
+            
+            // Update encounter system with position for step tracking
+            if (this.systems.encounter) {
+                this.systems.encounter.updatePlayerPosition(position);
+            }
             
             // Center map on first position update for debugging
             if (!this.hasCenteredOnLocation) {
@@ -334,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.investigationSystem = app.getSystem('investigation');
     window.websocketClient = app.getSystem('websocket');
     window.baseSystem = app.getSystem('baseSystem');
+    window.encounterSystem = app.getSystem('encounter');
     
     // Debug: Check what systems are available
     console.log('🔍 Global systems check:');

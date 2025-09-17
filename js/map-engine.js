@@ -847,7 +847,11 @@ class MapEngine {
             poi.bindPopup(`
                 <b>${poiType.name}</b><br>
                 <span style="color: ${poiType.color}; font-weight: bold;">Rarity: ${poiType.rarity.toUpperCase()}</span><br>
-                A mysterious location that may hold secrets or resources.
+                A mysterious location that may hold secrets or resources.<br>
+                <button onclick="window.eldritchApp.systems.encounter.triggerPOIEncounter()" 
+                        style="background: ${poiType.color}; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 5px; cursor: pointer;">
+                    🎭 Test Encounter
+                </button>
             `);
             
             this.pointsOfInterest.push(poi);
@@ -902,7 +906,11 @@ class MapEngine {
             monster.bindPopup(`
                 <b>${monsterType.name}</b><br>
                 <span style="color: #ff4444; font-weight: bold;">⚠️ DANGEROUS</span><br>
-                A hostile creature roaming the cosmic realm.
+                A hostile creature roaming the cosmic realm.<br>
+                <button onclick="window.eldritchApp.systems.encounter.triggerMonsterEncounter()" 
+                        style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-top: 5px; cursor: pointer;">
+                    🎭 Test Encounter
+                </button>
             `);
             
             this.monsters.push({
