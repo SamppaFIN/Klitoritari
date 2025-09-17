@@ -806,3 +806,24 @@ body {
     0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
     50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
 }
+
+/* Marker showcase animations */
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+.custom-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.custom-marker.pulsing {
+    animation: pulse 2s infinite;
+}

@@ -473,8 +473,6 @@ class MapEngine {
             <div class="base-popup">
                 <div class="popup-header">
                     <h4>🏗️ ${base.name}</h4>
-                    <button onclick="window.mapEngine.closeBasePopup()" 
-                            class="close-popup-btn" title="Close">&times;</button>
                 </div>
                 <div class="base-info">
                     <div><strong>Owner:</strong> Cosmic Explorer</div>
@@ -516,6 +514,9 @@ class MapEngine {
         // Create territory circle (temporarily disabled for testing)
         // this.createTerritoryCircle(latlng, base.radius);
         console.log('🏗️ Territory circle disabled for testing');
+        
+        // Create marker showcase
+        this.createMarkerShowcase();
     }
 
     createStarIcon() {
@@ -664,6 +665,113 @@ class MapEngine {
         if (this.playerBaseMarker && this.playerBaseMarker.isPopupOpen()) {
             this.playerBaseMarker.closePopup();
         }
+    }
+
+    createMarkerShowcase() {
+        if (!this.map) return;
+        
+        console.log('🎨 Creating marker showcase...');
+        
+        // Clear existing showcase markers
+        if (this.showcaseMarkers) {
+            this.showcaseMarkers.forEach(marker => this.map.removeLayer(marker));
+        }
+        this.showcaseMarkers = [];
+        
+        // Base location for showcase
+        const baseLat = 61.4978;
+        const baseLng = 23.7608;
+        
+        // 1. Circle Marker (Basic)
+        const circleMarker = L.circleMarker([baseLat + 0.001, baseLng + 0.001], {
+            radius: 15,
+            fillColor: '#ff6b6b',
+            color: '#ffffff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(this.map);
+        circleMarker.bindPopup('<b>Circle Marker</b><br>Basic circle marker with custom colors');
+        this.showcaseMarkers.push(circleMarker);
+        
+        // 2. Square Marker (Custom Icon)
+        const squareIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width: 30px; height: 30px; background: #4ecdc4; border: 3px solid #fff; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white;">⬜</div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        const squareMarker = L.marker([baseLat + 0.002, baseLng + 0.001], { icon: squareIcon }).addTo(this.map);
+        squareMarker.bindPopup('<b>Square Marker</b><br>Custom divIcon with square shape');
+        this.showcaseMarkers.push(squareMarker);
+        
+        // 3. Triangle Marker
+        const triangleIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 25px solid #ff9ff3; filter: drop-shadow(0 0 5px rgba(255, 159, 243, 0.8));"></div>',
+            iconSize: [30, 25],
+            iconAnchor: [15, 25]
+        });
+        const triangleMarker = L.marker([baseLat + 0.001, baseLng + 0.002], { icon: triangleIcon }).addTo(this.map);
+        triangleMarker.bindPopup('<b>Triangle Marker</b><br>CSS triangle with glow effect');
+        this.showcaseMarkers.push(triangleMarker);
+        
+        // 4. Star Marker (Unicode)
+        const starIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width: 40px; height: 40px; background: linear-gradient(45deg, #ffd700, #ffed4e); border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #333; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);">⭐</div>',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        const starMarker = L.marker([baseLat - 0.001, baseLng + 0.001], { icon: starIcon }).addTo(this.map);
+        starMarker.bindPopup('<b>Star Marker</b><br>Unicode star with gradient background');
+        this.showcaseMarkers.push(starMarker);
+        
+        // 5. Diamond Marker
+        const diamondIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 15px solid #a8e6cf; transform: rotate(45deg); filter: drop-shadow(0 0 8px rgba(168, 230, 207, 0.8));"></div>',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        const diamondMarker = L.marker([baseLat - 0.001, baseLng - 0.001], { icon: diamondIcon }).addTo(this.map);
+        diamondMarker.bindPopup('<b>Diamond Marker</b><br>Rotated triangle creating diamond shape');
+        this.showcaseMarkers.push(diamondMarker);
+        
+        // 6. Hexagon Marker
+        const hexagonIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="width: 30px; height: 30px; background: #ff8a80; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); border: 3px solid #fff; filter: drop-shadow(0 0 10px rgba(255, 138, 128, 0.8));"></div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        const hexagonMarker = L.marker([baseLat + 0.001, baseLng - 0.001], { icon: hexagonIcon }).addTo(this.map);
+        hexagonMarker.bindPopup('<b>Hexagon Marker</b><br>CSS clip-path hexagon shape');
+        this.showcaseMarkers.push(hexagonMarker);
+        
+        // 7. Pulsing Circle Marker
+        const pulsingIcon = L.divIcon({
+            className: 'custom-marker pulsing',
+            html: '<div style="width: 25px; height: 25px; background: #9c27b0; border: 3px solid #fff; border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 20px rgba(156, 39, 176, 0.8);"></div>',
+            iconSize: [25, 25],
+            iconAnchor: [12.5, 12.5]
+        });
+        const pulsingMarker = L.marker([baseLat - 0.002, baseLng - 0.001], { icon: pulsingIcon }).addTo(this.map);
+        pulsingMarker.bindPopup('<b>Pulsing Marker</b><br>Animated pulsing circle with CSS animation');
+        this.showcaseMarkers.push(pulsingMarker);
+        
+        // 8. Multi-layer Marker
+        const multiLayerIcon = L.divIcon({
+            className: 'custom-marker',
+            html: '<div style="position: relative; width: 40px; height: 40px;"><div style="position: absolute; top: 0; left: 0; width: 40px; height: 40px; background: #ff5722; border-radius: 50%; opacity: 0.3;"></div><div style="position: absolute; top: 5px; left: 5px; width: 30px; height: 30px; background: #ff9800; border-radius: 50%; opacity: 0.6;"></div><div style="position: absolute; top: 10px; left: 10px; width: 20px; height: 20px; background: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #333;">🔥</div></div>',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        const multiLayerMarker = L.marker([baseLat + 0.002, baseLng - 0.001], { icon: multiLayerIcon }).addTo(this.map);
+        multiLayerMarker.bindPopup('<b>Multi-layer Marker</b><br>Layered circles with emoji center');
+        this.showcaseMarkers.push(multiLayerMarker);
+        
+        console.log('🎨 Marker showcase created with', this.showcaseMarkers.length, 'markers');
     }
 
     // Cleanup
