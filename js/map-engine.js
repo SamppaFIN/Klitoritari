@@ -473,7 +473,7 @@ class MapEngine {
             <div class="base-popup">
                 <div class="popup-header">
                     <h4>🏗️ ${base.name}</h4>
-                    <button onclick="this.closest('.leaflet-popup').closePopup()" 
+                    <button onclick="window.mapEngine.closeBasePopup()" 
                             class="close-popup-btn" title="Close">&times;</button>
                 </div>
                 <div class="base-info">
@@ -657,6 +657,12 @@ class MapEngine {
     openBaseManagement() {
         if (window.baseSystem) {
             window.baseSystem.openBasePanel();
+        }
+    }
+
+    closeBasePopup() {
+        if (this.playerBaseMarker && this.playerBaseMarker.isPopupOpen()) {
+            this.playerBaseMarker.closePopup();
         }
     }
 
