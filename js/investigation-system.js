@@ -60,62 +60,18 @@ class InvestigationSystem {
     }
 
     loadMysteryZones() {
-        // Mystery zones in Tampere Härmälä area
+        // Only main quest mystery zone - Härmälä Convergence
         this.mysteryZones = [
             {
-                id: 'harmaala-forest-whispers',
-                name: 'Härmälä Forest Whispers',
-                type: 'paranormal',
+                id: 'harmala-convergence-main',
+                name: 'The Härmälä Convergence',
+                type: 'main_quest',
                 lat: 61.473683430224284,
                 lng: 23.726548746143216,
-                description: 'Deep in the Härmälä forest, locals report hearing ancient whispers carried by the wind. Investigators have recorded unexplained EVP (Electronic Voice Phenomena) and temperature drops near the old oak trees.',
-                requirements: 'Stay within 50m radius for 3 minutes',
-                difficulty: 'Easy',
-                rewards: ['Forest Spirits', 'Ancient Whispers']
-            },
-            {
-                id: 'harmaala-cosmic-convergence',
-                name: 'Härmälä Cosmic Convergence',
-                type: 'cosmicHorror',
-                lat: 61.4740,
-                lng: 23.7280,
-                description: 'A mysterious convergence point where cosmic energies seem to intersect. Strange aurora-like phenomena have been observed even during daylight hours.',
-                requirements: 'Document 2 different cosmic phenomena',
-                difficulty: 'Medium',
-                rewards: ['Cosmic Insight', 'Aurora Knowledge']
-            },
-            {
-                id: 'harmaala-government-secrets',
-                name: 'Härmälä Government Secrets',
-                type: 'conspiracy',
-                lat: 61.4730,
-                lng: 23.7250,
-                description: 'An unmarked facility near Härmälä that appears on no official maps. Satellite imagery shows unusual activity patterns and restricted access areas.',
-                requirements: 'Gather evidence of 3 suspicious activities',
-                difficulty: 'Hard',
-                rewards: ['Government Secrets', 'Whistleblower Status']
-            },
-            {
-                id: 'harmaala-ancient-grounds',
-                name: 'Härmälä Ancient Grounds',
-                type: 'paranormal',
-                lat: 61.4745,
-                lng: 23.7275,
-                description: 'Ancient burial grounds where mysterious rituals were performed centuries ago. Local legends speak of portals to other dimensions opening during certain celestial alignments.',
-                requirements: 'Complete the ancient ritual sequence',
-                difficulty: 'Easy',
-                rewards: ['Ancient Wisdom', 'Portal Access']
-            },
-            {
-                id: 'harmaala-ufo-observations',
-                name: 'Härmälä UFO Observations',
-                type: 'conspiracy',
-                lat: 61.4955,
-                lng: 23.7490,
-                description: 'Multiple UFO sightings have been reported in the Härmälä area. Military helicopters have been observed in the vicinity, suggesting government interest.',
-                requirements: 'Record 2 different UFO sightings',
-                difficulty: 'Medium',
-                rewards: ['Alien Technology', 'Government Contacts']
+                description: 'Something ancient stirs beneath the streets of Härmälä. The cosmic entities whisper of a convergence that will reshape reality itself... or at least the local bus schedule.',
+                requirements: 'Investigate the cosmic anomalies appearing around Härmälä',
+                difficulty: 'Main Quest',
+                rewards: ['Reality Anchor', 'Void Pocket', 'Härmälä Mystery Solver Title']
             }
         ];
 

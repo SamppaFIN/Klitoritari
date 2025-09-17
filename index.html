@@ -32,6 +32,26 @@
             <!-- Header -->
             <header id="header">
                 <h1>🌌 Eldritch Sanctuary</h1>
+                <div class="player-stats-header">
+                    <div class="stat-meter">
+                        <span class="stat-label">❤️ Health:</span>
+                        <div class="health-bar">
+                            <div id="health-fill" class="health-fill" style="width: 100%"></div>
+                        </div>
+                        <span id="health-value" class="stat-value">100/100</span>
+                    </div>
+                    <div class="stat-meter">
+                        <span class="stat-label">🧠 Sanity:</span>
+                        <div class="sanity-bar">
+                            <div id="sanity-fill" class="sanity-fill" style="width: 100%"></div>
+                        </div>
+                        <span id="sanity-value" class="stat-value">100/100</span>
+                    </div>
+                    <div class="stat-meter">
+                        <span class="stat-label">👣 Steps:</span>
+                        <span id="steps-value" class="stat-value">0</span>
+                    </div>
+                </div>
                 <div id="connection-status" class="status-indicator">
                     <span class="status-dot"></span>
                     <span class="status-text">Connecting...</span>
@@ -116,6 +136,7 @@
     <script src="js/base-system.js"></script>
     <script src="js/item-system.js"></script>
     <script src="js/quest-system.js"></script>
+    <script src="js/quest-simulation.js"></script>
     <script src="js/encounter-system.js"></script>
     <script src="js/npc-system.js"></script>
     <script src="js/path-painting-system.js"></script>

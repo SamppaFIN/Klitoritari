@@ -19,7 +19,8 @@ class EldritchSanctuaryApp {
             encounter: null,
             npc: null,
             pathPainting: null,
-            unifiedDebug: null
+            unifiedDebug: null,
+            questSimulation: null
         };
     }
 
@@ -137,6 +138,11 @@ class EldritchSanctuaryApp {
         // Initialize path painting system
         this.systems.pathPainting = new PathPaintingSystem();
         this.systems.pathPainting.init();
+        
+        // Initialize quest simulation
+        this.systems.questSimulation = new QuestSimulation();
+        window.questSimulation = this.systems.questSimulation;
+        console.log('🎭 Quest simulation system initialized');
         
         // Initialize unified debug panel (disabled for testing)
         // this.systems.unifiedDebug = new UnifiedDebugPanel();

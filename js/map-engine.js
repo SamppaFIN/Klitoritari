@@ -540,9 +540,9 @@ class MapEngine {
         // Create marker showcase
         this.createMarkerShowcase();
         
-        // Generate points of interest and monsters
-        this.generatePointsOfInterest();
-        this.generateMonsters();
+        // Disabled for main quest focus - no POIs or monsters
+        // this.generatePointsOfInterest();
+        // this.generateMonsters();
     }
 
     createStarIcon() {

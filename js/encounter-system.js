@@ -261,6 +261,8 @@ class EncounterSystem {
                         <button id="lose-health" class="debug-btn">Lose 10 Health</button>
                         <button id="lose-sanity" class="debug-btn">Lose 10 Sanity</button>
                         <button id="add-steps" class="debug-btn">Add 50 Steps</button>
+                        <button id="start-simulation" class="debug-btn simulation-btn">🎭 Start Quest Simulation</button>
+                        <button id="stop-simulation" class="debug-btn simulation-btn">⏹️ Stop Simulation</button>
                     </div>
                 </div>
                 
@@ -294,6 +296,21 @@ class EncounterSystem {
         document.getElementById('lose-sanity').addEventListener('click', () => {
             console.log('🎭 Lose Sanity button clicked');
             this.loseSanity(10, 'Debug test');
+        });
+        
+        // Simulation buttons
+        document.getElementById('start-simulation').addEventListener('click', () => {
+            console.log('🎭 Start Simulation button clicked');
+            if (window.questSimulation) {
+                window.questSimulation.startSimulation();
+            }
+        });
+        
+        document.getElementById('stop-simulation').addEventListener('click', () => {
+            console.log('🎭 Stop Simulation button clicked');
+            if (window.questSimulation) {
+                window.questSimulation.stopSimulation();
+            }
         });
         
         // Initialize displays
@@ -1521,6 +1538,34 @@ class EncounterSystem {
     }
 
     updateHealthBars() {
+        // Update main UI health/sanity bars
+        const mainHealthFill = document.getElementById('health-fill');
+        const mainSanityFill = document.getElementById('sanity-fill');
+        const mainHealthValue = document.getElementById('health-value');
+        const mainSanityValue = document.getElementById('sanity-value');
+        const mainStepsValue = document.getElementById('steps-value');
+        
+        if (mainHealthFill) {
+            mainHealthFill.style.width = `${(this.playerStats.health / this.playerStats.maxHealth) * 100}%`;
+        }
+        
+        if (mainSanityFill) {
+            mainSanityFill.style.width = `${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%`;
+        }
+        
+        if (mainHealthValue) {
+            mainHealthValue.textContent = `${Math.floor(this.playerStats.health)}/${Math.floor(this.playerStats.maxHealth)}`;
+        }
+        
+        if (mainSanityValue) {
+            mainSanityValue.textContent = `${Math.floor(this.playerStats.sanity)}/${Math.floor(this.playerStats.maxSanity)}`;
+        }
+        
+        if (mainStepsValue) {
+            mainStepsValue.textContent = Math.floor(this.playerStats.steps);
+        }
+        
+        // Update debug panel bars
         const playerHealthFill = document.querySelector('.health-fill');
         const playerSanityFill = document.querySelector('.sanity-fill');
         const monsterHealthFill = document.querySelector('.monster-health-fill');
