@@ -34,6 +34,7 @@ class PathPaintingSystem {
         this.loadPaintedPaths();
         this.startPathTracking();
         this.createPathDebugPanel();
+        this.hideIndividualDebugPanel();
     }
 
     startPathTracking() {
@@ -207,6 +208,13 @@ class PathPaintingSystem {
         
         document.body.appendChild(panel);
         this.setupPathDebugEventListeners();
+    }
+
+    hideIndividualDebugPanel() {
+        const panel = document.getElementById('path-debug-panel');
+        if (panel) {
+            panel.classList.add('hidden');
+        }
     }
 
     setupPathDebugEventListeners() {

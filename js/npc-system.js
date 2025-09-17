@@ -21,6 +21,7 @@ class NPCSystem {
         this.isInitialized = true;
         this.createChatModal();
         this.createChatDebugPanel();
+        this.hideIndividualDebugPanel();
         this.generateNPCs();
         this.startNPCMovement();
         this.startProximityDetection();
@@ -305,6 +306,13 @@ class NPCSystem {
         
         document.body.appendChild(panel);
         this.setupChatDebugEventListeners();
+    }
+
+    hideIndividualDebugPanel() {
+        const panel = document.getElementById('chat-debug-panel');
+        if (panel) {
+            panel.classList.add('hidden');
+        }
     }
 
     setupChatDebugEventListeners() {

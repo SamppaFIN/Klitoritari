@@ -39,8 +39,9 @@ class EncounterSystem {
         this.addSteps(100);
         console.log('🎭 Added 100 initial steps for testing');
         
-        // Create debug panel
+        // Create debug panel (hidden by default, use unified panel instead)
         this.createDebugPanel();
+        this.hideIndividualDebugPanel();
     }
 
     setupUI() {
@@ -204,6 +205,13 @@ class EncounterSystem {
         document.getElementById('toggle-debug').addEventListener('click', () => {
             panel.classList.toggle('hidden');
         });
+    }
+
+    hideIndividualDebugPanel() {
+        const panel = document.getElementById('debug-panel');
+        if (panel) {
+            panel.classList.add('hidden');
+        }
     }
 
     startProximityDetection() {
