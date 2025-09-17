@@ -82,40 +82,13 @@ class CosmicEffects {
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-        // Shader material for cosmic particles
-        const material = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0.0 }
-            },
-            vertexShader: `
-                attribute float size;
-                attribute vec3 color;
-                varying vec3 vColor;
-                uniform float time;
-                
-                void main() {
-                    vColor = color;
-                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                    
-                    // Gentle floating motion
-                    mvPosition.y += sin(time * 0.5 + position.x * 0.01) * 2.0;
-                    mvPosition.x += cos(time * 0.3 + position.z * 0.01) * 1.0;
-                    
-                    gl_PointSize = size * (300.0 / -mvPosition.z);
-                    gl_Position = projectionMatrix * mvPosition;
-                }
-            `,
-            fragmentShader: `
-                varying vec3 vColor;
-                
-                void main() {
-                    float distanceToCenter = distance(gl_PointCoord, vec2(0.5));
-                    float alpha = 1.0 - smoothstep(0.0, 0.5, distanceToCenter);
-                    gl_FragColor = vec4(vColor, alpha * 0.6);
-                }
-            `,
+        // Simplified material for cosmic particles
+        const material = new THREE.PointsMaterial({
+            size: 2,
             transparent: true,
-            vertexColors: true
+            opacity: 0.6,
+            vertexColors: true,
+            blending: THREE.AdditiveBlending
         });
 
         this.particles = new THREE.Points(geometry, material);
@@ -127,7 +100,7 @@ class CosmicEffects {
         for (let i = 0; i < 5; i++) {
             const wave = this.createEnergyWave(i);
             this.energyWaves.push(wave);
-            this.scene.add(wave);
+            this.scene.add(wave.mesh); // Fix: add the mesh, not the wave object
         }
     }
 
@@ -162,7 +135,8 @@ class CosmicEffects {
         // Animate particles
         if (this.particles) {
             this.particles.rotation.y += 0.0005;
-            this.particles.material.uniforms.time.value = time;
+            // Simple pulsing effect
+            this.particles.material.opacity = 0.3 + Math.sin(time * 2) * 0.3;
         }
 
         // Animate energy waves

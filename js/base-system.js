@@ -146,9 +146,21 @@ class BaseSystem {
         }
 
         // Get current location
-        const currentPosition = window.geolocationManager?.getCurrentPositionData();
+        let currentPosition = window.geolocationManager?.getCurrentPositionData();
+        
+        // Fallback: use simulator position if available
+        if (!currentPosition && window.geolocationManager?.simulatorMode) {
+            currentPosition = {
+                lat: 61.4978, // Tampere Härmälä
+                lng: 23.7608,
+                accuracy: 5,
+                timestamp: Date.now()
+            };
+            this.showNotification('Using simulator location for base establishment', 'info');
+        }
+        
         if (!currentPosition) {
-            this.showNotification('Location required to establish base. Please enable geolocation.', 'error');
+            this.showNotification('Location required to establish base. Please click "Locate Me" first to enable geolocation.', 'error');
             return;
         }
 
