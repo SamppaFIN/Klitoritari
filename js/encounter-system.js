@@ -13,11 +13,11 @@ class EncounterSystem {
         this.stepGainRate = 0.1; // Steps per position update
         this.lastPosition = null;
         
-        // Initialize item system
-        this.itemSystem = new ItemSystem();
+        // Initialize item system (disabled for testing)
+        // this.itemSystem = new ItemSystem();
         
-        // Initialize quest system
-        this.questSystem = new QuestSystem();
+        // Initialize quest system (disabled for testing)
+        // this.questSystem = new QuestSystem();
         
         // Player stats - The cosmic horror comedy begins!
         this.playerStats = {
@@ -227,56 +227,36 @@ class EncounterSystem {
         panel.innerHTML = `
             <div class="debug-content">
                 <h3>🎭 Debug Panel</h3>
-                <div class="debug-tabs">
-                    <button class="debug-tab active" data-tab="encounters">Encounters</button>
-                    <button class="debug-tab" data-tab="inventory">Inventory</button>
-                    <button class="debug-tab" data-tab="quests">Quests</button>
-                    <button class="debug-tab" data-tab="stats">Stats</button>
-                </div>
-                
-                <div id="debug-encounters" class="debug-tab-content active">
-                    <button id="test-monster" class="debug-btn">Test Monster Encounter</button>
-                    <button id="test-poi" class="debug-btn">Test POI Encounter</button>
-                    <button id="test-mystery" class="debug-btn">Test Mystery Encounter</button>
-                    <button id="add-steps" class="debug-btn">Add 50 Steps</button>
-                </div>
-                
-                <div id="debug-inventory" class="debug-tab-content">
-                    <div class="inventory-section">
-                        <h4>🎒 Player Inventory</h4>
-                        <div id="inventory-list" class="inventory-list"></div>
-                        <button id="spawn-item" class="debug-btn">Spawn Random Item</button>
-                        <button id="clear-inventory" class="debug-btn">Clear Inventory</button>
+                <div class="debug-content-simple">
+                    <h4>📊 Player Stats</h4>
+                    <div class="health-sanity-display">
+                        <div class="stat-bar">
+                            <span class="stat-label">Health:</span>
+                            <div class="health-bar">
+                                <div class="health-fill" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
+                            </div>
+                            <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <span class="stat-label">Sanity:</span>
+                            <div class="sanity-bar">
+                                <div class="sanity-fill" style="width: ${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%"></div>
+                            </div>
+                            <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
+                        </div>
+                        <div class="stat-bar">
+                            <span class="stat-label">Steps:</span>
+                            <span class="stat-value">${this.playerStats.steps}</span>
+                        </div>
                     </div>
-                    <div class="equipment-section">
-                        <h4>⚔️ Equipped Items</h4>
-                        <div id="equipped-items" class="equipped-items"></div>
-                    </div>
-                </div>
-                
-                <div id="debug-quests" class="debug-tab-content">
-                    <div class="quest-section">
-                        <h4>📜 Available Quests</h4>
-                        <div id="available-quests" class="quest-list"></div>
-                        <button id="start-main-quest" class="debug-btn">Start Main Quest</button>
-                    </div>
-                    <div class="quest-section">
-                        <h4>🎯 Active Quests</h4>
-                        <div id="active-quests" class="quest-list"></div>
-                    </div>
-                    <div class="quest-section">
-                        <h4>✅ Completed Quests</h4>
-                        <div id="completed-quests" class="quest-list"></div>
-                    </div>
-                </div>
-                
-                <div id="debug-stats" class="debug-tab-content">
-                    <div class="stats-section">
-                        <h4>📊 Player Stats</h4>
-                        <div id="player-stats-display" class="stats-display"></div>
-                        <button id="heal-player" class="debug-btn">Heal to Full</button>
+                    
+                    <div class="debug-controls">
+                        <button id="test-monster" class="debug-btn">Test Monster</button>
+                        <button id="heal-player" class="debug-btn">Heal Player</button>
                         <button id="restore-sanity" class="debug-btn">Restore Sanity</button>
-                        <button id="add-experience" class="debug-btn">Add 100 XP</button>
+                        <button id="lose-health" class="debug-btn">Lose 10 Health</button>
+                        <button id="lose-sanity" class="debug-btn">Lose 10 Sanity</button>
+                        <button id="add-steps" class="debug-btn">Add 50 Steps</button>
                     </div>
                 </div>
                 
@@ -288,34 +268,19 @@ class EncounterSystem {
         
         // Add event listeners
         document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
-        document.getElementById('test-poi').addEventListener('click', () => this.triggerPOIEncounter());
-        document.getElementById('test-mystery').addEventListener('click', () => this.triggerMysteryEncounter());
         document.getElementById('add-steps').addEventListener('click', () => this.addSteps(50));
         document.getElementById('toggle-debug').addEventListener('click', () => {
             panel.classList.toggle('hidden');
         });
         
-        // Tab switching
-        document.querySelectorAll('.debug-tab').forEach(tab => {
-            tab.addEventListener('click', () => this.switchDebugTab(tab.dataset.tab));
-        });
-        
-        // Inventory debug buttons
-        document.getElementById('spawn-item').addEventListener('click', () => this.spawnRandomItem());
-        document.getElementById('clear-inventory').addEventListener('click', () => this.clearInventory());
-        
         // Stats debug buttons
         document.getElementById('heal-player').addEventListener('click', () => this.healPlayer());
         document.getElementById('restore-sanity').addEventListener('click', () => this.restoreSanity());
-        document.getElementById('add-experience').addEventListener('click', () => this.addExperience(100));
-        
-        // Quest debug buttons
-        document.getElementById('start-main-quest').addEventListener('click', () => this.startMainQuest());
+        document.getElementById('lose-health').addEventListener('click', () => this.loseHealth(10, 'Debug test'));
+        document.getElementById('lose-sanity').addEventListener('click', () => this.loseSanity(10, 'Debug test'));
         
         // Initialize displays
-        this.updateInventoryDisplay();
-        this.updateStatsDisplay();
-        this.updateQuestDisplay();
+        this.updateSimpleStatsDisplay();
     }
 
     hideIndividualDebugPanel() {
@@ -325,261 +290,48 @@ class EncounterSystem {
         }
     }
 
-    // Debug panel tab switching
-    switchDebugTab(tabName) {
-        // Hide all tab contents
-        document.querySelectorAll('.debug-tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
+    // Simple stats display method
+    updateSimpleStatsDisplay() {
+        const healthFill = document.querySelector('.health-fill');
+        const sanityFill = document.querySelector('.sanity-fill');
+        const healthValue = document.querySelector('.stat-value');
+        const sanityValue = document.querySelectorAll('.stat-value')[1];
+        const stepsValue = document.querySelectorAll('.stat-value')[2];
         
-        // Remove active class from all tabs
-        document.querySelectorAll('.debug-tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
+        if (healthFill) {
+            healthFill.style.width = `${(this.playerStats.health / this.playerStats.maxHealth) * 100}%`;
+        }
         
-        // Show selected tab content
-        document.getElementById(`debug-${tabName}`).classList.add('active');
+        if (sanityFill) {
+            sanityFill.style.width = `${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%`;
+        }
         
-        // Add active class to selected tab
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        if (healthValue) {
+            healthValue.textContent = `${this.playerStats.health}/${this.playerStats.maxHealth}`;
+        }
         
-        // Update displays when switching to relevant tabs
-        if (tabName === 'inventory') {
-            this.updateInventoryDisplay();
-        } else if (tabName === 'stats') {
-            this.updateStatsDisplay();
-        } else if (tabName === 'quests') {
-            this.updateQuestDisplay();
+        if (sanityValue) {
+            sanityValue.textContent = `${this.playerStats.sanity}/${this.playerStats.maxSanity}`;
+        }
+        
+        if (stepsValue) {
+            stepsValue.textContent = this.playerStats.steps;
         }
     }
 
-    // Inventory display methods
-    updateInventoryDisplay() {
-        const inventoryList = document.getElementById('inventory-list');
-        const equippedItems = document.getElementById('equipped-items');
-        
-        if (!inventoryList || !equippedItems) return;
-        
-        // Update inventory list
-        inventoryList.innerHTML = '';
-        this.itemSystem.getPlayerInventory().forEach(invItem => {
-            const item = this.itemSystem.getItem(invItem.id);
-            if (item) {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `inventory-item ${item.rarity}`;
-                itemDiv.innerHTML = `
-                    <div class="item-info">
-                        <span class="item-name">${item.name}</span>
-                        <span class="item-quantity">x${invItem.quantity}</span>
-                        <span class="item-rarity">${item.rarity}</span>
-                    </div>
-                    <div class="item-actions">
-                        <button onclick="window.encounterSystem.equipItem('${item.id}')" class="equip-btn">Equip</button>
-                        <button onclick="window.encounterSystem.unequipItem('${item.id}')" class="unequip-btn">Unequip</button>
-                    </div>
-                `;
-                inventoryList.appendChild(itemDiv);
-            }
-        });
-        
-        // Update equipped items
-        equippedItems.innerHTML = '';
-        const equipped = this.itemSystem.getEquippedItems();
-        Object.entries(equipped).forEach(([slot, item]) => {
-            if (item) {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `equipped-item ${item.rarity}`;
-                itemDiv.innerHTML = `
-                    <div class="equipped-slot">${slot}:</div>
-                    <div class="equipped-name">${item.name}</div>
-                    <button onclick="window.encounterSystem.unequipItem('${item.id}')" class="unequip-btn">Unequip</button>
-                `;
-                equippedItems.appendChild(itemDiv);
-            } else {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'equipped-item empty';
-                itemDiv.innerHTML = `<div class="equipped-slot">${slot}:</div><div class="equipped-name">Empty</div>`;
-                equippedItems.appendChild(itemDiv);
-            }
-        });
-    }
-
-    // Stats display methods
-    updateStatsDisplay() {
-        const statsDisplay = document.getElementById('player-stats-display');
-        if (!statsDisplay) return;
-        
-        const totalStats = this.itemSystem.getTotalStats();
-        statsDisplay.innerHTML = `
-            <div class="stat-row">
-                <span class="stat-label">Health:</span>
-                <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Sanity:</span>
-                <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Steps:</span>
-                <span class="stat-value">${this.playerStats.steps}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Attack:</span>
-                <span class="stat-value">${this.playerStats.attack} + ${totalStats.attack} (equipment)</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Defense:</span>
-                <span class="stat-value">${this.playerStats.defense} + ${totalStats.defense} (equipment)</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Experience:</span>
-                <span class="stat-value">${this.playerStats.experience}</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Level:</span>
-                <span class="stat-value">${this.playerStats.level}</span>
-            </div>
-        `;
-    }
-
-    // Debug action methods
-    spawnRandomItem() {
-        const lootResult = this.itemSystem.generateRandomLoot('monster');
-        this.itemSystem.addToInventory(lootResult.itemId, 1);
-        this.updateInventoryDisplay();
-        console.log(`🎁 Spawned: ${lootResult.item.name} (${lootResult.rarity})`);
-    }
-
-    clearInventory() {
-        this.itemSystem.playerInventory = [];
-        this.itemSystem.equippedItems = { weapon: null, armor: null, accessory: null };
-        this.itemSystem.savePlayerInventory();
-        this.updateInventoryDisplay();
-        console.log('🗑️ Inventory cleared!');
-    }
-
+    // Simple debug action methods
     healPlayer() {
         this.playerStats.health = this.playerStats.maxHealth;
         this.updateHealthBars();
-        this.updateStatsDisplay();
+        this.updateSimpleStatsDisplay();
         console.log('❤️ Player healed to full health!');
     }
 
     restoreSanity() {
         this.playerStats.sanity = this.playerStats.maxSanity;
         this.updateHealthBars();
-        this.updateStatsDisplay();
+        this.updateSimpleStatsDisplay();
         console.log('🧠 Sanity restored to full!');
-    }
-
-    addExperience(amount) {
-        this.playerStats.experience += amount;
-        this.updateStatsDisplay();
-        console.log(`⭐ Gained ${amount} experience!`);
-    }
-
-    // Item system integration methods
-    equipItem(itemId) {
-        this.itemSystem.equipItem(itemId);
-        this.updateInventoryDisplay();
-    }
-
-    unequipItem(itemId) {
-        this.itemSystem.unequipItem(itemId);
-        this.updateInventoryDisplay();
-    }
-
-    // Quest display methods
-    updateQuestDisplay() {
-        this.updateAvailableQuests();
-        this.updateActiveQuests();
-        this.updateCompletedQuests();
-    }
-
-    updateAvailableQuests() {
-        const availableQuests = document.getElementById('available-quests');
-        if (!availableQuests) return;
-
-        availableQuests.innerHTML = '';
-        this.questSystem.getAvailableQuests().forEach(quest => {
-            const questDiv = document.createElement('div');
-            questDiv.className = 'quest-item available';
-            questDiv.innerHTML = `
-                <div class="quest-info">
-                    <h5>${quest.name}</h5>
-                    <p>${quest.description}</p>
-                    <span class="quest-type">${quest.type}</span>
-                </div>
-                <div class="quest-actions">
-                    <button onclick="window.encounterSystem.startQuest('${quest.id}')" class="start-quest-btn">Start Quest</button>
-                </div>
-            `;
-            availableQuests.appendChild(questDiv);
-        });
-    }
-
-    updateActiveQuests() {
-        const activeQuests = document.getElementById('active-quests');
-        if (!activeQuests) return;
-
-        activeQuests.innerHTML = '';
-        this.questSystem.getActiveQuests().forEach(quest => {
-            const questDiv = document.createElement('div');
-            questDiv.className = 'quest-item active';
-            questDiv.innerHTML = `
-                <div class="quest-info">
-                    <h5>${quest.name}</h5>
-                    <p>${quest.description}</p>
-                    <div class="quest-objectives">
-                        ${quest.objectives.map(obj => `
-                            <div class="objective ${obj.status}">
-                                <span class="objective-text">${obj.description}</span>
-                                <span class="objective-progress">${obj.progress}/${obj.maxProgress}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            activeQuests.appendChild(questDiv);
-        });
-    }
-
-    updateCompletedQuests() {
-        const completedQuests = document.getElementById('completed-quests');
-        if (!completedQuests) return;
-
-        completedQuests.innerHTML = '';
-        this.questSystem.getCompletedQuests().forEach(quest => {
-            const questDiv = document.createElement('div');
-            questDiv.className = 'quest-item completed';
-            questDiv.innerHTML = `
-                <div class="quest-info">
-                    <h5>${quest.name}</h5>
-                    <p>${quest.story.completion}</p>
-                    <span class="quest-type">${quest.type}</span>
-                </div>
-            `;
-            completedQuests.appendChild(questDiv);
-        });
-    }
-
-    // Quest action methods
-    startQuest(questId) {
-        this.questSystem.startQuest(questId);
-        this.updateQuestDisplay();
-    }
-
-    startMainQuest() {
-        this.questSystem.startMainQuest();
-        this.updateQuestDisplay();
-    }
-
-    // Update quest progress
-    updateQuestProgress(questId, objectiveId) {
-        if (this.questSystem) {
-            this.questSystem.updateQuestProgress(questId, objectiveId);
-            this.updateQuestDisplay();
-        }
     }
 
     startProximityDetection() {
