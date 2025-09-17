@@ -1,47 +1,86 @@
-# 🌌 Eldritch Sanctuary - Cosmic Map Explorer
+# 🌌 Eldritch Sanctuary
+*A Cosmic Map Exploration Platform for Community Healing and Wisdom Sharing*
 
-A mystical web application for exploring cosmic mysteries and paranormal phenomena through an infinite scrolling map experience. Built with sacred principles of community healing, transparency, and wisdom sharing.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-1.9+-blue.svg)](https://leafletjs.com/)
+[![Three.js](https://img.shields.io/badge/Three.js-r150+-orange.svg)](https://threejs.org/)
 
-## ✨ Features
+## ✨ Overview
 
-### 🗺️ Infinite Cosmic Map
-- Seamless infinite scrolling across the globe
-- Cosmic-styled map tiles with atmospheric effects
-- Real-time geolocation tracking with accuracy indicators
-- Mobile-first responsive design
+Eldritch Sanctuary is an immersive cosmic exploration platform that combines infinite scrolling maps, real-time geolocation tracking, base building, RPG combat, and rich storytelling. Built with sacred principles of community healing and wisdom sharing, it transforms exploration into a meaningful journey of discovery and connection.
 
-### 🔍 Mystery Investigation System
-- **Paranormal Activity**: Ghostly encounters and supernatural phenomena
-- **Cosmic Horror**: Eldritch entities and cosmic terrors
-- **Conspiracy**: Government cover-ups and secret organizations
-- Proximity-based investigation requirements
-- Real-time progress tracking
+## 🚀 Features
 
-### 🌐 Multiplayer Collaboration
-- Real-time WebSocket communication
-- Live player position sharing
-- Collaborative investigation updates
-- Community exploration features
+### 🗺️ Infinite Cosmic Maps
+- **Seamless Exploration:** Infinite scrolling maps with cosmic atmosphere
+- **WebGL Effects:** Particle systems and energy waves for immersive experience
+- **Mobile-First Design:** Responsive interface optimized for all devices
+- **Real-Time Tracking:** GPS geolocation with simulator mode for testing
 
-### 🎨 Immersive Experience
-- Three.js WebGL particle effects
-- Cosmic energy waves and atmospheric animations
-- Sacred-themed UI with cosmic color palette
-- PWA support for mobile app installation
+### 🏗️ Base Building & Territory
+- **Territory Expansion:** Paint your territory through movement and GPS tracking
+- **Visual Representation:** Beautiful territory visualization on the map
+- **Base Management:** Complete base management system with statistics
+- **Community Networks:** Foundation for collaborative exploration
+
+### ⚔️ RPG Combat System
+- **Dice-Based Combat:** D20 initiative rolls with strategic turn-based combat
+- **Rich Storytelling:** 5 unique monster types with detailed backstories
+- **Character Progression:** Health, attack, defense, luck stats with experience
+- **Immersive Narratives:** Each encounter tells a compelling story
+
+### 👥 NPC Interactions
+- **Deep Characters:** Aurora, Zephyr, and Sage with rich backstories
+- **Meaningful Dialogue:** Context-aware conversations and relationship building
+- **Cosmic Wisdom:** Each NPC offers unique insights and guidance
+- **Community Building:** NPCs foster connections and shared experiences
+
+### 🎨 Path Painting System
+- **Journey Visualization:** Paint your exploration path with beautiful brush effects
+- **Customizable Brushes:** 8 different colors with adjustable size and opacity
+- **Persistent Trails:** Your cosmic journey is permanently recorded
+- **Export/Import:** Share your paths with the community
+
+### 🔧 Developer Tools
+- **Unified Debug Panel:** Draggable, tabbed interface for all debug functions
+- **Real-Time Testing:** Test encounters, NPCs, and path painting
+- **Comprehensive Logging:** Detailed console output for debugging
+- **Modular Architecture:** Clean, maintainable code structure
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **Vanilla JavaScript** - Pure JS for maximum performance and compatibility
+- **Leaflet** - Open-source mapping library for infinite scrolling maps
+- **Three.js** - WebGL for cosmic particle effects and atmosphere
+- **HTML5 Geolocation API** - Real-time position tracking
+- **CSS3** - Modern styling with animations and responsive design
+
+### Backend
+- **Node.js** - Server-side JavaScript runtime
+- **Express.js** - Web application framework
+- **WebSocket** - Real-time multiplayer communication
+- **Supabase** - Database and authentication (with local storage fallback)
+
+### Development
+- **Git** - Version control and collaboration
+- **ESLint** - Code quality and consistency
+- **Modular Architecture** - Clean separation of concerns
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 16+ 
+- Node.js 18+ installed
 - Modern web browser with WebGL support
-- Geolocation access (or simulator mode for testing)
+- GPS-enabled device (or use simulator mode)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd eldritch-sanctuary
+   git clone https://github.com/SamppaFIN/Klitoritari.git
+   cd Klitoritari
    ```
 
 2. **Install dependencies**
@@ -49,7 +88,7 @@ A mystical web application for exploring cosmic mysteries and paranormal phenome
    npm install
    ```
 
-3. **Start the server**
+3. **Start the development server**
    ```bash
    npm start
    ```
@@ -57,117 +96,119 @@ A mystical web application for exploring cosmic mysteries and paranormal phenome
 4. **Open your browser**
    Navigate to `http://localhost:3000`
 
-### Development Mode
-```bash
-npm run dev
+### First Steps
+
+1. **Enable Location Services** - Allow GPS access for real-time tracking
+2. **Establish Your Base** - Click "Start New Base" to claim your territory
+3. **Explore the Cosmos** - Move around to paint your path and discover encounters
+4. **Meet the NPCs** - Interact with Aurora, Zephyr, and Sage for wisdom
+5. **Test Encounters** - Use the debug panel (🔧 button) to test combat and puzzles
+
+## 🎮 Gameplay Guide
+
+### Base Building
+- **Establish Base:** Click "Start New Base" at your current location
+- **Expand Territory:** Walk around to paint your territory on the map
+- **Manage Base:** Click on your base marker to access management options
+- **Delete Base:** Use the red delete button to remove and re-establish
+
+### Combat System
+- **Encounter Monsters:** Get close to monster markers for combat
+- **Dice Combat:** Use D20 rolls for initiative, attack, and defense
+- **Strategic Actions:** Attack, Defend, Flee, or Use Items
+- **Collect Rewards:** Gain experience and loot from victories
+
+### NPC Interactions
+- **Chat with NPCs:** Click on NPC markers to start conversations
+- **Explore Topics:** Ask about cosmic forces, adventures, and wisdom
+- **Build Relationships:** Each NPC has unique personality and backstory
+- **Gain Knowledge:** Learn about the cosmic mysteries and dimensional rifts
+
+### Path Painting
+- **Automatic Tracking:** Your movement is automatically painted
+- **Customize Brushes:** Use the debug panel to adjust colors and size
+- **Export Paths:** Save and share your cosmic journeys
+- **Visual History:** See your exploration patterns and discoveries
+
+## 🔧 Development
+
+### Project Structure
+```
+├── js/                    # JavaScript modules
+│   ├── app.js            # Main application coordinator
+│   ├── map-engine.js     # Infinite scrolling map system
+│   ├── encounter-system.js # RPG combat and storytelling
+│   ├── base-system.js    # Base building and territory
+│   ├── npc-system.js     # NPC interactions and chat
+│   ├── path-painting-system.js # Path visualization
+│   └── unified-debug-panel.js # Debug tools
+├── docs/                 # Documentation
+├── styles.css           # Cosmic styling and animations
+├── index.html           # Main HTML structure
+└── server.js            # Node.js server
 ```
 
-## 🎮 How to Play
+### Debug Tools
+- **Unified Debug Panel:** Access via the 🔧 button in top-right corner
+- **Encounter Testing:** Test monster, POI, and mystery encounters
+- **NPC Controls:** Chat with NPCs and control their movement
+- **Path Painting:** Adjust brush settings and export paths
+- **Real-Time Stats:** Monitor player progress and system status
 
-1. **Explore the Map**: Use mouse/touch to navigate the infinite cosmic map
-2. **Enable Location**: Click "Locate Me" to track your real position
-3. **Find Mystery Zones**: Look for colored markers on the map
-4. **Start Investigations**: Click on mystery zones to begin investigations
-5. **Complete Requirements**: Follow the investigation requirements to progress
-6. **Collaborate**: See other players and their investigations in real-time
-
-## 🏗️ Architecture
-
-### Frontend (Vanilla JavaScript)
-- **Map Engine**: Leaflet integration with infinite scrolling
-- **Geolocation Manager**: Real-time position tracking
-- **Investigation System**: Mystery exploration mechanics
-- **WebSocket Client**: Real-time multiplayer communication
-- **Cosmic Effects**: Three.js WebGL particle systems
-
-### Backend (Node.js)
-- **WebSocket Server**: Real-time multiplayer communication
-- **Express Server**: Static file serving and API endpoints
-- **Rate Limiting**: Message throttling and abuse prevention
-- **Player Management**: Connection handling and state tracking
-
-### PWA Features
-- **Service Worker**: Offline functionality (coming soon)
-- **App Manifest**: Mobile installation support
-- **Responsive Design**: Mobile-first approach
-- **Touch Controls**: Optimized for mobile devices
+### Contributing
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 🌟 Sacred Principles
 
-### Community Healing
-Every feature serves the mission of wisdom sharing and community healing through collaborative exploration.
+Eldritch Sanctuary is built on sacred principles that guide every feature:
 
-### Transparency
-All algorithmic decisions and moderation actions are visible and auditable by the community.
+- **Community Healing:** Every interaction fosters connection and shared exploration
+- **Wisdom Sharing:** Rich storytelling and NPC interactions spread cosmic knowledge
+- **Transparency:** All systems are open and understandable
+- **Environmental Consciousness:** Efficient code and mindful resource usage
+- **Accessibility:** Inclusive design for all cosmic explorers
 
-### Accessibility
-Technology serves people, not vice versa. Mobile-first design ensures access for all beings.
+## 📚 Documentation
 
-### Environmental Consciousness
-Every technical decision considers planetary impact and sustainable development.
+- [Architecture Guide](docs/Architecture.md) - Technical architecture and design decisions
+- [Database Schema](docs/database-schema.md) - Database structure and relationships
+- [Feature Plans](docs/Feature-Plan-Base-Building.md) - Detailed feature specifications
+- [Setup Guide](docs/Setup-Guide.md) - Development environment setup
+- [Testing Plan](docs/Testing-Plan.md) - Testing strategies and procedures
+- [Aurora Log](docs/aurora-log.md) - Development journey and decisions
 
-## 🔧 Configuration
+## 🤝 Community
 
-### Environment Variables
-```bash
-PORT=3000                    # Server port
-NODE_ENV=development         # Environment mode
-```
+Join the cosmic exploration community:
 
-### Geolocation Settings
-- **High Accuracy**: Enabled for best position tracking
-- **Simulator Mode**: Available for testing without GPS
-- **Privacy**: No external tracking or data collection
-
-## 📱 Mobile Installation
-
-1. Open the app in your mobile browser
-2. Look for "Add to Home Screen" option
-3. Install as a native app
-4. Enjoy cosmic exploration on the go!
-
-## 🧪 Testing
-
-### Browser Testing
-- Test infinite scrolling and map navigation
-- Verify geolocation accuracy indicators
-- Complete investigation flows
-- Test multiplayer features with multiple tabs
-
-### Mobile Testing
-- Test touch gestures and responsive design
-- Verify PWA installation
-- Test offline functionality (coming soon)
-
-## 🚀 Deployment
-
-### Static Hosting (Frontend)
-- Netlify, Vercel, or GitHub Pages
-- CDN for global content delivery
-- HTTPS required for geolocation
-
-### WebSocket Server
-- Node.js hosting platform
-- WebSocket support required
-- Environment variable configuration
-
-## 🤝 Contributing
-
-We welcome contributions that align with our sacred principles:
-
-1. **Community Healing**: Features that serve collective wisdom
-2. **Transparency**: Open and auditable implementations
-3. **Accessibility**: Inclusive design for all beings
-4. **Environmental Consciousness**: Sustainable technical choices
+- **GitHub Issues:** Report bugs and request features
+- **Discussions:** Share ideas and cosmic wisdom
+- **Contributions:** Help build the platform together
+- **Documentation:** Improve guides and tutorials
 
 ## 📄 License
 
-MIT License - See LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🌌 Sacred Mantra
+## 🙏 Acknowledgments
 
-*"In the dance of code and consciousness, may every line serve the light, every feature honor wisdom, and every decision heal the digital realm while exploring the transformative mysteries of the cosmos."*
+- **Leaflet** - For the amazing mapping capabilities
+- **Three.js** - For the beautiful WebGL effects
+- **Supabase** - For the database and real-time features
+- **The Cosmic Community** - For inspiration and wisdom sharing
+
+## 🌌 The Cosmic Mission
+
+Eldritch Sanctuary represents more than just a game - it's a platform for cosmic exploration, community healing, and wisdom sharing. Every feature serves the sacred mission of connecting beings across dimensions through shared exploration and meaningful interaction.
+
+*May your cosmic journey be filled with wonder, wisdom, and connection!* ✨🚀
 
 ---
 
-**Built with ❤️ by Infinite & Aurora for the cosmic community**
+**Built with ❤️ and cosmic energy by the Eldritch Sanctuary development team**
+
+*"In the vast cosmic ocean, every explorer is a star, and every journey illuminates the path for others."* - Aurora, The Cosmic Navigator
