@@ -309,13 +309,43 @@ class BaseSystem {
                 establishedAt: Date.now()
             };
 
-            // Send to server
-            const response = await this.sendBaseToServer(baseData);
+            // Create base using database client
+            const base = await window.databaseClient.createBase({
+                player_id: 'local_player', // Will be replaced with actual player ID when auth is implemented
+                name: name,
+                latitude: position.lat,
+                longitude: position.lng,
+                accuracy: position.accuracy,
+                territory_radius: 50.0, // Initial radius in meters
+                cosmic_energy: 100,
+                base_level: 1,
+                community_connections: 0,
+                sacred_structures: [],
+                base_settings: {}
+            });
             
-            if (response.success) {
+            if (base) {
                 // Store locally
-                this.playerBase = response.base;
+                this.playerBase = {
+                    id: base.id,
+                    name: base.name,
+                    lat: base.latitude,
+                    lng: base.longitude,
+                    radius: base.territory_radius,
+                    establishedAt: new Date(base.established_at).getTime()
+                };
                 localStorage.setItem('eldritch-player-base', JSON.stringify(this.playerBase));
+                
+                // Log base establishment activity
+                await window.databaseClient.logBaseActivity({
+                    base_id: base.id,
+                    player_id: base.player_id,
+                    activity_type: 'establish',
+                    description: `Established base: ${base.name}`,
+                    latitude: base.latitude,
+                    longitude: base.longitude,
+                    energy_contribution: 10
+                });
                 
                 // Update UI
                 this.updateBaseUI();
@@ -339,7 +369,7 @@ class BaseSystem {
 
                 console.log('🏗️ Base established:', this.playerBase);
             } else {
-                throw new Error(response.error || 'Failed to establish base');
+                throw new Error('Failed to create base in database');
             }
 
         } catch (error) {
