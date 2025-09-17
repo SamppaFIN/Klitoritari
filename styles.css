@@ -2258,6 +2258,201 @@ input[type="range"]::-moz-range-thumb {
     transform: translateY(0);
 }
 
+/* Debug Panel Tabs */
+.debug-tabs {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 2px solid #333;
+}
+
+.debug-tab {
+    background: #2a2a2a;
+    border: none;
+    color: #ccc;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+}
+
+.debug-tab:hover {
+    background: #3a3a3a;
+    color: #fff;
+}
+
+.debug-tab.active {
+    background: #4a4a4a;
+    color: #fff;
+    border-bottom: 2px solid #00ff88;
+}
+
+.debug-tab-content {
+    display: none;
+}
+
+.debug-tab-content.active {
+    display: block;
+}
+
+/* Inventory Styles */
+.inventory-section, .equipment-section, .stats-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.inventory-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.inventory-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 5px 0;
+    background: #2a2a2a;
+    border-radius: 5px;
+    border-left: 4px solid #666;
+}
+
+.inventory-item.common {
+    border-left-color: #888;
+}
+
+.inventory-item.uncommon {
+    border-left-color: #00ff88;
+}
+
+.inventory-item.rare {
+    border-left-color: #0088ff;
+}
+
+.inventory-item.epic {
+    border-left-color: #8800ff;
+}
+
+.inventory-item.legendary {
+    border-left-color: #ff8800;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.item-name {
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.item-quantity {
+    color: #888;
+    font-size: 12px;
+}
+
+.item-rarity {
+    color: #00ff88;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.item-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.equip-btn, .unequip-btn {
+    background: #00ff88;
+    border: none;
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.unequip-btn {
+    background: #ff4444;
+    color: #fff;
+}
+
+.equip-btn:hover {
+    background: #00cc66;
+}
+
+.unequip-btn:hover {
+    background: #cc3333;
+}
+
+/* Equipped Items */
+.equipped-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.equipped-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: #2a2a2a;
+    border-radius: 5px;
+    border-left: 4px solid #666;
+}
+
+.equipped-item.empty {
+    border-left-color: #444;
+    opacity: 0.6;
+}
+
+.equipped-slot {
+    font-weight: bold;
+    color: #00ff88;
+    min-width: 80px;
+}
+
+.equipped-name {
+    flex: 1;
+    color: #fff;
+    margin: 0 10px;
+}
+
+/* Stats Display */
+.stats-display {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid #333;
+}
+
+.stat-label {
+    color: #ccc;
+    font-weight: bold;
+}
+
+.stat-value {
+    color: #00ff88;
+    font-weight: bold;
+}
+
 /* Debug Toggle Button */
 .debug-toggle-button {
     position: fixed;

@@ -13,6 +13,9 @@ class EncounterSystem {
         this.stepGainRate = 0.1; // Steps per position update
         this.lastPosition = null;
         
+        // Initialize item system
+        this.itemSystem = new ItemSystem();
+        
         // Player stats - The cosmic horror comedy begins!
         this.playerStats = {
             health: 100,
@@ -221,10 +224,42 @@ class EncounterSystem {
         panel.innerHTML = `
             <div class="debug-content">
                 <h3>🎭 Debug Panel</h3>
-                <button id="test-monster" class="debug-btn">Test Monster Encounter</button>
-                <button id="test-poi" class="debug-btn">Test POI Encounter</button>
-                <button id="test-mystery" class="debug-btn">Test Mystery Encounter</button>
-                <button id="add-steps" class="debug-btn">Add 50 Steps</button>
+                <div class="debug-tabs">
+                    <button class="debug-tab active" data-tab="encounters">Encounters</button>
+                    <button class="debug-tab" data-tab="inventory">Inventory</button>
+                    <button class="debug-tab" data-tab="stats">Stats</button>
+                </div>
+                
+                <div id="debug-encounters" class="debug-tab-content active">
+                    <button id="test-monster" class="debug-btn">Test Monster Encounter</button>
+                    <button id="test-poi" class="debug-btn">Test POI Encounter</button>
+                    <button id="test-mystery" class="debug-btn">Test Mystery Encounter</button>
+                    <button id="add-steps" class="debug-btn">Add 50 Steps</button>
+                </div>
+                
+                <div id="debug-inventory" class="debug-tab-content">
+                    <div class="inventory-section">
+                        <h4>🎒 Player Inventory</h4>
+                        <div id="inventory-list" class="inventory-list"></div>
+                        <button id="spawn-item" class="debug-btn">Spawn Random Item</button>
+                        <button id="clear-inventory" class="debug-btn">Clear Inventory</button>
+                    </div>
+                    <div class="equipment-section">
+                        <h4>⚔️ Equipped Items</h4>
+                        <div id="equipped-items" class="equipped-items"></div>
+                    </div>
+                </div>
+                
+                <div id="debug-stats" class="debug-tab-content">
+                    <div class="stats-section">
+                        <h4>📊 Player Stats</h4>
+                        <div id="player-stats-display" class="stats-display"></div>
+                        <button id="heal-player" class="debug-btn">Heal to Full</button>
+                        <button id="restore-sanity" class="debug-btn">Restore Sanity</button>
+                        <button id="add-experience" class="debug-btn">Add 100 XP</button>
+                    </div>
+                </div>
+                
                 <button id="toggle-debug" class="debug-btn">Toggle Debug Panel</button>
             </div>
         `;
@@ -239,6 +274,24 @@ class EncounterSystem {
         document.getElementById('toggle-debug').addEventListener('click', () => {
             panel.classList.toggle('hidden');
         });
+        
+        // Tab switching
+        document.querySelectorAll('.debug-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.switchDebugTab(tab.dataset.tab));
+        });
+        
+        // Inventory debug buttons
+        document.getElementById('spawn-item').addEventListener('click', () => this.spawnRandomItem());
+        document.getElementById('clear-inventory').addEventListener('click', () => this.clearInventory());
+        
+        // Stats debug buttons
+        document.getElementById('heal-player').addEventListener('click', () => this.healPlayer());
+        document.getElementById('restore-sanity').addEventListener('click', () => this.restoreSanity());
+        document.getElementById('add-experience').addEventListener('click', () => this.addExperience(100));
+        
+        // Initialize displays
+        this.updateInventoryDisplay();
+        this.updateStatsDisplay();
     }
 
     hideIndividualDebugPanel() {
@@ -246,6 +299,168 @@ class EncounterSystem {
         if (panel) {
             panel.classList.add('hidden');
         }
+    }
+
+    // Debug panel tab switching
+    switchDebugTab(tabName) {
+        // Hide all tab contents
+        document.querySelectorAll('.debug-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        // Remove active class from all tabs
+        document.querySelectorAll('.debug-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Show selected tab content
+        document.getElementById(`debug-${tabName}`).classList.add('active');
+        
+        // Add active class to selected tab
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        
+        // Update displays when switching to relevant tabs
+        if (tabName === 'inventory') {
+            this.updateInventoryDisplay();
+        } else if (tabName === 'stats') {
+            this.updateStatsDisplay();
+        }
+    }
+
+    // Inventory display methods
+    updateInventoryDisplay() {
+        const inventoryList = document.getElementById('inventory-list');
+        const equippedItems = document.getElementById('equipped-items');
+        
+        if (!inventoryList || !equippedItems) return;
+        
+        // Update inventory list
+        inventoryList.innerHTML = '';
+        this.itemSystem.getPlayerInventory().forEach(invItem => {
+            const item = this.itemSystem.getItem(invItem.id);
+            if (item) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `inventory-item ${item.rarity}`;
+                itemDiv.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-quantity">x${invItem.quantity}</span>
+                        <span class="item-rarity">${item.rarity}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="window.encounterSystem.equipItem('${item.id}')" class="equip-btn">Equip</button>
+                        <button onclick="window.encounterSystem.unequipItem('${item.id}')" class="unequip-btn">Unequip</button>
+                    </div>
+                `;
+                inventoryList.appendChild(itemDiv);
+            }
+        });
+        
+        // Update equipped items
+        equippedItems.innerHTML = '';
+        const equipped = this.itemSystem.getEquippedItems();
+        Object.entries(equipped).forEach(([slot, item]) => {
+            if (item) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `equipped-item ${item.rarity}`;
+                itemDiv.innerHTML = `
+                    <div class="equipped-slot">${slot}:</div>
+                    <div class="equipped-name">${item.name}</div>
+                    <button onclick="window.encounterSystem.unequipItem('${item.id}')" class="unequip-btn">Unequip</button>
+                `;
+                equippedItems.appendChild(itemDiv);
+            } else {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'equipped-item empty';
+                itemDiv.innerHTML = `<div class="equipped-slot">${slot}:</div><div class="equipped-name">Empty</div>`;
+                equippedItems.appendChild(itemDiv);
+            }
+        });
+    }
+
+    // Stats display methods
+    updateStatsDisplay() {
+        const statsDisplay = document.getElementById('player-stats-display');
+        if (!statsDisplay) return;
+        
+        const totalStats = this.itemSystem.getTotalStats();
+        statsDisplay.innerHTML = `
+            <div class="stat-row">
+                <span class="stat-label">Health:</span>
+                <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Sanity:</span>
+                <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Steps:</span>
+                <span class="stat-value">${this.playerStats.steps}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Attack:</span>
+                <span class="stat-value">${this.playerStats.attack} + ${totalStats.attack} (equipment)</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Defense:</span>
+                <span class="stat-value">${this.playerStats.defense} + ${totalStats.defense} (equipment)</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Experience:</span>
+                <span class="stat-value">${this.playerStats.experience}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Level:</span>
+                <span class="stat-value">${this.playerStats.level}</span>
+            </div>
+        `;
+    }
+
+    // Debug action methods
+    spawnRandomItem() {
+        const lootResult = this.itemSystem.generateRandomLoot('monster');
+        this.itemSystem.addToInventory(lootResult.itemId, 1);
+        this.updateInventoryDisplay();
+        console.log(`🎁 Spawned: ${lootResult.item.name} (${lootResult.rarity})`);
+    }
+
+    clearInventory() {
+        this.itemSystem.playerInventory = [];
+        this.itemSystem.equippedItems = { weapon: null, armor: null, accessory: null };
+        this.itemSystem.savePlayerInventory();
+        this.updateInventoryDisplay();
+        console.log('🗑️ Inventory cleared!');
+    }
+
+    healPlayer() {
+        this.playerStats.health = this.playerStats.maxHealth;
+        this.updateHealthBars();
+        this.updateStatsDisplay();
+        console.log('❤️ Player healed to full health!');
+    }
+
+    restoreSanity() {
+        this.playerStats.sanity = this.playerStats.maxSanity;
+        this.updateHealthBars();
+        this.updateStatsDisplay();
+        console.log('🧠 Sanity restored to full!');
+    }
+
+    addExperience(amount) {
+        this.playerStats.experience += amount;
+        this.updateStatsDisplay();
+        console.log(`⭐ Gained ${amount} experience!`);
+    }
+
+    // Item system integration methods
+    equipItem(itemId) {
+        this.itemSystem.equipItem(itemId);
+        this.updateInventoryDisplay();
+    }
+
+    unequipItem(itemId) {
+        this.itemSystem.unequipItem(itemId);
+        this.updateInventoryDisplay();
     }
 
     startProximityDetection() {
@@ -1238,17 +1453,28 @@ class EncounterSystem {
         const monster = this.encounters.get(monsterId);
         if (!monster) return;
         
-        const attackRoll = this.rollDice(20, this.playerStats.attack);
+        // Get equipped weapon stats
+        const equippedWeapon = this.itemSystem.getEquippedItems().weapon;
+        const weaponAttack = equippedWeapon ? equippedWeapon.stats.attack : 0;
+        const totalAttack = this.playerStats.attack + weaponAttack;
+        
+        const attackRoll = this.rollDice(20, totalAttack);
         const defenseRoll = this.rollDice(20, monster.defense);
         
         const log = document.getElementById('battle-log');
-        log.innerHTML += `<div class="log-entry">You attack! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
+        const weaponName = equippedWeapon ? ` with ${equippedWeapon.name}` : '';
+        log.innerHTML += `<div class="log-entry">You attack${weaponName}! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
         log.innerHTML += `<div class="log-entry">${monster.name} defends! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
         
         if (attackRoll.total > defenseRoll.total) {
-            const damage = this.rollDice(8, this.playerStats.attack);
+            const damage = this.rollDice(8, totalAttack);
             monster.health -= damage.total;
             log.innerHTML += `<div class="log-entry success">Hit! You deal ${damage.total} damage!</div>`;
+            
+            // Apply weapon effects
+            if (equippedWeapon && equippedWeapon.effects) {
+                this.applyWeaponEffects(equippedWeapon, monster, log);
+            }
             
             if (monster.health <= 0) {
                 this.victory(monster);
@@ -1260,6 +1486,29 @@ class EncounterSystem {
         
         this.playerTurn = false;
         setTimeout(() => this.monsterTurn(monster), 1000);
+    }
+
+    // Apply weapon effects
+    applyWeaponEffects(weapon, monster, log) {
+        weapon.effects.forEach(effect => {
+            switch (effect) {
+                case 'void_damage':
+                    const voidDamage = this.rollDice(4, 2);
+                    monster.health -= voidDamage.total;
+                    log.innerHTML += `<div class="log-entry success">Void damage! +${voidDamage.total} damage!</div>`;
+                    break;
+                case 'tentacle_whisper':
+                    log.innerHTML += `<div class="log-entry">The tentacle whispers: "Why don't cosmic entities ever get cold? Because they're always in their element!"</div>`;
+                    break;
+                case 'starlight_arrows':
+                    log.innerHTML += `<div class="log-entry">Starlight arrows pierce through ${monster.name}'s defenses!</div>`;
+                    break;
+                case 'reality_breach':
+                    log.innerHTML += `<div class="log-entry">Reality tears around ${monster.name}! It looks confused!</div>`;
+                    monster.defense -= 2; // Reduce defense
+                    break;
+            }
+        });
     }
 
     playerDefend(monsterId) {
@@ -1325,19 +1574,27 @@ class EncounterSystem {
     victory(monster) {
         const monsterData = this.stories.monster[monster.type] || this.stories.monster.shadowStalker;
         const experience = monster.experience || 50;
-        const loot = monsterData.loot || ["Mysterious Item"];
         
+        // Generate random loot using item system
+        const lootResult = this.itemSystem.generateRandomLoot('monster');
+        const lootItem = lootResult.item;
+        
+        // Add experience and item
         this.playerStats.experience += experience;
-        this.playerStats.inventory.push(...loot);
+        this.itemSystem.addToInventory(lootResult.itemId, 1);
         
         const log = document.getElementById('battle-log');
         log.innerHTML += `<div class="log-entry victory">${monsterData.victory}</div>`;
         log.innerHTML += `<div class="log-entry reward">You gain ${experience} experience!</div>`;
-        log.innerHTML += `<div class="log-entry reward">You found: ${loot.join(", ")}</div>`;
+        log.innerHTML += `<div class="log-entry reward">You found: ${lootItem.name} (${lootResult.rarity})</div>`;
+        log.innerHTML += `<div class="log-entry reward">${lootItem.description}</div>`;
+        
+        // Gain some sanity back from victory
+        this.gainSanity(5, `Victory over ${monster.name} restores your cosmic confidence!`);
         
         setTimeout(() => {
             this.hideModal();
-            this.showRewards(experience, loot);
+            this.showRewards(experience, [lootItem.name]);
         }, 2000);
     }
 
