@@ -150,6 +150,15 @@ class BaseSystem {
         console.log('  - geolocationManager:', !!window.geolocationManager);
         console.log('  - databaseClient:', !!window.databaseClient);
         console.log('  - databaseClient.isInitialized:', window.databaseClient?.isInitialized);
+        console.log('  - eldritchApp:', !!window.eldritchApp);
+        console.log('  - app.systems:', window.eldritchApp?.systems ? Object.keys(window.eldritchApp.systems) : 'undefined');
+        
+        // Try to get geolocation manager directly from app if not available globally
+        if (!window.geolocationManager && window.eldritchApp) {
+            console.log('🔧 Attempting to get geolocation manager from app...');
+            window.geolocationManager = window.eldritchApp.getSystem('geolocation');
+            console.log('  - Retrieved geolocationManager:', !!window.geolocationManager);
+        }
         
         // Wait for geolocation manager and database client to be available
         if (!window.geolocationManager || !window.databaseClient || !window.databaseClient.isInitialized) {
