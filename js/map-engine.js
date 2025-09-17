@@ -438,14 +438,21 @@ class MapEngine {
         }
 
         // Create base marker with star shape
+        const starIcon = L.divIcon({
+            className: 'base-marker',
+            html: this.createStarIcon(),
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
+        });
+        
+        console.log('🏗️ Creating star icon:', starIcon);
+        console.log('🏗️ Star icon HTML:', this.createStarIcon());
+        
         this.playerBaseMarker = L.marker(latlng, {
-            icon: L.divIcon({
-                className: 'base-marker',
-                html: this.createStarIcon(),
-                iconSize: [50, 50],
-                iconAnchor: [25, 25]
-            })
+            icon: starIcon
         }).addTo(this.map);
+        
+        console.log('🏗️ Base marker created and added to map:', this.playerBaseMarker);
 
         // Add pulsing animation
         this.animateBaseMarker();
@@ -478,9 +485,20 @@ class MapEngine {
 
     createStarIcon() {
         return `
-            <div class="star-marker">
-                <div class="star-inner">★</div>
-                <div class="star-glow"></div>
+            <div style="
+                width: 50px; 
+                height: 50px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center;
+                background: rgba(255, 0, 0, 0.2);
+                border: 3px solid #ff0000;
+                border-radius: 50%;
+                font-size: 30px;
+                color: #ff0000;
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            ">
+                ★
             </div>
         `;
     }
