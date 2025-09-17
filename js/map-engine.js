@@ -462,7 +462,7 @@ class MapEngine {
         this.animateBaseMarker();
 
         // Add popup with base info
-        this.playerBaseMarker.bindPopup(`
+        const popupContent = `
             <div class="base-popup">
                 <div class="popup-header">
                     <h4>🏗️ ${base.name}</h4>
@@ -471,7 +471,7 @@ class MapEngine {
                 </div>
                 <div class="base-info">
                     <div><strong>Owner:</strong> Cosmic Explorer</div>
-                    <div><strong>Established:</strong> ${new Date(base.establishedAt).toLocaleDateString()}</div>
+                    <div><strong>Established:</strong> ${base.establishedAt ? new Date(base.establishedAt).toLocaleDateString() : 'Unknown'}</div>
                     <div><strong>Territory:</strong> ${base.radius}m radius</div>
                 </div>
                 <div class="base-actions">
@@ -481,7 +481,15 @@ class MapEngine {
                     </button>
                 </div>
             </div>
-        `);
+        `;
+        
+        console.log('🏗️ Binding popup to base marker:', popupContent);
+        this.playerBaseMarker.bindPopup(popupContent);
+        
+        // Add click event for debugging
+        this.playerBaseMarker.on('click', (e) => {
+            console.log('🏗️ Base marker clicked!', e);
+        });
 
         // Create territory circle
         this.createTerritoryCircle(latlng, base.radius);
