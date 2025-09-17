@@ -202,7 +202,7 @@ class GeolocationManager {
     // Simulator mode for testing
     enableSimulator() {
         this.simulatorMode = true;
-        this.simulatorPosition = { lat: 61.4978, lng: 23.7608 }; // Tampere Härmälä
+        this.simulatorPosition = { lat: 61.473683430224284, lng: 23.726548746143216 }; // Härmälänranta
         
         // Simulate position updates
         this.simulatorInterval = setInterval(() => {

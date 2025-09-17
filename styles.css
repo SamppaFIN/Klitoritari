@@ -1505,3 +1505,205 @@ body {
     transform: translateY(-1px);
     box-shadow: 0 3px 10px rgba(255, 152, 0, 0.4);
 }
+
+/* Chat Debug Panel */
+.chat-debug-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #4CAF50;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+    z-index: 1000;
+    max-width: 250px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.chat-debug-panel.hidden {
+    display: none;
+}
+
+.chat-debug-content h3 {
+    color: #4CAF50;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.debug-section {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.debug-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.debug-section h4 {
+    color: #ffd700;
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.debug-section label {
+    color: #aaa;
+    font-size: 11px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.debug-section input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #555;
+    border-radius: 3px;
+    color: white;
+    padding: 4px 8px;
+    font-size: 11px;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.debug-section input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 3px rgba(76, 175, 80, 0.3);
+}
+
+.debug-section div {
+    color: #aaa;
+    font-size: 11px;
+    margin: 2px 0;
+}
+
+#npc-status, #chat-status {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Path Painting System Styles */
+.painted-area {
+    transition: all 0.3s ease;
+}
+
+.painted-area:hover {
+    fill-opacity: 0.6 !important;
+}
+
+/* Path Debug Panel */
+.path-debug-panel {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #FF6B6B;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+    z-index: 1000;
+    max-width: 280px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.path-debug-panel.hidden {
+    display: none;
+}
+
+.path-debug-content h3 {
+    color: #FF6B6B;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.color-palette {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.color-btn {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.color-btn.selected {
+    border-color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
+}
+
+.color-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+}
+
+#brush-size-value, #brush-opacity-value {
+    color: #FF6B6B;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+#path-stats, #current-brush {
+    color: #FF6B6B;
+    font-weight: bold;
+    font-size: 11px;
+    margin: 2px 0;
+}
+
+/* Brush size and opacity sliders */
+input[type="range"] {
+    width: 100%;
+    height: 5px;
+    border-radius: 5px;
+    background: #333;
+    outline: none;
+    margin: 5px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #FF6B6B;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #FF6B6B;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}

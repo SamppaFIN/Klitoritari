@@ -17,7 +17,8 @@ class EldritchSanctuaryApp {
             websocket: null,
             baseSystem: null,
             encounter: null,
-            npc: null
+            npc: null,
+            pathPainting: null
         };
     }
 
@@ -125,6 +126,10 @@ class EldritchSanctuaryApp {
         // Initialize NPC system
         this.systems.npc = new NPCSystem();
         this.systems.npc.init();
+        
+        // Initialize path painting system
+        this.systems.pathPainting = new PathPaintingSystem();
+        this.systems.pathPainting.init();
         
         // Initialize map engine
         this.systems.mapEngine = new MapEngine();
@@ -370,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.baseSystem = app.getSystem('baseSystem');
     window.encounterSystem = app.getSystem('encounter');
     window.npcSystem = app.getSystem('npc');
+    window.pathPaintingSystem = app.getSystem('pathPainting');
     
     // Debug: Check what systems are available
     console.log('🔍 Global systems check:');

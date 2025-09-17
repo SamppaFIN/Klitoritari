@@ -35,7 +35,7 @@ class MapEngine {
     setupMap() {
         // Initialize Leaflet map with cosmic styling - centered on Tampere Härmälä
         this.map = L.map('map', {
-            center: [61.4978, 23.7608], // Tampere Härmälä default
+            center: [61.473683430224284, 23.726548746143216], // Härmälänranta
             zoom: 15,
             zoomControl: true,
             attributionControl: false,
@@ -805,9 +805,9 @@ class MapEngine {
         this.pointsOfInterest.forEach(poi => this.map.removeLayer(poi));
         this.pointsOfInterest = [];
         
-        // Base location for POI generation - Härmälä/Partola area
-        const baseLat = 61.4950;  // Slightly south of current location
-        const baseLng = 23.7500;  // Slightly west of current location
+        // Base location for POI generation - Härmälänranta
+        const baseLat = 61.473683430224284;
+        const baseLng = 23.726548746143216;
         
         // POI types with different visual styles
         const poiTypes = [
@@ -821,11 +821,11 @@ class MapEngine {
             { name: 'Stellar Observatory', emoji: '🔭', color: '#FFD700', rarity: 'rare' }
         ];
         
-        // Generate 15 random POIs
-        for (let i = 0; i < 15; i++) {
+        // Generate 3 random POIs within 300m radius
+        for (let i = 0; i < 3; i++) {
             const poiType = poiTypes[Math.floor(Math.random() * poiTypes.length)];
-            const lat = baseLat + (Math.random() - 0.5) * 0.01; // Within ~500m radius
-            const lng = baseLng + (Math.random() - 0.5) * 0.01;
+            const lat = baseLat + (Math.random() - 0.5) * 0.003; // Within ~300m radius
+            const lng = baseLng + (Math.random() - 0.5) * 0.003;
             
             const poiIcon = L.divIcon({
                 className: 'poi-marker multilayered',
@@ -878,13 +878,13 @@ class MapEngine {
             { name: 'Crystal Guardian', emoji: '🛡️', color: '#00BFFF', speed: 0.00006 }
         ];
         
-        // Generate 5 random monsters
-        for (let i = 0; i < 5; i++) {
+        // Generate 1 random monster
+        for (let i = 0; i < 1; i++) {
             const monsterType = monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
-            const baseLat = 61.4950;  // Härmälä/Partola area
-            const baseLng = 23.7500;
-            const lat = baseLat + (Math.random() - 0.5) * 0.008;
-            const lng = baseLng + (Math.random() - 0.5) * 0.008;
+            const baseLat = 61.473683430224284;  // Härmälänranta
+            const baseLng = 23.726548746143216;
+            const lat = baseLat + (Math.random() - 0.5) * 0.003; // Within ~300m radius
+            const lng = baseLng + (Math.random() - 0.5) * 0.003;
             
             const monsterIcon = L.divIcon({
                 className: 'monster-marker multilayered',
