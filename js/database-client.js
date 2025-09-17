@@ -5,6 +5,7 @@
 
 class DatabaseClient {
     constructor() {
+        console.log('🗄️ DatabaseClient constructor called');
         this.supabase = null;
         this.isInitialized = false;
         this.init();
@@ -420,4 +421,10 @@ class DatabaseClient {
 }
 
 // Make database client globally available
-window.databaseClient = new DatabaseClient();
+console.log('🗄️ Creating database client...');
+try {
+    window.databaseClient = new DatabaseClient();
+    console.log('🗄️ Database client created successfully');
+} catch (error) {
+    console.error('🗄️ Error creating database client:', error);
+}
