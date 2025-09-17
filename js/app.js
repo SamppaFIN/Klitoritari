@@ -107,6 +107,10 @@ class EldritchSanctuaryApp {
         this.systems.geolocation = new GeolocationManager();
         this.systems.geolocation.init();
         
+        // Initialize investigation system first
+        this.systems.investigation = new InvestigationSystem();
+        this.systems.investigation.init();
+        
         // Initialize map engine
         this.systems.mapEngine = new MapEngine();
         
@@ -120,10 +124,6 @@ class EldritchSanctuaryApp {
         
         // Now initialize the map engine
         this.systems.mapEngine.init();
-        
-        // Initialize investigation system
-        this.systems.investigation = new InvestigationSystem();
-        this.systems.investigation.init();
         
         // Initialize WebSocket client
         this.systems.websocket = new WebSocketClient();
