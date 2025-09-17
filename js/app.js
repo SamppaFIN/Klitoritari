@@ -207,8 +207,11 @@ class EldritchSanctuaryApp {
     loadPlayerBases() {
         // Load player's base if exists
         const playerBase = this.systems.baseSystem.getPlayerBase();
+        console.log('🏗️ Loading player base:', playerBase);
         if (playerBase) {
             this.systems.mapEngine.addPlayerBaseMarker(playerBase);
+        } else {
+            console.log('🏗️ No player base found to load');
         }
     }
 

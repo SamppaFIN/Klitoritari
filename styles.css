@@ -692,3 +692,41 @@ body {
 .base-marker {
     filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 0, 0, 0.4));
 }
+
+/* Base popup styling */
+.base-popup {
+    min-width: 200px;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.popup-header h4 {
+    margin: 0;
+    color: var(--cosmic-light);
+}
+
+.close-popup-btn {
+    background: var(--cosmic-red);
+    color: var(--cosmic-light);
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.close-popup-btn:hover {
+    background: var(--cosmic-glow);
+    transform: scale(1.1);
+}

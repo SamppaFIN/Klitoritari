@@ -428,7 +428,9 @@ class MapEngine {
     addPlayerBaseMarker(base) {
         if (!this.map) return;
 
+        console.log('🏗️ Adding base marker for:', base);
         const latlng = [base.lat, base.lng];
+        console.log('🏗️ Base marker coordinates:', latlng);
         
         // Remove existing base marker
         if (this.playerBaseMarker) {
@@ -452,7 +454,11 @@ class MapEngine {
         // Add popup with base info
         this.playerBaseMarker.bindPopup(`
             <div class="base-popup">
-                <h4>🏗️ ${base.name}</h4>
+                <div class="popup-header">
+                    <h4>🏗️ ${base.name}</h4>
+                    <button onclick="this.closest('.leaflet-popup').closePopup()" 
+                            class="close-popup-btn" title="Close">&times;</button>
+                </div>
                 <div class="base-info">
                     <div><strong>Owner:</strong> Cosmic Explorer</div>
                     <div><strong>Established:</strong> ${new Date(base.establishedAt).toLocaleDateString()}</div>
