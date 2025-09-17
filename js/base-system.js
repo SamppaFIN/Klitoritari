@@ -145,13 +145,13 @@ class BaseSystem {
             return;
         }
 
-        // Wait for geolocation manager to be available
-        if (!window.geolocationManager || !window.eldritchApp || !window.eldritchApp.isInitialized) {
+        // Wait for geolocation manager and database client to be available
+        if (!window.geolocationManager || !window.databaseClient || !window.databaseClient.isInitialized) {
             this.showNotification('System still initializing. Please wait a moment and try again.', 'info');
             
             // Retry after a short delay
             setTimeout(() => {
-                if (window.geolocationManager && window.eldritchApp && window.eldritchApp.isInitialized) {
+                if (window.geolocationManager && window.databaseClient && window.databaseClient.isInitialized) {
                     this.showBaseEstablishmentModal();
                 } else {
                     this.showNotification('System not ready. Please refresh the page and try again.', 'error');
@@ -176,6 +176,8 @@ class BaseSystem {
         // Debug logging
         console.log('Base establishment - current position:', currentPosition);
         console.log('Geolocation manager:', window.geolocationManager);
+        console.log('Database client:', window.databaseClient);
+        console.log('Database client initialized:', window.databaseClient?.isInitialized);
         
         // Fallback: use simulator position if available
         if (!currentPosition && window.geolocationManager?.simulatorMode) {

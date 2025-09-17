@@ -16,14 +16,14 @@ class DatabaseClient {
             if (typeof supabase !== 'undefined') {
                 this.supabase = supabase;
                 this.isInitialized = true;
-                console.log('🗄️ Database client initialized');
+                console.log('🗄️ Database client initialized with Supabase');
             } else {
                 console.warn('🗄️ Supabase not available - using local storage fallback');
-                this.isInitialized = false;
+                this.isInitialized = true; // Still functional with local storage
             }
         } catch (error) {
             console.error('🗄️ Failed to initialize database client:', error);
-            this.isInitialized = false;
+            this.isInitialized = true; // Still functional with local storage
         }
     }
 
