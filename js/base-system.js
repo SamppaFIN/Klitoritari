@@ -69,7 +69,10 @@ class BaseSystem {
         `;
 
         basePanel.innerHTML = `
-            <h3>🏗️ Base Management</h3>
+            <div class="panel-header">
+                <h3>🏗️ Base Management</h3>
+                <button id="close-base-panel" class="close-panel-btn" title="Close">&times;</button>
+            </div>
             <div id="base-info">
                 <div class="base-status">No base established</div>
                 <div class="base-stats hidden">
@@ -143,6 +146,11 @@ class BaseSystem {
         const deleteBtn = document.getElementById('delete-base-btn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => this.confirmDeleteBase());
+        }
+
+        const closePanelBtn = document.getElementById('close-base-panel');
+        if (closePanelBtn) {
+            closePanelBtn.addEventListener('click', () => this.closeBasePanel());
         }
     }
 
@@ -732,6 +740,20 @@ class BaseSystem {
 
         if (confirmed) {
             this.deletePlayerBase();
+        }
+    }
+
+    closeBasePanel() {
+        const basePanel = document.getElementById('base-management-panel');
+        if (basePanel) {
+            basePanel.classList.add('hidden');
+        }
+    }
+
+    openBasePanel() {
+        const basePanel = document.getElementById('base-management-panel');
+        if (basePanel) {
+            basePanel.classList.remove('hidden');
         }
     }
 

@@ -437,15 +437,14 @@ class MapEngine {
             this.map.removeLayer(this.playerBaseMarker);
         }
 
-        // Create base marker with cosmic styling
-        this.playerBaseMarker = L.circleMarker(latlng, {
-            radius: 25,
-            fillColor: '#ff0000',
-            color: '#ffffff',
-            weight: 6,
-            opacity: 1,
-            fillOpacity: 0.9,
-            className: 'base-marker'
+        // Create base marker with star shape
+        this.playerBaseMarker = L.marker(latlng, {
+            icon: L.divIcon({
+                className: 'base-marker',
+                html: this.createStarIcon(),
+                iconSize: [50, 50],
+                iconAnchor: [25, 25]
+            })
         }).addTo(this.map);
 
         // Add pulsing animation
@@ -465,9 +464,9 @@ class MapEngine {
                     <div><strong>Territory:</strong> ${base.radius}m radius</div>
                 </div>
                 <div class="base-actions">
-                    <button onclick="window.mapEngine.visitBase('${base.id}')" 
+                    <button onclick="window.mapEngine.openBaseManagement()" 
                             class="sacred-button" style="margin-top: 10px; width: 100%;">
-                        Visit Base
+                        Manage Base
                     </button>
                 </div>
             </div>
@@ -475,6 +474,15 @@ class MapEngine {
 
         // Create territory circle
         this.createTerritoryCircle(latlng, base.radius);
+    }
+
+    createStarIcon() {
+        return `
+            <div class="star-marker">
+                <div class="star-inner">★</div>
+                <div class="star-glow"></div>
+            </div>
+        `;
     }
 
     removePlayerBaseMarker() {
@@ -586,6 +594,12 @@ class MapEngine {
     visitBase(baseId) {
         console.log('Visiting base:', baseId);
         // TODO: Implement base visiting functionality
+    }
+
+    openBaseManagement() {
+        if (window.baseSystem) {
+            window.baseSystem.openBasePanel();
+        }
     }
 
     // Cleanup
