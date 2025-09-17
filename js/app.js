@@ -8,6 +8,7 @@ class EldritchSanctuaryApp {
         this.isInitialized = false;
         this.loadingScreen = null;
         this.hasCenteredOnLocation = false;
+        this.playerBasesLoaded = false;
         this.systems = {
             cosmicEffects: null,
             geolocation: null,
@@ -216,6 +217,12 @@ class EldritchSanctuaryApp {
     }
 
     loadPlayerBases() {
+        // Prevent duplicate loading
+        if (this.playerBasesLoaded) {
+            console.log('🏗️ Player bases already loaded, skipping');
+            return;
+        }
+        
         // Load player's base if exists
         const playerBase = this.systems.baseSystem.getPlayerBase();
         console.log('🏗️ Loading player base:', playerBase);
@@ -227,11 +234,13 @@ class EldritchSanctuaryApp {
             try {
                 this.systems.mapEngine.addPlayerBaseMarker(playerBase);
                 console.log('🏗️ addPlayerBaseMarker called successfully');
+                this.playerBasesLoaded = true;
             } catch (error) {
                 console.error('🏗️ Error calling addPlayerBaseMarker:', error);
             }
         } else {
             console.log('🏗️ No player base found to load');
+            this.playerBasesLoaded = true;
         }
     }
 
