@@ -2453,6 +2453,177 @@ input[type="range"]::-moz-range-thumb {
     font-weight: bold;
 }
 
+/* Quest System Styles */
+.quest-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.quest-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.quest-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px;
+    margin: 8px 0;
+    background: #2a2a2a;
+    border-radius: 8px;
+    border-left: 4px solid #666;
+    transition: all 0.3s ease;
+}
+
+.quest-item.available {
+    border-left-color: #00ff88;
+}
+
+.quest-item.active {
+    border-left-color: #0088ff;
+}
+
+.quest-item.completed {
+    border-left-color: #ff8800;
+    opacity: 0.8;
+}
+
+.quest-item:hover {
+    background: #3a3a3a;
+    transform: translateX(5px);
+}
+
+.quest-info {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.quest-info h5 {
+    color: #fff;
+    margin: 0 0 8px 0;
+    font-size: 16px;
+}
+
+.quest-info p {
+    color: #ccc;
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.quest-type {
+    display: inline-block;
+    background: #444;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.quest-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.start-quest-btn {
+    background: #00ff88;
+    border: none;
+    color: #000;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.start-quest-btn:hover {
+    background: #00cc66;
+    transform: translateY(-2px);
+}
+
+.quest-objectives {
+    margin-top: 10px;
+}
+
+.objective {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #444;
+    font-size: 13px;
+}
+
+.objective:last-child {
+    border-bottom: none;
+}
+
+.objective.incomplete {
+    color: #888;
+}
+
+.objective.completed {
+    color: #00ff88;
+}
+
+.objective-text {
+    flex: 1;
+}
+
+.objective-progress {
+    color: #00ff88;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+/* Quest Notifications */
+.quest-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #00ff88;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 400px;
+    z-index: 10000;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    animation: questNotificationSlide 0.5s ease-out;
+}
+
+@keyframes questNotificationSlide {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.quest-notification-content h4 {
+    color: #00ff88;
+    margin: 0 0 10px 0;
+    font-size: 18px;
+}
+
+.quest-notification-content p {
+    color: #fff;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
 /* Debug Toggle Button */
 .debug-toggle-button {
     position: fixed;

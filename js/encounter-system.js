@@ -16,6 +16,9 @@ class EncounterSystem {
         // Initialize item system
         this.itemSystem = new ItemSystem();
         
+        // Initialize quest system
+        this.questSystem = new QuestSystem();
+        
         // Player stats - The cosmic horror comedy begins!
         this.playerStats = {
             health: 100,
@@ -227,6 +230,7 @@ class EncounterSystem {
                 <div class="debug-tabs">
                     <button class="debug-tab active" data-tab="encounters">Encounters</button>
                     <button class="debug-tab" data-tab="inventory">Inventory</button>
+                    <button class="debug-tab" data-tab="quests">Quests</button>
                     <button class="debug-tab" data-tab="stats">Stats</button>
                 </div>
                 
@@ -247,6 +251,22 @@ class EncounterSystem {
                     <div class="equipment-section">
                         <h4>⚔️ Equipped Items</h4>
                         <div id="equipped-items" class="equipped-items"></div>
+                    </div>
+                </div>
+                
+                <div id="debug-quests" class="debug-tab-content">
+                    <div class="quest-section">
+                        <h4>📜 Available Quests</h4>
+                        <div id="available-quests" class="quest-list"></div>
+                        <button id="start-main-quest" class="debug-btn">Start Main Quest</button>
+                    </div>
+                    <div class="quest-section">
+                        <h4>🎯 Active Quests</h4>
+                        <div id="active-quests" class="quest-list"></div>
+                    </div>
+                    <div class="quest-section">
+                        <h4>✅ Completed Quests</h4>
+                        <div id="completed-quests" class="quest-list"></div>
                     </div>
                 </div>
                 
@@ -289,9 +309,13 @@ class EncounterSystem {
         document.getElementById('restore-sanity').addEventListener('click', () => this.restoreSanity());
         document.getElementById('add-experience').addEventListener('click', () => this.addExperience(100));
         
+        // Quest debug buttons
+        document.getElementById('start-main-quest').addEventListener('click', () => this.startMainQuest());
+        
         // Initialize displays
         this.updateInventoryDisplay();
         this.updateStatsDisplay();
+        this.updateQuestDisplay();
     }
 
     hideIndividualDebugPanel() {
@@ -324,6 +348,8 @@ class EncounterSystem {
             this.updateInventoryDisplay();
         } else if (tabName === 'stats') {
             this.updateStatsDisplay();
+        } else if (tabName === 'quests') {
+            this.updateQuestDisplay();
         }
     }
 
@@ -461,6 +487,99 @@ class EncounterSystem {
     unequipItem(itemId) {
         this.itemSystem.unequipItem(itemId);
         this.updateInventoryDisplay();
+    }
+
+    // Quest display methods
+    updateQuestDisplay() {
+        this.updateAvailableQuests();
+        this.updateActiveQuests();
+        this.updateCompletedQuests();
+    }
+
+    updateAvailableQuests() {
+        const availableQuests = document.getElementById('available-quests');
+        if (!availableQuests) return;
+
+        availableQuests.innerHTML = '';
+        this.questSystem.getAvailableQuests().forEach(quest => {
+            const questDiv = document.createElement('div');
+            questDiv.className = 'quest-item available';
+            questDiv.innerHTML = `
+                <div class="quest-info">
+                    <h5>${quest.name}</h5>
+                    <p>${quest.description}</p>
+                    <span class="quest-type">${quest.type}</span>
+                </div>
+                <div class="quest-actions">
+                    <button onclick="window.encounterSystem.startQuest('${quest.id}')" class="start-quest-btn">Start Quest</button>
+                </div>
+            `;
+            availableQuests.appendChild(questDiv);
+        });
+    }
+
+    updateActiveQuests() {
+        const activeQuests = document.getElementById('active-quests');
+        if (!activeQuests) return;
+
+        activeQuests.innerHTML = '';
+        this.questSystem.getActiveQuests().forEach(quest => {
+            const questDiv = document.createElement('div');
+            questDiv.className = 'quest-item active';
+            questDiv.innerHTML = `
+                <div class="quest-info">
+                    <h5>${quest.name}</h5>
+                    <p>${quest.description}</p>
+                    <div class="quest-objectives">
+                        ${quest.objectives.map(obj => `
+                            <div class="objective ${obj.status}">
+                                <span class="objective-text">${obj.description}</span>
+                                <span class="objective-progress">${obj.progress}/${obj.maxProgress}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            activeQuests.appendChild(questDiv);
+        });
+    }
+
+    updateCompletedQuests() {
+        const completedQuests = document.getElementById('completed-quests');
+        if (!completedQuests) return;
+
+        completedQuests.innerHTML = '';
+        this.questSystem.getCompletedQuests().forEach(quest => {
+            const questDiv = document.createElement('div');
+            questDiv.className = 'quest-item completed';
+            questDiv.innerHTML = `
+                <div class="quest-info">
+                    <h5>${quest.name}</h5>
+                    <p>${quest.story.completion}</p>
+                    <span class="quest-type">${quest.type}</span>
+                </div>
+            `;
+            completedQuests.appendChild(questDiv);
+        });
+    }
+
+    // Quest action methods
+    startQuest(questId) {
+        this.questSystem.startQuest(questId);
+        this.updateQuestDisplay();
+    }
+
+    startMainQuest() {
+        this.questSystem.startMainQuest();
+        this.updateQuestDisplay();
+    }
+
+    // Update quest progress
+    updateQuestProgress(questId, objectiveId) {
+        if (this.questSystem) {
+            this.questSystem.updateQuestProgress(questId, objectiveId);
+            this.updateQuestDisplay();
+        }
     }
 
     startProximityDetection() {
@@ -1591,6 +1710,9 @@ class EncounterSystem {
         
         // Gain some sanity back from victory
         this.gainSanity(5, `Victory over ${monster.name} restores your cosmic confidence!`);
+        
+        // Update quest progress
+        this.updateQuestProgress('encounter', 'monster');
         
         setTimeout(() => {
             this.hideModal();

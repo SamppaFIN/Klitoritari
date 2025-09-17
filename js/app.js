@@ -127,6 +127,9 @@ class EldritchSanctuaryApp {
         // Initialize item system
         this.systems.itemSystem = new ItemSystem();
         
+        // Initialize quest system
+        this.systems.questSystem = new QuestSystem();
+        
         // Initialize NPC system
         this.systems.npc = new NPCSystem();
         this.systems.npc.init();
