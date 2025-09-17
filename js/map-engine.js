@@ -149,9 +149,12 @@ class MapEngine {
 
             // Add pulsing animation
             this.animatePlayerMarker();
+            
+            console.log('📍 Player marker created at:', latlng);
         } else {
             // Update existing marker
             this.playerMarker.setLatLng(latlng);
+            console.log('📍 Player marker updated to:', latlng);
         }
 
         // Update accuracy circle

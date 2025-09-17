@@ -146,15 +146,17 @@ class BaseSystem {
         }
 
         // Wait for geolocation manager to be available
-        if (!window.geolocationManager) {
+        if (!window.geolocationManager || !window.eldritchApp || !window.eldritchApp.isInitialized) {
             this.showNotification('System still initializing. Please wait a moment and try again.', 'info');
             
             // Retry after a short delay
             setTimeout(() => {
-                if (window.geolocationManager) {
+                if (window.geolocationManager && window.eldritchApp && window.eldritchApp.isInitialized) {
                     this.showBaseEstablishmentModal();
+                } else {
+                    this.showNotification('System not ready. Please refresh the page and try again.', 'error');
                 }
-            }, 1000);
+            }, 2000);
             return;
         }
 
