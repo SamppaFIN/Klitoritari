@@ -489,7 +489,22 @@ class MapEngine {
         // Add click event for debugging
         this.playerBaseMarker.on('click', (e) => {
             console.log('🏗️ Base marker clicked!', e);
+            console.log('🏗️ Event target:', e.target);
+            console.log('🏗️ Event type:', e.type);
         });
+        
+        // Also try mousedown and mouseup events
+        this.playerBaseMarker.on('mousedown', (e) => {
+            console.log('🏗️ Base marker mousedown!', e);
+        });
+        
+        this.playerBaseMarker.on('mouseup', (e) => {
+            console.log('🏗️ Base marker mouseup!', e);
+        });
+        
+        // Check if marker is interactive
+        console.log('🏗️ Base marker interactive?', this.playerBaseMarker.options.interactive);
+        console.log('🏗️ Base marker clickable?', this.playerBaseMarker.options.clickable);
 
         // Create territory circle
         this.createTerritoryCircle(latlng, base.radius);
@@ -571,7 +586,8 @@ class MapEngine {
             weight: 4,
             opacity: 1,
             fillOpacity: 0.2,
-            dashArray: '20, 10'
+            dashArray: '20, 10',
+            interactive: false  // Make it non-interactive so it doesn't capture clicks
         }).addTo(this.map);
     }
 
