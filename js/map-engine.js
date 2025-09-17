@@ -448,22 +448,22 @@ class MapEngine {
         const latlng = [base.lat, base.lng];
         console.log('🏗️ Base marker coordinates:', latlng);
 
-        // Create base marker with star shape
-        const starIcon = L.divIcon({
-            className: 'base-marker',
-            html: this.createStarIcon(),
-            iconSize: [50, 50],
-            iconAnchor: [25, 25]
-        });
-        
-        console.log('🏗️ Creating star icon:', starIcon);
-        console.log('🏗️ Star icon HTML:', this.createStarIcon());
-        
-        this.playerBaseMarker = L.marker(latlng, {
-            icon: starIcon
+        // Create base marker with simple circle first (for testing)
+        this.playerBaseMarker = L.circleMarker(latlng, {
+            radius: 25,
+            fillColor: '#ff0000',
+            color: '#ffffff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.8
         }).addTo(this.map);
         
+        console.log('🏗️ Created simple circle marker for testing');
+        
         console.log('🏗️ Base marker created and added to map:', this.playerBaseMarker);
+        console.log('🏗️ Base marker position:', this.playerBaseMarker.getLatLng());
+        console.log('🏗️ Base marker is on map?', this.map.hasLayer(this.playerBaseMarker));
+        console.log('🏗️ Base marker icon element:', this.playerBaseMarker.getElement());
 
         // Add pulsing animation
         this.animateBaseMarker();
