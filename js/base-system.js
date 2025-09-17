@@ -145,12 +145,24 @@ class BaseSystem {
             return;
         }
 
+        // Debug: Check what's available
+        console.log('🔍 Base establishment check:');
+        console.log('  - geolocationManager:', !!window.geolocationManager);
+        console.log('  - databaseClient:', !!window.databaseClient);
+        console.log('  - databaseClient.isInitialized:', window.databaseClient?.isInitialized);
+        
         // Wait for geolocation manager and database client to be available
         if (!window.geolocationManager || !window.databaseClient || !window.databaseClient.isInitialized) {
+            console.log('❌ System not ready - showing retry notification');
             this.showNotification('System still initializing. Please wait a moment and try again.', 'info');
             
             // Retry after a short delay
             setTimeout(() => {
+                console.log('🔄 Retrying base establishment...');
+                console.log('  - geolocationManager:', !!window.geolocationManager);
+                console.log('  - databaseClient:', !!window.databaseClient);
+                console.log('  - databaseClient.isInitialized:', window.databaseClient?.isInitialized);
+                
                 if (window.geolocationManager && window.databaseClient && window.databaseClient.isInitialized) {
                     this.showBaseEstablishmentModal();
                 } else {
@@ -159,6 +171,8 @@ class BaseSystem {
             }, 2000);
             return;
         }
+        
+        console.log('✅ System ready - proceeding with base establishment');
 
         // Get current location - try multiple approaches
         let currentPosition = null;

@@ -11,7 +11,7 @@ class DatabaseClient {
         this.init();
     }
 
-    async init() {
+    init() {
         try {
             // Check if Supabase is available
             if (typeof supabase !== 'undefined') {
