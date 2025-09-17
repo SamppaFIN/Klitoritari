@@ -81,10 +81,16 @@ class GeolocationManager {
     }
 
     handlePositionUpdate(position) {
+        // Validate position object structure
+        if (!position || !position.coords) {
+            console.error('Invalid position object received:', position);
+            return;
+        }
+
         this.currentPosition = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
-            accuracy: position.coords.accuracy,
+            accuracy: position.coords.accuracy || null,
             timestamp: position.timestamp || Date.now()
         };
 
@@ -206,9 +212,11 @@ class GeolocationManager {
                 this.simulatorPosition.lng += (Math.random() - 0.5) * 0.0005;
                 
                 const simulatedPosition = {
-                    lat: this.simulatorPosition.lat,
-                    lng: this.simulatorPosition.lng,
-                    accuracy: 5 + Math.random() * 10,
+                    coords: {
+                        latitude: this.simulatorPosition.lat,
+                        longitude: this.simulatorPosition.lng,
+                        accuracy: 5 + Math.random() * 10
+                    },
                     timestamp: Date.now()
                 };
                 
