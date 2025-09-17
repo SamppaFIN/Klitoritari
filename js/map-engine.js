@@ -139,12 +139,13 @@ class MapEngine {
         if (!this.playerMarker) {
             // Create player marker
             this.playerMarker = L.circleMarker(latlng, {
-                radius: 8,
-                fillColor: '#00ff88',
+                radius: 12,
+                fillColor: '#00ff00',
                 color: '#ffffff',
-                weight: 2,
+                weight: 4,
                 opacity: 1,
-                fillOpacity: 0.8
+                fillOpacity: 0.9,
+                className: 'player-marker'
             }).addTo(this.map);
 
             // Add pulsing animation
@@ -436,12 +437,13 @@ class MapEngine {
 
         // Create base marker with cosmic styling
         this.playerBaseMarker = L.circleMarker(latlng, {
-            radius: 20,
-            fillColor: '#ff6b35',
+            radius: 25,
+            fillColor: '#ff0000',
             color: '#ffffff',
-            weight: 4,
+            weight: 6,
             opacity: 1,
-            fillOpacity: 0.9
+            fillOpacity: 0.9,
+            className: 'base-marker'
         }).addTo(this.map);
 
         // Add pulsing animation
@@ -484,7 +486,7 @@ class MapEngine {
                 if (scale <= 1) growing = true;
             }
 
-            this.playerBaseMarker.setRadius(20 * scale);
+            this.playerBaseMarker.setRadius(25 * scale);
             
             if (this.playerBaseMarker._map) {
                 requestAnimationFrame(animate);
@@ -503,11 +505,11 @@ class MapEngine {
         // Create territory circle
         this.territoryPolygon = L.circle(center, {
             radius: radius,
-            color: '#ff6b35',
-            weight: 3,
-            opacity: 0.8,
-            fillOpacity: 0.15,
-            dashArray: '15, 10'
+            color: '#ff0000',
+            weight: 4,
+            opacity: 1,
+            fillOpacity: 0.2,
+            dashArray: '20, 10'
         }).addTo(this.map);
     }
 

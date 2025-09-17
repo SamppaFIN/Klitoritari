@@ -677,3 +677,18 @@ body {
     background: var(--cosmic-blue);
     color: var(--cosmic-light);
 }
+
+/* Map marker visibility enhancements */
+.leaflet-interactive {
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.8));
+}
+
+/* Player marker specific styling */
+.player-marker {
+    filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8)) drop-shadow(0 0 20px rgba(0, 255, 0, 0.4));
+}
+
+/* Base marker specific styling */
+.base-marker {
+    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 0, 0, 0.4));
+}
