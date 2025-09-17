@@ -113,9 +113,11 @@ class EldritchSanctuaryApp {
         
         // Set up map ready callback immediately
         this.systems.mapEngine.onMapReady = () => {
+            console.log('🗺️ onMapReady callback triggered!');
             this.loadMysteryZones();
             this.loadPlayerBases();
         };
+        console.log('🗺️ onMapReady callback set:', this.systems.mapEngine.onMapReady);
         
         // Initialize investigation system
         this.systems.investigation = new InvestigationSystem();

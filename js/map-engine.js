@@ -114,8 +114,12 @@ class MapEngine {
         // Map ready event
         this.map.whenReady(() => {
             console.log('🗺️ Map is ready');
+            console.log('🗺️ onMapReady callback exists?', !!this.onMapReady);
             if (this.onMapReady) {
+                console.log('🗺️ Calling onMapReady callback');
                 this.onMapReady();
+            } else {
+                console.log('🗺️ No onMapReady callback to call');
             }
         });
 
