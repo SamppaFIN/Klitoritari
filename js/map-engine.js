@@ -152,9 +152,14 @@ class MapEngine {
             
             console.log('📍 Player marker created at:', latlng);
         } else {
-            // Update existing marker
+            // Update existing marker position
             this.playerMarker.setLatLng(latlng);
-            console.log('📍 Player marker updated to:', latlng);
+            
+            // Ensure marker is still on the map
+            if (!this.map.hasLayer(this.playerMarker)) {
+                console.log('📍 Player marker was removed, re-adding to map');
+                this.playerMarker.addTo(this.map);
+            }
         }
 
         // Update accuracy circle
@@ -431,12 +436,12 @@ class MapEngine {
 
         // Create base marker with cosmic styling
         this.playerBaseMarker = L.circleMarker(latlng, {
-            radius: 15,
-            fillColor: '#00ff88',
+            radius: 20,
+            fillColor: '#ff6b35',
             color: '#ffffff',
-            weight: 3,
+            weight: 4,
             opacity: 1,
-            fillOpacity: 0.8
+            fillOpacity: 0.9
         }).addTo(this.map);
 
         // Add pulsing animation
@@ -479,7 +484,7 @@ class MapEngine {
                 if (scale <= 1) growing = true;
             }
 
-            this.playerBaseMarker.setRadius(15 * scale);
+            this.playerBaseMarker.setRadius(20 * scale);
             
             if (this.playerBaseMarker._map) {
                 requestAnimationFrame(animate);
@@ -498,11 +503,11 @@ class MapEngine {
         // Create territory circle
         this.territoryPolygon = L.circle(center, {
             radius: radius,
-            color: '#00ff88',
-            weight: 2,
-            opacity: 0.6,
-            fillOpacity: 0.1,
-            dashArray: '10, 5'
+            color: '#ff6b35',
+            weight: 3,
+            opacity: 0.8,
+            fillOpacity: 0.15,
+            dashArray: '15, 10'
         }).addTo(this.map);
     }
 
