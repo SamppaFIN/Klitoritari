@@ -13,7 +13,8 @@ class EldritchSanctuaryApp {
             geolocation: null,
             mapEngine: null,
             investigation: null,
-            websocket: null
+            websocket: null,
+            baseSystem: null
         };
     }
 
@@ -117,6 +118,10 @@ class EldritchSanctuaryApp {
         // Initialize WebSocket client
         this.systems.websocket = new WebSocketClient();
         this.systems.websocket.init();
+        
+        // Initialize base system
+        this.systems.baseSystem = new BaseSystem();
+        this.systems.baseSystem.init();
     }
 
     setupSystemIntegration() {
@@ -164,6 +169,17 @@ class EldritchSanctuaryApp {
         // Map Engine ready
         this.systems.mapEngine.onMapReady = () => {
             this.loadMysteryZones();
+            this.loadPlayerBases();
+        };
+
+        // Base System integration
+        this.systems.baseSystem.onBaseEstablished = (base) => {
+            this.systems.mapEngine.addPlayerBaseMarker(base);
+            this.showNotification(`🏗️ Base "${base.name}" established!`, 'success');
+        };
+
+        this.systems.baseSystem.onTerritoryUpdated = (territoryPoints) => {
+            this.systems.mapEngine.updateTerritoryVisualization(territoryPoints);
         };
     }
 
@@ -185,6 +201,14 @@ class EldritchSanctuaryApp {
         const zoneCountElement = document.getElementById('zone-count');
         if (zoneCountElement) {
             zoneCountElement.textContent = zones.length;
+        }
+    }
+
+    loadPlayerBases() {
+        // Load player's base if exists
+        const playerBase = this.systems.baseSystem.getPlayerBase();
+        if (playerBase) {
+            this.systems.mapEngine.addPlayerBaseMarker(playerBase);
         }
     }
 

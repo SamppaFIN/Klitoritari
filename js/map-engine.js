@@ -10,6 +10,8 @@ class MapEngine {
         this.otherPlayerMarkers = new Map();
         this.investigationMarkers = new Map();
         this.mysteryZoneMarkers = new Map();
+        this.playerBaseMarker = null;
+        this.territoryPolygon = null;
         this.isInitialized = false;
         this.onMapReady = null;
         this.onMarkerClick = null;
@@ -413,6 +415,149 @@ class MapEngine {
         }
     }
 
+    // Base marker management
+    addPlayerBaseMarker(base) {
+        if (!this.map) return;
+
+        const latlng = [base.lat, base.lng];
+        
+        // Remove existing base marker
+        if (this.playerBaseMarker) {
+            this.map.removeLayer(this.playerBaseMarker);
+        }
+
+        // Create base marker with cosmic styling
+        this.playerBaseMarker = L.circleMarker(latlng, {
+            radius: 15,
+            fillColor: '#00ff88',
+            color: '#ffffff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 0.8
+        }).addTo(this.map);
+
+        // Add pulsing animation
+        this.animateBaseMarker();
+
+        // Add popup with base info
+        this.playerBaseMarker.bindPopup(`
+            <div class="base-popup">
+                <h4>🏗️ ${base.name}</h4>
+                <div class="base-info">
+                    <div><strong>Owner:</strong> Cosmic Explorer</div>
+                    <div><strong>Established:</strong> ${new Date(base.establishedAt).toLocaleDateString()}</div>
+                    <div><strong>Territory:</strong> ${base.radius}m radius</div>
+                </div>
+                <div class="base-actions">
+                    <button onclick="window.mapEngine.visitBase('${base.id}')" 
+                            class="sacred-button" style="margin-top: 10px; width: 100%;">
+                        Visit Base
+                    </button>
+                </div>
+            </div>
+        `);
+
+        // Create territory circle
+        this.createTerritoryCircle(latlng, base.radius);
+    }
+
+    animateBaseMarker() {
+        if (!this.playerBaseMarker) return;
+
+        let scale = 1;
+        let growing = true;
+
+        const animate = () => {
+            if (growing) {
+                scale += 0.02;
+                if (scale >= 1.3) growing = false;
+            } else {
+                scale -= 0.02;
+                if (scale <= 1) growing = true;
+            }
+
+            this.playerBaseMarker.setRadius(15 * scale);
+            
+            if (this.playerBaseMarker._map) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        animate();
+    }
+
+    createTerritoryCircle(center, radius) {
+        // Remove existing territory circle
+        if (this.territoryPolygon) {
+            this.map.removeLayer(this.territoryPolygon);
+        }
+
+        // Create territory circle
+        this.territoryPolygon = L.circle(center, {
+            radius: radius,
+            color: '#00ff88',
+            weight: 2,
+            opacity: 0.6,
+            fillOpacity: 0.1,
+            dashArray: '10, 5'
+        }).addTo(this.map);
+    }
+
+    updateTerritoryVisualization(territoryPoints) {
+        if (!this.map || territoryPoints.length < 3) return;
+
+        // Remove existing territory polygon
+        if (this.territoryPolygon) {
+            this.map.removeLayer(this.territoryPolygon);
+        }
+
+        // Create polygon from territory points
+        const latLngs = territoryPoints.map(point => [point.lat, point.lng]);
+        
+        this.territoryPolygon = L.polygon(latLngs, {
+            color: '#00ff88',
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.2,
+            fillColor: '#00ff88'
+        }).addTo(this.map);
+
+        // Add pulsing effect to territory
+        this.animateTerritoryPolygon();
+    }
+
+    animateTerritoryPolygon() {
+        if (!this.territoryPolygon) return;
+
+        let opacity = 0.2;
+        let increasing = true;
+
+        const animate = () => {
+            if (increasing) {
+                opacity += 0.01;
+                if (opacity >= 0.4) increasing = false;
+            } else {
+                opacity -= 0.01;
+                if (opacity <= 0.2) increasing = true;
+            }
+
+            this.territoryPolygon.setStyle({
+                fillOpacity: opacity
+            });
+            
+            if (this.territoryPolygon._map) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        animate();
+    }
+
+    visitBase(baseId) {
+        console.log('Visiting base:', baseId);
+        // TODO: Implement base visiting functionality
+    }
+
     // Cleanup
     destroy() {
         if (this.map) {
@@ -424,6 +569,8 @@ class MapEngine {
         this.otherPlayerMarkers.clear();
         this.investigationMarkers.clear();
         this.mysteryZoneMarkers.clear();
+        this.playerBaseMarker = null;
+        this.territoryPolygon = null;
         this.isInitialized = false;
     }
 }

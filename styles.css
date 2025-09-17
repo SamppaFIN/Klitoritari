@@ -483,3 +483,197 @@ body {
     background: var(--cosmic-darker);
     border: 2px solid var(--cosmic-purple);
 }
+
+/* Base System Styles */
+.base-button {
+    background: linear-gradient(45deg, var(--cosmic-green), var(--cosmic-blue));
+    border: 2px solid var(--cosmic-green);
+    animation: basePulse 2s infinite;
+}
+
+@keyframes basePulse {
+    0%, 100% { box-shadow: 0 0 10px var(--cosmic-glow); }
+    50% { box-shadow: 0 0 20px var(--cosmic-green); }
+}
+
+.base-status {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--cosmic-green);
+    margin-bottom: 10px;
+}
+
+.base-stats {
+    margin-bottom: 15px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.stat-label {
+    color: var(--cosmic-light);
+    opacity: 0.8;
+}
+
+.stat-value {
+    color: var(--cosmic-green);
+    font-weight: 600;
+}
+
+.base-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.territory-expansion {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--cosmic-purple);
+}
+
+.expansion-info {
+    margin-bottom: 10px;
+}
+
+.expansion-status {
+    font-size: 0.9rem;
+    color: var(--cosmic-blue);
+    margin-bottom: 8px;
+}
+
+.expansion-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Base Establishment Modal */
+.base-setup-info {
+    margin-bottom: 20px;
+}
+
+.location-confirmation {
+    background: var(--cosmic-darker);
+    border: 1px solid var(--cosmic-purple);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.location-details {
+    margin-top: 10px;
+}
+
+.location-coords, .location-accuracy {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.base-naming {
+    margin: 20px 0;
+}
+
+#base-name-input {
+    width: 100%;
+    padding: 10px;
+    background: var(--cosmic-darker);
+    border: 2px solid var(--cosmic-purple);
+    border-radius: 8px;
+    color: var(--cosmic-light);
+    font-size: 1rem;
+    margin-top: 8px;
+}
+
+#base-name-input:focus {
+    outline: none;
+    border-color: var(--cosmic-green);
+    box-shadow: 0 0 10px var(--cosmic-glow);
+}
+
+.base-name-hint {
+    font-size: 0.8rem;
+    color: var(--cosmic-light);
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.base-territory-info {
+    background: var(--cosmic-darker);
+    border: 1px solid var(--cosmic-blue);
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.territory-details {
+    margin-top: 10px;
+}
+
+.territory-size, .territory-expansion {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+/* Base Popup Styles */
+.base-popup {
+    text-align: center;
+}
+
+.base-popup h4 {
+    color: var(--cosmic-green);
+    margin-bottom: 10px;
+}
+
+.base-info {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+.base-info div {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.base-actions {
+    margin-top: 10px;
+}
+
+/* Base Notifications */
+.base-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    z-index: 3000;
+    box-shadow: 0 0 20px var(--cosmic-glow);
+    backdrop-filter: blur(10px);
+    animation: slideInRight 0.3s ease-out;
+    max-width: 300px;
+}
+
+.base-notification.success {
+    background: var(--cosmic-green);
+    color: var(--cosmic-dark);
+}
+
+.base-notification.error {
+    background: var(--cosmic-red);
+    color: var(--cosmic-light);
+}
+
+.base-notification.warning {
+    background: var(--cosmic-purple);
+    color: var(--cosmic-light);
+}
+
+.base-notification.info {
+    background: var(--cosmic-blue);
+    color: var(--cosmic-light);
+}
