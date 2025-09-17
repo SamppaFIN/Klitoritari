@@ -416,6 +416,9 @@ class BaseSystem {
                     this.onBaseEstablished(this.playerBase);
                 }
 
+                // Show the base panel when first established
+                this.openBasePanel();
+
                 console.log('🏗️ Base established:', this.playerBase);
             } else {
                 throw new Error('Failed to create base in database');
@@ -489,8 +492,8 @@ class BaseSystem {
         if (!basePanel) return;
 
         if (this.playerBase) {
-            // Show base management panel
-            basePanel.classList.remove('hidden');
+            // Don't automatically show panel - let user control it
+            // basePanel.classList.remove('hidden');
             
             // Update base status
             if (baseStatus) {

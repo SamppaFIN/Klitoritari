@@ -514,7 +514,11 @@ class MapEngine {
                 if (scale <= 1) growing = true;
             }
 
-            this.playerBaseMarker.setRadius(25 * scale);
+            // Update star marker scale using CSS transform
+            const starElement = this.playerBaseMarker.getElement();
+            if (starElement) {
+                starElement.style.transform = `scale(${scale})`;
+            }
             
             if (this.playerBaseMarker._map) {
                 requestAnimationFrame(animate);

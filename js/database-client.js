@@ -71,7 +71,7 @@ class DatabaseClient {
 
     // Base management
     async createBase(baseData) {
-        if (!this.isInitialized) {
+        if (!this.isInitialized || !this.supabase) {
             return this.createBaseLocal(baseData);
         }
 
@@ -218,7 +218,7 @@ class DatabaseClient {
 
     // Base activities
     async logBaseActivity(activityData) {
-        if (!this.isInitialized) {
+        if (!this.isInitialized || !this.supabase) {
             return this.logBaseActivityLocal(activityData);
         }
 
