@@ -14,14 +14,21 @@ class UnifiedDebugPanel {
         this.tabs = {
             encounter: { name: '🎭 Encounters', icon: '🎭' },
             chat: { name: '💬 Chat', icon: '💬' },
-            path: { name: '🎨 Path', icon: '🎨' }
+            path: { name: '🎨 Path', icon: '🎨' },
+            quest: { name: '🐙 Quest', icon: '🐙' }
         };
     }
 
     init() {
         this.createPanel();
         this.createToggleButton();
-        this.setupEventListeners();
+        
+        // Delay event listener setup to ensure DOM is ready
+        setTimeout(() => {
+            this.setupEventListeners();
+            this.setupHeaderToggle();
+        }, 100);
+        
         this.loadPanelState();
         this.startStatsUpdate();
         console.log('🔧 Unified debug panel initialized');
@@ -69,6 +76,9 @@ class UnifiedDebugPanel {
                 <div id="path-tab" class="debug-tab-content ${this.currentTab === 'path' ? 'active' : ''}">
                     ${this.createPathTab()}
                 </div>
+                <div id="quest-tab" class="debug-tab-content ${this.currentTab === 'quest' ? 'active' : ''}">
+                    ${this.createQuestTab()}
+                </div>
             </div>
         `;
 
@@ -102,11 +112,83 @@ class UnifiedDebugPanel {
     createEncounterTab() {
         return `
             <div class="debug-section">
+                <h4>👤 Player Stats</h4>
+                <div class="player-stats-display">
+                    <div class="stat-row">
+                        <span>Health: <span id="debug-health">100/100</span></span>
+                        <button id="heal-player" class="debug-btn small">Heal</button>
+                        <button id="damage-player" class="debug-btn small">-10 HP</button>
+                    </div>
+                    <div class="stat-row">
+                        <span>Sanity: <span id="debug-sanity">100/100</span></span>
+                        <button id="restore-sanity" class="debug-btn small">Restore</button>
+                        <button id="lose-sanity" class="debug-btn small">-10 Sanity</button>
+                    </div>
+                    <div class="stat-row">
+                        <span>Distortion: <span id="distortion-status">Active</span></span>
+                        <button id="trigger-distortion" class="debug-btn small">Trigger Effect</button>
+                        <button id="stop-distortion-timer" class="debug-btn small">Stop Timer</button>
+                    </div>
+                    <div class="stat-row">
+                        <span>Steps: <span id="debug-steps">100</span></span>
+                        <button id="add-steps" class="debug-btn small">+50 Steps</button>
+                    </div>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>🧠 Distortion Effects</h4>
+                <div class="distortion-controls">
+                    <button id="test-blur" class="debug-btn small">Test Blur</button>
+                    <button id="test-noise" class="debug-btn small">Test Noise</button>
+                    <button id="test-chromatic" class="debug-btn small">Test Chromatic</button>
+                    <button id="test-vignette" class="debug-btn small">Test Vignette</button>
+                    <button id="test-shake" class="debug-btn small">Test Shake</button>
+                    <button id="test-ghost" class="debug-btn small">Test Ghost</button>
+                    <button id="test-color-shift" class="debug-btn small">Test Color</button>
+                    <button id="test-slime" class="debug-btn small">Test Slime</button>
+                    <button id="test-particles" class="debug-btn small">Test Particles</button>
+                    <button id="test-hallucinations" class="debug-btn small">Test Hallucinations</button>
+                    <button id="test-screen-warp" class="debug-btn small">Test Warp</button>
+                    <button id="test-glitch" class="debug-btn small">Test Glitch</button>
+                    <button id="test-blood" class="debug-btn small">Test Blood</button>
+                    <button id="test-eyes" class="debug-btn small">Test Eyes</button>
+                    <button id="test-all-effects" class="debug-btn small">Test All</button>
+                    <button id="clear-distortions" class="debug-btn small">Clear All</button>
+                </div>
+            </div>
+            <div class="debug-section">
                 <h4>🎭 Encounter Tests</h4>
                 <button id="test-monster" class="debug-btn">Test Monster Encounter</button>
                 <button id="test-poi" class="debug-btn">Test POI Encounter</button>
                 <button id="test-mystery" class="debug-btn">Test Mystery Encounter</button>
-                <button id="add-steps" class="debug-btn">Add 50 Steps</button>
+                <div class="legendary-section">
+                    <h5>⚡ Legendary Encounters</h5>
+                    <button id="test-heavy" class="debug-btn legendary-btn">Test HEVY Encounter</button>
+                    <button id="force-heavy-spawn" class="debug-btn legendary-btn">Force HEVY Spawn</button>
+                    <div class="legendary-info">
+                        <small>HEVY: The Legendary Cosmic Guardian<br>Quest Answer: "love"</small>
+                    </div>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>⚔️ PvP Simulation</h4>
+                <button id="add-other-player" class="debug-btn">Add Other Player</button>
+                <button id="remove-other-players" class="debug-btn">Remove All Players</button>
+                <button id="test-pvp-encounter" class="debug-btn legendary-btn">⚔️ Test PvP Encounter</button>
+                <div class="pvp-stats">
+                    <small>Players: <span id="other-player-count">0</span></small>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>📍 Location Simulation</h4>
+                <div class="toggle-container">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="location-simulator-toggle" class="toggle-input">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Use Simulated Location</span>
+                    </label>
+                </div>
+                <div id="location-mode-status" class="status-indicator">Real GPS</div>
             </div>
             <div class="debug-section">
                 <h4>📊 Encounter Stats</h4>
@@ -180,15 +262,76 @@ class UnifiedDebugPanel {
         `;
     }
 
+    createQuestTab() {
+        return `
+            <div class="debug-section">
+                <h4>🐙 Lovecraftian Quest</h4>
+                <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">
+                    A dark humorous narrative combining H.P. Lovecraft with Terry Pratchett
+                </p>
+                <button id="start-quest" class="debug-btn">Start Quest</button>
+                <button id="start-quest-simulation" class="debug-btn">Start Quest Simulation</button>
+                <button id="reset-quest" class="debug-btn">Reset Quest</button>
+            </div>
+            <div class="debug-section">
+                <h4>📍 Quest Locations</h4>
+                <div class="quest-locations-list">
+                    <div class="quest-location-item">
+                        <strong>1. The Fuming Lake of Despair</strong><br>
+                        <small>61.476173436868, 23.725432936819306</small>
+                    </div>
+                    <div class="quest-location-item">
+                        <strong>2. The Twisted Path of Wrong Turns</strong><br>
+                        <small>61.473611708976755, 23.73287872299121</small>
+                    </div>
+                    <div class="quest-location-item">
+                        <strong>3. The Summit of Madness</strong><br>
+                        <small>61.47307885676524, 23.732106061397662</small>
+                    </div>
+                    <div class="quest-location-item">
+                        <strong>4. The Bridge of Regret</strong><br>
+                        <small>61.47668582005944, 23.730389713506298</small>
+                    </div>
+                    <div class="quest-location-item">
+                        <strong>5. The Lake of Cosmic Horror</strong><br>
+                        <small>61.4778436462739, 23.727063631949118</small>
+                    </div>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>🎮 Quest Controls</h4>
+                <button id="teleport-to-quest-location" class="debug-btn">Teleport to Current Location</button>
+                <button id="show-quest-status" class="debug-btn">Show Quest Status</button>
+            </div>
+        `;
+    }
+
     setupEventListeners() {
+        if (!this.panel) {
+            console.error('🔧 Debug panel not initialized, cannot setup event listeners');
+            return;
+        }
+
         // Panel controls
-        document.getElementById('minimize-debug').addEventListener('click', () => this.toggle());
-        document.getElementById('close-debug').addEventListener('click', () => this.hide());
+        const minimizeBtn = document.getElementById('minimize-debug');
+        const closeBtn = document.getElementById('close-debug');
+        
+        if (minimizeBtn) minimizeBtn.addEventListener('click', () => this.toggle());
+        if (closeBtn) closeBtn.addEventListener('click', () => this.hide());
         
         // Tab switching
-        document.querySelectorAll('.debug-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => this.switchTab(e.target.dataset.tab));
-        });
+        // Add delay to ensure DOM is ready
+        setTimeout(() => {
+            document.querySelectorAll('.debug-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    if (tabName) {
+                        console.log('🔧 Switching to tab:', tabName);
+                        this.switchTab(tabName);
+                    }
+                });
+            });
+        }, 100);
 
         // Drag functionality
         this.panel.addEventListener('mousedown', (e) => this.startDrag(e));
@@ -201,17 +344,96 @@ class UnifiedDebugPanel {
         // Chat tab events
         this.setupChatEvents();
         
+        
         // Path tab events
         this.setupPathEvents();
+        
+        // Quest tab events
+        this.setupQuestEvents();
+        
+        // Header toggle
+        this.setupHeaderToggle();
     }
 
     setupEncounterEvents() {
         if (window.encounterSystem) {
+            // Encounter tests
             document.getElementById('test-monster').addEventListener('click', () => window.encounterSystem.triggerMonsterEncounter());
             document.getElementById('test-poi').addEventListener('click', () => window.encounterSystem.triggerPOIEncounter());
             document.getElementById('test-mystery').addEventListener('click', () => window.encounterSystem.triggerMysteryEncounter());
+            document.getElementById('test-heavy').addEventListener('click', () => window.encounterSystem.testHeavyEncounter());
+            document.getElementById('force-heavy-spawn').addEventListener('click', () => window.encounterSystem.forceHeavySpawn());
             document.getElementById('add-steps').addEventListener('click', () => window.encounterSystem.addSteps(50));
+            
+            // Player stats controls
+            document.getElementById('heal-player').addEventListener('click', () => this.healPlayer());
+            document.getElementById('damage-player').addEventListener('click', () => this.damagePlayer());
+            document.getElementById('restore-sanity').addEventListener('click', () => this.restoreSanity());
+            document.getElementById('lose-sanity').addEventListener('click', () => this.loseSanity());
+            
+            // Distortion controls
+            document.getElementById('trigger-distortion').addEventListener('click', () => this.triggerDistortion());
+            document.getElementById('stop-distortion-timer').addEventListener('click', () => this.stopDistortionTimer());
+            
+            // Distortion effect tests
+            document.getElementById('test-blur').addEventListener('click', () => this.testDistortionEffect('blur'));
+            document.getElementById('test-noise').addEventListener('click', () => this.testDistortionEffect('noise'));
+            document.getElementById('test-chromatic').addEventListener('click', () => this.testDistortionEffect('chromaticAberration'));
+            document.getElementById('test-vignette').addEventListener('click', () => this.testDistortionEffect('vignette'));
+            document.getElementById('test-shake').addEventListener('click', () => this.testDistortionEffect('shake'));
+            document.getElementById('test-ghost').addEventListener('click', () => this.testDistortionEffect('ghostlyShadows'));
+            document.getElementById('test-color-shift').addEventListener('click', () => this.testDistortionEffect('colorShift'));
+            document.getElementById('test-slime').addEventListener('click', () => this.testDistortionEffect('slime'));
+            document.getElementById('test-particles').addEventListener('click', () => this.testDistortionEffect('particles'));
+            document.getElementById('test-hallucinations').addEventListener('click', () => this.testDistortionEffect('hallucinations'));
+            document.getElementById('test-screen-warp').addEventListener('click', () => this.testDistortionEffect('screenWarp'));
+            document.getElementById('test-glitch').addEventListener('click', () => this.testDistortionEffect('glitch'));
+            document.getElementById('test-blood').addEventListener('click', () => this.testDistortionEffect('bloodDrips'));
+            document.getElementById('test-eyes').addEventListener('click', () => this.testDistortionEffect('eyes'));
+            document.getElementById('test-all-effects').addEventListener('click', () => this.testAllDistortionEffects());
+            document.getElementById('clear-distortions').addEventListener('click', () => this.clearAllDistortions());
+        } else {
+            // Show "not implemented" messages if systems aren't available
+            this.setupFallbackEncounterEvents();
         }
+        
+        // PvP simulation controls
+        if (window.otherPlayerSimulation) {
+            document.getElementById('add-other-player').addEventListener('click', () => window.otherPlayerSimulation.addRandomPlayer());
+            document.getElementById('remove-other-players').addEventListener('click', () => window.otherPlayerSimulation.removeAllPlayers());
+            document.getElementById('test-pvp-encounter').addEventListener('click', () => window.otherPlayerSimulation.testPvPEncounter());
+        } else {
+            // Show "not implemented" messages for PvP
+            this.setupFallbackPvPEvents();
+        }
+        
+        // Location simulator toggle
+        const locationToggle = document.getElementById('location-simulator-toggle');
+        if (locationToggle) {
+            locationToggle.addEventListener('change', (e) => this.toggleLocationSimulation(e.target.checked));
+        }
+    }
+
+    setupFallbackEncounterEvents() {
+        document.getElementById('test-monster').addEventListener('click', () => this.showNotImplemented('Test Monster Encounter'));
+        document.getElementById('test-poi').addEventListener('click', () => this.showNotImplemented('Test POI Encounter'));
+        document.getElementById('test-mystery').addEventListener('click', () => this.showNotImplemented('Test Mystery Encounter'));
+        document.getElementById('test-heavy').addEventListener('click', () => this.showNotImplemented('Test HEVY Encounter'));
+        document.getElementById('force-heavy-spawn').addEventListener('click', () => this.showNotImplemented('Force HEVY Spawn'));
+        document.getElementById('add-steps').addEventListener('click', () => this.showNotImplemented('Add Steps'));
+        document.getElementById('heal-player').addEventListener('click', () => this.showNotImplemented('Heal Player'));
+        document.getElementById('damage-player').addEventListener('click', () => this.showNotImplemented('Damage Player'));
+        document.getElementById('restore-sanity').addEventListener('click', () => this.showNotImplemented('Restore Sanity'));
+        document.getElementById('lose-sanity').addEventListener('click', () => this.showNotImplemented('Lose Sanity'));
+        document.getElementById('trigger-distortion').addEventListener('click', () => this.showNotImplemented('Trigger Distortion'));
+        document.getElementById('stop-distortion-timer').addEventListener('click', () => this.showNotImplemented('Stop Distortion Timer'));
+        // Distortion test buttons are handled in setupDistortionEvents()
+    }
+
+    setupFallbackPvPEvents() {
+        document.getElementById('add-other-player').addEventListener('click', () => this.showNotImplemented('Add Other Player'));
+        document.getElementById('remove-other-players').addEventListener('click', () => this.showNotImplemented('Remove All Players'));
+        document.getElementById('test-pvp-encounter').addEventListener('click', () => this.showNotImplemented('Test PvP Encounter'));
     }
 
     setupChatEvents() {
@@ -223,7 +445,20 @@ class UnifiedDebugPanel {
             document.getElementById('reset-npc-positions').addEventListener('click', () => window.npcSystem.resetNPCPositions());
             document.getElementById('toggle-npc-movement').addEventListener('click', () => window.npcSystem.toggleNPCMovement());
             document.getElementById('update-chat-distance').addEventListener('click', () => window.npcSystem.updateChatDistance());
+        } else {
+            // Show "not implemented" messages if systems aren't available
+            this.setupFallbackChatEvents();
         }
+    }
+
+    setupFallbackChatEvents() {
+        document.getElementById('test-chat-aurora').addEventListener('click', () => this.showNotImplemented('Chat with Aurora'));
+        document.getElementById('test-chat-zephyr').addEventListener('click', () => this.showNotImplemented('Chat with Zephyr'));
+        document.getElementById('test-chat-sage').addEventListener('click', () => this.showNotImplemented('Chat with Sage'));
+        document.getElementById('move-npcs-closer').addEventListener('click', () => this.showNotImplemented('Move NPCs Closer'));
+        document.getElementById('reset-npc-positions').addEventListener('click', () => this.showNotImplemented('Reset NPC Positions'));
+        document.getElementById('toggle-npc-movement').addEventListener('click', () => this.showNotImplemented('Toggle NPC Movement'));
+        document.getElementById('update-chat-distance').addEventListener('click', () => this.showNotImplemented('Update Chat Distance'));
     }
 
     setupPathEvents() {
@@ -231,20 +466,24 @@ class UnifiedDebugPanel {
             // Brush size control
             const brushSizeSlider = document.getElementById('brush-size');
             const brushSizeValue = document.getElementById('brush-size-value');
-            brushSizeSlider.addEventListener('input', (e) => {
-                window.pathPaintingSystem.brushSize = (parseInt(e.target.value) / 111000);
-                brushSizeValue.textContent = `${e.target.value}m`;
-                window.pathPaintingSystem.updateDebugInfo();
-            });
+            if (brushSizeSlider && brushSizeValue) {
+                brushSizeSlider.addEventListener('input', (e) => {
+                    window.pathPaintingSystem.brushSize = (parseInt(e.target.value) / 111000);
+                    brushSizeValue.textContent = `${e.target.value}m`;
+                    window.pathPaintingSystem.updateDebugInfo();
+                });
+            }
 
             // Brush opacity control
             const brushOpacitySlider = document.getElementById('brush-opacity');
             const brushOpacityValue = document.getElementById('brush-opacity-value');
-            brushOpacitySlider.addEventListener('input', (e) => {
-                window.pathPaintingSystem.pathOpacity = parseFloat(e.target.value);
-                brushOpacityValue.textContent = e.target.value;
-                window.pathPaintingSystem.updateDebugInfo();
-            });
+            if (brushOpacitySlider && brushOpacityValue) {
+                brushOpacitySlider.addEventListener('input', (e) => {
+                    window.pathPaintingSystem.pathOpacity = parseFloat(e.target.value);
+                    brushOpacityValue.textContent = e.target.value;
+                    window.pathPaintingSystem.updateDebugInfo();
+                });
+            }
 
             // Color palette
             document.querySelectorAll('.color-btn').forEach(btn => {
@@ -257,9 +496,100 @@ class UnifiedDebugPanel {
             });
 
             // Path controls
-            document.getElementById('clear-painted-paths').addEventListener('click', () => window.pathPaintingSystem.clearAllPaths());
-            document.getElementById('export-paths').addEventListener('click', () => window.pathPaintingSystem.exportPaths());
-            document.getElementById('import-paths').addEventListener('click', () => window.pathPaintingSystem.importPaths());
+            const clearPathsBtn = document.getElementById('clear-painted-paths');
+            const exportPathsBtn = document.getElementById('export-paths');
+            const importPathsBtn = document.getElementById('import-paths');
+            
+            if (clearPathsBtn) clearPathsBtn.addEventListener('click', () => window.pathPaintingSystem.clearAllPaths());
+            if (exportPathsBtn) exportPathsBtn.addEventListener('click', () => window.pathPaintingSystem.exportPaths());
+            if (importPathsBtn) importPathsBtn.addEventListener('click', () => window.pathPaintingSystem.importPaths());
+        } else {
+            // Show "not implemented" messages if systems aren't available
+            this.setupFallbackPathEvents();
+        }
+    }
+
+    setupFallbackPathEvents() {
+        const clearPathsBtn = document.getElementById('clear-painted-paths');
+        const exportPathsBtn = document.getElementById('export-paths');
+        const importPathsBtn = document.getElementById('import-paths');
+        
+        if (clearPathsBtn) clearPathsBtn.addEventListener('click', () => this.showNotImplemented('Clear Painted Paths'));
+        if (exportPathsBtn) exportPathsBtn.addEventListener('click', () => this.showNotImplemented('Export Paths'));
+        if (importPathsBtn) importPathsBtn.addEventListener('click', () => this.showNotImplemented('Import Paths'));
+    }
+
+    setupQuestEvents() {
+        if (window.lovecraftianQuest) {
+            // Quest controls
+            document.getElementById('start-quest').addEventListener('click', () => window.lovecraftianQuest.startQuest());
+            document.getElementById('start-quest-simulation').addEventListener('click', () => {
+                console.log('🐙 Quest simulation button clicked - quests now trigger by proximity to markers');
+                alert('🐙 Quest simulation disabled. Quests now trigger when you approach quest markers within 50m!');
+            });
+            document.getElementById('reset-quest').addEventListener('click', () => window.lovecraftianQuest.resetQuest());
+            document.getElementById('teleport-to-quest-location').addEventListener('click', () => this.teleportToCurrentQuestLocation());
+            document.getElementById('show-quest-status').addEventListener('click', () => this.showQuestStatus());
+        } else {
+            // Show "not implemented" messages if quest system isn't available
+            this.setupFallbackQuestEvents();
+        }
+    }
+
+    setupFallbackQuestEvents() {
+        const startQuestBtn = document.getElementById('start-quest');
+        const startSimulationBtn = document.getElementById('start-quest-simulation');
+        const resetQuestBtn = document.getElementById('reset-quest');
+        const teleportBtn = document.getElementById('teleport-to-quest-location');
+        const statusBtn = document.getElementById('show-quest-status');
+        
+        if (startQuestBtn) startQuestBtn.addEventListener('click', () => this.showNotImplemented('Start Quest'));
+        if (startSimulationBtn) startSimulationBtn.addEventListener('click', () => this.showNotImplemented('Start Quest Simulation'));
+        if (resetQuestBtn) resetQuestBtn.addEventListener('click', () => this.showNotImplemented('Reset Quest'));
+        if (teleportBtn) teleportBtn.addEventListener('click', () => this.showNotImplemented('Teleport to Quest Location'));
+        if (statusBtn) statusBtn.addEventListener('click', () => this.showNotImplemented('Show Quest Status'));
+    }
+
+    teleportToCurrentQuestLocation() {
+        if (window.lovecraftianQuest && window.mapEngine) {
+            const currentStep = window.lovecraftianQuest.currentQuestStep;
+            const location = window.lovecraftianQuest.questLocations[currentStep];
+            if (location) {
+                window.mapEngine.map.setView([location.lat, location.lng], 18);
+                console.log(`🐙 Teleported to quest location: ${location.name}`);
+            }
+        }
+    }
+
+    showQuestStatus() {
+        if (window.lovecraftianQuest) {
+            const status = {
+                active: window.lovecraftianQuest.questActive,
+                currentStep: window.lovecraftianQuest.currentQuestStep,
+                totalSteps: window.lovecraftianQuest.questLocations.length,
+                health: window.lovecraftianQuest.playerStats.health,
+                sanity: window.lovecraftianQuest.playerStats.sanity,
+                items: window.lovecraftianQuest.playerStats.items
+            };
+            
+            alert(`🐙 Quest Status:
+Active: ${status.active}
+Current Step: ${status.currentStep + 1}/${status.totalSteps}
+Health: ${status.health}
+Sanity: ${status.sanity}
+Items: ${status.items.join(', ') || 'None'}`);
+        }
+    }
+
+    showNotImplemented(feature) {
+        console.log(`🚧 Feature not implemented: ${feature}`);
+        alert(`🚧 Feature not implemented: ${feature}\n\nThis feature is not yet available in the current version.`);
+    }
+
+    setupHeaderToggle() {
+        const headerToggle = document.getElementById('debug-toggle-header');
+        if (headerToggle) {
+            headerToggle.addEventListener('click', () => this.toggle());
         }
     }
 
@@ -268,13 +598,21 @@ class UnifiedDebugPanel {
         document.querySelectorAll('.debug-tab').forEach(tab => {
             tab.classList.remove('active');
         });
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        
+        const activeTabButton = document.querySelector(`[data-tab="${tabName}"]`);
+        if (activeTabButton) {
+            activeTabButton.classList.add('active');
+        }
 
         // Update tab content
         document.querySelectorAll('.debug-tab-content').forEach(content => {
             content.classList.remove('active');
         });
-        document.getElementById(`${tabName}-tab`).classList.add('active');
+        
+        const activeTabContent = document.getElementById(`${tabName}-tab`);
+        if (activeTabContent) {
+            activeTabContent.classList.add('active');
+        }
 
         this.currentTab = tabName;
         this.savePanelState();
@@ -324,13 +662,220 @@ class UnifiedDebugPanel {
     show() {
         this.panel.classList.remove('hidden');
         this.isVisible = true;
+        this.updateHeaderButtonState();
         this.savePanelState();
     }
 
     hide() {
         this.panel.classList.add('hidden');
         this.isVisible = false;
+        this.updateHeaderButtonState();
         this.savePanelState();
+    }
+
+    updateHeaderButtonState() {
+        const headerToggle = document.getElementById('debug-toggle-header');
+        if (headerToggle) {
+            if (this.isVisible) {
+                headerToggle.classList.add('active');
+            } else {
+                headerToggle.classList.remove('active');
+            }
+        }
+    }
+
+    // Player stats control methods
+    healPlayer() {
+        if (window.encounterSystem) {
+            window.encounterSystem.playerStats.health = window.encounterSystem.playerStats.maxHealth;
+            window.encounterSystem.updateHealthBars();
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player healed to full health');
+        }
+    }
+
+    damagePlayer() {
+        if (window.encounterSystem) {
+            window.encounterSystem.loseHealth(10, 'Debug damage');
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player took 10 damage');
+        }
+    }
+
+    restoreSanity() {
+        if (window.encounterSystem) {
+            window.encounterSystem.playerStats.sanity = window.encounterSystem.playerStats.maxSanity;
+            window.encounterSystem.updateHealthBars();
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player sanity restored to full');
+        }
+    }
+
+    loseSanity() {
+        if (window.encounterSystem) {
+            window.encounterSystem.loseSanity(10, 'Debug sanity loss');
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player lost 10 sanity');
+        }
+    }
+    
+    triggerDistortion() {
+        if (window.sanityDistortion) {
+            window.sanityDistortion.triggerManualDistortion();
+            console.log('🧠 Manual distortion effect triggered');
+        } else {
+            console.log('🧠 Sanity distortion system not available');
+        }
+    }
+    
+    stopDistortionTimer() {
+        if (window.sanityDistortion) {
+            window.sanityDistortion.stopTimer();
+            const statusElement = document.getElementById('distortion-status');
+            if (statusElement) {
+                statusElement.textContent = 'Stopped';
+                statusElement.style.color = '#ff6b6b';
+            }
+            console.log('🧠 Distortion timer stopped');
+        } else {
+            console.log('🧠 Sanity distortion system not available');
+        }
+    }
+    
+    testDistortionEffect(effectType) {
+        if (window.sanityDistortion) {
+            console.log(`🧠 Testing ${effectType} distortion effect`);
+            
+            // Set the specific effect with high intensity
+            window.sanityDistortion.distortionEffects[effectType] = 0.8;
+            
+            // Make canvas visible for testing
+            window.sanityDistortion.makeCanvasVisible();
+            
+            // Add specific effects for certain types
+            if (effectType === 'ghostlyShadows') {
+                for (let i = 0; i < 3; i++) {
+                    window.sanityDistortion.addRandomGhostlyShadow();
+                }
+            } else if (effectType === 'slime') {
+                for (let i = 0; i < 5; i++) {
+                    window.sanityDistortion.addRandomSlimeDrop();
+                }
+            } else if (effectType === 'particles') {
+                for (let i = 0; i < 15; i++) {
+                    window.sanityDistortion.addRandomParticle();
+                }
+            } else if (effectType === 'hallucinations') {
+                for (let i = 0; i < 2; i++) {
+                    window.sanityDistortion.addRandomHallucination();
+                }
+            } else if (effectType === 'bloodDrips') {
+                for (let i = 0; i < 4; i++) {
+                    window.sanityDistortion.addRandomBloodDrip();
+                }
+            } else if (effectType === 'eyes') {
+                for (let i = 0; i < 2; i++) {
+                    window.sanityDistortion.addRandomEye();
+                }
+            }
+            
+            // Clear the effect after 3 seconds
+            setTimeout(() => {
+                window.sanityDistortion.distortionEffects[effectType] = 0;
+                // Reset canvas opacity based on current sanity
+                if (window.sanityDistortion.canvas) {
+                    const sanity = window.encounterSystem ? window.encounterSystem.playerStats.sanity : 100;
+                    const opacity = sanity < 100 ? 0.3 + (1 - sanity / 100) * 0.7 : 0;
+                    window.sanityDistortion.canvas.style.opacity = opacity;
+                }
+                console.log(`🧠 ${effectType} distortion effect cleared`);
+            }, 3000);
+            
+        } else {
+            console.log('🧠 Sanity distortion system not available');
+        }
+    }
+    
+    testAllDistortionEffects() {
+        if (window.sanityDistortion) {
+            console.log('🧠 Testing all distortion effects');
+            
+            // Make canvas visible
+            window.sanityDistortion.makeCanvasVisible();
+            
+            // Set all effects with moderate intensity
+            const effects = ['blur', 'noise', 'chromaticAberration', 'vignette', 'shake', 'colorShift', 
+                           'slime', 'particles', 'hallucinations', 'screenWarp', 'glitch', 'bloodDrips', 'eyes'];
+            effects.forEach(effect => {
+                window.sanityDistortion.distortionEffects[effect] = 0.5;
+            });
+            
+            // Add multiple effects for dramatic testing
+            for (let i = 0; i < 3; i++) {
+                window.sanityDistortion.addRandomGhostlyShadow();
+            }
+            for (let i = 0; i < 5; i++) {
+                window.sanityDistortion.addRandomSlimeDrop();
+            }
+            for (let i = 0; i < 10; i++) {
+                window.sanityDistortion.addRandomParticle();
+            }
+            for (let i = 0; i < 2; i++) {
+                window.sanityDistortion.addRandomHallucination();
+            }
+            for (let i = 0; i < 3; i++) {
+                window.sanityDistortion.addRandomBloodDrip();
+            }
+            for (let i = 0; i < 2; i++) {
+                window.sanityDistortion.addRandomEye();
+            }
+            
+            // Clear all effects after 5 seconds
+            setTimeout(() => {
+                this.clearAllDistortions();
+                console.log('🧠 All distortion effects cleared');
+            }, 5000);
+            
+        } else {
+            console.log('🧠 Sanity distortion system not available');
+        }
+    }
+    
+    clearAllDistortions() {
+        if (window.sanityDistortion) {
+            console.log('🧠 Clearing all distortion effects');
+            
+            // Reset all distortion effects to 0
+            Object.keys(window.sanityDistortion.distortionEffects).forEach(effect => {
+                window.sanityDistortion.distortionEffects[effect] = 0;
+            });
+            
+            // Clear ghostly shadows
+            window.sanityDistortion.ghostlyShadows = [];
+            
+            console.log('🧠 All distortion effects cleared');
+        } else {
+            console.log('🧠 Sanity distortion system not available');
+        }
+    }
+    
+
+    updatePlayerStatsDisplay() {
+        if (window.encounterSystem) {
+            const healthElement = document.getElementById('debug-health');
+            const sanityElement = document.getElementById('debug-sanity');
+            const stepsElement = document.getElementById('debug-steps');
+            
+            if (healthElement) {
+                healthElement.textContent = `${Math.floor(window.encounterSystem.playerStats.health)}/${Math.floor(window.encounterSystem.playerStats.maxHealth)}`;
+            }
+            if (sanityElement) {
+                sanityElement.textContent = `${Math.floor(window.encounterSystem.playerStats.sanity)}/${Math.floor(window.encounterSystem.playerStats.maxSanity)}`;
+            }
+            if (stepsElement) {
+                stepsElement.textContent = Math.floor(window.encounterSystem.playerStats.steps);
+            }
+        }
     }
 
     savePanelState() {
@@ -363,6 +908,28 @@ class UnifiedDebugPanel {
         }
     }
 
+    toggleLocationSimulation(enableSimulation) {
+        if (window.geolocationManager) {
+            if (enableSimulation) {
+                window.geolocationManager.enableSimulator();
+                this.updateLocationModeStatus('Simulated GPS');
+                console.log('🔧 Location simulation enabled');
+            } else {
+                window.geolocationManager.disableSimulator();
+                this.updateLocationModeStatus('Real GPS');
+                console.log('🔧 Location simulation disabled');
+            }
+        }
+    }
+
+    updateLocationModeStatus(mode) {
+        const statusElement = document.getElementById('location-mode-status');
+        if (statusElement) {
+            statusElement.textContent = mode;
+            statusElement.className = `status-indicator ${mode.toLowerCase().includes('simulated') ? 'simulated' : 'real'}`;
+        }
+    }
+
     updateStats() {
         // Update encounter stats
         if (window.encounterSystem) {
@@ -370,6 +937,9 @@ class UnifiedDebugPanel {
             if (encounterStats) {
                 encounterStats.textContent = `Steps: ${window.encounterSystem.playerSteps || 0} | Encounters: ${window.encounterSystem.encounters?.size || 0}`;
             }
+            
+            // Update player stats display
+            this.updatePlayerStatsDisplay();
         }
 
         // Update chat stats
@@ -402,6 +972,7 @@ class UnifiedDebugPanel {
             this.updateStats();
         }, 2000);
     }
+
 
     destroy() {
         if (this.panel) {

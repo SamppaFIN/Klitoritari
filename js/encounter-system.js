@@ -67,6 +67,9 @@ class EncounterSystem {
         // Story database
         this.stories = this.initializeStories();
         this.npcBackstories = this.initializeNPCBackstories();
+        
+        // Legendary encounters
+        this.legendaryEncounters = this.initializeLegendaryEncounters();
     }
 
     init() {
@@ -79,15 +82,13 @@ class EncounterSystem {
         this.addSteps(100);
         console.log('🎭 Added 100 initial steps for testing');
         
-        // Create debug panel (visible for testing)
-        this.createDebugPanel();
-        // Don't hide the panel - keep it visible for testing
+        // Debug panel disabled - using unified debug console instead
+        // this.createDebugPanel();
     }
 
     setupUI() {
         // Create encounter UI elements
         this.createEncounterModal();
-        this.createStepCounter();
         this.createRewardsPanel();
     }
 
@@ -173,23 +174,6 @@ class EncounterSystem {
         document.getElementById('skip-puzzle').addEventListener('click', () => this.skipPuzzle());
     }
 
-    createStepCounter() {
-        const existingCounter = document.getElementById('step-counter');
-        if (existingCounter) {
-            existingCounter.remove();
-        }
-
-        const counter = document.createElement('div');
-        counter.id = 'step-counter';
-        counter.className = 'step-counter';
-        counter.innerHTML = `
-            <div class="step-icon">👣</div>
-            <div class="step-value">${this.playerSteps}</div>
-            <div class="step-label">Steps</div>
-        `;
-        
-        document.body.appendChild(counter);
-    }
 
     createRewardsPanel() {
         const existingPanel = document.getElementById('rewards-panel');
@@ -393,6 +377,9 @@ class EncounterSystem {
         this.checkPOIProximity(playerPos);
         this.checkMysteryProximity(playerPos);
         
+        // Check for legendary encounters
+        this.checkLegendaryEncounters(playerPos);
+        
         // Check for proximity warnings (within 100m)
         this.checkProximityWarnings(playerPos);
     }
@@ -467,6 +454,222 @@ class EncounterSystem {
                 this.startMysteryEncounter(mystery);
             }
         });
+    }
+
+    checkLegendaryEncounters(playerPos) {
+        // Check for legendary encounters based on spawn chance
+        Object.values(this.legendaryEncounters).forEach(encounter => {
+            if (Math.random() < encounter.spawnChance) {
+                console.log('⚡ Legendary encounter chance triggered!');
+                this.startLegendaryEncounter(encounter);
+            }
+        });
+    }
+
+    // Test function to trigger HEVY encounter (for testing purposes)
+    testHeavyEncounter() {
+        console.log('⚡ Testing HEVY encounter...');
+        const heavy = this.legendaryEncounters.heavy;
+        if (heavy) {
+            this.startLegendaryEncounter(heavy);
+        } else {
+            console.error('HEVY encounter not found!');
+        }
+    }
+
+    // Force HEVY to spawn at current location (for testing)
+    forceHeavySpawn() {
+        console.log('⚡ Forcing HEVY spawn at current location...');
+        const heavy = this.legendaryEncounters.heavy;
+        if (heavy) {
+            // Temporarily increase spawn chance to 100%
+            const originalChance = heavy.spawnChance;
+            heavy.spawnChance = 1.0;
+            
+            // Trigger the encounter
+            this.startLegendaryEncounter(heavy);
+            
+            // Restore original spawn chance
+            heavy.spawnChance = originalChance;
+        } else {
+            console.error('HEVY encounter not found!');
+        }
+    }
+
+    startLegendaryEncounter(encounter) {
+        console.log(`⚡ Legendary encounter: ${encounter.name} appears!`);
+        
+        // Create special visual effects
+        if (window.cosmicEffects) {
+            const screenX = window.innerWidth / 2;
+            const screenY = window.innerHeight / 2;
+            window.cosmicEffects.createEnergyBurst(screenX, screenY, 2.0);
+            
+            // Create multiple energy bursts for dramatic effect
+            setTimeout(() => window.cosmicEffects.createEnergyBurst(screenX - 100, screenY - 100, 1.5), 500);
+            setTimeout(() => window.cosmicEffects.createEnergyBurst(screenX + 100, screenY + 100, 1.5), 1000);
+        }
+        
+        this.showLegendaryModal(encounter);
+    }
+
+    showLegendaryModal(encounter) {
+        // Remove existing modal if it exists
+        const existingModal = document.getElementById('legendary-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        const modal = document.createElement('div');
+        modal.id = 'legendary-modal';
+        modal.className = 'encounter-modal';
+        modal.innerHTML = `
+            <div class="encounter-content legendary-encounter">
+                <div class="encounter-header legendary-header">
+                    <h2>${encounter.emoji} ${encounter.name}</h2>
+                    <p class="legendary-title">${encounter.title}</p>
+                    <button class="close-btn" onclick="this.closest('.encounter-modal').remove()">×</button>
+                </div>
+                <div class="legendary-dialogue">
+                    <div class="legendary-text">
+                        <p>${encounter.dialogue.greeting}</p>
+                        <p class="quest-question">${encounter.quest.question}</p>
+                    </div>
+                    <div class="quest-answer-section">
+                        <input type="text" id="quest-answer" placeholder="Your answer..." class="quest-input">
+                        <button onclick="window.encounterSystem.submitQuestAnswer('heavy')" class="quest-submit-btn">Submit Answer</button>
+                    </div>
+                    <div class="quest-hints">
+                        <button onclick="window.encounterSystem.showQuestHint('heavy')" class="hint-btn">Need a hint?</button>
+                        <div id="hint-display" class="hint-display hidden"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        this.currentLegendaryEncounter = encounter;
+        this.currentHintIndex = 0;
+    }
+
+    submitQuestAnswer(encounterName) {
+        const answerInput = document.getElementById('quest-answer');
+        const answer = answerInput.value.toLowerCase().trim();
+        
+        // Try both exact name and lowercase lookup
+        let encounter = this.legendaryEncounters[encounterName.toLowerCase()];
+        if (!encounter) {
+            encounter = this.legendaryEncounters[encounterName];
+        }
+        
+        if (!encounter) {
+            console.error('Encounter not found:', encounterName);
+            console.log('Available encounters:', Object.keys(this.legendaryEncounters));
+            return;
+        }
+
+        const isCorrect = answer === encounter.quest.correctAnswer.toLowerCase();
+        
+        if (isCorrect) {
+            this.handleCorrectAnswer(encounter);
+        } else {
+            this.handleIncorrectAnswer(encounter);
+        }
+    }
+
+    handleCorrectAnswer(encounter) {
+        const modal = document.getElementById('legendary-modal');
+        const dialogueDiv = modal.querySelector('.legendary-dialogue');
+        
+        dialogueDiv.innerHTML = `
+            <div class="legendary-text success">
+                <p>${encounter.dialogue.correct}</p>
+                <p>${encounter.dialogue.farewell}</p>
+            </div>
+            <div class="quest-rewards">
+                <h3>🌟 Rewards Earned:</h3>
+                <p>+${encounter.quest.rewards.experience} Experience</p>
+                <p>+${encounter.quest.rewards.steps} Steps</p>
+                <p>+${encounter.quest.rewards.items.join(', ')}</p>
+                <p>Title: ${encounter.quest.rewards.title}</p>
+            </div>
+            <button onclick="this.closest('.encounter-modal').remove()" class="quest-close-btn">Continue Your Journey</button>
+        `;
+
+        // Apply rewards
+        this.playerStats.experience += encounter.quest.rewards.experience;
+        this.playerStats.steps += encounter.quest.rewards.steps;
+        
+        // Add items to inventory (if item system is available)
+        if (window.itemSystem) {
+            encounter.quest.rewards.items.forEach(item => {
+                window.itemSystem.addToInventory(item, 1);
+            });
+        }
+
+        // Update UI
+        this.updateHealthBars();
+        
+        // Create celebration effects
+        if (window.cosmicEffects) {
+            const screenX = window.innerWidth / 2;
+            const screenY = window.innerHeight / 2;
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    window.cosmicEffects.createEnergyBurst(
+                        screenX + (Math.random() - 0.5) * 200,
+                        screenY + (Math.random() - 0.5) * 200,
+                        1.0
+                    );
+                }, i * 200);
+            }
+        }
+
+        console.log('⚡ Quest completed successfully!');
+    }
+
+    handleIncorrectAnswer(encounter) {
+        const modal = document.getElementById('legendary-modal');
+        const dialogueDiv = modal.querySelector('.legendary-dialogue');
+        
+        dialogueDiv.innerHTML = `
+            <div class="legendary-text incorrect">
+                <p>${encounter.dialogue.incorrect}</p>
+                <p>The cosmic guardian fades away, but you sense they will return when you are ready...</p>
+            </div>
+            <button onclick="this.closest('.encounter-modal').remove()" class="quest-close-btn">Continue Your Journey</button>
+        `;
+
+        console.log('⚡ Quest answer was incorrect');
+    }
+
+    showQuestHint(encounterName) {
+        // Try both exact name and lowercase lookup
+        let encounter = this.legendaryEncounters[encounterName.toLowerCase()];
+        if (!encounter) {
+            encounter = this.legendaryEncounters[encounterName];
+        }
+        
+        if (!encounter) {
+            console.error('Encounter not found for hint:', encounterName);
+            console.log('Available encounters:', Object.keys(this.legendaryEncounters));
+            return;
+        }
+        
+        const hintDisplay = document.getElementById('hint-display');
+        if (!hintDisplay) {
+            console.error('Hint display element not found');
+            return;
+        }
+        
+        if (this.currentHintIndex < encounter.quest.hints.length) {
+            const hint = encounter.quest.hints[this.currentHintIndex];
+            hintDisplay.innerHTML = `<p class="hint-text">💡 Hint: ${hint}</p>`;
+            hintDisplay.classList.remove('hidden');
+            this.currentHintIndex++;
+        } else {
+            hintDisplay.innerHTML = `<p class="hint-text">No more hints available. Trust your cosmic intuition!</p>`;
+        }
     }
 
     checkProximityWarnings(playerPos) {
@@ -591,6 +794,13 @@ class EncounterSystem {
     startMysteryEncounter(mystery) {
         console.log('🔍 Mystery encounter started');
         
+        // Check if this is a quest marker
+        if (mystery.isQuestMarker) {
+            console.log('🐙 Quest marker detected, starting quest system');
+            this.startQuestEncounter(mystery);
+            return;
+        }
+        
         this.activeEncounter = {
             type: this.encounterTypes.MYSTERY,
             data: mystery
@@ -598,6 +808,17 @@ class EncounterSystem {
         
         this.showEncounterModal();
         this.showMysteryCutscene(mystery);
+    }
+    
+    startQuestEncounter(questMarker) {
+        console.log('🐙 Starting quest encounter for marker:', questMarker.questIndex);
+        
+        if (window.lovecraftianQuest) {
+            // Start quest from the specific location
+            window.lovecraftianQuest.startQuestFromLocation(questMarker.questIndex);
+        } else {
+            console.error('🐙 Lovecraftian quest system not available');
+        }
     }
 
     showMonsterCutscene(monster) {
@@ -907,11 +1128,6 @@ class EncounterSystem {
     }
 
     updateStepCounter() {
-        const counter = document.getElementById('step-counter');
-        if (counter) {
-            counter.querySelector('.step-value').textContent = this.playerSteps;
-        }
-        
         // Sync with player stats and check for death
         this.playerStats.steps = this.playerSteps;
         this.checkPlayerDeath();
@@ -1082,24 +1298,250 @@ class EncounterSystem {
 
     // Debug methods for testing
     triggerMonsterEncounter() {
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine.monsters.length > 0) {
+        console.log('🎭 Triggering monster encounter...');
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.monsters.length > 0) {
             const monster = window.eldritchApp.systems.mapEngine.monsters[0];
             this.startMonsterEncounter(monster);
+        } else {
+            console.log('🎭 No monsters available, creating test monster...');
+            // Create a test monster for demonstration
+            const testMonster = {
+                id: 'test_monster',
+                name: 'Test Shadow Stalker',
+                type: 'shadowStalker',
+                health: 50,
+                maxHealth: 50,
+                attack: 12,
+                defense: 8,
+                experience: 25
+            };
+            this.startMonsterEncounter(testMonster);
         }
     }
 
     triggerPOIEncounter() {
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine.pointsOfInterest.length > 0) {
+        console.log('🎭 Triggering POI encounter...');
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.pointsOfInterest.length > 0) {
             const poi = window.eldritchApp.systems.mapEngine.pointsOfInterest[0];
             this.startPOIEncounter(poi);
+        } else {
+            console.log('🎭 No POIs available, creating test POI...');
+            // Create a test POI for demonstration
+            const testPOI = {
+                id: 'test_poi',
+                name: 'Test Ancient Ruins',
+                type: 'ancientRuins',
+                description: 'Mysterious ruins that pulse with cosmic energy'
+            };
+            this.startPOIEncounter(testPOI);
         }
     }
 
     triggerMysteryEncounter() {
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.size > 0) {
+        console.log('🎭 Triggering mystery encounter...');
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.size > 0) {
             const mystery = Array.from(window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.values())[0];
             this.startMysteryEncounter(mystery);
+        } else {
+            console.log('🎭 No mysteries available, creating test mystery...');
+            // Create a test mystery for demonstration
+            const testMystery = {
+                id: 'test_mystery',
+                name: 'Test Cosmic Rift',
+                type: 'cosmicRift',
+                description: 'A swirling portal to another dimension'
+            };
+            this.startMysteryEncounter(testMystery);
         }
+    }
+
+    triggerPvPCombat(otherPlayer) {
+        console.log(`⚔️ Starting PvP combat with ${otherPlayer.name}!`);
+        
+        // Create PvP combat encounter
+        const pvpEncounter = {
+            id: `pvp_${otherPlayer.id}`,
+            name: otherPlayer.name,
+            type: 'pvp',
+            health: otherPlayer.health,
+            maxHealth: otherPlayer.maxHealth,
+            attack: 10 + (otherPlayer.level * 2),
+            defense: 8 + otherPlayer.level,
+            level: otherPlayer.level,
+            isHostile: otherPlayer.isHostile,
+            emoji: otherPlayer.emoji,
+            color: otherPlayer.color
+        };
+        
+        this.startPvPCombat(pvpEncounter);
+    }
+
+    startPvPCombat(pvpEncounter) {
+        this.showModal();
+        this.encounterType = 'pvp';
+        
+        const modal = document.getElementById('encounter-modal');
+        modal.innerHTML = `
+            <div class="encounter-content pvp-combat">
+                <div class="encounter-header pvp-combat-header">
+                    <h3>⚔️ PvP Combat: ${pvpEncounter.emoji} ${pvpEncounter.name}</h3>
+                    <p class="player-level">Level ${pvpEncounter.level} ${pvpEncounter.isHostile ? 'Hostile' : 'Friendly'} Player</p>
+                    <button class="close-btn" onclick="window.encounterSystem.hideModal()">×</button>
+                </div>
+                <div class="combat-interface">
+                    <div class="combat-stats">
+                        <div class="player-stats">
+                            <h4>You</h4>
+                            <div class="health-bar">
+                                <div class="health-fill" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
+                            </div>
+                            <span>${this.playerStats.health}/${this.playerStats.maxHealth}</span>
+                        </div>
+                        <div class="vs-indicator">VS</div>
+                        <div class="enemy-stats">
+                            <h4>${pvpEncounter.name}</h4>
+                            <div class="health-bar">
+                                <div class="health-fill" style="width: ${(pvpEncounter.health / pvpEncounter.maxHealth) * 100}%"></div>
+                            </div>
+                            <span>${pvpEncounter.health}/${pvpEncounter.maxHealth}</span>
+                        </div>
+                    </div>
+                    <div class="combat-actions">
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpAttack('${pvpEncounter.id}')">⚔️ Attack</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpDefend('${pvpEncounter.id}')">🛡️ Defend</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpFlee('${pvpEncounter.id}')">🏃 Flee</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpUseItem('${pvpEncounter.id}')">🧪 Use Item</button>
+                    </div>
+                    <div id="battle-log" class="battle-log"></div>
+                </div>
+            </div>
+        `;
+        
+        this.activeEncounter = pvpEncounter.id;
+        this.encounters.set(pvpEncounter.id, pvpEncounter);
+        this.playerTurn = true;
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML = `<div class="log-entry">⚔️ PvP combat begins! You face ${pvpEncounter.name} in battle!</div>`;
+    }
+
+    pvpAttack(enemyId) {
+        if (!this.playerTurn) return;
+        
+        const enemy = this.encounters.get(enemyId);
+        if (!enemy) return;
+        
+        const attackRoll = this.rollDice(20, this.playerStats.attack);
+        const defenseRoll = this.rollDice(20, enemy.defense);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You attack ${enemy.name}! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
+        log.innerHTML += `<div class="log-entry">${enemy.name} defends! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
+        
+        if (attackRoll.total > defenseRoll.total) {
+            const damage = this.rollDice(8, this.playerStats.attack);
+            enemy.health -= damage.total;
+            log.innerHTML += `<div class="log-entry success">Hit! You deal ${damage.total} damage to ${enemy.name}!</div>`;
+            
+            if (enemy.health <= 0) {
+                this.pvpVictory(enemy);
+                return;
+            }
+        } else {
+            log.innerHTML += `<div class="log-entry miss">Miss! ${enemy.name} dodges your attack!</div>`;
+        }
+        
+        this.playerTurn = false;
+        setTimeout(() => this.pvpEnemyTurn(enemyId), 1000);
+    }
+
+    pvpDefend(enemyId) {
+        if (!this.playerTurn) return;
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You take a defensive stance! Defense increased for this turn.</div>`;
+        
+        this.playerStats.defense += 5;
+        this.playerTurn = false;
+        setTimeout(() => this.pvpEnemyTurn(enemyId), 1000);
+    }
+
+    pvpFlee(enemyId) {
+        const fleeRoll = this.rollDice(20, this.playerStats.luck);
+        const enemyRoll = this.rollDice(20, 10);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You attempt to flee! Roll: ${fleeRoll.roll} + ${fleeRoll.modifier} = ${fleeRoll.total}</div>`;
+        
+        if (fleeRoll.total > enemyRoll.total) {
+            log.innerHTML += `<div class="log-entry success">You successfully flee from combat!</div>`;
+            this.hideModal();
+        } else {
+            log.innerHTML += `<div class="log-entry miss">You can't escape! The battle continues!</div>`;
+            this.playerTurn = false;
+            setTimeout(() => this.pvpEnemyTurn(enemyId), 1000);
+        }
+    }
+
+    pvpUseItem(enemyId) {
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">You use an item! (Item system not implemented yet)</div>`;
+        this.playerTurn = false;
+        setTimeout(() => this.pvpEnemyTurn(enemyId), 1000);
+    }
+
+    pvpEnemyTurn(enemyId) {
+        const enemy = this.encounters.get(enemyId);
+        if (!enemy) return;
+        
+        const attackRoll = this.rollDice(20, enemy.attack);
+        const defenseRoll = this.rollDice(20, this.playerStats.defense);
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry">${enemy.name} attacks! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
+        log.innerHTML += `<div class="log-entry">You defend! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
+        
+        if (attackRoll.total > defenseRoll.total) {
+            const damage = this.rollDice(6, enemy.attack);
+            this.loseHealth(damage.total, `${enemy.name}'s attack strikes true!`);
+            log.innerHTML += `<div class="log-entry danger">Hit! ${enemy.name} deals ${damage.total} damage!</div>`;
+            
+            if (this.playerStats.health <= 0) {
+                this.pvpDefeat(enemy);
+                return;
+            }
+        } else {
+            log.innerHTML += `<div class="log-entry miss">Miss! You dodge ${enemy.name}'s attack!</div>`;
+        }
+        
+        this.playerTurn = true;
+        this.updateHealthBars();
+    }
+
+    pvpVictory(enemy) {
+        const experience = enemy.level * 25;
+        this.playerStats.experience += experience;
+        
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry victory">Victory! You defeated ${enemy.name}!</div>`;
+        log.innerHTML += `<div class="log-entry reward">You gain ${experience} experience!</div>`;
+        
+        setTimeout(() => {
+            this.hideModal();
+            this.showRewards(experience, [`Defeated ${enemy.name}`]);
+        }, 2000);
+    }
+
+    pvpDefeat(enemy) {
+        const log = document.getElementById('battle-log');
+        log.innerHTML += `<div class="log-entry defeat">Defeat! ${enemy.name} has bested you!</div>`;
+        log.innerHTML += `<div class="log-entry">You are defeated! Your health will regenerate over time.</div>`;
+        
+        this.playerStats.health = Math.floor(this.playerStats.maxHealth * 0.5);
+        
+        setTimeout(() => {
+            this.hideModal();
+        }, 3000);
     }
 
     initializeStories() {
@@ -1242,6 +1684,45 @@ class EncounterSystem {
                         mystery: "The cosmic rifts are not random occurrences. They're part of a greater pattern that we're only beginning to understand.",
                         guidance: "If you seek wisdom, you must first learn to listen to the silence between the stars. There, you'll find the answers you seek."
                     }
+                }
+            }
+        };
+    }
+
+    initializeLegendaryEncounters() {
+        return {
+            heavy: {
+                name: "HEVY",
+                title: "The Legendary Cosmic Guardian",
+                emoji: "⚡",
+                color: "#FF4500",
+                rarity: "legendary",
+                spawnChance: 0.001, // 0.1% chance per position update
+                backstory: "HEVY is a legendary cosmic guardian who has transcended the boundaries of space and time. Once a mortal who achieved perfect enlightenment, HEVY now exists as pure cosmic energy, appearing only to those who have walked the path of wisdom and are ready for the ultimate test of the heart.",
+                personality: "Mysterious and powerful, HEVY speaks in cosmic riddles and tests the very essence of those who encounter them. They appear as a shimmering figure of pure energy, radiating ancient wisdom and infinite power.",
+                quest: {
+                    question: "In the cosmic dance of existence, what is the force that binds all dimensions together, that flows through every star and every soul, that is both the beginning and the end of all things?",
+                    correctAnswer: "love",
+                    hints: [
+                        "It is not power, for power corrupts",
+                        "It is not knowledge, for knowledge can be lost",
+                        "It is the force that created the universe",
+                        "It is what makes life worth living",
+                        "It is the answer to every question"
+                    ],
+                    rewards: {
+                        experience: 1000,
+                        steps: 500,
+                        items: ["Cosmic Heart Fragment", "Legendary Wisdom Crystal"],
+                        title: "Heart of the Cosmos"
+                    }
+                },
+                dialogue: {
+                    greeting: "Greetings, mortal soul. I am HEVY, guardian of the cosmic realms. You have walked far to reach this moment...",
+                    question: "In the cosmic dance of existence, what is the force that binds all dimensions together, that flows through every star and every soul, that is both the beginning and the end of all things?",
+                    correct: "Ah, you understand the cosmic truth! Love is indeed the fundamental force that binds all existence together. You have proven yourself worthy of cosmic wisdom!",
+                    incorrect: "Your answer reveals much about your understanding of the cosmic order. Perhaps you need more time to contemplate the mysteries of existence...",
+                    farewell: "Go forth with the cosmic wisdom you have gained. Remember, love is the key to unlocking all mysteries of the universe."
                 }
             }
         };
@@ -1543,7 +2024,8 @@ class EncounterSystem {
         const mainSanityFill = document.getElementById('sanity-fill');
         const mainHealthValue = document.getElementById('health-value');
         const mainSanityValue = document.getElementById('sanity-value');
-        const mainStepsValue = document.getElementById('steps-value');
+        const healthExplanation = document.getElementById('health-explanation');
+        const sanityExplanation = document.getElementById('sanity-explanation');
         
         if (mainHealthFill) {
             mainHealthFill.style.width = `${(this.playerStats.health / this.playerStats.maxHealth) * 100}%`;
@@ -1561,9 +2043,22 @@ class EncounterSystem {
             mainSanityValue.textContent = `${Math.floor(this.playerStats.sanity)}/${Math.floor(this.playerStats.maxSanity)}`;
         }
         
-        if (mainStepsValue) {
-            mainStepsValue.textContent = Math.floor(this.playerStats.steps);
+        // Update health explanation
+        if (healthExplanation) {
+            healthExplanation.textContent = this.getHealthExplanation();
         }
+        
+        // Update sanity explanation
+        if (sanityExplanation) {
+            sanityExplanation.textContent = this.getSanityExplanation();
+        }
+        
+        // Update steps counter in header
+        const stepsValue = document.getElementById('steps-value');
+        if (stepsValue) {
+            stepsValue.textContent = Math.floor(this.playerStats.steps);
+        }
+        
         
         // Update debug panel bars
         const playerHealthFill = document.querySelector('.health-fill');
@@ -1583,6 +2078,62 @@ class EncounterSystem {
             if (monster) {
                 monsterHealthFill.style.width = `${(monster.health / monster.maxHealth) * 100}%`;
             }
+        }
+    }
+    
+    getHealthExplanation() {
+        const healthPercent = (this.playerStats.health / this.playerStats.maxHealth) * 100;
+        
+        if (healthPercent >= 90) {
+            return "Perfect Health";
+        } else if (healthPercent >= 80) {
+            return "Excellent Health";
+        } else if (healthPercent >= 70) {
+            return "Good Health";
+        } else if (healthPercent >= 60) {
+            return "Fair Health";
+        } else if (healthPercent >= 50) {
+            return "Poor Health";
+        } else if (healthPercent >= 40) {
+            return "Bad Health";
+        } else if (healthPercent >= 30) {
+            return "Critical Health";
+        } else if (healthPercent >= 20) {
+            return "Near Death";
+        } else if (healthPercent >= 10) {
+            return "Dying";
+        } else if (healthPercent > 0) {
+            return "Almost Dead";
+        } else {
+            return "DEAD";
+        }
+    }
+    
+    getSanityExplanation() {
+        const sanityPercent = (this.playerStats.sanity / this.playerStats.maxSanity) * 100;
+        
+        if (sanityPercent >= 90) {
+            return "Perfect Sanity";
+        } else if (sanityPercent >= 80) {
+            return "Excellent Sanity";
+        } else if (sanityPercent >= 70) {
+            return "Good Sanity";
+        } else if (sanityPercent >= 60) {
+            return "Fair Sanity";
+        } else if (sanityPercent >= 50) {
+            return "Poor Sanity";
+        } else if (sanityPercent >= 40) {
+            return "Bad Sanity";
+        } else if (sanityPercent >= 30) {
+            return "Critical Sanity";
+        } else if (sanityPercent >= 20) {
+            return "Near Madness";
+        } else if (sanityPercent >= 10) {
+            return "Madness";
+        } else if (sanityPercent > 0) {
+            return "Complete Madness";
+        } else {
+            return "MADNESS";
         }
     }
 }

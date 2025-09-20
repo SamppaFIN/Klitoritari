@@ -27,7 +27,26 @@ class EldritchSanctuaryApp {
     async init() {
         console.log('🌌 Initializing Eldritch Sanctuary...');
         
-        this.showLoadingScreen();
+        // Store reference to this app instance globally first
+        window.eldritchApp = this;
+        
+        // Initialize welcome screen first
+        this.initWelcomeScreen();
+        
+        // The welcome screen will handle game initialization when appropriate
+    }
+
+    initWelcomeScreen() {
+        console.log('🌟 Initializing welcome screen...');
+        this.welcomeScreen = new WelcomeScreen();
+        this.welcomeScreen.init();
+    }
+
+    async initializeGame() {
+        console.log('🎮 Initializing game systems...');
+        
+        // Show particle loading screen
+        this.showParticleLoadingScreen();
         
         try {
             // Initialize cosmic effects first
@@ -36,21 +55,183 @@ class EldritchSanctuaryApp {
             // Initialize core systems
             await this.initCoreSystems();
             
-            // Set up system integration
-            this.setupSystemIntegration();
+        // Set up system integration
+        this.setupSystemIntegration();
+        
+        // Set up header buttons
+        this.setupHeaderButtons();
+        
+        // Load initial data
+        await this.loadInitialData();
             
-            // Load initial data
-            await this.loadInitialData();
-            
-            // Hide loading screen
-            this.hideLoadingScreen();
+            // Hide particle loading screen (it will auto-hide after 3+ seconds)
+            // The particle loading screen handles its own timing
             
             this.isInitialized = true;
             console.log('🌌 Eldritch Sanctuary initialized successfully');
             
         } catch (error) {
             console.error('🌌 Failed to initialize Eldritch Sanctuary:', error);
+            this.hideParticleLoadingScreen();
             this.showError('Failed to initialize the cosmic map. Please refresh the page.');
+        }
+    }
+
+    showParticleLoadingScreen() {
+        console.log('🌟 Showing particle loading screen...');
+        this.particleLoadingScreen = new ParticleLoadingScreen();
+        this.particleLoadingScreen.init();
+    }
+
+    hideParticleLoadingScreen() {
+        if (this.particleLoadingScreen) {
+            this.particleLoadingScreen.hide();
+        }
+    }
+    
+    setupHeaderButtons() {
+        console.log('🔧 Setting up header buttons...');
+        
+        // Initialize location mode tracking
+        this.locationMode = 'device'; // device, random, manual
+        
+        // Locate me button - cycles through modes
+        const locateBtn = document.getElementById('locate-me-btn');
+        if (locateBtn) {
+            locateBtn.addEventListener('click', () => {
+                this.cycleLocationMode();
+            });
+        }
+    }
+    
+    cycleLocationMode() {
+        console.log(`📍 Cycling location mode from ${this.locationMode}`);
+        
+        switch(this.locationMode) {
+            case 'device':
+                console.log('📍 Switching to random mode');
+                this.locationMode = 'random';
+                this.enableRandomMode();
+                break;
+            case 'random':
+                console.log('📍 Switching to manual mode');
+                this.locationMode = 'manual';
+                this.enableManualMode();
+                break;
+            case 'manual':
+                console.log('📍 Switching to device mode');
+                this.locationMode = 'device';
+                this.enableDeviceMode();
+                break;
+        }
+        
+        console.log(`📍 Switched to ${this.locationMode} mode`);
+    }
+    
+    enableDeviceMode() {
+        console.log('📍 Enabling device location mode');
+        this.stopRandomWandering(); // Stop random wandering
+        if (window.geolocationManager) {
+            window.geolocationManager.startTracking();
+        }
+        if (window.mapEngine) {
+            window.mapEngine.disableManualMode();
+        }
+        this.updateLocationButtonText();
+    }
+    
+    enableRandomMode() {
+        console.log('📍 Enabling random location mode');
+        if (window.mapEngine) {
+            // Generate random location near Tampere
+            const randomLat = 61.4978 + (Math.random() - 0.5) * 0.01;
+            const randomLng = 23.7608 + (Math.random() - 0.5) * 0.01;
+            
+            window.mapEngine.manualPosition = { lat: randomLat, lng: randomLng };
+            window.mapEngine.updateManualPosition();
+            
+            // Start random wandering
+            this.startRandomWandering();
+        }
+        this.updateLocationButtonText();
+    }
+    
+    startRandomWandering() {
+        console.log('🎲 Starting random wandering...');
+        this.stopRandomWandering(); // Stop any existing wandering
+        
+        this.randomWanderingInterval = setInterval(() => {
+            if (this.locationMode === 'random' && window.mapEngine) {
+                // Random direction and distance
+                const angle = Math.random() * 2 * Math.PI;
+                const distance = 0.0001 + Math.random() * 0.0002; // Small random movement
+                
+                const newLat = window.mapEngine.manualPosition.lat + Math.cos(angle) * distance;
+                const newLng = window.mapEngine.manualPosition.lng + Math.sin(angle) * distance;
+                
+                window.mapEngine.manualPosition = { lat: newLat, lng: newLng };
+                window.mapEngine.updateManualPosition();
+                
+                console.log(`🎲 Random wandering to: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`);
+            }
+        }, 2000); // Move every 2 seconds
+    }
+    
+    stopRandomWandering() {
+        if (this.randomWanderingInterval) {
+            clearInterval(this.randomWanderingInterval);
+            this.randomWanderingInterval = null;
+            console.log('🎲 Random wandering stopped');
+        }
+    }
+    
+    enableManualMode() {
+        console.log('📍 Enabling manual movement mode');
+        console.log('📍 Map engine available:', !!window.mapEngine);
+        console.log('📍 Map engine instance:', window.mapEngine);
+        
+        this.stopRandomWandering(); // Stop random wandering
+        if (window.mapEngine) {
+            console.log('📍 Calling mapEngine.enableManualMode()');
+            window.mapEngine.enableManualMode();
+        } else {
+            console.error('📍 Map engine not available! Trying again in 100ms...');
+            // Try again after a short delay
+            setTimeout(() => {
+                console.log('📍 Retry - Map engine available:', !!window.mapEngine);
+                if (window.mapEngine) {
+                    console.log('📍 Retry - Calling mapEngine.enableManualMode()');
+                    window.mapEngine.enableManualMode();
+                } else {
+                    console.error('📍 Retry - Map engine still not available!');
+                }
+            }, 100);
+        }
+        this.updateLocationButtonText();
+    }
+    
+    updateLocationButtonText() {
+        const locateBtn = document.getElementById('locate-me-btn');
+        if (locateBtn) {
+            const textElement = locateBtn.querySelector('.locate-text');
+            if (textElement) {
+                // Remove all mode classes
+                locateBtn.classList.remove('manual-mode', 'random-mode');
+                
+                switch(this.locationMode) {
+                    case 'device':
+                        textElement.textContent = 'DEVICE';
+                        break;
+                    case 'random':
+                        textElement.textContent = 'RANDOM';
+                        locateBtn.classList.add('random-mode');
+                        break;
+                    case 'manual':
+                        textElement.textContent = 'MANUAL';
+                        locateBtn.classList.add('manual-mode');
+                        break;
+                }
+            }
         }
     }
 
@@ -109,9 +290,18 @@ class EldritchSanctuaryApp {
     }
 
     async initCoreSystems() {
+        // Check if systems are already initialized
+        if (this.systems.mapEngine && this.systems.mapEngine.isInitialized) {
+            console.log('🔧 Core systems already initialized, skipping');
+            return;
+        }
+        
         // Initialize geolocation manager
         this.systems.geolocation = new GeolocationManager();
         this.systems.geolocation.init();
+        
+        // Make geolocation manager globally available
+        window.geolocationManager = this.systems.geolocation;
         
         // Initialize investigation system first
         this.systems.investigation = new InvestigationSystem();
@@ -125,6 +315,9 @@ class EldritchSanctuaryApp {
         this.systems.encounter = new EncounterSystem();
         this.systems.encounter.init();
         
+        // Make encounter system globally available
+        window.encounterSystem = this.systems.encounter;
+        
         // Initialize item system
         this.systems.itemSystem = new ItemSystem();
         
@@ -135,21 +328,55 @@ class EldritchSanctuaryApp {
         this.systems.npc = new NPCSystem();
         this.systems.npc.init();
         
+        // Make NPC system globally available
+        window.npcSystem = this.systems.npc;
+        
         // Initialize path painting system
         this.systems.pathPainting = new PathPaintingSystem();
         this.systems.pathPainting.init();
+        
+        // Make path painting system globally available
+        window.pathPaintingSystem = this.systems.pathPainting;
         
         // Initialize quest simulation
         this.systems.questSimulation = new QuestSimulation();
         window.questSimulation = this.systems.questSimulation;
         console.log('🎭 Quest simulation system initialized');
         
-        // Initialize unified debug panel (disabled for testing)
-        // this.systems.unifiedDebug = new UnifiedDebugPanel();
-        // this.systems.unifiedDebug.init();
+        // Initialize other player simulation
+        this.systems.otherPlayerSimulation = new OtherPlayerSimulation();
+        this.systems.otherPlayerSimulation.init();
         
-        // Initialize map engine
+        // Make other player simulation globally available
+        window.otherPlayerSimulation = this.systems.otherPlayerSimulation;
+        
+        // Initialize Lovecraftian quest system
+        this.systems.lovecraftianQuest = new LovecraftianQuest();
+        
+        // Make Lovecraftian quest system globally available
+        window.lovecraftianQuest = this.systems.lovecraftianQuest;
+        console.log('🐙 Lovecraftian quest system initialized and available globally');
+        
+        // Initialize sanity distortion system
+        this.systems.sanityDistortion = new SanityDistortion();
+        window.sanityDistortion = this.systems.sanityDistortion;
+        console.log('🧠 Sanity distortion system initialized');
+        
+        // Initialize gruesome notifications
+        this.systems.gruesomeNotifications = new GruesomeNotifications();
+        window.gruesomeNotifications = this.systems.gruesomeNotifications;
+        console.log('💀 Gruesome notifications system initialized');
+        
+        // Initialize map engine BEFORE exposing global systems
         this.systems.mapEngine = new MapEngine();
+        console.log('🗺️ Map engine created:', !!this.systems.mapEngine);
+        
+        // Initialize unified debug panel
+        this.systems.unifiedDebug = new UnifiedDebugPanel();
+        this.systems.unifiedDebug.init();
+        
+        // Make all systems globally available after map engine is initialized
+        this.exposeGlobalSystems();
         
         // Set up map ready callback BEFORE initializing
         this.systems.mapEngine.onMapReady = () => {
@@ -162,10 +389,32 @@ class EldritchSanctuaryApp {
         
         // Now initialize the map engine
         this.systems.mapEngine.init();
+        console.log('🗺️ Map engine initialized:', !!this.systems.mapEngine);
         
         // Initialize WebSocket client
         this.systems.websocket = new WebSocketClient();
         this.systems.websocket.init();
+    }
+
+    exposeGlobalSystems() {
+        // Make all systems globally available for debugging and external access
+        window.eldritchApp = this;
+        window.cosmicEffects = this.systems.cosmicEffects;
+        window.geolocationManager = this.systems.geolocation;
+        window.mapEngine = this.systems.mapEngine;
+        console.log('🌌 Setting window.mapEngine:', !!window.mapEngine);
+        console.log('🌌 Map engine instance:', window.mapEngine);
+        window.investigationSystem = this.systems.investigation;
+        window.websocketClient = this.systems.websocket;
+        window.baseSystem = this.systems.baseSystem;
+        window.encounterSystem = this.systems.encounter;
+        window.npcSystem = this.systems.npc;
+        window.pathPaintingSystem = this.systems.pathPainting;
+        window.unifiedDebugPanel = this.systems.unifiedDebug;
+        window.questSimulation = this.systems.questSimulation;
+        window.otherPlayerSimulation = this.systems.otherPlayerSimulation;
+        
+        console.log('🌌 All systems exposed globally');
     }
 
     setupSystemIntegration() {
@@ -237,10 +486,8 @@ class EldritchSanctuaryApp {
         // Load mystery zones
         this.loadMysteryZones();
         
-        // Enable simulator mode for testing (remove in production)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            this.systems.geolocation.enableSimulator();
-        }
+        // Disable simulator mode by default - use real device location
+        this.systems.geolocation.disableSimulator();
     }
 
     loadMysteryZones() {
@@ -382,18 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
     app = new EldritchSanctuaryApp();
     app.init();
     
-    // Make app globally accessible for debugging
-    window.eldritchApp = app;
-    window.cosmicEffects = app.getSystem('cosmicEffects');
-    window.geolocationManager = app.getSystem('geolocation');
-    window.mapEngine = app.getSystem('mapEngine');
-    window.investigationSystem = app.getSystem('investigation');
-    window.websocketClient = app.getSystem('websocket');
-    window.baseSystem = app.getSystem('baseSystem');
-    window.encounterSystem = app.getSystem('encounter');
-    window.npcSystem = app.getSystem('npc');
-    window.pathPaintingSystem = app.getSystem('pathPainting');
-    window.unifiedDebugPanel = app.getSystem('unifiedDebug');
+    // Global systems are now exposed during initialization
     
     // Debug: Check what systems are available
     console.log('🔍 Global systems check:');

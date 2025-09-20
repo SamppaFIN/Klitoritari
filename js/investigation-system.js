@@ -31,6 +31,12 @@ class InvestigationSystem {
                 color: '#9C27B0',
                 icon: '🌌',
                 description: 'The primary storyline of the Härmälä Mystery'
+            },
+            lovecraftian_quest: {
+                name: 'Lovecraftian Quest',
+                color: '#00ff88',
+                icon: '🐙',
+                description: 'A dark humorous narrative combining H.P. Lovecraft with Terry Pratchett'
             }
         };
         this.onInvestigationStart = null;
@@ -79,6 +85,18 @@ class InvestigationSystem {
                 difficulty: 'Main Quest',
                 rewards: ['Reality Anchor', 'Void Pocket', 'Härmälä Mystery Solver Title'],
                 icon: '🌌'
+            },
+            {
+                id: 'lovecraftian-quest',
+                name: 'The Quest of Questionable Sanity',
+                type: 'lovecraftian_quest',
+                lat: 61.476173436868,
+                lng: 23.725432936819306,
+                description: 'A dark humorous narrative combining H.P. Lovecraft with Terry Pratchett. Follow the cosmic horror adventure through 5 locations, where sanity is optional and death is just another plot device.',
+                requirements: 'Complete the Lovecraftian quest sequence',
+                difficulty: 'Epic Quest',
+                rewards: ['Staff of Questionable Sanity', 'Tentacle Hat of Madness', 'Sanity (Optional)'],
+                icon: '🐙'
             }
         ];
 
@@ -127,7 +145,12 @@ class InvestigationSystem {
 
         if (!modal) return;
 
-        const typeInfo = this.investigationTypes[zone.type];
+        const typeInfo = this.investigationTypes[zone.type] || {
+            name: 'Unknown',
+            color: '#666666',
+            icon: '❓',
+            description: 'Unknown investigation type'
+        };
         
         title.textContent = `${typeInfo.icon} ${zone.name}`;
         description.textContent = zone.description;
@@ -155,6 +178,19 @@ class InvestigationSystem {
         const zone = this.mysteryZones.find(z => z.id === zoneId);
         if (!zone) return;
 
+        // Handle Lovecraftian quest specially
+        if (zone.type === 'lovecraftian_quest') {
+            this.closeModal();
+            if (window.lovecraftianQuest) {
+                // Show quest options dialog
+                this.showQuestOptionsDialog(zone);
+            } else {
+                console.error('Lovecraftian quest system not available');
+                alert('Quest system not available. Please refresh the page.');
+            }
+            return;
+        }
+
         this.activeInvestigation = {
             ...zone,
             startTime: Date.now(),
@@ -172,6 +208,73 @@ class InvestigationSystem {
         }
 
         console.log(`🔍 Started investigation: ${zone.name}`);
+    }
+
+    showQuestOptionsDialog(zone) {
+        console.log('🐙 Creating quest options dialog...');
+        console.log('🐙 Lovecraftian quest available:', !!window.lovecraftianQuest);
+        console.log('🐙 Window object keys:', Object.keys(window).filter(key => key.includes('quest')));
+        
+        const questModal = document.createElement('div');
+        questModal.className = 'quest-options-modal';
+        questModal.innerHTML = `
+            <div class="quest-options-content">
+                <div class="quest-options-header">
+                    <h2>🐙 ${zone.name}</h2>
+                    <button class="close-quest-options-btn" onclick="this.closest('.quest-options-modal').remove()">×</button>
+                </div>
+                <div class="quest-options-body">
+                    <p>${zone.description}</p>
+                    <div class="quest-options-actions">
+                        <button id="start-quest-manual" class="quest-option-btn">Start Quest (Manual)</button>
+                        <button id="start-quest-simulation" class="quest-option-btn">Start Quest Simulation</button>
+                        <button id="cancel-quest" class="quest-option-btn cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(questModal);
+        
+        // Add event listeners with a small delay to ensure DOM is ready
+        setTimeout(() => {
+            const manualBtn = document.getElementById('start-quest-manual');
+            const simulationBtn = document.getElementById('start-quest-simulation');
+            const cancelBtn = document.getElementById('cancel-quest');
+            
+            if (manualBtn) {
+                manualBtn.addEventListener('click', () => {
+                    questModal.remove();
+                    if (window.lovecraftianQuest) {
+                        console.log('🐙 Starting manual quest...');
+                        window.lovecraftianQuest.startQuest();
+                    } else {
+                        console.error('🐙 Lovecraftian quest system not available');
+                        alert('Quest system not available. Please refresh the page.');
+                    }
+                });
+            }
+            
+            if (simulationBtn) {
+                simulationBtn.addEventListener('click', () => {
+                    questModal.remove();
+                    if (window.lovecraftianQuest) {
+                        console.log('🐙 Starting quest simulation...');
+                        console.log('🐙 Quest simulation disabled - quests now trigger by proximity to markers');
+                        alert('🐙 Quest simulation disabled. Quests now trigger when you approach quest markers within 50m!');
+                    } else {
+                        console.error('🐙 Lovecraftian quest system not available');
+                        alert('Quest system not available. Please refresh the page.');
+                    }
+                });
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    questModal.remove();
+                });
+            }
+        }, 100);
     }
 
     parseRequirements(requirementsText) {

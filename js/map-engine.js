@@ -18,6 +18,10 @@ class MapEngine {
         this.pointsOfInterest = [];
         this.monsters = [];
         this.monsterMovementInterval = null;
+        this.manualMode = false;
+        this.manualPosition = { lat: 61.4978, lng: 23.7608 }; // Default Tampere area
+        this.movementInterval = null; // For smooth movement animation
+        this.manualClickHandler = null; // For manual mode click handler
     }
 
     init() {
@@ -28,13 +32,37 @@ class MapEngine {
         
         this.setupMap();
         this.setupMapEvents();
+        this.setupManualControls();
         this.isInitialized = true;
         console.log('🗺️ Map engine initialized');
     }
 
     setupMap() {
-        // Initialize Leaflet map with cosmic styling - centered on Tampere Härmälä
-        this.map = L.map('map', {
+        // Check if map is already initialized
+        if (this.map) {
+            console.log('🗺️ Map already exists, skipping initialization');
+            return;
+        }
+        
+        // Check if the map container is already initialized by Leaflet
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && mapContainer.classList.contains('leaflet-container')) {
+            console.log('🗺️ Map container already initialized by Leaflet, reusing existing map');
+            // Try to get the existing map instance
+            try {
+                this.map = L.map.get(mapContainer);
+                if (this.map) {
+                    console.log('🗺️ Successfully retrieved existing map instance');
+                    return;
+                }
+            } catch (e) {
+                console.log('🗺️ Could not retrieve existing map, will create new one');
+            }
+        }
+        
+        // Try to initialize Leaflet map with cosmic styling - centered on Tampere Härmälä
+        try {
+            this.map = L.map('map', {
             center: [61.473683430224284, 23.726548746143216], // Härmälänranta
             zoom: 15,
             zoomControl: true,
@@ -52,6 +80,18 @@ class MapEngine {
         
         // Set up map events
         this.setupMapEvents();
+        
+        } catch (error) {
+            console.error('🗺️ Failed to initialize map:', error);
+            // If map initialization fails, try to get existing map
+            const mapContainer = document.getElementById('map');
+            if (mapContainer && mapContainer._leaflet_id) {
+                console.log('🗺️ Attempting to get existing map instance...');
+                this.map = L.map.get(mapContainer);
+            } else {
+                throw error; // Re-throw if we can't recover
+            }
+        }
     }
 
     addCosmicTileLayer() {
@@ -134,6 +174,23 @@ class MapEngine {
         // Map click events
         this.map.on('click', (e) => {
             console.log('Map clicked at:', e.latlng);
+            console.log(`🎮 Manual mode: ${this.manualMode}, Handler: ${!!this.manualClickHandler}`);
+            console.log(`🎮 Map engine instance:`, this);
+            console.log(`🎮 Manual mode property:`, this.manualMode);
+            
+            // If in manual mode, handle movement
+            if (this.manualMode && this.manualClickHandler) {
+                console.log('🎮 Delegating to manual click handler');
+                this.manualClickHandler(e);
+            } else {
+                console.log('🎮 Not in manual mode or no handler available');
+            }
+        });
+
+        // Right-click context menu
+        this.map.on('contextmenu', (e) => {
+            e.originalEvent.preventDefault();
+            this.showContextMenu(e.latlng, e.containerPoint);
         });
 
         // Map move events for investigation updates
@@ -457,24 +514,30 @@ class MapEngine {
         const latlng = [base.lat, base.lng];
         console.log('🏗️ Base marker coordinates:', latlng);
 
-        // Create multilayered base marker
+        // Create multilayered base marker with proper click handling
         const baseIcon = L.divIcon({
             className: 'base-marker multilayered',
             html: `
-                <div style="position: relative; width: 50px; height: 50px;">
+                <div style="position: relative; width: 50px; height: 50px; cursor: pointer; z-index: 1000;">
                     <!-- Outer energy field -->
-                    <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite;"></div>
+                    <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite; pointer-events: none;"></div>
                     <!-- Middle ring -->
-                    <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: #ff0000; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);"></div>
+                    <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: #ff0000; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); pointer-events: none;"></div>
                     <!-- Inner star -->
-                    <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; background: linear-gradient(45deg, #ff0000, #cc0000); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);">⭐</div>
+                    <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; background: linear-gradient(45deg, #ff0000, #cc0000); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(255, 0, 0, 0.8); pointer-events: none;">⭐</div>
+                    <!-- Clickable overlay -->
+                    <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: transparent; cursor: pointer; z-index: 1001;" onclick="if(window.mapEngine) window.mapEngine.openBaseManagement(); else console.error('Map engine not available');"></div>
                 </div>
             `,
             iconSize: [50, 50],
             iconAnchor: [25, 25]
         });
         
-        this.playerBaseMarker = L.marker(latlng, { icon: baseIcon }).addTo(this.map);
+        this.playerBaseMarker = L.marker(latlng, { 
+            icon: baseIcon,
+            interactive: true,
+            clickable: true
+        }).addTo(this.map);
         
         console.log('🏗️ Created multilayered base marker');
         
@@ -513,16 +576,30 @@ class MapEngine {
         console.log('🏗️ Binding popup to base marker:', popupContent);
         this.playerBaseMarker.bindPopup(popupContent);
         
-        // Add click event for debugging
+        // Add click event to open base management
         this.playerBaseMarker.on('click', (e) => {
-            console.log('🏗️ Base marker clicked!', e);
+            console.log('🏗️ Base marker clicked! Opening base management...');
+            console.log('🏗️ Click event details:', e);
             console.log('🏗️ Event target:', e.target);
-            console.log('🏗️ Event type:', e.type);
+            console.log('🏗️ Event originalEvent:', e.originalEvent);
+            
+            e.originalEvent.preventDefault();
+            e.originalEvent.stopPropagation();
+            e.originalEvent.stopImmediatePropagation();
+            
+            // Close any open popup first
+            this.playerBaseMarker.closePopup();
+            
+            // Open base management modal
+            this.openBaseManagement();
         });
-        
-        // Also try mousedown and mouseup events
+
+        // Also add mousedown event as backup
         this.playerBaseMarker.on('mousedown', (e) => {
-            console.log('🏗️ Base marker mousedown!', e);
+            console.log('🏗️ Base marker mousedown! Opening base management...');
+            e.originalEvent.preventDefault();
+            e.originalEvent.stopPropagation();
+            this.openBaseManagement();
         });
         
         this.playerBaseMarker.on('mouseup', (e) => {
@@ -540,9 +617,42 @@ class MapEngine {
         // Create marker showcase
         this.createMarkerShowcase();
         
+        // Generate legendary encounters
+        this.generateLegendaryEncounters();
+        
         // Disabled for main quest focus - no POIs or monsters
         // this.generatePointsOfInterest();
         // this.generateMonsters();
+    }
+
+    openBaseManagement() {
+        console.log('🏗️ Opening base management...');
+        console.log('🏗️ Base system available:', !!window.baseSystem);
+        console.log('🏗️ Base system methods:', window.baseSystem ? Object.keys(window.baseSystem) : 'N/A');
+        
+        if (window.baseSystem) {
+            if (typeof window.baseSystem.showBaseManagementModal === 'function') {
+                window.baseSystem.showBaseManagementModal();
+            } else {
+                console.error('🏗️ showBaseManagementModal method not found on base system');
+            }
+        } else {
+            console.error('🏗️ Base system not available, trying to get it from app...');
+            
+            // Try to get base system from the main app
+            if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.baseSystem) {
+                console.log('🏗️ Found base system in app, using it...');
+                window.baseSystem = window.eldritchApp.systems.baseSystem;
+                if (typeof window.baseSystem.showBaseManagementModal === 'function') {
+                    window.baseSystem.showBaseManagementModal();
+                } else {
+                    console.error('🏗️ showBaseManagementModal method still not found');
+                }
+            } else {
+                console.error('🏗️ Base system not found in app either');
+                alert('Base management system is not available. Please refresh the page.');
+            }
+        }
     }
 
     createStarIcon() {
@@ -681,11 +791,6 @@ class MapEngine {
         // TODO: Implement base visiting functionality
     }
 
-    openBaseManagement() {
-        if (window.baseSystem) {
-            window.baseSystem.openBasePanel();
-        }
-    }
 
     closeBasePopup() {
         if (this.playerBaseMarker && this.playerBaseMarker.isPopupOpen()) {
@@ -934,6 +1039,133 @@ class MapEngine {
         this.startMonsterMovement();
     }
 
+    generateLegendaryEncounters() {
+        if (!this.map) return;
+        
+        console.log('⚡ Generating legendary encounters...');
+        
+        // Clear existing legendary markers
+        if (this.legendaryMarkers) {
+            this.legendaryMarkers.forEach(marker => this.map.removeLayer(marker));
+        }
+        this.legendaryMarkers = [];
+        
+        // HEVY - The Legendary Cosmic Guardian
+        const heavyLat = 61.473683430224284;  // Härmälänranta
+        const heavyLng = 23.726548746143216;
+        
+        const heavyIcon = L.divIcon({
+            className: 'legendary-marker',
+            html: `
+                <div style="position: relative; width: 40px; height: 40px;">
+                    <!-- Cosmic aura -->
+                    <div style="position: absolute; top: -8px; left: -8px; width: 56px; height: 56px; background: radial-gradient(circle, #ff450080 0%, #ff660040 30%, transparent 70%); border-radius: 50%; animation: legendaryPulse 3s infinite;"></div>
+                    <!-- Energy rings -->
+                    <div style="position: absolute; top: -4px; left: -4px; width: 48px; height: 48px; border: 2px solid #ff4500; border-radius: 50%; animation: legendaryRotate 4s linear infinite; opacity: 0.6;"></div>
+                    <div style="position: absolute; top: -2px; left: -2px; width: 44px; height: 44px; border: 1px solid #ffcc00; border-radius: 50%; animation: legendaryRotate 3s linear infinite reverse; opacity: 0.4;"></div>
+                    <!-- HEVY core -->
+                    <div style="position: absolute; top: 4px; left: 4px; width: 32px; height: 32px; background: linear-gradient(45deg, #ff4500, #ff6600); border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px #ff4500, inset 0 0 10px #ffcc00;"></div>
+                    <!-- HEVY symbol -->
+                    <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">⚡</div>
+                </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+        
+        const heavyMarker = L.marker([heavyLat, heavyLng], { icon: heavyIcon }).addTo(this.map);
+        heavyMarker.bindPopup(`
+            <div style="text-align: center; color: #ff4500; font-weight: bold;">
+                <h3>⚡ HEVY</h3>
+                <p style="margin: 10px 0; color: #ffcc00;">The Legendary Cosmic Guardian</p>
+                <p style="color: #ffffff; font-size: 0.9em;">A transcendent being of pure cosmic energy, appearing only to those ready for the ultimate test of the heart.</p>
+                <div style="margin: 15px 0; padding: 10px; background: rgba(255, 69, 0, 0.1); border-radius: 8px; border: 1px solid #ff4500;">
+                    <strong>Quest:</strong> Answer the cosmic riddle<br>
+                    <strong>Reward:</strong> 1000 XP + 500 Steps + Legendary Items
+                </div>
+                <button onclick="if(window.encounterSystem) { window.encounterSystem.testHeavyEncounter(); } else { console.error('Encounter system not available'); }" 
+                        style="background: linear-gradient(45deg, #ff4500, #ff6600); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;">
+                    ⚡ Approach HEVY
+                </button>
+            </div>
+        `);
+        
+        this.legendaryMarkers.push(heavyMarker);
+        console.log('⚡ Generated HEVY legendary encounter marker');
+    }
+
+    addQuestMarkers() {
+        if (!this.map || !window.lovecraftianQuest) return;
+        
+        console.log('🐙 Adding quest markers...');
+        
+        // Clear existing quest markers
+        if (this.questMarkers) {
+            this.questMarkers.forEach(marker => {
+                this.map.removeLayer(marker);
+                // Also remove from mystery zone markers
+                const index = this.mysteryZoneMarkers.indexOf(marker);
+                if (index > -1) {
+                    this.mysteryZoneMarkers.splice(index, 1);
+                }
+            });
+        }
+        this.questMarkers = [];
+        
+        window.lovecraftianQuest.questLocations.forEach((location, index) => {
+            const questIcon = L.divIcon({
+                className: 'quest-marker',
+                html: `
+                    <div style="position: relative; width: 35px; height: 35px;">
+                        <!-- Quest aura -->
+                        <div style="position: absolute; top: -6px; left: -6px; width: 47px; height: 47px; background: radial-gradient(circle, #00ff8840 0%, #00ff8820 30%, transparent 70%); border-radius: 50%; animation: questPulse 2s infinite;"></div>
+                        <!-- Quest ring -->
+                        <div style="position: absolute; top: -3px; left: -3px; width: 41px; height: 41px; border: 2px solid #00ff88; border-radius: 50%; animation: questRotate 3s linear infinite; opacity: 0.7;"></div>
+                        <!-- Quest core -->
+                        <div style="position: absolute; top: 2px; left: 2px; width: 31px; height: 31px; background: linear-gradient(45deg, #00ff88, #66ffaa); border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 10px #00ff88;"></div>
+                        <!-- Quest number -->
+                        <div style="position: absolute; top: 6px; left: 6px; width: 23px; height: 23px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #000000; text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);">${index + 1}</div>
+                    </div>
+                `,
+                iconSize: [35, 35],
+                iconAnchor: [17.5, 17.5]
+            });
+            
+            const questMarker = L.marker([location.lat, location.lng], {
+                icon: questIcon,
+                interactive: true,
+                clickable: true
+            });
+            
+            // Mark as quest marker for encounter system
+            questMarker.isQuestMarker = true;
+            questMarker.questIndex = index;
+            
+            questMarker.bindPopup(`
+                <div class="quest-popup">
+                    <div class="popup-header">
+                        <h4>🐙 ${location.name}</h4>
+                    </div>
+                    <div class="quest-info">
+                        <div><strong>Step:</strong> ${index + 1}/5</div>
+                        <div><strong>Description:</strong> ${location.description}</div>
+                    </div>
+                    <div class="quest-actions">
+                        <button onclick="window.lovecraftianQuest.teleportToLocation(${index})" class="sacred-button" style="margin-top: 10px; width: 100%;">Teleport Here</button>
+                        <button onclick="window.lovecraftianQuest.startQuestFromLocation(${index})" class="sacred-button" style="background: var(--cosmic-purple); margin-top: 5px; width: 100%;">Start Quest Here</button>
+                    </div>
+                </div>
+            `);
+            
+            this.questMarkers.push(questMarker);
+            questMarker.addTo(this.map);
+            
+            // Don't add quest markers to mystery zone markers - they should only be triggered manually
+        });
+        
+        console.log('🐙 Added', this.questMarkers.length, 'quest markers');
+    }
+
     startMonsterMovement() {
         if (this.monsterMovementInterval) {
             clearInterval(this.monsterMovementInterval);
@@ -987,6 +1219,284 @@ class MapEngine {
         this.playerBaseMarker = null;
         this.territoryPolygon = null;
         this.isInitialized = false;
+    }
+    
+    setupManualControls() {
+        console.log('🎮 Setting up manual movement controls...');
+        // Click handler will be set up when manual mode is enabled
+    }
+    
+    showContextMenu(latlng, containerPoint) {
+        console.log('🎮 Showing context menu at:', latlng);
+        
+        // Remove existing context menu
+        this.hideContextMenu();
+        
+        // Create context menu
+        const contextMenu = document.createElement('div');
+        contextMenu.id = 'map-context-menu';
+        contextMenu.className = 'map-context-menu';
+        contextMenu.style.cssText = `
+            position: absolute;
+            left: ${containerPoint.x}px;
+            top: ${containerPoint.y}px;
+            background: var(--cosmic-dark);
+            border: 2px solid var(--cosmic-purple);
+            border-radius: 10px;
+            padding: 10px;
+            z-index: 2000;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+            min-width: 200px;
+        `;
+        
+        contextMenu.innerHTML = `
+            <div style="color: var(--cosmic-light); font-weight: bold; margin-bottom: 10px; text-align: center;">
+                🌌 Location Actions
+            </div>
+            <div style="color: var(--cosmic-light); font-size: 12px; margin-bottom: 10px; text-align: center;">
+                ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}
+            </div>
+            <button class="context-menu-btn" onclick="window.mapEngine.teleportPlayer(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
+                ⚡ Teleport Here
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.movePlayer(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
+                🚶 Move Here
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.centerOnLocation(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
+                🎯 Center Map
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.hideContextMenu()" style="width: 100%; background: var(--cosmic-red);">
+                ❌ Close
+            </button>
+        `;
+        
+        document.body.appendChild(contextMenu);
+        
+        // Close menu when clicking elsewhere
+        setTimeout(() => {
+            document.addEventListener('click', this.hideContextMenu.bind(this), { once: true });
+        }, 100);
+    }
+    
+    hideContextMenu() {
+        const contextMenu = document.getElementById('map-context-menu');
+        if (contextMenu) {
+            contextMenu.remove();
+        }
+    }
+    
+    teleportPlayer(lat, lng) {
+        console.log(`🎮 Teleporting player to: ${lat}, ${lng}`);
+        this.hideContextMenu();
+        
+        if (this.manualMode) {
+            // Instant teleport in manual mode
+            this.manualPosition.lat = lat;
+            this.manualPosition.lng = lng;
+            this.updateManualPosition(true); // Center map on teleport
+        } else {
+            // For other modes, update geolocation position
+            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                window.eldritchApp.systems.geolocation.currentPosition = {
+                    lat: lat,
+                    lng: lng,
+                    accuracy: 1,
+                    timestamp: Date.now()
+                };
+                // Update player marker
+                this.updatePlayerPosition({
+                    lat: lat,
+                    lng: lng,
+                    accuracy: 1,
+                    timestamp: Date.now()
+                });
+                // Center map
+                this.map.setView([lat, lng], this.map.getZoom());
+                // Trigger encounters
+                if (window.encounterSystem) {
+                    window.encounterSystem.checkProximityEncounters();
+                }
+            }
+        }
+    }
+    
+    movePlayer(lat, lng) {
+        console.log(`🎮 Moving player to: ${lat}, ${lng}`);
+        this.hideContextMenu();
+        
+        if (this.manualMode) {
+            this.movePlayerToPosition(lat, lng);
+        } else {
+            // Switch to manual mode and move
+            this.enableManualMode();
+            setTimeout(() => {
+                this.movePlayerToPosition(lat, lng);
+            }, 100);
+        }
+    }
+    
+    centerOnLocation(lat, lng) {
+        console.log(`🎮 Centering map on: ${lat}, ${lng}`);
+        this.hideContextMenu();
+        this.map.setView([lat, lng], this.map.getZoom());
+    }
+    
+    updateManualPosition(centerMap = false) {
+        console.log(`🎮 Manual position: ${this.manualPosition.lat}, ${this.manualPosition.lng}`);
+        
+        // Only center map if explicitly requested (e.g., when starting manual mode)
+        if (centerMap) {
+            this.map.setView([this.manualPosition.lat, this.manualPosition.lng], this.map.getZoom());
+        }
+        
+        // Update player marker
+        this.updatePlayerPosition({
+            lat: this.manualPosition.lat,
+            lng: this.manualPosition.lng,
+            accuracy: 1,
+            timestamp: Date.now()
+        });
+        
+        // Update geolocation system's current position for encounter system
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            window.eldritchApp.systems.geolocation.currentPosition = {
+                lat: this.manualPosition.lat,
+                lng: this.manualPosition.lng,
+                accuracy: 1,
+                timestamp: Date.now()
+            };
+            console.log('🎮 Updated geolocation position for encounters');
+        }
+        
+        // Trigger proximity checks
+        if (window.encounterSystem) {
+            window.encounterSystem.checkProximityEncounters();
+        }
+    }
+    
+    enableManualMode() {
+        console.log('🎮 Enabling manual movement mode');
+        this.manualMode = true;
+        console.log('🎮 Manual mode set to:', this.manualMode);
+        console.log('🎮 Map engine instance:', this);
+        
+        // Set up click handler for manual movement
+        this.setupClickHandler();
+        
+        // Set initial position and center map only when first enabling
+        this.updateManualPosition(true);
+        
+        console.log('🎮 Manual mode enabled successfully');
+    }
+    
+    setupClickHandler() {
+        console.log('🎮 Setting up click handler for manual mode');
+        
+        // Create click handler for manual movement
+        this.manualClickHandler = (e) => {
+            if (!this.manualMode) {
+                console.log('🎮 Click ignored - manual mode disabled');
+                return;
+            }
+            
+            console.log(`🎮 Manual mode click: ${e.latlng.lat}, ${e.latlng.lng}`);
+            this.movePlayerToPosition(e.latlng.lat, e.latlng.lng);
+        };
+        
+        console.log('🎮 Click handler created for manual mode');
+    }
+    
+    disableManualMode() {
+        console.log('🎮 Disabling manual movement mode');
+        this.manualMode = false;
+        
+        // Clear click handler reference
+        this.manualClickHandler = null;
+        console.log('🎮 Click handler cleared');
+        
+        // Stop any ongoing movement
+        if (this.movementInterval) {
+            clearInterval(this.movementInterval);
+            this.movementInterval = null;
+        }
+    }
+    
+    movePlayerToPosition(targetLat, targetLng) {
+        console.log(`🎮 movePlayerToPosition called: ${targetLat}, ${targetLng}`);
+        console.log(`🎮 Manual mode active: ${this.manualMode}`);
+        console.log(`🎮 Map available: ${!!this.map}`);
+        
+        // Stop any existing movement
+        if (this.movementInterval) {
+            clearInterval(this.movementInterval);
+            console.log('🎮 Stopped existing movement');
+        }
+        
+        const startLat = this.manualPosition.lat;
+        const startLng = this.manualPosition.lng;
+        
+        // Calculate distance in meters
+        const distance = this.calculateDistance(startLat, startLng, targetLat, targetLng);
+        console.log(`🎮 Distance to target: ${distance.toFixed(2)} meters`);
+        
+        if (distance < 1) {
+            // Already very close, just set position
+            this.manualPosition.lat = targetLat;
+            this.manualPosition.lng = targetLng;
+            this.updateManualPosition();
+            return;
+        }
+        
+        // Calculate movement parameters
+        const speed = 100; // meters per second (10x faster)
+        const duration = distance / speed; // seconds
+        const steps = Math.max(10, Math.floor(duration * 10)); // 10 updates per second
+        const stepDuration = (duration * 1000) / steps; // milliseconds per step
+        
+        console.log(`🎮 Movement: ${distance.toFixed(2)}m at ${speed}m/s = ${duration.toFixed(2)}s (${steps} steps)`);
+        
+        let currentStep = 0;
+        
+        this.movementInterval = setInterval(() => {
+            if (currentStep >= steps) {
+                // Movement complete
+                this.manualPosition.lat = targetLat;
+                this.manualPosition.lng = targetLng;
+                this.updateManualPosition();
+                clearInterval(this.movementInterval);
+                this.movementInterval = null;
+                console.log('🎮 Movement complete');
+                return;
+            }
+            
+            // Calculate interpolated position
+            const progress = currentStep / steps;
+            const easeProgress = this.easeInOutCubic(progress);
+            
+            const currentLat = startLat + (targetLat - startLat) * easeProgress;
+            const currentLng = startLng + (targetLng - startLng) * easeProgress;
+            
+            this.manualPosition.lat = currentLat;
+            this.manualPosition.lng = currentLng;
+            this.updateManualPosition(false); // Don't center map during movement
+            
+            currentStep++;
+        }, stepDuration);
+    }
+    
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 }
 

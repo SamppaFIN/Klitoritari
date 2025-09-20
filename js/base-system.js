@@ -13,6 +13,9 @@ class BaseSystem {
         this.onBaseEstablished = null;
         this.onTerritoryUpdated = null;
         this.onNearbyBaseFound = null;
+        this.buildings = [];
+        this.territorySize = 100; // Base territory size in m²
+        this.baseMarker = null;
     }
 
     init() {
@@ -155,6 +158,51 @@ class BaseSystem {
         if (closePanelBtn) {
             closePanelBtn.addEventListener('click', () => this.closeBasePanel());
         }
+        
+        // Base management modal events - delay to ensure DOM is ready
+        setTimeout(() => {
+            this.setupBaseModalEvents();
+        }, 100);
+    }
+
+    setupBaseModalEvents() {
+        // Wait for DOM to be ready before setting up events
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupBaseModalEvents());
+            return;
+        }
+
+        // Close base modal button
+        const closeModalBtn = document.getElementById('close-base-modal');
+        console.log('🏗️ Close button found:', !!closeModalBtn);
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => {
+                console.log('🏗️ Close button clicked!');
+                this.hideBaseManagementModal();
+            });
+        } else {
+            console.error('🏗️ Close button not found!');
+        }
+
+        // Build buttons - use event delegation for dynamic content
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('build-btn')) {
+                const buildingCard = e.target.closest('.building-card');
+                if (buildingCard) {
+                    const building = buildingCard.dataset.building;
+                    const cost = parseInt(e.target.dataset.cost);
+                    this.buildStructure(building, cost);
+                }
+            }
+        });
+
+        // Expand buttons - use event delegation for dynamic content
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('expand-btn')) {
+                const cost = parseInt(e.target.dataset.cost);
+                this.expandTerritory(cost);
+            }
+        });
     }
 
     showBaseEstablishmentModal() {
@@ -314,38 +362,9 @@ class BaseSystem {
         document.body.appendChild(modal);
 
         // Setup modal event listeners
-        this.setupBaseModalEvents(modal, position);
+        // Modal events are handled by the main setupBaseModalEvents method
     }
 
-    setupBaseModalEvents(modal, position) {
-        const closeBtn = modal.querySelector('#close-base-modal');
-        const cancelBtn = modal.querySelector('#cancel-base-establishment');
-        const confirmBtn = modal.querySelector('#confirm-base-establishment');
-        const nameInput = modal.querySelector('#base-name-input');
-
-        // Close modal
-        const closeModal = () => {
-            modal.remove();
-        };
-
-        closeBtn.addEventListener('click', closeModal);
-        cancelBtn.addEventListener('click', closeModal);
-
-        // Confirm base establishment
-        confirmBtn.addEventListener('click', () => {
-            const baseName = nameInput.value.trim();
-            if (!baseName) {
-                this.showNotification('Please enter a base name', 'error');
-                return;
-            }
-
-            this.establishBase(baseName, position);
-            closeModal();
-        });
-
-        // Auto-focus name input
-        nameInput.focus();
-    }
 
     async establishBase(name, position) {
         try {
@@ -729,8 +748,206 @@ class BaseSystem {
     }
 
     showBaseManagementModal() {
-        // TODO: Implement base management modal
-        this.showNotification('Base management features coming soon!', 'info');
+        // Show base management modal
+        const baseModal = document.getElementById('base-management-modal');
+        if (baseModal) {
+            baseModal.classList.remove('hidden');
+            this.updateBaseModalInfo();
+            
+            // Add escape key listener for closing
+            this.escapeKeyListener = (e) => {
+                if (e.key === 'Escape') {
+                    console.log('🏗️ Escape key pressed, closing modal');
+                    this.hideBaseManagementModal();
+                }
+            };
+            document.addEventListener('keydown', this.escapeKeyListener);
+            
+            // Add click outside to close
+            this.modalOverlayListener = (e) => {
+                if (e.target === baseModal) {
+                    console.log('🏗️ Clicked outside modal, closing');
+                    this.hideBaseManagementModal();
+                }
+            };
+            baseModal.addEventListener('click', this.modalOverlayListener);
+        }
+    }
+
+    hideBaseManagementModal() {
+        console.log('🏗️ hideBaseManagementModal called');
+        const baseModal = document.getElementById('base-management-modal');
+        console.log('🏗️ Base modal found:', !!baseModal);
+        if (baseModal) {
+            baseModal.classList.add('hidden');
+            console.log('🏗️ Base modal hidden');
+            
+            // Clean up event listeners
+            if (this.escapeKeyListener) {
+                document.removeEventListener('keydown', this.escapeKeyListener);
+                this.escapeKeyListener = null;
+            }
+            if (this.modalOverlayListener) {
+                baseModal.removeEventListener('click', this.modalOverlayListener);
+                this.modalOverlayListener = null;
+            }
+        } else {
+            console.error('🏗️ Base modal not found!');
+        }
+    }
+
+    updateBaseModalInfo() {
+        // Update base information in modal
+        const baseName = document.getElementById('base-name');
+        const territorySize = document.getElementById('territory-size');
+        const buildingCount = document.getElementById('building-count');
+        const availableSteps = document.getElementById('available-steps');
+
+        if (baseName) baseName.textContent = this.playerBase ? this.playerBase.name : 'Cosmic Sanctuary';
+        if (territorySize) territorySize.textContent = `${this.territorySize}m²`;
+        if (buildingCount) buildingCount.textContent = this.buildings.length + 1; // +1 for base itself
+        if (availableSteps) {
+            const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+            availableSteps.textContent = Math.floor(steps);
+        }
+
+        // Update button states based on available steps
+        this.updateButtonStates();
+    }
+
+    updateButtonStates() {
+        const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+        
+        // Update build buttons
+        document.querySelectorAll('.build-btn').forEach(btn => {
+            const cost = parseInt(btn.dataset.cost);
+            if (steps >= cost) {
+                btn.disabled = false;
+                btn.textContent = 'Build';
+            } else {
+                btn.disabled = true;
+                btn.textContent = 'Not enough steps';
+            }
+        });
+
+        // Update expand buttons
+        document.querySelectorAll('.expand-btn').forEach(btn => {
+            const cost = parseInt(btn.dataset.cost);
+            if (steps >= cost) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        });
+    }
+
+    buildStructure(buildingType, cost) {
+        const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+        
+        if (steps < cost) {
+            this.showNotification(`Not enough steps! Need ${cost}, have ${Math.floor(steps)}`, 'error');
+            return;
+        }
+
+        // Check if building already exists
+        if (this.buildings.find(b => b.type === buildingType)) {
+            this.showNotification(`${buildingType} already built!`, 'info');
+            return;
+        }
+
+        // Deduct steps
+        if (window.encounterSystem) {
+            window.encounterSystem.playerStats.steps -= cost;
+            window.encounterSystem.updateHealthBars();
+        }
+
+        // Add building
+        const building = {
+            type: buildingType,
+            name: this.getBuildingName(buildingType),
+            cost: cost,
+            builtAt: Date.now(),
+            effects: this.getBuildingEffects(buildingType)
+        };
+
+        this.buildings.push(building);
+        this.updateBaseModalInfo();
+        this.showNotification(`🏗️ ${building.name} built successfully!`, 'success');
+        
+        // Apply building effects
+        this.applyBuildingEffects(building);
+    }
+
+    getBuildingName(buildingType) {
+        const names = {
+            'watchtower': 'Watchtower',
+            'energy-core': 'Energy Core',
+            'research-lab': 'Research Lab',
+            'defense-turret': 'Defense Turret'
+        };
+        return names[buildingType] || buildingType;
+    }
+
+    getBuildingEffects(buildingType) {
+        const effects = {
+            'watchtower': { visibility: 50, description: 'Increases territory visibility' },
+            'energy-core': { energy: 100, description: 'Generates cosmic energy' },
+            'research-lab': { research: 25, description: 'Unlocks new technologies' },
+            'defense-turret': { defense: 75, description: 'Protects your territory' }
+        };
+        return effects[buildingType] || {};
+    }
+
+    applyBuildingEffects(building) {
+        // Apply building effects to the game
+        console.log(`🏗️ Applied effects for ${building.name}:`, building.effects);
+        
+        // Update territory size if watchtower
+        if (building.type === 'watchtower') {
+            this.territorySize += 50;
+            this.updateTerritoryDisplay();
+        }
+    }
+
+    expandTerritory(cost) {
+        const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+        
+        if (steps < cost) {
+            this.showNotification(`Not enough steps! Need ${cost}, have ${Math.floor(steps)}`, 'error');
+            return;
+        }
+
+        // Deduct steps
+        if (window.encounterSystem) {
+            window.encounterSystem.playerStats.steps -= cost;
+            window.encounterSystem.updateHealthBars();
+        }
+
+        // Expand territory
+        this.territorySize += cost * 2; // 2m² per step
+        this.updateTerritoryDisplay();
+        this.updateBaseModalInfo();
+        
+        this.showNotification(`🗺️ Territory expanded by ${cost * 2}m²!`, 'success');
+        
+        // Update territory on map
+        this.updateTerritoryOnMap();
+    }
+
+    updateTerritoryDisplay() {
+        // Update territory display in UI
+        const territorySize = document.getElementById('territory-size');
+        if (territorySize) {
+            territorySize.textContent = `${this.territorySize}m²`;
+        }
+    }
+
+    updateTerritoryOnMap() {
+        // Update territory visualization on map
+        if (this.baseMarker && window.eldritchApp && window.eldritchApp.systems.mapEngine) {
+            // Update base marker with new territory size
+            this.baseMarker.setRadius(this.territorySize);
+        }
     }
 
     confirmDeleteBase() {

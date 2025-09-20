@@ -337,13 +337,43 @@ class NPCSystem {
     }
 
     testChatWithNPC(npcName) {
+        console.log(`💬 Testing chat with ${npcName}...`);
+        
+        // Ensure NPCs are generated if they don't exist
+        if (!this.npcs || this.npcs.length === 0) {
+            console.log('💬 No NPCs found, generating them...');
+            this.generateNPCs();
+        }
+        
         const npc = this.npcs.find(n => n.name === npcName);
         if (npc) {
-            console.log(`💬 Testing chat with ${npcName}`);
+            console.log(`💬 Starting chat with ${npcName}`);
             this.startChat(npc.id);
         } else {
-            console.log(`💬 NPC ${npcName} not found`);
+            console.log(`💬 NPC ${npcName} not found. Available NPCs:`, this.npcs.map(n => n.name));
+            // Create a test NPC if none exists
+            this.createTestNPC(npcName);
         }
+    }
+
+    createTestNPC(npcName) {
+        console.log(`💬 Creating test NPC: ${npcName}`);
+        const testNPC = {
+            id: `test_${npcName.toLowerCase()}`,
+            name: npcName,
+            emoji: '🌟',
+            color: '#FFD700',
+            personality: 'mystical',
+            greeting: `Greetings! I am ${npcName}, a test NPC created for your convenience.`,
+            topics: ['cosmic mysteries', 'testing', 'development'],
+            lat: 61.473683430224284,
+            lng: 23.726548746143216,
+            encountered: false,
+            lastChatTime: 0
+        };
+        
+        this.npcs.push(testNPC);
+        this.startChat(testNPC.id);
     }
 
     moveNPCsCloser() {

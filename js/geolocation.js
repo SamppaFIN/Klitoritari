@@ -45,6 +45,15 @@ class GeolocationManager {
             return;
         }
 
+        this.isTracking = true;
+        this.updateUI();
+
+        if (this.simulatorMode) {
+            // If simulator is enabled, just start the simulator
+            console.log('📍 Geolocation tracking started (simulator mode)');
+            return;
+        }
+
         if (!this.checkGeolocationSupport()) return;
 
         const options = {
@@ -65,9 +74,7 @@ class GeolocationManager {
                 options
             );
 
-            this.isTracking = true;
-            this.updateUI();
-            console.log('📍 Geolocation tracking started');
+            console.log('📍 Geolocation tracking started (real GPS)');
             
         } catch (error) {
             this.handleError(error);
@@ -194,6 +201,11 @@ class GeolocationManager {
             this.watchId = null;
         }
         
+        if (this.simulatorInterval) {
+            clearInterval(this.simulatorInterval);
+            this.simulatorInterval = null;
+        }
+        
         this.isTracking = false;
         this.updateUI();
         console.log('📍 Geolocation tracking stopped');
@@ -203,6 +215,12 @@ class GeolocationManager {
     enableSimulator() {
         this.simulatorMode = true;
         this.simulatorPosition = { lat: 61.473683430224284, lng: 23.726548746143216 }; // Härmälänranta
+        
+        // Stop real geolocation if it's running
+        if (this.isTracking && this.watchId !== null) {
+            navigator.geolocation.clearWatch(this.watchId);
+            this.watchId = null;
+        }
         
         // Simulate position updates
         this.simulatorInterval = setInterval(() => {
@@ -233,7 +251,41 @@ class GeolocationManager {
             clearInterval(this.simulatorInterval);
             this.simulatorInterval = null;
         }
+        
+        // Restart real geolocation if tracking was active
+        if (this.isTracking) {
+            this.startRealGeolocation();
+        }
+        
         console.log('📍 Simulator mode disabled');
+    }
+    
+    startRealGeolocation() {
+        if (!this.checkGeolocationSupport()) return;
+
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 5000
+        };
+
+        try {
+            // Get initial position
+            this.getCurrentPosition(options).then(position => {
+                this.handlePositionUpdate(position);
+            });
+            
+            // Start watching position
+            this.watchId = navigator.geolocation.watchPosition(
+                (position) => this.handlePositionUpdate(position),
+                (error) => this.handleError(error),
+                options
+            );
+            
+            console.log('📍 Real geolocation restarted');
+        } catch (error) {
+            this.handleError(error);
+        }
     }
 
     // Get current position (returns null if not available)

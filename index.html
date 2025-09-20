@@ -39,6 +39,7 @@
                             <div id="health-fill" class="health-fill" style="width: 100%"></div>
                         </div>
                         <span id="health-value" class="stat-value">100/100</span>
+                        <div id="health-explanation" class="stat-explanation">Perfect Health</div>
                     </div>
                     <div class="stat-meter">
                         <span class="stat-label">🧠 Sanity:</span>
@@ -46,29 +47,31 @@
                             <div id="sanity-fill" class="sanity-fill" style="width: 100%"></div>
                         </div>
                         <span id="sanity-value" class="stat-value">100/100</span>
+                        <div id="sanity-explanation" class="stat-explanation">Perfect Sanity</div>
                     </div>
                     <div class="stat-meter">
                         <span class="stat-label">👣 Steps:</span>
-                        <span id="steps-value" class="stat-value">0</span>
+                        <span id="steps-value" class="stat-value">100</span>
+                        <div id="steps-explanation" class="stat-explanation">Cosmic Energy</div>
+                    </div>
+                    <div class="stat-meter">
+                        <span class="stat-label">⏰ Distortion:</span>
+                        <span id="distortion-timer" class="stat-value">30s</span>
+                        <div id="distortion-explanation" class="stat-explanation">Next Effect</div>
                     </div>
                 </div>
-                <div id="connection-status" class="status-indicator">
-                    <span class="status-dot"></span>
-                    <span class="status-text">Connecting...</span>
+                <div class="header-controls">
+                    <button id="locate-me-btn" class="locate-me-btn" title="Locate Me">
+                        <span class="locate-icon">📍</span>
+                        <span class="locate-text">LOCATE ME</span>
+                    </button>
+                    <div id="connection-status" class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Connecting...</span>
+                    </div>
                 </div>
             </header>
             
-            <!-- Geolocation Controls -->
-            <div id="geolocation-panel" class="control-panel">
-                <button id="locate-btn" class="sacred-button">
-                    <span class="icon">📍</span>
-                    Locate Me
-                </button>
-                <div id="accuracy-display" class="accuracy-info">
-                    <span class="accuracy-label">Accuracy:</span>
-                    <span id="accuracy-value">--</span>
-                </div>
-            </div>
             
             <!-- Investigation Panel -->
             <div id="investigation-panel" class="control-panel hidden">
@@ -118,8 +121,244 @@
         </div>
     </div>
     
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-content">
+            <div class="welcome-header">
+                <h1 class="welcome-title">🌟 Welcome to Eldritch Sanctuary 🌟</h1>
+                <p class="welcome-subtitle">A Cosmic Exploration Adventure</p>
+            </div>
+            
+            <div class="welcome-body">
+                <div class="welcome-section">
+                    <h2>🎮 How to Play</h2>
+                    <div class="tutorial-steps">
+                        <div class="tutorial-step">
+                            <div class="step-icon">📍</div>
+                            <div class="step-content">
+                                <h3>Explore the Cosmos</h3>
+                                <p>Walk around in real life to explore the cosmic map. Your movement will be tracked and painted on the world.</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="step-icon">⚡</div>
+                            <div class="step-content">
+                                <h3>Encounter Mysteries</h3>
+                                <p>Discover legendary encounters, mysterious NPCs, and cosmic events as you explore. Each step brings new adventures!</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="step-icon">💬</div>
+                            <div class="step-content">
+                                <h3>Chat with Beings</h3>
+                                <p>Meet cosmic entities like Aurora, Zephyr, and Sage. They have wisdom to share and quests to offer.</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="step-icon">🎨</div>
+                            <div class="step-content">
+                                <h3>Paint Your Path</h3>
+                                <p>Your journey creates a beautiful painted trail on the map. Watch as your cosmic footprint grows!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="welcome-section">
+                    <h2>🎯 Your Mission</h2>
+                    <div class="mission-content">
+                        <p>You are a cosmic explorer in the mystical realm of Eldritch Sanctuary. Your goal is to:</p>
+                        <ul class="mission-list">
+                            <li>🌟 Discover legendary encounters and cosmic mysteries</li>
+                            <li>💫 Complete quests and gain cosmic wisdom</li>
+                            <li>🗺️ Explore every corner of the cosmic map</li>
+                            <li>👥 Meet and interact with other cosmic beings</li>
+                            <li>🎨 Create a beautiful painted trail of your journey</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="welcome-section">
+                    <h2>⚙️ Controls & Features</h2>
+                    <div class="controls-grid">
+                        <div class="control-item">
+                            <div class="control-icon">🔧</div>
+                            <div class="control-text">
+                                <strong>Debug Console</strong><br>
+                                Toggle with the wrench icon to test features
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <div class="control-icon">📍</div>
+                            <div class="control-text">
+                                <strong>Location</strong><br>
+                                Allow GPS access for real-world tracking
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <div class="control-icon">🎭</div>
+                            <div class="control-text">
+                                <strong>Encounters</strong><br>
+                                Click markers to interact with cosmic beings
+                            </div>
+                        </div>
+                        <div class="control-item">
+                            <div class="control-icon">💬</div>
+                            <div class="control-text">
+                                <strong>Chat</strong><br>
+                                Click NPCs to start conversations
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-footer">
+                <div class="welcome-actions">
+                    <button id="start-adventure" class="welcome-btn primary">
+                        🚀 Start Your Cosmic Adventure
+                    </button>
+                    <button id="skip-tutorial" class="welcome-btn secondary">
+                        ⏭️ Skip Tutorial
+                    </button>
+                </div>
+                <div class="welcome-tips">
+                    <p>💡 <strong>Tip:</strong> Keep the debug console open to test features and see your progress!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Base Management Modal -->
+    <div id="base-management-modal" class="modal hidden">
+        <div class="modal-content base-modal">
+            <div class="modal-header">
+                <h2>🏗️ Base Management</h2>
+                <button id="close-base-modal" class="close-btn" onclick="if(window.baseSystem) window.baseSystem.hideBaseManagementModal(); else console.error('Base system not available');">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="base-info-section">
+                    <div class="base-status">
+                        <h3>🏠 Your Base: <span id="base-name">Cosmic Sanctuary</span></h3>
+                        <div class="base-stats">
+                            <div class="stat-row">
+                                <span>Territory Size:</span>
+                                <span id="territory-size">100m²</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Buildings:</span>
+                                <span id="building-count">1</span>
+                            </div>
+                            <div class="stat-row">
+                                <span>Steps Available:</span>
+                                <span id="available-steps">1000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="building-section">
+                    <h3>🏗️ Buildings & Upgrades</h3>
+                    <div class="building-grid">
+                        <div class="building-card" data-building="watchtower">
+                            <div class="building-icon">🗼</div>
+                            <div class="building-info">
+                                <h4>Watchtower</h4>
+                                <p>Increases territory visibility</p>
+                                <div class="building-cost">Cost: 100 steps</div>
+                                <button class="build-btn" data-cost="100">Build</button>
+                            </div>
+                        </div>
+                        
+                        <div class="building-card" data-building="energy-core">
+                            <div class="building-icon">⚡</div>
+                            <div class="building-info">
+                                <h4>Energy Core</h4>
+                                <p>Generates cosmic energy</p>
+                                <div class="building-cost">Cost: 200 steps</div>
+                                <button class="build-btn" data-cost="200">Build</button>
+                            </div>
+                        </div>
+                        
+                        <div class="building-card" data-building="research-lab">
+                            <div class="building-icon">🔬</div>
+                            <div class="building-info">
+                                <h4>Research Lab</h4>
+                                <p>Unlocks new technologies</p>
+                                <div class="building-cost">Cost: 300 steps</div>
+                                <button class="build-btn" data-cost="300">Build</button>
+                            </div>
+                        </div>
+                        
+                        <div class="building-card" data-building="defense-turret">
+                            <div class="building-icon">🛡️</div>
+                            <div class="building-info">
+                                <h4>Defense Turret</h4>
+                                <p>Protects your territory</p>
+                                <div class="building-cost">Cost: 250 steps</div>
+                                <button class="build-btn" data-cost="250">Build</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="expansion-section">
+                    <h3>🗺️ Territory Expansion</h3>
+                    <div class="expansion-options">
+                        <div class="expansion-card">
+                            <div class="expansion-icon">📏</div>
+                            <div class="expansion-info">
+                                <h4>Expand Territory</h4>
+                                <p>Increase your base's influence radius</p>
+                                <div class="expansion-cost">Cost: 500 steps</div>
+                                <button class="expand-btn" data-cost="500">Expand</button>
+                            </div>
+                        </div>
+                        
+                        <div class="expansion-card">
+                            <div class="expansion-icon">🌐</div>
+                            <div class="expansion-info">
+                                <h4>Cosmic Gateway</h4>
+                                <p>Connect to other bases</p>
+                                <div class="expansion-cost">Cost: 1000 steps</div>
+                                <button class="expand-btn" data-cost="1000">Build Gateway</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Particle Loading Screen -->
+    <div id="particle-loading-screen" class="particle-loading-screen hidden">
+        <div class="particle-container">
+            <canvas id="particle-canvas"></canvas>
+            <div class="loading-content">
+                <div class="cosmic-logo">
+                    <div class="logo-icon">🌟</div>
+                    <h1 class="logo-text">Eldritch Sanctuary</h1>
+                    <div class="logo-subtitle">Cosmic Exploration Platform</div>
+                </div>
+                <div class="loading-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="loading-progress"></div>
+                    </div>
+                    <div class="loading-text" id="loading-text">Initializing Cosmic Map...</div>
+                </div>
+                <div class="loading-steps">
+                    <div class="step" id="step-1">🌌 Initializing cosmic effects...</div>
+                    <div class="step" id="step-2">🗺️ Loading map engine...</div>
+                    <div class="step" id="step-3">📍 Setting up geolocation...</div>
+                    <div class="step" id="step-4">🎭 Preparing encounters...</div>
+                    <div class="step" id="step-5">✨ Finalizing cosmic realm...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
-    <div id="loading-screen">
+    <div id="loading-screen" class="hidden">
         <div class="cosmic-loader">
             <div class="loader-ring"></div>
             <div class="loader-text">Initializing Cosmic Map...</div>
@@ -128,6 +367,7 @@
     
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/particle-loading.js"></script>
     <script src="js/cosmic-effects.js"></script>
     <script src="js/geolocation.js"></script>
     <script src="js/investigation-system.js"></script>
@@ -140,7 +380,12 @@
     <script src="js/encounter-system.js"></script>
     <script src="js/npc-system.js"></script>
     <script src="js/path-painting-system.js"></script>
+    <script src="js/other-player-simulation.js"></script>
     <script src="js/unified-debug-panel.js"></script>
+    <script src="js/lovecraftian-quest.js"></script>
+    <script src="js/sanity-distortion.js"></script>
+    <script src="js/gruesome-notifications.js"></script>
+    <script src="js/welcome-screen.js"></script>
     <script src="js/map-engine.js"></script>
     <script src="js/app.js"></script>
 </body>
