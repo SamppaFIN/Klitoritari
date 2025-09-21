@@ -19,10 +19,7 @@ class MapEngine {
         this.pointsOfInterest = [];
         this.monsters = [];
         this.monsterMovementInterval = null;
-        this.manualMode = false;
-        this.manualPosition = { lat: 61.4978, lng: 23.7608 }; // Default Tampere area
         this.movementInterval = null; // For smooth movement animation
-        this.manualClickHandler = null; // For manual mode click handler
     }
 
     init() {
@@ -182,17 +179,6 @@ class MapEngine {
         // Map click events
         this.map.on('click', (e) => {
             console.log('Map clicked at:', e.latlng);
-            console.log(`🎮 Manual mode: ${this.manualMode}, Handler: ${!!this.manualClickHandler}`);
-            console.log(`🎮 Map engine instance:`, this);
-            console.log(`🎮 Manual mode property:`, this.manualMode);
-            
-            // If in manual mode, handle movement
-            if (this.manualMode && this.manualClickHandler) {
-                console.log('🎮 Delegating to manual click handler');
-                this.manualClickHandler(e);
-            } else {
-                console.log('🎮 Not in manual mode or no handler available');
-            }
         });
 
         // Right-click context menu
@@ -643,12 +629,6 @@ class MapEngine {
             this.movementInterval = null;
         }
         
-        // Reset manual mode
-        this.manualMode = false;
-        this.manualClickHandler = null;
-        
-        // Reset position to default
-        this.manualPosition = { lat: 61.4978, lng: 23.7608 };
         
         // Center map on default position
         if (this.map) {
@@ -1614,23 +1594,12 @@ class MapEngine {
         console.log(`🎮 Teleporting player to: ${lat}, ${lng}`);
         this.hideContextMenu();
         
-        // Disable device location when user moves manually
+        // Disable device GPS and use fixed position
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            console.log('🎮 Disabling device location for manual movement');
-            window.eldritchApp.systems.geolocation.stopTracking();
-        }
-        
-        if (this.manualMode) {
-            // Instant teleport in manual mode
-            this.manualPosition.lat = lat;
-            this.manualPosition.lng = lng;
-            this.updateManualPosition(true); // Center map on teleport
-        } else {
-            // Switch to manual mode and move
-            this.enableManualMode();
-            setTimeout(() => {
-                this.movePlayerToPosition(lat, lng);
-            }, 50);
+            console.log('🎮 Disabling device GPS for teleport');
+            window.eldritchApp.systems.geolocation.deviceGPSEnabled = false;
+            window.eldritchApp.systems.geolocation.fixedPosition = { lat, lng };
+            window.eldritchApp.systems.geolocation.startTracking();
         }
     }
     
@@ -1638,20 +1607,12 @@ class MapEngine {
         console.log(`🎮 Moving player to: ${lat}, ${lng}`);
         this.hideContextMenu();
         
-        // Disable device location when user moves manually
+        // Disable device GPS and use fixed position
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            console.log('🎮 Disabling device location for manual movement');
-            window.eldritchApp.systems.geolocation.stopTracking();
-        }
-        
-        if (this.manualMode) {
-            this.movePlayerToPosition(lat, lng);
-        } else {
-            // Switch to manual mode and move
-            this.enableManualMode();
-            setTimeout(() => {
-                this.movePlayerToPosition(lat, lng);
-            }, 50);
+            console.log('🎮 Disabling device GPS for manual movement');
+            window.eldritchApp.systems.geolocation.deviceGPSEnabled = false;
+            window.eldritchApp.systems.geolocation.fixedPosition = { lat, lng };
+            window.eldritchApp.systems.geolocation.startTracking();
         }
     }
     
@@ -1661,58 +1622,20 @@ class MapEngine {
         this.map.setView([lat, lng], this.map.getZoom());
     }
     
-    updateManualPosition(centerMap = false) {
-        console.log(`🎮 Manual position: ${this.manualPosition.lat}, ${this.manualPosition.lng}`);
-        
-        // Only center map if explicitly requested (e.g., when starting manual mode)
-        if (centerMap) {
-            this.map.setView([this.manualPosition.lat, this.manualPosition.lng], this.map.getZoom());
-        }
-        
-        // Update player marker
-        this.updatePlayerPosition({
-            lat: this.manualPosition.lat,
-            lng: this.manualPosition.lng,
-            accuracy: 1,
-            timestamp: Date.now()
-        });
-        
-        // Update geolocation system's current position for encounter system
-        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            window.eldritchApp.systems.geolocation.currentPosition = {
-                lat: this.manualPosition.lat,
-                lng: this.manualPosition.lng,
-                accuracy: 1,
-                timestamp: Date.now()
-            };
-            console.log('🎮 Updated geolocation position for encounters');
-        }
-        
-        // Trigger proximity checks
-        if (window.encounterSystem) {
-            window.encounterSystem.checkProximityEncounters();
-        }
-    }
 
     getPlayerPosition() {
-        if (this.manualMode) {
-            console.log('🎮 Using manual position:', this.manualPosition);
-            return {
-                lat: this.manualPosition.lat,
-                lng: this.manualPosition.lng
-            };
-        } else if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             const geolocation = window.eldritchApp.systems.geolocation;
             const position = geolocation.getCurrentPositionSafe();
             if (position) {
-                console.log('📍 Using GPS position:', position);
+                console.log('📍 Using position:', position);
                 return {
                     lat: position.lat,
                     lng: position.lng
                 };
             } else {
-                console.log('📍 No valid GPS position available, waiting for location...');
-                // Don't fall back to default position if GPS is available but not ready yet
+                console.log('📍 No position available, waiting for location...');
+                // Don't fall back to default position if geolocation is available but not ready yet
                 // Return null to indicate no position available
                 return null;
             }
@@ -1726,115 +1649,9 @@ class MapEngine {
         }
     }
     
-    enableManualMode() {
-        console.log('🎮 Enabling manual movement mode');
-        this.manualMode = true;
-        console.log('🎮 Manual mode set to:', this.manualMode);
-        console.log('🎮 Map engine instance:', this);
-        
-        // Set up click handler for manual movement
-        this.setupClickHandler();
-        
-        // Set initial position and center map only when first enabling
-        this.updateManualPosition(true);
-        
-        console.log('🎮 Manual mode enabled successfully');
-    }
     
-    setupClickHandler() {
-        console.log('🎮 Setting up click handler for manual mode');
-        
-        // Create click handler for manual movement
-        this.manualClickHandler = (e) => {
-            if (!this.manualMode) {
-                console.log('🎮 Click ignored - manual mode disabled');
-                return;
-            }
-            
-            console.log(`🎮 Manual mode click: ${e.latlng.lat}, ${e.latlng.lng}`);
-            this.movePlayerToPosition(e.latlng.lat, e.latlng.lng);
-        };
-        
-        console.log('🎮 Click handler created for manual mode');
-    }
     
-    disableManualMode() {
-        console.log('🎮 Disabling manual movement mode');
-        this.manualMode = false;
-        
-        // Clear click handler reference
-        this.manualClickHandler = null;
-        console.log('🎮 Click handler cleared');
-        
-        // Stop any ongoing movement
-        if (this.movementInterval) {
-            clearInterval(this.movementInterval);
-            this.movementInterval = null;
-        }
-    }
     
-    movePlayerToPosition(targetLat, targetLng) {
-        console.log(`🎮 movePlayerToPosition called: ${targetLat}, ${targetLng}`);
-        console.log(`🎮 Manual mode active: ${this.manualMode}`);
-        console.log(`🎮 Map available: ${!!this.map}`);
-        
-        // Stop any existing movement
-        if (this.movementInterval) {
-            clearInterval(this.movementInterval);
-            console.log('🎮 Stopped existing movement');
-        }
-        
-        const startLat = this.manualPosition.lat;
-        const startLng = this.manualPosition.lng;
-        
-        // Calculate distance in meters
-        const distance = this.calculateDistance(startLat, startLng, targetLat, targetLng);
-        console.log(`🎮 Distance to target: ${distance.toFixed(2)} meters`);
-        
-        if (distance < 1) {
-            // Already very close, just set position
-            this.manualPosition.lat = targetLat;
-            this.manualPosition.lng = targetLng;
-            this.updateManualPosition();
-            return;
-        }
-        
-        // Calculate movement parameters
-        const speed = 100; // meters per second (10x faster)
-        const duration = distance / speed; // seconds
-        const steps = Math.max(10, Math.floor(duration * 10)); // 10 updates per second
-        const stepDuration = (duration * 1000) / steps; // milliseconds per step
-        
-        console.log(`🎮 Movement: ${distance.toFixed(2)}m at ${speed}m/s = ${duration.toFixed(2)}s (${steps} steps)`);
-        
-        let currentStep = 0;
-        
-        this.movementInterval = setInterval(() => {
-            if (currentStep >= steps) {
-                // Movement complete
-                this.manualPosition.lat = targetLat;
-                this.manualPosition.lng = targetLng;
-                this.updateManualPosition();
-                clearInterval(this.movementInterval);
-                this.movementInterval = null;
-                console.log('🎮 Movement complete');
-                return;
-            }
-            
-            // Calculate interpolated position
-            const progress = currentStep / steps;
-            const easeProgress = this.easeInOutCubic(progress);
-            
-            const currentLat = startLat + (targetLat - startLat) * easeProgress;
-            const currentLng = startLng + (targetLng - startLng) * easeProgress;
-            
-            this.manualPosition.lat = currentLat;
-            this.manualPosition.lng = currentLng;
-            this.updateManualPosition(false); // Don't center map during movement
-            
-            currentStep++;
-        }, stepDuration);
-    }
     
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371000; // Earth's radius in meters
@@ -1847,9 +1664,6 @@ class MapEngine {
         return R * c;
     }
     
-    easeInOutCubic(t) {
-        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
 }
 
 // Export for use in other modules

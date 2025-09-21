@@ -12,8 +12,8 @@ class GeolocationManager {
         this.updateInterval = 2000; // 2 seconds - less frequent but more accurate
         this.onPositionUpdate = null;
         this.onAccuracyChange = null;
-        this.simulatorMode = false;
-        this.simulatorPosition = { lat: 40.7128, lng: -74.0060 }; // NYC default
+        this.deviceGPSEnabled = true; // Toggle for device GPS
+        this.fixedPosition = { lat: 61.4978, lng: 23.7608 }; // Default Tampere area
         this.lastValidPosition = null;
         this.positionHistory = [];
         this.maxHistorySize = 10;
@@ -86,9 +86,17 @@ class GeolocationManager {
         this.isTracking = true;
         this.updateUI();
 
-        if (this.simulatorMode) {
-            // If simulator is enabled, just start the simulator
-            console.log('📍 Geolocation tracking started (simulator mode)');
+        if (!this.deviceGPSEnabled) {
+            // Use fixed position instead of device GPS
+            console.log('📍 Using fixed position (device GPS disabled)');
+            this.handlePositionUpdate({
+                coords: {
+                    latitude: this.fixedPosition.lat,
+                    longitude: this.fixedPosition.lng,
+                    accuracy: 1
+                },
+                timestamp: Date.now()
+            });
             return;
         }
 
@@ -387,100 +395,28 @@ class GeolocationManager {
         }
     }
 
-    // Force enable manual mode (disable GPS)
-    forceManualMode() {
-        console.log('📍 Forcing manual mode - disabling GPS tracking');
-        this.stopTracking();
-        this.updateDeviceLocationDisplay('Manual Mode', 'N/A');
-        
-        // Notify map engine to switch to manual mode
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
-            window.eldritchApp.systems.mapEngine.enableManualMode();
-        }
-    }
 
-    // Re-enable GPS tracking
-    enableGPSTracking() {
-        console.log('📍 Re-enabling GPS tracking');
-        this.startTracking();
-    }
-
-    // Simulator mode for testing
-    enableSimulator() {
-        this.simulatorMode = true;
-        this.simulatorPosition = { lat: 61.473683430224284, lng: 23.726548746143216 }; // Härmälänranta
+    // Toggle device GPS on/off
+    toggleDeviceGPS() {
+        this.deviceGPSEnabled = !this.deviceGPSEnabled;
+        console.log(`📍 Device GPS ${this.deviceGPSEnabled ? 'enabled' : 'disabled'}`);
         
-        // Stop real geolocation if it's running
-        if (this.isTracking && this.watchId !== null) {
-            navigator.geolocation.clearWatch(this.watchId);
-            this.watchId = null;
+        // Update display
+        if (this.deviceGPSEnabled) {
+            this.updateDeviceLocationDisplay('GPS Enabled', '--');
+        } else {
+            this.updateDeviceLocationDisplay('Fixed Position', 'N/A');
         }
         
-        // Simulate position updates
-        this.simulatorInterval = setInterval(() => {
-            if (this.isTracking) {
-                // Add some random movement around Härmälä
-                this.simulatorPosition.lat += (Math.random() - 0.5) * 0.0005;
-                this.simulatorPosition.lng += (Math.random() - 0.5) * 0.0005;
-                
-                const simulatedPosition = {
-                    coords: {
-                        latitude: this.simulatorPosition.lat,
-                        longitude: this.simulatorPosition.lng,
-                        accuracy: 5 + Math.random() * 10
-                    },
-                    timestamp: Date.now()
-                };
-                
-                this.handlePositionUpdate(simulatedPosition);
-            }
-        }, this.updateInterval);
-        
-        console.log('📍 Simulator mode enabled - centered on Tampere Härmälä');
-    }
-
-    disableSimulator() {
-        this.simulatorMode = false;
-        if (this.simulatorInterval) {
-            clearInterval(this.simulatorInterval);
-            this.simulatorInterval = null;
-        }
-        
-        // Restart real geolocation if tracking was active
+        // Restart tracking with new mode
         if (this.isTracking) {
-            this.startRealGeolocation();
+            this.stopTracking();
+            setTimeout(() => this.startTracking(), 100);
         }
         
-        console.log('📍 Simulator mode disabled');
+        return this.deviceGPSEnabled;
     }
-    
-    startRealGeolocation() {
-        if (!this.checkGeolocationSupport()) return;
 
-        const options = {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 5000
-        };
-
-        try {
-            // Get initial position
-            this.getCurrentPosition(options).then(position => {
-                this.handlePositionUpdate(position);
-            });
-            
-            // Start watching position
-            this.watchId = navigator.geolocation.watchPosition(
-                (position) => this.handlePositionUpdate(position),
-                (error) => this.handleError(error),
-                options
-            );
-            
-            console.log('📍 Real geolocation restarted');
-        } catch (error) {
-            this.handleError(error);
-        }
-    }
 
     // Get current position (returns null if not available)
     getCurrentPositionData() {

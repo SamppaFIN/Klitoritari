@@ -170,7 +170,7 @@ class UnifiedDebugPanel {
             <span>Location:</span>
             <button id="center-on-location" class="debug-btn small">Center Map</button>
             <button id="force-geolocation" class="debug-btn small">Get Location</button>
-            <button id="toggle-gps-manual" class="debug-btn small">Toggle GPS/Manual</button>
+            <button id="toggle-gps-manual" class="debug-btn small">Toggle GPS</button>
         </div>
             <div class="stat-row">
                 <span>Movement:</span>
@@ -948,25 +948,18 @@ Items: ${status.items.join(', ') || 'None'}`);
     }
 
     toggleGpsManual() {
-        console.log('📍 Toggling between GPS and Manual mode...');
+        console.log('📍 Toggling device GPS...');
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             const geolocation = window.eldritchApp.systems.geolocation;
-            const mapEngine = window.eldritchApp.systems.mapEngine;
+            const isEnabled = geolocation.toggleDeviceGPS();
             
-            if (mapEngine.manualMode) {
-                // Currently in manual mode, switch to GPS
-                console.log('📍 Switching to GPS mode...');
-                mapEngine.disableManualMode();
-                geolocation.enableGPSTracking();
-                this.showNotification('📍 Switched to GPS mode', 'info');
+            if (isEnabled) {
+                this.showNotification('📍 Device GPS enabled', 'info');
             } else {
-                // Currently in GPS mode, switch to manual
-                console.log('📍 Switching to Manual mode...');
-                geolocation.forceManualMode();
-                this.showNotification('📍 Switched to Manual mode', 'info');
+                this.showNotification('📍 Using fixed position', 'info');
             }
         } else {
-            console.error('📍 Geolocation or map engine not available');
+            console.error('📍 Geolocation system not available');
         }
     }
 

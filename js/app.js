@@ -105,27 +105,14 @@ class EldritchSanctuaryApp {
     }
     
     cycleLocationMode() {
-        console.log(`📍 Cycling location mode from ${this.locationMode}`);
+        console.log('📍 Toggling device GPS...');
         
-        switch(this.locationMode) {
-            case 'device':
-                console.log('📍 Switching to random mode');
-                this.locationMode = 'random';
-                this.enableRandomMode();
-                break;
-            case 'random':
-                console.log('📍 Switching to manual mode');
-                this.locationMode = 'manual';
-                this.enableManualMode();
-                break;
-            case 'manual':
-                console.log('📍 Switching to device mode');
-                this.locationMode = 'device';
-                this.enableDeviceMode();
-                break;
+        if (this.systems.geolocation) {
+            const isEnabled = this.systems.geolocation.toggleDeviceGPS();
+            this.updateLocationButtonText(isEnabled);
+        } else {
+            console.error('📍 Geolocation system not available');
         }
-        
-        console.log(`📍 Switched to ${this.locationMode} mode`);
     }
     
     enableDeviceMode() {
@@ -140,96 +127,23 @@ class EldritchSanctuaryApp {
         this.updateLocationButtonText();
     }
     
-    enableRandomMode() {
-        console.log('📍 Enabling random location mode');
-        if (window.mapEngine) {
-            // Generate random location near Tampere
-            const randomLat = 61.4978 + (Math.random() - 0.5) * 0.01;
-            const randomLng = 23.7608 + (Math.random() - 0.5) * 0.01;
-            
-            window.mapEngine.manualPosition = { lat: randomLat, lng: randomLng };
-            window.mapEngine.updateManualPosition();
-            
-            // Start random wandering
-            this.startRandomWandering();
-        }
-        this.updateLocationButtonText();
-    }
     
-    startRandomWandering() {
-        console.log('🎲 Starting random wandering...');
-        this.stopRandomWandering(); // Stop any existing wandering
-        
-        this.randomWanderingInterval = setInterval(() => {
-            if (this.locationMode === 'random' && window.mapEngine) {
-                // Random direction and distance
-                const angle = Math.random() * 2 * Math.PI;
-                const distance = 0.0001 + Math.random() * 0.0002; // Small random movement
-                
-                const newLat = window.mapEngine.manualPosition.lat + Math.cos(angle) * distance;
-                const newLng = window.mapEngine.manualPosition.lng + Math.sin(angle) * distance;
-                
-                window.mapEngine.manualPosition = { lat: newLat, lng: newLng };
-                window.mapEngine.updateManualPosition();
-                
-                console.log(`🎲 Random wandering to: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`);
-            }
-        }, 2000); // Move every 2 seconds
-    }
     
-    stopRandomWandering() {
-        if (this.randomWanderingInterval) {
-            clearInterval(this.randomWanderingInterval);
-            this.randomWanderingInterval = null;
-            console.log('🎲 Random wandering stopped');
-        }
-    }
     
-    enableManualMode() {
-        console.log('📍 Enabling manual movement mode');
-        console.log('📍 Map engine available:', !!window.mapEngine);
-        console.log('📍 Map engine instance:', window.mapEngine);
-        
-        this.stopRandomWandering(); // Stop random wandering
-        if (window.mapEngine) {
-            console.log('📍 Calling mapEngine.enableManualMode()');
-            window.mapEngine.enableManualMode();
-        } else {
-            console.error('📍 Map engine not available! Trying again in 50ms...');
-            // Try again after a short delay
-            setTimeout(() => {
-                console.log('📍 Retry - Map engine available:', !!window.mapEngine);
-                if (window.mapEngine) {
-                    console.log('📍 Retry - Calling mapEngine.enableManualMode()');
-                    window.mapEngine.enableManualMode();
-                } else {
-                    console.error('📍 Retry - Map engine still not available!');
-                }
-            }, 100);
-        }
-        this.updateLocationButtonText();
-    }
-    
-    updateLocationButtonText() {
+    updateLocationButtonText(isEnabled = null) {
         const locateBtn = document.getElementById('locate-me-btn');
         if (locateBtn) {
             const textElement = locateBtn.querySelector('.locate-text');
             if (textElement) {
-                // Remove all mode classes
-                locateBtn.classList.remove('manual-mode', 'random-mode');
+                if (isEnabled === null) {
+                    // Get current state from geolocation system
+                    isEnabled = this.systems.geolocation ? this.systems.geolocation.deviceGPSEnabled : true;
+                }
                 
-                switch(this.locationMode) {
-                    case 'device':
-                        textElement.textContent = 'DEVICE';
-                        break;
-                    case 'random':
-                        textElement.textContent = 'RANDOM';
-                        locateBtn.classList.add('random-mode');
-                        break;
-                    case 'manual':
-                        textElement.textContent = 'MANUAL';
-                        locateBtn.classList.add('manual-mode');
-                        break;
+                if (isEnabled) {
+                    textElement.textContent = 'GPS';
+                } else {
+                    textElement.textContent = 'FIXED';
                 }
             }
         }
