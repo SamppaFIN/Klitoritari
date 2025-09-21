@@ -520,6 +520,36 @@ body {
     display: none !important;
 }
 
+/* Device Location Display */
+.device-location-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--cosmic-purple);
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin: 0 5px;
+    font-size: 0.7em;
+    min-width: 120px;
+}
+
+.location-info, .location-accuracy {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.location-label, .accuracy-label {
+    color: var(--cosmic-purple);
+    font-weight: bold;
+}
+
+.location-coords, .accuracy-value {
+    color: var(--cosmic-green);
+    font-family: 'Courier New', monospace;
+}
+
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     #header {
@@ -555,6 +585,12 @@ body {
         padding: 8px 4px;
         font-size: 0.7rem;
         min-width: 0;
+    }
+
+    .device-location-display {
+        font-size: 0.6em;
+        padding: 4px 6px;
+        min-width: 100px;
     }
     
     .header-controls .inventory-text,

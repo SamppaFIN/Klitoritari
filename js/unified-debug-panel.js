@@ -166,11 +166,12 @@ class UnifiedDebugPanel {
                 <button id="reset-encounter-flags" class="debug-btn small">Reset Encounters</button>
                 <button id="toggle-proximity-debug" class="debug-btn small">Debug Mode</button>
             </div>
-            <div class="stat-row">
-                <span>Location:</span>
-                <button id="center-on-location" class="debug-btn small">Center Map</button>
-                <button id="force-geolocation" class="debug-btn small">Get Location</button>
-            </div>
+        <div class="stat-row">
+            <span>Location:</span>
+            <button id="center-on-location" class="debug-btn small">Center Map</button>
+            <button id="force-geolocation" class="debug-btn small">Get Location</button>
+            <button id="toggle-gps-manual" class="debug-btn small">Toggle GPS/Manual</button>
+        </div>
             <div class="stat-row">
                 <span>Movement:</span>
                 <button id="test-distance" class="debug-btn small">Test Distance</button>
@@ -442,6 +443,7 @@ class UnifiedDebugPanel {
         document.getElementById('toggle-proximity-debug').addEventListener('click', () => this.toggleProximityDebug());
         document.getElementById('center-on-location').addEventListener('click', () => this.centerOnLocation());
         document.getElementById('force-geolocation').addEventListener('click', () => this.forceGeolocation());
+        document.getElementById('toggle-gps-manual').addEventListener('click', () => this.toggleGpsManual());
         document.getElementById('test-distance').addEventListener('click', () => this.testDistanceCalculation());
         document.getElementById('add-steps-manual').addEventListener('click', () => this.addStepsManual());
         document.getElementById('add-quest-markers').addEventListener('click', () => this.addQuestMarkers());
@@ -942,6 +944,29 @@ Items: ${status.items.join(', ') || 'None'}`);
             console.log('📍 Forcing geolocation update');
         } else {
             console.error('📍 Geolocation manager not available');
+        }
+    }
+
+    toggleGpsManual() {
+        console.log('📍 Toggling between GPS and Manual mode...');
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            const geolocation = window.eldritchApp.systems.geolocation;
+            const mapEngine = window.eldritchApp.systems.mapEngine;
+            
+            if (mapEngine.manualMode) {
+                // Currently in manual mode, switch to GPS
+                console.log('📍 Switching to GPS mode...');
+                mapEngine.disableManualMode();
+                geolocation.enableGPSTracking();
+                this.showNotification('📍 Switched to GPS mode', 'info');
+            } else {
+                // Currently in GPS mode, switch to manual
+                console.log('📍 Switching to Manual mode...');
+                geolocation.forceManualMode();
+                this.showNotification('📍 Switched to Manual mode', 'info');
+            }
+        } else {
+            console.error('📍 Geolocation or map engine not available');
         }
     }
 

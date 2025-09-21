@@ -8,12 +8,16 @@ class GeolocationManager {
         this.currentPosition = null;
         this.watchId = null;
         this.isTracking = false;
-        this.accuracyThreshold = 100; // meters
-        this.updateInterval = 1000; // 1 second
+        this.accuracyThreshold = 50; // meters - more strict
+        this.updateInterval = 2000; // 2 seconds - less frequent but more accurate
         this.onPositionUpdate = null;
         this.onAccuracyChange = null;
         this.simulatorMode = false;
         this.simulatorPosition = { lat: 40.7128, lng: -74.0060 }; // NYC default
+        this.lastValidPosition = null;
+        this.positionHistory = [];
+        this.maxHistorySize = 10;
+        this.deviceLocationDisplay = null;
     }
 
     init() {
@@ -29,6 +33,40 @@ class GeolocationManager {
         if (locateBtn) {
             locateBtn.addEventListener('click', () => this.startTracking());
         }
+        
+        // Create device location display in header
+        this.createDeviceLocationDisplay();
+    }
+
+    createDeviceLocationDisplay() {
+        // Find the header controls area
+        const headerControls = document.querySelector('.header-controls');
+        if (!headerControls) return;
+
+        // Create device location display
+        const locationDisplay = document.createElement('div');
+        locationDisplay.id = 'device-location-display';
+        locationDisplay.className = 'device-location-display';
+        locationDisplay.innerHTML = `
+            <div class="location-info">
+                <span class="location-label">📍 Device:</span>
+                <span class="location-coords">Getting location...</span>
+            </div>
+            <div class="location-accuracy">
+                <span class="accuracy-label">Accuracy:</span>
+                <span class="accuracy-value">--</span>
+            </div>
+        `;
+
+        // Insert after the locate button
+        const locateBtn = document.getElementById('locate-btn');
+        if (locateBtn && locateBtn.parentNode) {
+            locateBtn.parentNode.insertBefore(locationDisplay, locateBtn.nextSibling);
+        } else {
+            headerControls.appendChild(locationDisplay);
+        }
+
+        this.deviceLocationDisplay = locationDisplay;
     }
 
     checkGeolocationSupport() {
@@ -63,25 +101,57 @@ class GeolocationManager {
         };
 
         try {
-            // Get initial position
-            const position = await this.getCurrentPosition(options);
+            // Try high accuracy first
+            console.log('📍 Requesting high accuracy location...');
+            this.updateDeviceLocationDisplay('Getting high accuracy...', '--');
+            
+            const position = await this.getHighAccuracyPosition();
             this.handlePositionUpdate(position);
             
-            // Start watching position
+            // Start watching position with high accuracy
             this.watchId = navigator.geolocation.watchPosition(
                 (position) => this.handlePositionUpdate(position),
                 (error) => this.handleError(error),
                 options
             );
 
-            console.log('📍 Geolocation tracking started (real GPS)');
+            console.log('📍 Geolocation tracking started (high accuracy GPS)');
             
         } catch (error) {
-            this.handleError(error);
+            console.log('📍 High accuracy failed, trying standard accuracy...');
+            this.updateDeviceLocationDisplay('Trying standard accuracy...', '--');
+            
+            try {
+                const position = await this.getCurrentPosition(options);
+                this.handlePositionUpdate(position);
+                
+                // Start watching position
+                this.watchId = navigator.geolocation.watchPosition(
+                    (position) => this.handlePositionUpdate(position),
+                    (error) => this.handleError(error),
+                    options
+                );
+                
+                console.log('📍 Geolocation tracking started (standard GPS)');
+            } catch (fallbackError) {
+                this.handleError(fallbackError);
+            }
         }
     }
 
     getCurrentPosition(options) {
+        return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, options);
+        });
+    }
+
+    async getHighAccuracyPosition() {
+        const options = {
+            enableHighAccuracy: true,
+            timeout: 30000,  // 30 seconds for high accuracy
+            maximumAge: 0    // No cached positions
+        };
+
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, options);
         });
@@ -101,6 +171,27 @@ class GeolocationManager {
             timestamp: position.timestamp || Date.now()
         };
 
+        // Validate position coordinates
+        if (!this.isValidCoordinates(newPosition.lat, newPosition.lng)) {
+            console.error('Invalid coordinates received:', newPosition);
+            return;
+        }
+
+        // Check if this position is significantly different from last valid position
+        if (this.lastValidPosition && this.calculateDistance(this.lastValidPosition, newPosition) > 1000) {
+            console.warn('📍 Large position jump detected, validating...', {
+                from: this.lastValidPosition,
+                to: newPosition,
+                distance: this.calculateDistance(this.lastValidPosition, newPosition)
+            });
+            
+            // If jump is too large, wait for confirmation
+            if (this.calculateDistance(this.lastValidPosition, newPosition) > 5000) {
+                console.warn('📍 Position jump too large, ignoring this update');
+                return;
+            }
+        }
+
         // Log position updates for debugging
         console.log('📍 GPS Position Update:', {
             lat: newPosition.lat.toFixed(6),
@@ -109,7 +200,20 @@ class GeolocationManager {
             timestamp: new Date(newPosition.timestamp).toLocaleTimeString()
         });
 
+        // Update position history
+        this.positionHistory.push(newPosition);
+        if (this.positionHistory.length > this.maxHistorySize) {
+            this.positionHistory.shift();
+        }
+
         this.currentPosition = newPosition;
+        this.lastValidPosition = newPosition;
+
+        // Update device location display
+        this.updateDeviceLocationDisplay(
+            `${newPosition.lat.toFixed(6)}, ${newPosition.lng.toFixed(6)}`,
+            newPosition.accuracy ? `${newPosition.accuracy.toFixed(1)}m` : 'unknown'
+        );
 
         this.updateAccuracyDisplay();
         
@@ -244,6 +348,61 @@ class GeolocationManager {
             return this.currentPosition;
         }
         return null;
+    }
+
+    // Validate coordinates
+    isValidCoordinates(lat, lng) {
+        return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && 
+               !isNaN(lat) && !isNaN(lng) && isFinite(lat) && isFinite(lng);
+    }
+
+    // Calculate distance between two positions in meters
+    calculateDistance(pos1, pos2) {
+        const R = 6371e3; // Earth's radius in meters
+        const φ1 = pos1.lat * Math.PI/180;
+        const φ2 = pos2.lat * Math.PI/180;
+        const Δφ = (pos2.lat - pos1.lat) * Math.PI/180;
+        const Δλ = (pos2.lng - pos1.lng) * Math.PI/180;
+
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c; // Distance in meters
+    }
+
+    // Update device location display
+    updateDeviceLocationDisplay(coords, accuracy) {
+        if (!this.deviceLocationDisplay) return;
+
+        const coordsElement = this.deviceLocationDisplay.querySelector('.location-coords');
+        const accuracyElement = this.deviceLocationDisplay.querySelector('.accuracy-value');
+
+        if (coordsElement) {
+            coordsElement.textContent = coords;
+        }
+        if (accuracyElement) {
+            accuracyElement.textContent = accuracy;
+        }
+    }
+
+    // Force enable manual mode (disable GPS)
+    forceManualMode() {
+        console.log('📍 Forcing manual mode - disabling GPS tracking');
+        this.stopTracking();
+        this.updateDeviceLocationDisplay('Manual Mode', 'N/A');
+        
+        // Notify map engine to switch to manual mode
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
+            window.eldritchApp.systems.mapEngine.enableManualMode();
+        }
+    }
+
+    // Re-enable GPS tracking
+    enableGPSTracking() {
+        console.log('📍 Re-enabling GPS tracking');
+        this.startTracking();
     }
 
     // Simulator mode for testing
