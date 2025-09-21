@@ -122,9 +122,9 @@ class GruesomeNotifications {
         notification.className = 'gruesome-notification';
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             background: linear-gradient(135deg, ${levelInfo.color}20, ${levelInfo.color}40);
             border: 2px solid ${levelInfo.color};
             border-radius: 10px;
@@ -159,25 +159,25 @@ class GruesomeNotifications {
             style.textContent = `
                 @keyframes gruesomeSlideIn {
                     0% { 
-                        transform: translateX(-50%) translateY(-100px); 
+                        transform: translate(-50%, -50%) scale(0.5); 
                         opacity: 0; 
                     }
                     50% { 
-                        transform: translateX(-50%) translateY(10px); 
+                        transform: translate(-50%, -50%) scale(1.1); 
                         opacity: 0.8; 
                     }
                     100% { 
-                        transform: translateX(-50%) translateY(0); 
+                        transform: translate(-50%, -50%) scale(1); 
                         opacity: 1; 
                     }
                 }
                 @keyframes gruesomeSlideOut {
                     0% { 
-                        transform: translateX(-50%) translateY(0); 
+                        transform: translate(-50%, -50%) scale(1); 
                         opacity: 1; 
                     }
                     100% { 
-                        transform: translateX(-50%) translateY(-100px); 
+                        transform: translate(-50%, -50%) scale(0.5); 
                         opacity: 0; 
                     }
                 }

@@ -21,6 +21,8 @@ class UnifiedQuestSystem {
         this.isPaused = true; // Start paused until game begins
         this.visitedQuests = new Set(); // Track visited quest markers
         this.questCooldowns = new Map(); // Track quest cooldowns
+        this.dialogCooldowns = new Map(); // Track dialog cooldowns
+        this.currentDialog = null; // Track current dialog
         
         // Aurora as main quest giver - positioned 100m away from player
         this.aurora = {
@@ -31,7 +33,11 @@ class UnifiedQuestSystem {
             interactionDistance: 20, // meters
             isQuestGiver: true,
             currentQuest: null,
-            dialogue: this.getAuroraDialogue()
+            dialogue: this.getAuroraDialogue(),
+            // Movement properties
+            movementSpeed: 0.00001, // Slow random movement
+            movementInterval: null,
+            lastMoveTime: 0
         };
         
         this.initializeQuests();
@@ -60,7 +66,7 @@ class UnifiedQuestSystem {
                             type: 'proximity',
                             target: 'corroding_lake',
                             distance: 50,
-                            location: { lat: 61.4737, lng: 23.7240 }
+                            location: { lat: 61.476173436868, lng: 23.725432936819306 }
                         },
                 {
                     id: 'find_ancient_staff',
@@ -69,7 +75,7 @@ class UnifiedQuestSystem {
                     type: 'proximity',
                     target: 'ancient_staff',
                     distance: 50,
-                    location: { lat: 61.4735, lng: 23.7245 }
+                    location: { lat: 61.4735, lng: 23.7325 }
                 },
                 {
                     id: 'meet_lunatic_sage',
@@ -78,7 +84,7 @@ class UnifiedQuestSystem {
                     type: 'proximity',
                     target: 'lunatic_sage',
                     distance: 50,
-                    location: { lat: 61.4733, lng: 23.7242 }
+                    location: { lat: 61.4728, lng: 23.7320 }
                 },
                 {
                     id: 'face_troll_bridge',
@@ -87,7 +93,7 @@ class UnifiedQuestSystem {
                     type: 'proximity',
                     target: 'troll_bridge',
                     distance: 50,
-                    location: { lat: 61.4739, lng: 23.7248 }
+                    location: { lat: 61.4765, lng: 23.7305 }
                 },
                 {
                     id: 'release_cthulhu',
@@ -96,7 +102,7 @@ class UnifiedQuestSystem {
                     type: 'proximity',
                     target: 'cthulhu_awakening',
                     distance: 50,
-                    location: { lat: 61.4741, lng: 23.7250 }
+                    location: { lat: 61.4775, lng: 23.7285 }
                 }
             ],
             rewards: {
@@ -320,6 +326,14 @@ class UnifiedQuestSystem {
         console.log('🎭 Creating quest markers...');
         console.log('🎭 Map engine available:', !!window.mapEngine);
         console.log('🎭 Map available:', !!window.mapEngine.map);
+        console.log('🎭 Map center:', window.mapEngine.map.getCenter());
+        console.log('🎭 Map zoom:', window.mapEngine.map.getZoom());
+        console.log('🎭 Quest system state:', {
+            isInitialized: this.isInitialized,
+            isPaused: this.isPaused,
+            availableQuests: this.availableQuests.size,
+            activeQuests: this.activeQuests.size
+        });
         
         // Aurora quest giver marker
         this.createAuroraMarker();
@@ -327,9 +341,61 @@ class UnifiedQuestSystem {
         // Quest location markers
         this.createQuestLocationMarkers();
         
+        // Create the first quest objective marker if quest is available
+        const corrodingLakeQuest = this.availableQuests.get('corroding_lake');
+        if (corrodingLakeQuest && corrodingLakeQuest.status === 'available') {
+            console.log('🎭 Creating first quest objective marker for Corroding Lake');
+            this.createFirstQuestObjectiveMarker(corrodingLakeQuest);
+        }
+        
         console.log('🎭 Quest markers created successfully');
+        console.log('🎭 Total quest markers:', this.questMarkers.size);
+        console.log('🎭 Quest marker keys:', Array.from(this.questMarkers.keys()));
     }
     
+    createFirstQuestObjectiveMarker(quest) {
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.log('🎭 First quest objective marker: Map engine not ready');
+            return;
+        }
+        
+        // Find the first objective
+        const firstObjective = quest.objectives.find(obj => obj.status === 'incomplete');
+        if (!firstObjective) {
+            console.log('🎭 No incomplete objectives found for quest:', quest.name);
+            return;
+        }
+        
+        console.log('🎭 Creating first quest objective marker for:', firstObjective.id);
+        
+        // Use the objective's location
+        const position = firstObjective.location;
+        if (!position) {
+            console.log('🎭 No location found for objective:', firstObjective.id);
+            return;
+        }
+        
+        // Create the marker
+        const markerKey = `${quest.id}_${firstObjective.id}`;
+        const marker = this.createQuestObjectiveMarker(firstObjective, position);
+        
+        if (marker) {
+            this.questMarkers.set(markerKey, marker);
+            console.log('🎭 Created first quest objective marker:', markerKey, 'at:', position);
+            
+            // Show notification for new quest marker
+            const objectiveIcons = {
+                'escape_corroding_lake': { symbol: '🌊', color: '#00bfff', name: 'Corroding Lake' },
+                'find_ancient_staff': { symbol: '🌿', color: '#8b4513', name: 'Ancient Staff' },
+                'meet_lunatic_sage': { symbol: '🧙', color: '#ffd700', name: 'Lunatic Sage' },
+                'face_troll_bridge': { symbol: '👹', color: '#8b0000', name: 'Troll Bridge' },
+                'release_cthulhu': { symbol: '🐙', color: '#4b0082', name: 'Cthulhu\'s Depths' }
+            };
+            const iconData = objectiveIcons[firstObjective.id] || { symbol: '❓', color: '#95a5a6', name: 'Quest Objective' };
+            this.showNewMarkerNotification(firstObjective, iconData);
+        }
+    }
+
     createAuroraMarker() {
         if (!window.mapEngine || !window.mapEngine.map) {
             console.log('🎭 Aurora marker: Map engine not ready');
@@ -380,12 +446,13 @@ class UnifiedQuestSystem {
     
     createQuestLocationMarkers() {
         // Create markers for quest locations
+        console.log('🎭 Creating quest location markers...');
         const questLocations = [
             {
                 id: 'corroding_lake',
                 name: 'The Corroding Lake',
-                lat: 61.4737,
-                lng: 23.7240,
+                lat: 61.476173436868,
+                lng: 23.725432936819306,
                 description: 'A mysterious fuming lake that threatens the area',
                 icon: '🌊',
                 color: '#00bfff'
@@ -394,7 +461,7 @@ class UnifiedQuestSystem {
                 id: 'ancient_staff',
                 name: 'Ancient Grove',
                 lat: 61.4735,
-                lng: 23.7245,
+                lng: 23.7325,
                 description: 'A hidden grove where an ancient staff lies',
                 icon: '🌿',
                 color: '#8b4513'
@@ -402,8 +469,8 @@ class UnifiedQuestSystem {
             {
                 id: 'lunatic_sage',
                 name: 'Sage\'s Hill',
-                lat: 61.4733,
-                lng: 23.7242,
+                lat: 61.4728,
+                lng: 23.7320,
                 description: 'The dwelling of the Lunatic Sage',
                 icon: '🧙',
                 color: '#ffd700'
@@ -411,8 +478,8 @@ class UnifiedQuestSystem {
             {
                 id: 'troll_bridge',
                 name: 'Troll Bridge',
-                lat: 61.4739,
-                lng: 23.7248,
+                lat: 61.4765,
+                lng: 23.7305,
                 description: 'A bridge guarded by a hideous troll',
                 icon: '👹',
                 color: '#8b0000'
@@ -420,8 +487,8 @@ class UnifiedQuestSystem {
             {
                 id: 'cthulhu_awakening',
                 name: 'Cthulhu\'s Depths',
-                lat: 61.4741,
-                lng: 23.7250,
+                lat: 61.4775,
+                lng: 23.7285,
                 description: 'Where the ancient horror slumbers',
                 icon: '🐙',
                 color: '#4b0082'
@@ -438,6 +505,7 @@ class UnifiedQuestSystem {
         ];
         
         questLocations.forEach(location => {
+            console.log('🎭 Creating marker for:', location.name, 'at', location.lat, location.lng);
             const locationIcon = L.divIcon({
                 className: 'quest-location-marker',
                 html: `
@@ -465,7 +533,29 @@ class UnifiedQuestSystem {
             `);
             
             this.questMarkers.set(location.id, locationMarker);
+            console.log('🎭 Marker created and added to map:', location.name);
         });
+        
+        console.log('🎭 All quest location markers created. Total markers:', this.questMarkers.size);
+    }
+    
+    // Debug method to force show all quest markers
+    forceShowAllMarkers() {
+        console.log('🎭 Force showing all quest markers...');
+        console.log('🎭 Total markers:', this.questMarkers.size);
+        
+        this.questMarkers.forEach((marker, key) => {
+            console.log('🎭 Showing marker:', key);
+            marker.openPopup();
+        });
+        
+        // Also try to create a test marker at a known location
+        if (window.mapEngine && window.mapEngine.map) {
+            const testMarker = L.marker([61.4737, 23.7240]).addTo(window.mapEngine.map);
+            testMarker.bindPopup('Test Quest Marker - Corroding Lake');
+            testMarker.openPopup();
+            console.log('🎭 Test marker created and shown');
+        }
     }
     
     updateQuestProximity() {
@@ -488,6 +578,12 @@ class UnifiedQuestSystem {
         
         // Check Aurora proximity
         this.checkAuroraProximity(playerPosition);
+        
+        // Check HEVY proximity
+        this.checkHEVYProximity(playerPosition);
+        
+        // Check Zephyr proximity
+        this.checkZephyrProximity(playerPosition);
         
         // Check quest objective proximity
         this.checkQuestObjectiveProximity(playerPosition);
@@ -519,23 +615,76 @@ class UnifiedQuestSystem {
     }
     
     checkAuroraProximity(playerPosition) {
+        // Get Aurora's current position from NPC system
+        if (window.eldritchApp && window.eldritchApp.systems.npc) {
+            const aurora = window.eldritchApp.systems.npc.npcs.find(npc => npc.name === 'Aurora');
+            if (aurora) {
+                const interactionDistance = 20; // meters
+                const distance = this.calculateDistance(
+                    playerPosition.lat, playerPosition.lng,
+                    aurora.lat, aurora.lng
+                );
+                
+                console.log(`🌟 Aurora distance: ${distance.toFixed(2)}m (interaction distance: ${interactionDistance}m)`);
+                
+                // Update distance display
+                const distanceEl = document.getElementById('aurora-distance');
+                if (distanceEl) {
+                    distanceEl.textContent = `${Math.round(distance)}m`;
+                }
+                
+                // Check if player is close enough to interact
+                if (distance <= interactionDistance) {
+                    console.log('🌟 Aurora proximity triggered!');
+                    this.handleAuroraProximity();
+                }
+            } else {
+                console.log('🌟 Aurora not found in NPC system');
+            }
+        } else {
+            console.log('🌟 NPC system not available for Aurora check');
+        }
+    }
+    
+    checkHEVYProximity(playerPosition) {
+        // HEVY is at a fixed location
+        const heavyLat = 61.473683430224284;
+        const heavyLng = 23.726548746143216;
+        const interactionDistance = 20; // meters
+        
         const distance = this.calculateDistance(
             playerPosition.lat, playerPosition.lng,
-            this.aurora.lat, this.aurora.lng
+            heavyLat, heavyLng
         );
         
-        console.log(`🎭 Aurora distance: ${distance.toFixed(2)}m (interaction distance: ${this.aurora.interactionDistance}m)`);
-        
-        // Update distance display
-        const distanceEl = document.getElementById('aurora-distance');
-        if (distanceEl) {
-            distanceEl.textContent = `${Math.round(distance)}m`;
-        }
+        console.log(`⚡ HEVY distance: ${distance.toFixed(2)}m (interaction distance: ${interactionDistance}m)`);
         
         // Check if player is close enough to interact
-        if (distance <= this.aurora.interactionDistance) {
-            console.log('🎭 Aurora proximity triggered!');
-            this.handleAuroraProximity();
+        if (distance <= interactionDistance) {
+            console.log('⚡ HEVY proximity triggered!');
+            this.handleHEVYProximity();
+        }
+    }
+    
+    checkZephyrProximity(playerPosition) {
+        // Get Zephyr's current position from NPC system
+        if (window.eldritchApp && window.eldritchApp.systems.npc) {
+            const zephyr = window.eldritchApp.systems.npc.npcs.find(npc => npc.name === 'Zephyr');
+            if (zephyr) {
+                const interactionDistance = 20; // meters
+                const distance = this.calculateDistance(
+                    playerPosition.lat, playerPosition.lng,
+                    zephyr.lat, zephyr.lng
+                );
+                
+                console.log(`💨 Zephyr distance: ${distance.toFixed(2)}m (interaction distance: ${interactionDistance}m)`);
+                
+                // Check if player is close enough to interact
+                if (distance <= interactionDistance) {
+                    console.log('💨 Zephyr proximity triggered!');
+                    this.handleZephyrProximity();
+                }
+            }
         }
     }
     
@@ -544,6 +693,23 @@ class UnifiedQuestSystem {
         const auroraQuest = this.availableQuests.get('aurora_meeting');
         if (auroraQuest && auroraQuest.status === 'available') {
             this.startQuest('aurora_meeting');
+        }
+    }
+    
+    handleHEVYProximity() {
+        console.log('⚡ HEVY proximity triggered - starting encounter');
+        if (window.eldritchApp && window.eldritchApp.systems.encounter) {
+            window.eldritchApp.systems.encounter.testHeavyEncounter();
+        }
+    }
+    
+    handleZephyrProximity() {
+        console.log('💨 Zephyr proximity triggered - starting chat');
+        if (window.eldritchApp && window.eldritchApp.systems.npc) {
+            const zephyr = window.eldritchApp.systems.npc.npcs.find(npc => npc.name === 'Zephyr');
+            if (zephyr) {
+                window.eldritchApp.systems.npc.startChat(zephyr);
+            }
         }
     }
     
@@ -613,7 +779,25 @@ class UnifiedQuestSystem {
                     if (distance <= 50) { // Always trigger within 50 meters
                         console.log(`🎭 Quest triggered! Distance: ${distance.toFixed(2)}m to ${objective.id}`);
                         
-                        // No cooldowns or visited checks - allow immediate dialog triggering
+                        // Check if dialog is already open
+                        if (this.currentDialog) {
+                            console.log('🎭 Dialog already open, skipping trigger');
+                            return;
+                        }
+                        
+                        // Check cooldown for this objective
+                        const cooldownKey = `${quest.id}_${objective.id}`;
+                        const lastTrigger = this.dialogCooldowns.get(cooldownKey);
+                        const now = Date.now();
+                        const cooldownTime = 10000; // 10 seconds cooldown
+                        
+                        if (lastTrigger && (now - lastTrigger) < cooldownTime) {
+                            console.log(`🎭 Dialog on cooldown for ${cooldownKey}, remaining: ${Math.ceil((cooldownTime - (now - lastTrigger)) / 1000)}s`);
+                            return;
+                        }
+                        
+                        // Set cooldown
+                        this.dialogCooldowns.set(cooldownKey, now);
                         
                         // If this is the first objective and quest is available, start it
                         if (quest.status === 'available' && objective.id === 'escape_corroding_lake') {
@@ -1110,8 +1294,9 @@ class UnifiedQuestSystem {
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: var(--cosmic-purple);
             color: white;
             padding: 15px 20px;
@@ -1119,11 +1304,26 @@ class UnifiedQuestSystem {
             z-index: 10001;
             font-weight: bold;
             box-shadow: 0 0 20px rgba(106, 13, 173, 0.5);
-            animation: slideIn 0.3s ease-out;
+            animation: slideInCenter 0.3s ease-out;
+            text-align: center;
+            max-width: 400px;
         `;
         
         notification.textContent = message;
         document.body.appendChild(notification);
+        
+        // Add animation styles if not already added
+        if (!document.getElementById('quest-notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'quest-notification-styles';
+            style.textContent = `
+                @keyframes slideInCenter {
+                    from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         // Remove after 3 seconds
         setTimeout(() => {
@@ -1209,6 +1409,9 @@ class UnifiedQuestSystem {
         // Start position tracking now that game has begun
         this.startPositionTracking();
         
+        // Start Aurora movement
+        this.startAuroraMovement();
+        
         // Reset any quests that were triggered during start screen
         this.resetQuestsForGameStart();
         
@@ -1227,6 +1430,12 @@ class UnifiedQuestSystem {
         // Clear visited quests and cooldowns (no longer used)
         // this.visitedQuests.clear();
         // this.questCooldowns.clear();
+        
+        // Clear dialog cooldowns
+        this.dialogCooldowns.clear();
+        
+        // Close any open dialog
+        this.closeQuestDialog();
         
         // Reset quest statuses
         this.availableQuests.forEach((quest, questId) => {
@@ -1369,6 +1578,12 @@ class UnifiedQuestSystem {
     showQuestDialog(quest, objective) {
         console.log('🎭 Showing quest dialog for:', quest.name);
         
+        // Check if dialog is already open
+        if (this.currentDialog) {
+            console.log('🎭 Dialog already open, closing existing dialog first');
+            this.closeQuestDialog();
+        }
+        
         // Create dialog overlay
         const dialogOverlay = document.createElement('div');
         dialogOverlay.className = 'quest-dialog-overlay';
@@ -1465,6 +1680,17 @@ class UnifiedQuestSystem {
         
         dialogContent.innerHTML = questHTML;
         dialogOverlay.appendChild(dialogContent);
+        
+        // Store dialog reference
+        this.currentDialog = dialogOverlay;
+        
+        // Add click outside to close
+        dialogOverlay.addEventListener('click', (e) => {
+            if (e.target === dialogOverlay) {
+                this.closeQuestDialog();
+            }
+        });
+        
         document.body.appendChild(dialogOverlay);
         
         // Add click handlers for options
@@ -2012,10 +2238,14 @@ class UnifiedQuestSystem {
         
         // Complete the objective only if it should be completed
         if (shouldCompleteObjective) {
+            console.log(`🎭 Completing objective: ${objective.id} for quest: ${quest.id}`);
             this.completeObjective(quest.id, objective.id);
             
             // Hide current quest marker and show next one
+            console.log(`🎭 Progressing quest markers for quest: ${quest.id}, objective: ${objective.id}`);
             this.progressQuestMarkers(quest, objective);
+        } else {
+            console.log(`🎭 Not completing objective: ${objective.id} (shouldCompleteObjective = false)`);
         }
         
         // Show feedback dialog
@@ -2250,6 +2480,72 @@ class UnifiedQuestSystem {
         this.showQuestFeedback(quest, 'riddle', effect, feedbackText);
     }
     
+    // Start Aurora movement
+    startAuroraMovement() {
+        if (this.aurora.movementInterval) {
+            clearInterval(this.aurora.movementInterval);
+        }
+        
+        this.aurora.movementInterval = setInterval(() => {
+            this.moveAurora();
+        }, 5000); // Move every 5 seconds
+        
+        console.log('👑 Aurora movement started');
+    }
+    
+    // Move Aurora randomly
+    moveAurora() {
+        if (!this.aurora || !window.mapEngine || !window.mapEngine.map) {
+            return;
+        }
+        
+        // Random direction
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = this.aurora.movementSpeed;
+        
+        // Calculate new position
+        const newLat = this.aurora.lat + Math.cos(angle) * distance;
+        const newLng = this.aurora.lng + Math.sin(angle) * distance;
+        
+        // Update Aurora position
+        this.aurora.lat = newLat;
+        this.aurora.lng = newLng;
+        
+        // Update marker position
+        const auroraMarker = this.questMarkers.get('aurora');
+        if (auroraMarker) {
+            auroraMarker.setLatLng([newLat, newLng]);
+        }
+        
+        console.log(`👑 Aurora moved to: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`);
+    }
+    
+    // Show notification for new quest marker
+    showNewMarkerNotification(objective, iconData) {
+        if (window.eldritchApp && window.eldritchApp.showNotification) {
+            const message = `🎯 New Quest Objective: ${iconData.name}`;
+            window.eldritchApp.showNotification(message, 'info');
+        }
+        
+        // Also show a more detailed notification
+        setTimeout(() => {
+            if (window.eldritchApp && window.eldritchApp.showNotification) {
+                const description = objective.description || 'A new quest objective has appeared on the map!';
+                window.eldritchApp.showNotification(`📍 ${description}`, 'quest');
+            }
+        }, 2000);
+        
+        // Animate map to focus on the new marker
+        if (window.mapEngine && window.mapEngine.map && objective.location) {
+            setTimeout(() => {
+                window.mapEngine.map.setView([objective.location.lat, objective.location.lng], 18, {
+                    animate: true,
+                    duration: 1.5
+                });
+            }, 500);
+        }
+    }
+
     // Apply quest effects to player stats
     applyQuestEffect(effect) {
         if (window.eldritchApp && window.eldritchApp.systems.encounter) {
@@ -2299,8 +2595,95 @@ class UnifiedQuestSystem {
         // Hide the current quest marker
         this.hideCurrentQuestMarker(quest, completedObjective);
         
-        // Show the next quest marker if there's another objective
-        this.showNextQuestMarker(quest);
+        // Special progression for Corroding Lake quest
+        if (quest.id === 'corroding_lake') {
+            this.progressCorrodingLakeMarkers(completedObjective);
+        } else {
+            // Show the next quest marker if there's another objective
+            this.showNextQuestMarker(quest);
+        }
+    }
+    
+    // Special progression for Corroding Lake quest
+    progressCorrodingLakeMarkers(completedObjective) {
+        console.log('🎭 Progressing Corroding Lake markers for objective:', completedObjective.id);
+        console.log('🎭 Available quests:', Array.from(this.availableQuests.keys()));
+        console.log('🎭 Active quests:', Array.from(this.activeQuests.keys()));
+        
+        const quest = this.availableQuests.get('corroding_lake') || this.activeQuests.get('corroding_lake');
+        if (!quest) {
+            console.log('🎭 Corroding Lake quest not found in available or active quests');
+            return;
+        }
+        
+        console.log('🎭 Found Corroding Lake quest:', quest.name, 'status:', quest.status);
+        
+        switch (completedObjective.id) {
+            case 'escape_corroding_lake':
+                // After Corroding Lake, show Ancient Grove (2) and Sage's Hill (3)
+                console.log('🎭 Revealing markers 2 & 3 after Corroding Lake');
+                const ancientStaffObj = quest.objectives.find(obj => obj.id === 'find_ancient_staff');
+                const sageObj = quest.objectives.find(obj => obj.id === 'meet_lunatic_sage');
+                
+                if (ancientStaffObj) {
+                    console.log('🎭 Creating Ancient Staff marker at:', ancientStaffObj.location);
+                    const markerKey1 = `${quest.id}_${ancientStaffObj.id}`;
+                    const marker1 = this.createQuestObjectiveMarker(ancientStaffObj, ancientStaffObj.location);
+                    if (marker1) {
+                        this.questMarkers.set(markerKey1, marker1);
+                        console.log('🎭 Ancient Staff marker created and stored:', markerKey1);
+                        this.showNewMarkerNotification(ancientStaffObj, { symbol: '🌿', color: '#8b4513', name: 'Ancient Staff' });
+                    } else {
+                        console.log('🎭 Failed to create Ancient Staff marker');
+                    }
+                } else {
+                    console.log('🎭 Ancient Staff objective not found');
+                }
+                
+                if (sageObj) {
+                    console.log('🎭 Creating Sage marker at:', sageObj.location);
+                    const markerKey2 = `${quest.id}_${sageObj.id}`;
+                    const marker2 = this.createQuestObjectiveMarker(sageObj, sageObj.location);
+                    if (marker2) {
+                        this.questMarkers.set(markerKey2, marker2);
+                        console.log('🎭 Sage marker created and stored:', markerKey2);
+                        this.showNewMarkerNotification(sageObj, { symbol: '🧙', color: '#ffd700', name: 'Lunatic Sage' });
+                    } else {
+                        console.log('🎭 Failed to create Sage marker');
+                    }
+                } else {
+                    console.log('🎭 Sage objective not found');
+                }
+                break;
+                
+            case 'meet_lunatic_sage':
+                // After Sage's Hill, show Troll Bridge (4)
+                console.log('🎭 Revealing marker 4 after Sage\'s Hill');
+                const trollObj = quest.objectives.find(obj => obj.id === 'face_troll_bridge');
+                if (trollObj) {
+                    const markerKey = `${quest.id}_${trollObj.id}`;
+                    const marker = this.createQuestObjectiveMarker(trollObj, trollObj.location);
+                    if (marker) {
+                        this.questMarkers.set(markerKey, marker);
+                        this.showNewMarkerNotification(trollObj, { symbol: '👹', color: '#8b0000', name: 'Troll Bridge' });
+                    }
+                }
+                break;
+                
+            case 'face_troll_bridge':
+                // After Troll Bridge, show Cthulhu's Depths (5)
+                console.log('🎭 Revealing marker 5 after Troll Bridge');
+                const cthulhuObj = quest.objectives.find(obj => obj.id === 'release_cthulhu');
+                if (cthulhuObj) {
+                    const markerKey = `${quest.id}_${cthulhuObj.id}`;
+                    const marker = this.createQuestObjectiveMarker(cthulhuObj, cthulhuObj.location);
+                    if (marker) {
+                        this.questMarkers.set(markerKey, marker);
+                        this.showNewMarkerNotification(cthulhuObj, { symbol: '🐙', color: '#4b0082', name: 'Cthulhu\'s Depths' });
+                    }
+                }
+                break;
+        }
     }
     
     // Hide the current quest marker
@@ -2369,6 +2752,17 @@ class UnifiedQuestSystem {
         if (marker) {
             this.questMarkers.set(markerKey, marker);
             console.log('🎭 Created objective marker:', markerKey, 'at:', nextMarkerPos);
+            
+            // Show notification for new quest marker
+            const objectiveIcons = {
+                'escape_corroding_lake': { symbol: '🌊', color: '#00bfff', name: 'Corroding Lake' },
+                'find_ancient_staff': { symbol: '🌿', color: '#8b4513', name: 'Ancient Staff' },
+                'meet_lunatic_sage': { symbol: '🧙', color: '#ffd700', name: 'Lunatic Sage' },
+                'face_troll_bridge': { symbol: '👹', color: '#8b0000', name: 'Troll Bridge' },
+                'release_cthulhu': { symbol: '🐙', color: '#4b0082', name: 'Cthulhu\'s Depths' }
+            };
+            const iconData = objectiveIcons[objective.id] || { symbol: '❓', color: '#95a5a6', name: 'Quest Objective' };
+            this.showNewMarkerNotification(objective, iconData);
         }
     }
     
@@ -2392,6 +2786,11 @@ class UnifiedQuestSystem {
     // Create a quest objective marker
     createQuestObjectiveMarker(objective, position) {
         const objectiveIcons = {
+            'escape_corroding_lake': { symbol: '🌊', color: '#00bfff', name: 'Corroding Lake' },
+            'find_ancient_staff': { symbol: '🌿', color: '#8b4513', name: 'Ancient Staff' },
+            'meet_lunatic_sage': { symbol: '🧙', color: '#ffd700', name: 'Lunatic Sage' },
+            'face_troll_bridge': { symbol: '👹', color: '#8b0000', name: 'Troll Bridge' },
+            'release_cthulhu': { symbol: '🐙', color: '#4b0082', name: 'Cthulhu\'s Depths' },
             'accept_sanity_test': { symbol: '🧠', color: '#ff6b6b', name: 'Sanity Test' },
             'survive_insanity': { symbol: '🌀', color: '#4ecdc4', name: 'Survival Challenge' },
             'talk_to_npcs': { symbol: '👥', color: '#45b7d1', name: 'Community Meeting' }
@@ -2400,7 +2799,7 @@ class UnifiedQuestSystem {
         const iconData = objectiveIcons[objective.id] || { symbol: '❓', color: '#95a5a6', name: 'Quest Objective' };
         
         const objectiveIcon = L.divIcon({
-            className: 'quest-objective-marker',
+            className: 'quest-objective-marker new-marker',
             html: `
                 <div style="position: relative; width: 40px; height: 40px;">
                     <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, ${iconData.color}33 0%, transparent 70%); border-radius: 50%; animation: questObjectivePulse 2s infinite;"></div>
@@ -2413,6 +2812,13 @@ class UnifiedQuestSystem {
         });
         
         const marker = L.marker([position.lat, position.lng], { icon: objectiveIcon }).addTo(window.mapEngine.map);
+        
+        // Remove animation class after animation completes
+        setTimeout(() => {
+            if (marker._icon) {
+                marker._icon.classList.remove('new-marker');
+            }
+        }, 3000); // Remove after 3 seconds
         
         // Add click event to trigger interaction
         marker.on('click', () => {
@@ -2458,9 +2864,13 @@ class UnifiedQuestSystem {
     // Close quest dialog
     closeQuestDialog() {
         if (this.currentDialog) {
+            console.log('🎭 Closing quest dialog');
             this.currentDialog.remove();
             this.currentDialog = null;
         }
+        
+        // Also close any riddle minigame that might be open
+        this.closeRiddleMinigame();
     }
     
     // Close riddle minigame

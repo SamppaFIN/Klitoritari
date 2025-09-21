@@ -12,7 +12,7 @@ class NPCSystem {
         this.currentNPC = null;
         this.movementInterval = null;
         this.proximityCheckInterval = null;
-        this.chatDistance = 30; // meters
+        this.chatDistance = 20; // meters
         this.npcCount = 2; // Number of NPCs to spawn
     }
 
@@ -40,6 +40,12 @@ class NPCSystem {
         }
 
         console.log('👥 Clearing all NPCs...');
+        console.log('👥 NPC system state:', {
+            isInitialized: this.isInitialized,
+            npcCount: this.npcCount,
+            mapEngine: !!window.eldritchApp.systems.mapEngine,
+            map: !!window.eldritchApp.systems.mapEngine.map
+        });
         
         // Clear existing NPCs
         this.npcMarkers.forEach(marker => {
@@ -53,10 +59,9 @@ class NPCSystem {
         // Generate new NPCs
         console.log('👥 Generating new NPCs...');
         
-        const npcCount = 2; // Generate only 2 test NPCs to reduce log spam
-        for (let i = 0; i < npcCount; i++) {
-            this.createTestNPC(`NPC_${i + 1}`);
-        }
+        // Create Aurora and Zephyr specifically
+        this.createAuroraNPC();
+        this.createZephyrNPC();
         
         console.log('👥 Generated', this.npcs.length, 'NPCs');
 
@@ -269,9 +274,20 @@ class NPCSystem {
         this.npcs.forEach(npc => {
             if (!npc.marker) return;
 
-            // Random movement within radius
-            const angle = npc.direction + (Math.random() - 0.5) * 0.5; // Slight direction change
-            const distance = npc.speed * (0.5 + Math.random() * 0.5); // Variable speed
+            let angle, distance;
+            
+            // Special movement for Zephyr - fast directional movement
+            if (npc.name === 'Zephyr') {
+                // Zephyr moves fast in specific directions
+                const directions = [0, Math.PI/2, Math.PI, 3*Math.PI/2]; // North, East, South, West
+                const currentDirection = directions[Math.floor(Math.random() * directions.length)];
+                angle = currentDirection;
+                distance = npc.speed * 3; // 3x faster than normal
+            } else {
+                // Normal random movement for other NPCs
+                angle = npc.direction + (Math.random() - 0.5) * 0.5; // Slight direction change
+                distance = npc.speed * (0.5 + Math.random() * 0.5); // Variable speed
+            }
 
             const newLat = npc.lat + Math.cos(angle) * distance;
             const newLng = npc.lng + Math.sin(angle) * distance;
@@ -286,6 +302,10 @@ class NPCSystem {
                 npc.lng = newLng;
                 npc.direction = angle;
                 npc.marker.setLatLng([npc.lat, npc.lng]);
+                
+                if (npc.name === 'Zephyr') {
+                    console.log(`💨 Zephyr moved fast to: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`);
+                }
             } else {
                 // Turn around if too far from origin
                 npc.direction = npc.direction + Math.PI + (Math.random() - 0.5) * Math.PI;
@@ -322,7 +342,7 @@ class NPCSystem {
 
             // Only log distance when close to encounter
             if (distance < this.chatDistance * 2) {
-                console.log(`👥 ${npc.name} distance:`, distance, 'meters (encounter distance: ${this.chatDistance})');
+                console.log(`👥 ${npc.name} distance:`, distance, 'meters (encounter distance:', this.chatDistance, ')');
             }
 
             if (distance < this.chatDistance && !npc.encountered) {
@@ -423,7 +443,7 @@ class NPCSystem {
                 <div class="debug-section">
                     <h4>Chat Settings</h4>
                     <label for="chat-distance">Chat Distance (m):</label>
-                    <input type="number" id="chat-distance" value="30" min="5" max="100">
+                    <input type="number" id="chat-distance" value="20" min="5" max="100">
                     <button id="update-chat-distance" class="debug-btn">Update Distance</button>
                 </div>
                 <div class="debug-section">
@@ -485,6 +505,90 @@ class NPCSystem {
             // Create a test NPC if none exists
             this.createTestNPC(npcName);
         }
+    }
+
+    createAuroraNPC() {
+        console.log('👥 Creating Aurora NPC...');
+        
+        // Get player position for NPC placement
+        let baseLat = 61.473683430224284;
+        let baseLng = 23.726548746143216;
+        
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
+            baseLat = window.eldritchApp.systems.geolocation.currentPosition.lat;
+            baseLng = window.eldritchApp.systems.geolocation.currentPosition.lng;
+        }
+        
+        // Generate random position around player (within 200m radius)
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 0.001 + Math.random() * 0.002; // 100-300m in degrees
+        const lat = baseLat + Math.cos(angle) * distance;
+        const lng = baseLng + Math.sin(angle) * distance;
+        
+        const auroraNPC = {
+            id: 'aurora',
+            name: 'Aurora',
+            emoji: '🌟',
+            color: '#FFD700',
+            personality: 'mystical',
+            greeting: 'Greetings, fellow cosmic explorer!',
+            topics: ['cosmic mysteries', 'ancient wisdom', 'stellar navigation'],
+            role: 'lore_keeper',
+            lat: lat,
+            lng: lng,
+            originalLat: lat,
+            originalLng: lng,
+            movementRadius: 0.001, // ~100m movement radius
+            speed: 0.00005, // Slow movement for Aurora
+            direction: Math.random() * Math.PI * 2,
+            encountered: false,
+            lastChatTime: 0
+        };
+        
+        this.npcs.push(auroraNPC);
+        this.createNPCMarker(auroraNPC);
+    }
+    
+    createZephyrNPC() {
+        console.log('👥 Creating Zephyr NPC...');
+        
+        // Get player position for NPC placement
+        let baseLat = 61.473683430224284;
+        let baseLng = 23.726548746143216;
+        
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
+            baseLat = window.eldritchApp.systems.geolocation.currentPosition.lat;
+            baseLng = window.eldritchApp.systems.geolocation.currentPosition.lng;
+        }
+        
+        // Generate random position around player (within 200m radius)
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 0.001 + Math.random() * 0.002; // 100-300m in degrees
+        const lat = baseLat + Math.cos(angle) * distance;
+        const lng = baseLng + Math.sin(angle) * distance;
+        
+        const zephyrNPC = {
+            id: 'zephyr',
+            name: 'Zephyr',
+            emoji: '💨',
+            color: '#87CEEB',
+            personality: 'wanderer',
+            greeting: 'Hey there! Nice to see another traveler!',
+            topics: ['adventure stories', 'hidden locations', 'travel tips'],
+            role: 'information_broker',
+            lat: lat,
+            lng: lng,
+            originalLat: lat,
+            originalLng: lng,
+            movementRadius: 0.001, // ~100m movement radius
+            speed: 0.0001, // Fast movement for Zephyr
+            direction: Math.random() * Math.PI * 2,
+            encountered: false,
+            lastChatTime: 0
+        };
+        
+        this.npcs.push(zephyrNPC);
+        this.createNPCMarker(zephyrNPC);
     }
 
     createTestNPC(npcName) {

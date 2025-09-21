@@ -800,6 +800,34 @@ class EldritchSanctuaryApp {
         }
     }
     
+    addQuestMarkerDebugButton() {
+        // Add a test button for quest marker debugging
+        const testButton = document.createElement('button');
+        testButton.textContent = '🎭 Test Quest Markers';
+        testButton.style.cssText = `
+            position: fixed;
+            top: 150px;
+            right: 20px;
+            z-index: 10000;
+            background: var(--cosmic-green);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        `;
+        
+        testButton.addEventListener('click', () => {
+            if (this.systems.unifiedQuest) {
+                this.systems.unifiedQuest.forceShowAllMarkers();
+            } else {
+                console.log('🎭 Quest system not available');
+            }
+        });
+        
+        document.body.appendChild(testButton);
+    }
+    
     testLocationServices() {
         console.log('🧪 Testing location services...');
         
@@ -900,88 +928,13 @@ class EldritchSanctuaryApp {
             });
         }
         
-        // Quest test button - triggers quest dialog
-        const questTestBtn = document.getElementById('quest-test-btn');
-        if (questTestBtn) {
-            questTestBtn.addEventListener('click', () => {
-                console.log('🎭 Test quest button clicked');
-                if (this.systems.unifiedQuest) {
-                    console.log('🎭 Quest system available, triggering quest...');
-                    this.systems.unifiedQuest.forceTriggerQuest();
-                } else {
-                    console.log('🎭 Quest system not available, trying to initialize...');
-                    this.systems.unifiedQuest = new UnifiedQuestSystem();
-                    this.systems.unifiedQuest.init();
-                    window.unifiedQuestSystem = this.systems.unifiedQuest;
-                    this.systems.unifiedQuest.resumeQuestSystem();
-                    this.systems.unifiedQuest.forceTriggerQuest();
-                }
-            });
-        }
-        
-        // Quest progress button - tests quest progression
-        const questProgressBtn = document.getElementById('quest-progress-btn');
-        if (questProgressBtn) {
-            questProgressBtn.addEventListener('click', () => {
-                if (this.systems.unifiedQuest) {
-                    console.log('🎯 Testing quest progression...');
-                    console.log('🎯 Active quests:', Array.from(this.systems.unifiedQuest.activeQuests.keys()));
-                    console.log('🎯 Available quests:', Array.from(this.systems.unifiedQuest.availableQuests.keys()));
-                    
-                    // Test quest progression by simulating objective completion
-                    const quest = this.systems.unifiedQuest.activeQuests.get('corroding_lake');
-                    if (quest) {
-                        console.log('🎯 Found active quest:', quest.name);
-                        const objective = quest.objectives.find(obj => obj.status === 'incomplete');
-                        if (objective) {
-                            console.log('🎯 Found incomplete objective:', objective.id, 'status:', objective.status);
-                            this.systems.unifiedQuest.progressQuestMarkers(quest, objective);
-                        } else {
-                            console.log('🎯 No incomplete objectives found');
-                            console.log('🎯 Available objectives:', quest.objectives.map(obj => ({ id: obj.id, status: obj.status })));
-                        }
-                    } else {
-                        console.log('🎯 No active corroding_lake quest found');
-                        // Try to get it from available quests
-                        const availableQuest = this.systems.unifiedQuest.availableQuests.get('corroding_lake');
-                        if (availableQuest) {
-                            console.log('🎯 Found in available quests, starting it...');
-                            this.systems.unifiedQuest.startQuest('corroding_lake');
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Quest visibility button - shows all quest markers
-        const questVisibilityBtn = document.getElementById('quest-visibility-btn');
-        if (questVisibilityBtn) {
-            questVisibilityBtn.addEventListener('click', () => {
-                if (this.systems.unifiedQuest) {
-                    console.log('👁️ Showing all quest markers...');
-                    console.log('👁️ Quest markers count:', this.systems.unifiedQuest.questMarkers.size);
-                    
-                    // Force show all quest markers
-                    this.systems.unifiedQuest.questMarkers.forEach((marker, key) => {
-                        console.log('👁️ Showing marker:', key);
-                        marker.openPopup();
-                    });
-                    
-                    // Also try to create a test marker
-                    if (this.systems.unifiedQuest.activeQuests.has('corroding_lake')) {
-                        const quest = this.systems.unifiedQuest.activeQuests.get('corroding_lake');
-                        const nextObjective = quest.objectives.find(obj => obj.status === 'incomplete');
-                        if (nextObjective) {
-                            console.log('👁️ Creating test marker for:', nextObjective.id);
-                            this.systems.unifiedQuest.createObjectiveMarker(quest, nextObjective);
-                        }
-                    }
-                }
-            });
-        }
+        // Quest debug buttons removed for mobile optimization
         
         // Add location test button for debugging
         this.addLocationTestButton();
+        
+        // Add quest marker debug button
+        this.addQuestMarkerDebugButton();
     }
     
     cycleLocationMode() {
@@ -1074,8 +1027,8 @@ class EldritchSanctuaryApp {
     }
 
     async initCosmicEffects() {
-        this.systems.cosmicEffects = new CosmicEffects();
-        this.systems.cosmicEffects.init();
+            this.systems.cosmicEffects = new CosmicEffects();
+            this.systems.cosmicEffects.init();
         return Promise.resolve();
     }
 
@@ -1244,9 +1197,9 @@ class EldritchSanctuaryApp {
                 this.hasCenteredOnLocation = true;
             } else if (!this.hasCenteredOnLocation && (!position.accuracy || position.accuracy >= 100)) {
                 // If accuracy is poor or unknown, center anyway immediately
-                console.log('📍 Centering map on GPS position (poor accuracy):', position);
-                this.systems.mapEngine.centerOnPosition(position);
-                this.hasCenteredOnLocation = true;
+                        console.log('📍 Centering map on GPS position (poor accuracy):', position);
+                        this.systems.mapEngine.centerOnPosition(position);
+                        this.hasCenteredOnLocation = true;
             }
         };
 
@@ -1369,8 +1322,9 @@ class EldritchSanctuaryApp {
         notification.textContent = message;
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: linear-gradient(135deg, var(--cosmic-darker), var(--cosmic-dark));
             border: 2px solid var(--cosmic-purple);
             color: var(--cosmic-light);
@@ -1380,8 +1334,9 @@ class EldritchSanctuaryApp {
             z-index: 3000;
             box-shadow: 0 0 20px var(--cosmic-glow);
             backdrop-filter: blur(10px);
-            animation: slideInRight 0.3s ease-out;
+            animation: slideInCenter 0.3s ease-out;
             max-width: 300px;
+            text-align: center;
         `;
 
         // Add animation keyframes
@@ -1389,13 +1344,13 @@ class EldritchSanctuaryApp {
             const style = document.createElement('style');
             style.id = 'notification-styles';
             style.textContent = `
-                @keyframes slideInRight {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
+                @keyframes slideInCenter {
+                    from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+                    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
                 }
-                @keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
+                @keyframes slideOutCenter {
+                    from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+                    to { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
                 }
             `;
             document.head.appendChild(style);
@@ -1405,7 +1360,7 @@ class EldritchSanctuaryApp {
         
         // Auto-remove after 3 seconds
         setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease-in';
+            notification.style.animation = 'slideOutCenter 0.3s ease-in';
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);

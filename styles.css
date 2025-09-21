@@ -2818,17 +2818,17 @@ input[type="range"]::-moz-range-thumb {
 /* Level Up Notification Styles */
 .level-up-notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
     z-index: 10001;
     opacity: 0;
-    transform: translateX(100%);
     transition: all 0.3s ease;
 }
 
 .level-up-notification.show {
     opacity: 1;
-    transform: translateX(0);
+    transform: translate(-50%, -50%) scale(1);
 }
 
 .level-up-content {
@@ -4112,23 +4112,26 @@ input[type="range"]::-moz-range-thumb {
 /* Lore Discovery Animation */
 .lore-discovery-notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: linear-gradient(45deg, #ffd700, #ff9800);
     color: #000;
     padding: 15px 20px;
     border-radius: 10px;
     font-weight: bold;
     z-index: 10000;
-    animation: loreDiscoverySlide 3s ease-in-out;
+    animation: loreDiscoverySlideCenter 3s ease-in-out;
+    text-align: center;
+    max-width: 400px;
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
-@keyframes loreDiscoverySlide {
-    0% { transform: translateX(100%); opacity: 0; }
-    20% { transform: translateX(0); opacity: 1; }
-    80% { transform: translateX(0); opacity: 1; }
-    100% { transform: translateX(100%); opacity: 0; }
+@keyframes loreDiscoverySlideCenter {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
 }
 
 /* Quest Marker Animations */
@@ -5363,55 +5366,7 @@ input[type="range"]::-moz-range-thumb {
     margin-left: auto; /* Push to the right side */
 }
 
-/* Quest Debug Buttons */
-.quest-test-btn,
-.quest-progress-btn,
-.quest-visibility-btn {
-    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-    border: 2px solid #ffaa00;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    font-size: 11px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    min-width: 80px;
-    justify-content: center;
-}
-
-.quest-test-btn:hover,
-.quest-progress-btn:hover,
-.quest-visibility-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
-}
-
-.quest-progress-btn {
-    background: linear-gradient(45deg, #ff9f43, #ff6b6b);
-    border-color: #ffaa00;
-}
-
-.quest-visibility-btn {
-    background: linear-gradient(45deg, #9b59b6, #8e44ad);
-    border-color: #ff00ff;
-}
-
-.quest-test-btn:hover {
-    box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
-}
-
-.quest-progress-btn:hover {
-    box-shadow: 0 0 15px rgba(255, 159, 67, 0.5);
-}
-
-.quest-visibility-btn:hover {
-    box-shadow: 0 0 15px rgba(155, 89, 182, 0.5);
-}
+/* Quest Debug Buttons removed for mobile optimization */
 
 
 .debug-icon {
@@ -5724,16 +5679,17 @@ input[type="range"]::-moz-range-thumb {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background: linear-gradient(135deg, #0c0c0c 0%, #1a0a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
     background-size: 400% 400%;
     animation: cosmicBackground 20s ease infinite;
     z-index: 10000;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     overflow-y: auto;
-    padding: 20px;
+    padding: 40px 20px 20px 20px;
+    box-sizing: border-box;
 }
 
 @keyframes cosmicBackground {
@@ -5743,15 +5699,15 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .welcome-content {
-    max-width: 900px;
+    max-width: 800px;
     width: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #ffd700;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 30px rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #00ffff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
     backdrop-filter: blur(10px);
-    animation: welcomeGlow 3s ease-in-out infinite alternate;
+    margin-top: 20px;
 }
 
 @keyframes welcomeGlow {
@@ -5761,7 +5717,51 @@ input[type="range"]::-moz-range-thumb {
 
 .welcome-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
+}
+
+/* Quest Preview Styles */
+.quest-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.quest-icon {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.quest-info h3 {
+    color: #00ffff;
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+}
+
+.quest-info p {
+    color: #ffffff;
+    margin: 0 0 15px 0;
+    line-height: 1.4;
+}
+
+.quest-objectives {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.objective {
+    background: rgba(0, 255, 255, 0.2);
+    border: 1px solid #00ffff;
+    border-radius: 15px;
+    padding: 5px 12px;
+    font-size: 0.9rem;
+    color: #ffffff;
 }
 
 /* Enhanced Klitoritarit Branding in Welcome Screen */
@@ -6167,31 +6167,31 @@ input[type="range"]::-moz-range-thumb {
 
 .tutorial-steps {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 .tutorial-step {
     display: flex;
     align-items: flex-start;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: 15px;
-    padding: 20px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 15px;
     transition: all 0.3s ease;
 }
 
 .tutorial-step:hover {
-    background: rgba(255, 215, 0, 0.1);
-    border-color: #ffd700;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+    background: rgba(0, 255, 255, 0.1);
+    border-color: #00ffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 255, 255, 0.2);
 }
 
 .step-icon {
-    font-size: 2.5rem;
-    margin-right: 15px;
+    font-size: 2rem;
+    margin-right: 12px;
     flex-shrink: 0;
     animation: iconFloat 3s ease-in-out infinite;
 }
@@ -6366,25 +6366,36 @@ input[type="range"]::-moz-range-thumb {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+    .welcome-screen {
+        padding: 20px 10px 10px 10px;
+    }
+    
     .welcome-content {
         padding: 20px;
-        margin: 10px;
+        margin: 0;
     }
     
     .welcome-title {
-        font-size: 2.5rem;
+        font-size: 2rem;
     }
     
     .welcome-subtitle {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
     
     .tutorial-steps {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
     
-    .controls-grid {
-        grid-template-columns: 1fr;
+    .quest-preview {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .quest-objectives {
+        justify-content: center;
     }
     
     .welcome-actions {
@@ -6871,6 +6882,57 @@ input[type="range"]::-moz-range-thumb {
     50% { 
         transform: scale(1.05); 
         opacity: 0.9; 
+    }
+}
+
+@keyframes newMarkerAppear {
+    0% { 
+        transform: scale(0) rotate(180deg); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.3) rotate(90deg); 
+        opacity: 0.8; 
+    }
+    100% { 
+        transform: scale(1) rotate(0deg); 
+        opacity: 1; 
+    }
+}
+
+@keyframes newMarkerGlow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.8), 0 0 60px rgba(0, 255, 255, 0.5), 0 0 80px rgba(0, 255, 255, 0.3);
+    }
+}
+
+.quest-objective-marker.new-marker {
+    animation: newMarkerAppear 1.5s ease-out, newMarkerGlow 2s ease-in-out infinite;
+}
+
+/* Tutorial tip animations */
+@keyframes tipSlideIn {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.8); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1); 
+    }
+}
+
+@keyframes tipSlideOut {
+    0% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1); 
+    }
+    100% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.8); 
     }
 }
 

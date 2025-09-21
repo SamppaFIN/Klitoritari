@@ -46,30 +46,8 @@ class EnhancedMapEngine extends MapEngine {
     }
     
     setupWebGLControls() {
-        // Add WebGL toggle button to header
-        const header = document.getElementById('header');
-        if (header) {
-            const webglToggle = document.createElement('button');
-            webglToggle.id = 'webgl-toggle';
-            webglToggle.className = 'sacred-button';
-            webglToggle.innerHTML = '🌌 WebGL';
-            webglToggle.style.cssText = `
-                background: var(--cosmic-purple);
-                color: white;
-                border: 2px solid var(--cosmic-purple);
-                padding: 8px 16px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 12px;
-                margin-left: 10px;
-            `;
-            
-            webglToggle.addEventListener('click', () => {
-                this.toggleWebGLRendering();
-            });
-            
-            header.appendChild(webglToggle);
-        }
+        // WebGL controls removed for mobile optimization
+        // WebGL is now forced and doesn't need toggle button
     }
     
     // Performance panel removed - WebGL is now forced
@@ -175,11 +153,7 @@ class EnhancedMapEngine extends MapEngine {
             this.webglRenderer.destroy();
         }
         
-        // Remove WebGL toggle button
-        const webglToggle = document.getElementById('webgl-toggle');
-        if (webglToggle) {
-            webglToggle.remove();
-        }
+        // WebGL toggle button removal no longer needed
         
         // Call parent destroy
         super.destroy();

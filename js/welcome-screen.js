@@ -188,8 +188,9 @@ class WelcomeScreen {
         // Add tip styles
         tip.style.cssText = `
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: linear-gradient(45deg, #ffd700, #ffed4e);
             color: #000;
             padding: 15px 20px;
@@ -197,7 +198,7 @@ class WelcomeScreen {
             box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
             z-index: 1000;
             max-width: 400px;
-            animation: slideInRight 0.5s ease-out;
+            animation: tipSlideIn 0.5s ease-out;
         `;
         
         document.body.appendChild(tip);
@@ -205,7 +206,7 @@ class WelcomeScreen {
         // Auto-remove after 8 seconds
         setTimeout(() => {
             if (tip.parentElement) {
-                tip.style.animation = 'slideOutRight 0.5s ease-in';
+                tip.style.animation = 'tipSlideOut 0.5s ease-in';
                 setTimeout(() => tip.remove(), 500);
             }
         }, 8000);
