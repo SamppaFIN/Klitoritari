@@ -33,7 +33,7 @@ class NPCSystem {
             return;
         }
 
-        console.log('👥 Generating NPCs...');
+        console.log('👥 Clearing all NPCs...');
         
         // Clear existing NPCs
         this.npcMarkers.forEach(marker => {
@@ -43,8 +43,18 @@ class NPCSystem {
         });
         this.npcs = [];
         this.npcMarkers = [];
+        
+        // Generate new NPCs
+        console.log('👥 Generating new NPCs...');
+        
+        const npcCount = 5; // Generate 5 NPCs
+        for (let i = 0; i < npcCount; i++) {
+            this.createTestNPC(`NPC_${i + 1}`);
+        }
+        
+        console.log('👥 Generated', this.npcs.length, 'NPCs');
 
-        // NPC types with different personalities
+        // Enhanced NPC types with lore integration
         const npcTypes = [
             { 
                 name: 'Aurora', 
@@ -52,7 +62,27 @@ class NPCSystem {
                 color: '#FFD700',
                 personality: 'mystical',
                 greeting: 'Greetings, fellow cosmic explorer!',
-                topics: ['cosmic mysteries', 'ancient wisdom', 'stellar navigation']
+                topics: ['cosmic mysteries', 'ancient wisdom', 'stellar navigation'],
+                role: 'lore_keeper',
+                knowledge: ['harmala-history', 'cosmic-crystals', 'eldritch-entities'],
+                quests: ['harmala-mystery-1'],
+                dialogue: {
+                    harmala: [
+                        "The Härmälä area... I've heard whispers about that place. Something dark stirs there.",
+                        "The Great Collapse of 1987 was no natural disaster. The cosmic crystals... they were fragments of something much larger.",
+                        "If you're investigating Härmälä, be careful. The entity beneath that sinkhole is awakening."
+                    ],
+                    cosmic_crystals: [
+                        "Cosmic crystals are not mere minerals - they are fragments of ancient cosmic entities.",
+                        "The crystals found in Härmälä were particularly pure, which explains the unusual phenomena there.",
+                        "I've studied these crystals for years. They possess properties that bend space and time itself."
+                    ],
+                    disappearances: [
+                        "The recent disappearances follow a pattern. All during the full moon, all in the same age range.",
+                        "The survivors of the Great Collapse spoke of 'blank-faced people' before the disappearances began.",
+                        "Something is choosing its victims deliberately. It's not random - it's ritualistic."
+                    ]
+                }
             },
             { 
                 name: 'Zephyr', 
@@ -60,7 +90,27 @@ class NPCSystem {
                 color: '#87CEEB',
                 personality: 'wanderer',
                 greeting: 'Hey there! Nice to see another traveler!',
-                topics: ['adventure stories', 'hidden locations', 'travel tips']
+                topics: ['adventure stories', 'hidden locations', 'travel tips'],
+                role: 'information_broker',
+                knowledge: ['recent-disappearances', 'cosmic-disturbances'],
+                quests: ['cosmic-exploration-1'],
+                dialogue: {
+                    harmala: [
+                        "I've been to Härmälä a few times. Strange place - the air feels... wrong there.",
+                        "The locals avoid the sinkhole area completely. Even the animals won't go near it.",
+                        "I've heard stories about people seeing lights in the sky over Härmälä. Not normal lights, either."
+                    ],
+                    exploration: [
+                        "The cosmic realm is vast and full of hidden wonders! I've discovered so many interesting places.",
+                        "If you're looking for adventure, I can point you to some fascinating locations.",
+                        "The key to exploration is keeping your eyes open and your mind curious."
+                    ],
+                    travel_tips: [
+                        "Always carry cosmic crystals when exploring - they can protect you from reality distortions.",
+                        "The cosmic realm has its own rules. Trust your instincts, but don't ignore the signs.",
+                        "Some areas are more dangerous than others. Härmälä is definitely one of the riskier ones."
+                    ]
+                }
             },
             { 
                 name: 'Sage', 
@@ -68,7 +118,55 @@ class NPCSystem {
                 color: '#9370DB',
                 personality: 'wise',
                 greeting: 'Welcome, seeker of knowledge.',
-                topics: ['ancient lore', 'mystical phenomena', 'wisdom sharing']
+                topics: ['ancient lore', 'mystical phenomena', 'wisdom sharing'],
+                role: 'quest_giver',
+                knowledge: ['great-collapse', 'survivor-testimonies', 'the-entity-beneath'],
+                quests: ['harmala-mystery-1', 'cosmic-exploration-1'],
+                dialogue: {
+                    harmala: [
+                        "The Härmälä mystery is deeper than most realize. The entity beneath that sinkhole has been dormant for millennia.",
+                        "The Great Collapse was not the beginning - it was merely the entity's first attempt to surface.",
+                        "If you seek to understand Härmälä, you must first understand the cosmic crystals and their true nature."
+                    ],
+                    entity_beneath: [
+                        "The entity beneath Härmälä is ancient beyond comprehension. It has been slumbering for thousands of years.",
+                        "The cosmic crystals are fragments of this entity. The mining operations disturbed its rest.",
+                        "The disappearances are not random - they are the entity's way of gathering consciousness to manifest fully."
+                    ],
+                    wisdom: [
+                        "Knowledge is power, but wisdom is understanding how to use that power responsibly.",
+                        "The cosmic realm teaches us that reality is more fluid than we once believed.",
+                        "To truly understand the mysteries of the cosmos, one must be willing to question everything."
+                    ]
+                }
+            },
+            { 
+                name: 'Maria', 
+                emoji: '👵', 
+                color: '#8B4513',
+                personality: 'survivor',
+                greeting: 'You... you\'re investigating Härmälä, aren\'t you?',
+                topics: ['great-collapse', 'survivor-stories', 'warnings'],
+                role: 'witness',
+                knowledge: ['great-collapse', 'survivor-testimonies'],
+                quests: ['harmala-mystery-1'],
+                dialogue: {
+                    great_collapse: [
+                        "I was there that night... October 31st, 1987. The sinkhole appeared without warning.",
+                        "I saw things that night that no human should ever see. Creatures that defied physics itself.",
+                        "My husband... he walked toward the sinkhole. When I called out to him, he turned around and his face was... blank. No eyes, no mouth, just smooth skin."
+                    ],
+                    warnings: [
+                        "Don't go to Härmälä. Whatever is down there, it's not human. It's not even alive in the way we understand.",
+                        "The disappearances have started again. It's happening all over again, just like in 1987.",
+                        "I've been warning people for years, but no one listens. They think I'm crazy, but I know what I saw."
+                    ],
+                    survivor_stories: [
+                        "The government covered it up. They said it was a 'geological hazard zone' and evacuated everyone.",
+                        "The rescue teams that went down the sinkhole... they never came back. Not a single one.",
+                        "I've been having the same nightmare for 37 years. The humming sound, the lights, the blank faces..."
+                    ]
+                }
             }
         ];
 
@@ -133,11 +231,17 @@ class NPCSystem {
         
         marker.bindPopup(`
             <div class="npc-popup">
-                <h4>${npc.emoji} ${npc.name}</h4>
+                <h4>${npc.emoji} ${npc.name} <span class="npc-role ${npc.role}">${npc.role.replace('_', ' ')}</span></h4>
                 <p><strong>Personality:</strong> ${npc.personality}</p>
                 <p><strong>Status:</strong> ${npc.encountered ? 'Met' : 'Unknown'}</p>
-                <button onclick="window.npcSystem.startChat('${npc.id}')" class="chat-btn">💬 Chat</button>
-                <button onclick="window.npcSystem.testEncounter('${npc.id}')" class="debug-btn">🎭 Test Encounter</button>
+                ${npc.knowledge ? `<div class="npc-knowledge">
+                    <strong>Knowledge:</strong>
+                    ${npc.knowledge.map(k => `<span class="knowledge-tag">${k.replace('-', ' ')}</span>`).join('')}
+                </div>` : ''}
+                <div class="popup-actions">
+                    <button onclick="window.npcSystem.startChat('${npc.id}')" class="chat-btn">💬 Chat</button>
+                    <button onclick="window.npcSystem.testEncounter('${npc.id}')" class="debug-btn">🎭 Test Encounter</button>
+                </div>
             </div>
         `);
 
@@ -243,7 +347,12 @@ class NPCSystem {
                 </div>
                 <div class="chat-actions">
                     <button id="ask-topic" class="chat-action-btn">Ask about topics</button>
+                    <button id="ask-quest" class="chat-action-btn">Ask about quests</button>
+                    <button id="ask-lore" class="chat-action-btn">Ask about lore</button>
                     <button id="end-chat" class="chat-action-btn">End conversation</button>
+                </div>
+                <div class="topic-buttons" id="topic-buttons" style="display: none;">
+                    <!-- Topic buttons will be populated here -->
                 </div>
             </div>
         `;
@@ -257,6 +366,8 @@ class NPCSystem {
         document.getElementById('end-chat').addEventListener('click', () => this.hideChat());
         document.getElementById('send-message').addEventListener('click', () => this.sendMessage());
         document.getElementById('ask-topic').addEventListener('click', () => this.askAboutTopics());
+        document.getElementById('ask-quest').addEventListener('click', () => this.askAboutQuests());
+        document.getElementById('ask-lore').addEventListener('click', () => this.askAboutLore());
         
         document.getElementById('chat-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -497,55 +608,288 @@ class NPCSystem {
     generateNPCResponse(playerMessage) {
         if (!this.currentNPC) return;
 
-        const responses = {
-            greeting: [
-                "Hello there! Nice to meet you!",
-                "Greetings, fellow explorer!",
-                "Hey! How's your cosmic journey going?"
-            ],
-            question: [
-                "That's an interesting question!",
-                "I've been wondering about that too.",
-                "Hmm, let me think about that..."
-            ],
-            topic: [
-                `I love talking about ${this.currentNPC.topics[0]}!`,
-                `Have you heard about ${this.currentNPC.topics[1]}?`,
-                `You know, ${this.currentNPC.topics[2]} is fascinating!`
-            ],
-            default: [
+        const message = playerMessage.toLowerCase();
+        let response = null;
+        let loreDiscovered = null;
+
+        // Check for specific topic keywords
+        const topicKeywords = {
+            'harmala': ['harmala', 'härmälä', 'sinkhole', 'collapse', 'disappearances'],
+            'cosmic_crystals': ['crystal', 'cosmic crystal', 'mining', 'fragment'],
+            'disappearances': ['disappear', 'missing', 'vanished', 'victim'],
+            'great_collapse': ['1987', 'collapse', 'sinkhole', 'october'],
+            'entity_beneath': ['entity', 'beneath', 'ancient', 'slumber'],
+            'exploration': ['explore', 'adventure', 'discover', 'location'],
+            'travel_tips': ['travel', 'tip', 'advice', 'safe'],
+            'wisdom': ['wisdom', 'knowledge', 'understand', 'learn'],
+            'warnings': ['warning', 'danger', 'careful', 'safe'],
+            'survivor_stories': ['survivor', 'story', 'testimony', 'witness']
+        };
+
+        // Find matching topic
+        for (const [topic, keywords] of Object.entries(topicKeywords)) {
+            if (keywords.some(keyword => message.includes(keyword))) {
+                if (this.currentNPC.dialogue && this.currentNPC.dialogue[topic]) {
+                    const responses = this.currentNPC.dialogue[topic];
+                    response = responses[Math.floor(Math.random() * responses.length)];
+                    
+                    // Check if this reveals new lore
+                    if (this.currentNPC.knowledge) {
+                        const knowledgeTopics = {
+                            'harmala': 'harmala-history',
+                            'cosmic_crystals': 'cosmic-crystals',
+                            'disappearances': 'recent-disappearances',
+                            'great_collapse': 'great-collapse',
+                            'entity_beneath': 'the-entity-beneath',
+                            'survivor_stories': 'survivor-testimonies'
+                        };
+                        
+                        if (knowledgeTopics[topic]) {
+                            loreDiscovered = knowledgeTopics[topic];
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Fallback responses based on NPC role
+        if (!response) {
+            const roleResponses = {
+                'lore_keeper': [
+                    "I have much knowledge to share about the cosmic realm.",
+                    "The mysteries of the universe are vast and complex.",
+                    "There are many secrets hidden in the cosmic realm."
+                ],
+                'information_broker': [
+                    "I've heard many interesting stories in my travels.",
+                    "The cosmic realm is full of fascinating places to explore.",
+                    "I can tell you about some interesting locations I've discovered."
+                ],
+                'quest_giver': [
+                    "There are many mysteries that need investigating.",
+                    "The cosmic realm needs brave explorers like you.",
+                    "I have some tasks that might interest you."
+                ],
+                'witness': [
+                    "I've seen things that most people wouldn't believe.",
+                    "The truth about what happened is more terrifying than you can imagine.",
+                    "I've been trying to warn people, but they don't listen."
+                ]
+            };
+
+            const responses = roleResponses[this.currentNPC.role] || [
                 "That's really interesting!",
                 "I see what you mean.",
                 "Tell me more about that!",
                 "Fascinating perspective!",
                 "I hadn't thought of it that way."
-            ]
-        };
-
-        let responseType = 'default';
-        if (playerMessage.toLowerCase().includes('hello') || playerMessage.toLowerCase().includes('hi')) {
-            responseType = 'greeting';
-        } else if (playerMessage.includes('?')) {
-            responseType = 'question';
-        } else if (this.currentNPC.topics.some(topic => playerMessage.toLowerCase().includes(topic.toLowerCase()))) {
-            responseType = 'topic';
+            ];
+            
+            response = responses[Math.floor(Math.random() * responses.length)];
         }
 
-        const possibleResponses = responses[responseType];
-        const response = possibleResponses[Math.floor(Math.random() * possibleResponses.length)];
-        
+        // Add response
         this.addMessage(this.currentNPC.name, response, 'npc');
+
+        // Discover lore if applicable
+        if (loreDiscovered && window.questLogUI) {
+            window.questLogUI.addLoreEntry({
+                id: loreDiscovered,
+                title: this.getLoreTitle(loreDiscovered),
+                content: this.getLoreContent(loreDiscovered),
+                source: `Conversation with ${this.currentNPC.name}`,
+                tags: ['npc', 'dialogue', 'harmala'],
+                discovered: true
+            });
+            
+            // Show lore discovery notification
+            this.showLoreDiscoveryNotification(loreDiscovered);
+        }
+
+        // Check for quest triggers
+        this.checkQuestTriggers(playerMessage);
+    }
+
+    getLoreTitle(loreId) {
+        const titles = {
+            'harmala-history': 'The History of Härmälä',
+            'cosmic-crystals': 'Cosmic Crystals and Their Properties',
+            'recent-disappearances': 'Recent Disappearances in the Härmälä Area',
+            'great-collapse': 'The Great Collapse of 1987',
+            'the-entity-beneath': 'The Entity Beneath Härmälä',
+            'survivor-testimonies': 'Survivor Testimonies from the Great Collapse'
+        };
+        return titles[loreId] || 'Unknown Lore';
+    }
+
+    getLoreContent(loreId) {
+        const contents = {
+            'harmala-history': 'Härmälä was once a thriving mining town known for its cosmic crystals. The Great Collapse of 1987 changed everything.',
+            'cosmic-crystals': 'Cosmic crystals are fragments of ancient cosmic entities that possess unique properties.',
+            'recent-disappearances': 'Since 2020, there have been 12 new disappearances in the Härmälä area, all during the full moon.',
+            'great-collapse': 'On October 31st, 1987, a massive sinkhole appeared in Härmälä, swallowing 47 buildings and 23 people.',
+            'the-entity-beneath': 'Something ancient and powerful slumbers beneath the Härmälä sinkhole, awakened by mining operations.',
+            'survivor-testimonies': 'Survivors of the Great Collapse reported seeing creatures that defied physics and blank-faced people.'
+        };
+        return contents[loreId] || 'This lore entry contains information about the cosmic realm.';
+    }
+
+    checkQuestTriggers(playerMessage) {
+        if (!this.currentNPC || !window.questLogUI) return;
+
+        const message = playerMessage.toLowerCase();
+        
+        // Check for quest-related keywords
+        if (message.includes('quest') || message.includes('mission') || message.includes('investigate')) {
+            if (this.currentNPC.quests && this.currentNPC.quests.length > 0) {
+                this.addMessage(this.currentNPC.name, "I might have some tasks that could interest you. Let me think...", 'npc');
+                setTimeout(() => {
+                    this.addMessage(this.currentNPC.name, "Actually, there are some mysteries in the Härmälä area that need investigating. Would you be interested in helping?", 'npc');
+                }, 1500);
+            }
+        }
     }
 
     askAboutTopics() {
         if (!this.currentNPC) return;
 
+        // Show topic buttons
+        this.showTopicButtons();
+        
         const topicsText = this.currentNPC.topics.join(', ');
         this.addMessage('You', `What can you tell me about ${topicsText}?`, 'player');
         
         setTimeout(() => {
-            this.addMessage(this.currentNPC.name, `Well, ${this.currentNPC.topics[0]} is one of my favorite subjects! I could talk about it for hours.`, 'npc');
+            this.addMessage(this.currentNPC.name, `I'd be happy to discuss ${topicsText}! What specifically interests you?`, 'npc');
         }, 500);
+    }
+
+    askAboutQuests() {
+        if (!this.currentNPC) return;
+
+        if (this.currentNPC.quests && this.currentNPC.quests.length > 0) {
+            this.addMessage('You', 'Do you have any quests or tasks for me?', 'player');
+            setTimeout(() => {
+                this.addMessage(this.currentNPC.name, "Yes! There are some mysteries in the Härmälä area that need investigating. Would you be interested in helping?", 'npc');
+            }, 500);
+        } else {
+            this.addMessage('You', 'Do you have any quests or tasks for me?', 'player');
+            setTimeout(() => {
+                this.addMessage(this.currentNPC.name, "I don't have any specific tasks right now, but I might have some information that could help you.", 'npc');
+            }, 500);
+        }
+    }
+
+    askAboutLore() {
+        if (!this.currentNPC) return;
+
+        if (this.currentNPC.knowledge && this.currentNPC.knowledge.length > 0) {
+            this.addMessage('You', 'What knowledge do you have about the cosmic realm?', 'player');
+            setTimeout(() => {
+                this.addMessage(this.currentNPC.name, "I have knowledge about many cosmic mysteries. What would you like to know about?", 'npc');
+                this.showLoreButtons();
+            }, 500);
+        } else {
+            this.addMessage('You', 'What knowledge do you have about the cosmic realm?', 'player');
+            setTimeout(() => {
+                this.addMessage(this.currentNPC.name, "I'm afraid I don't have much specialized knowledge, but I can share what I've learned in my travels.", 'npc');
+            }, 500);
+        }
+    }
+
+    showTopicButtons() {
+        const topicButtons = document.getElementById('topic-buttons');
+        if (!topicButtons || !this.currentNPC) return;
+
+        topicButtons.innerHTML = '';
+        topicButtons.style.display = 'block';
+
+        this.currentNPC.topics.forEach(topic => {
+            const button = document.createElement('button');
+            button.className = 'topic-btn';
+            button.textContent = topic;
+            button.addEventListener('click', () => {
+                this.addMessage('You', `Tell me about ${topic}`, 'player');
+                this.generateNPCResponse(`Tell me about ${topic}`);
+                this.hideTopicButtons();
+            });
+            topicButtons.appendChild(button);
+        });
+    }
+
+    showLoreButtons() {
+        const topicButtons = document.getElementById('topic-buttons');
+        if (!topicButtons || !this.currentNPC) return;
+
+        topicButtons.innerHTML = '';
+        topicButtons.style.display = 'block';
+
+        const loreTopics = {
+            'harmala-history': 'Härmälä History',
+            'cosmic-crystals': 'Cosmic Crystals',
+            'recent-disappearances': 'Recent Disappearances',
+            'great-collapse': 'Great Collapse',
+            'the-entity-beneath': 'Entity Beneath',
+            'survivor-testimonies': 'Survivor Stories'
+        };
+
+        this.currentNPC.knowledge.forEach(knowledgeId => {
+            const button = document.createElement('button');
+            button.className = 'topic-btn';
+            button.textContent = loreTopics[knowledgeId] || knowledgeId;
+            button.addEventListener('click', () => {
+                this.addMessage('You', `Tell me about ${loreTopics[knowledgeId] || knowledgeId}`, 'player');
+                this.generateNPCResponse(`Tell me about ${loreTopics[knowledgeId] || knowledgeId}`);
+                this.hideTopicButtons();
+            });
+            topicButtons.appendChild(button);
+        });
+    }
+
+    hideTopicButtons() {
+        const topicButtons = document.getElementById('topic-buttons');
+        if (topicButtons) {
+            topicButtons.style.display = 'none';
+        }
+    }
+
+    showLoreDiscoveryNotification(loreId) {
+        const notification = document.createElement('div');
+        notification.className = 'lore-discovery-notification';
+        notification.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <span style="font-size: 20px; margin-right: 10px;">📜</span>
+                <div>
+                    <div style="font-weight: bold;">New Lore Discovered!</div>
+                    <div style="font-size: 12px;">${this.getLoreTitle(loreId)}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove notification after animation
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
+
+    clearAllMarkers() {
+        console.log('👥 Clearing all NPC markers...');
+        
+        // Clear existing NPCs
+        this.npcMarkers.forEach(marker => {
+            if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.map) {
+                window.eldritchApp.systems.mapEngine.map.removeLayer(marker);
+            }
+        });
+        this.npcs = [];
+        this.npcMarkers = [];
+        
+        console.log('👥 All NPC markers cleared');
     }
 
     destroy() {

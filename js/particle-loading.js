@@ -190,15 +190,15 @@ class ParticleLoadingScreen {
         this.updateProgress(0);
         
         // Simulate loading steps with delays
-        setTimeout(() => this.updateStep(1), 600);
-        setTimeout(() => this.updateStep(2), 1200);
-        setTimeout(() => this.updateStep(3), 1800);
-        setTimeout(() => this.updateStep(4), 2400);
+        setTimeout(() => this.updateStep(1), 50);
+        setTimeout(() => this.updateStep(2), 100);
+        setTimeout(() => this.updateStep(3), 150);
+        setTimeout(() => this.updateStep(4), 200);
         
-        // Complete loading after minimum 3 seconds
+        // Complete loading after minimum 300ms
         setTimeout(() => {
             this.completeLoading();
-        }, 3000);
+        }, 300);
     }
 
     updateStep(stepIndex) {
@@ -256,7 +256,7 @@ class ParticleLoadingScreen {
         // Hide loading screen after a short delay
         setTimeout(() => {
             this.hide();
-        }, 1000);
+        }, 200);
     }
 
     show() {

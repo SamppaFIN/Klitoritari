@@ -195,7 +195,7 @@ class EldritchSanctuaryApp {
             console.log('📍 Calling mapEngine.enableManualMode()');
             window.mapEngine.enableManualMode();
         } else {
-            console.error('📍 Map engine not available! Trying again in 100ms...');
+            console.error('📍 Map engine not available! Trying again in 50ms...');
             // Try again after a short delay
             setTimeout(() => {
                 console.log('📍 Retry - Map engine available:', !!window.mapEngine);
@@ -285,7 +285,7 @@ class EldritchSanctuaryApp {
             this.systems.cosmicEffects.init();
             
             // Give cosmic effects time to initialize
-            setTimeout(resolve, 1000);
+            setTimeout(resolve, 100);
         });
     }
 
@@ -302,6 +302,13 @@ class EldritchSanctuaryApp {
         
         // Make geolocation manager globally available
         window.geolocationManager = this.systems.geolocation;
+        
+        // Connect geolocation to encounter system for step tracking
+        this.systems.geolocation.onPositionUpdate = (position) => {
+            if (this.systems.encounter) {
+                this.systems.encounter.handlePositionUpdate(position);
+            }
+        };
         
         // Initialize investigation system first
         this.systems.investigation = new InvestigationSystem();
@@ -375,8 +382,20 @@ class EldritchSanctuaryApp {
         this.systems.unifiedDebug = new UnifiedDebugPanel();
         this.systems.unifiedDebug.init();
         
+        // Initialize inventory UI
+        this.systems.inventoryUI = new InventoryUI();
+        this.systems.inventoryUI.init();
+        
+        // Initialize quest log UI
+        this.systems.questLogUI = new QuestLogUI();
+        this.systems.questLogUI.init();
+        
         // Make all systems globally available after map engine is initialized
         this.exposeGlobalSystems();
+        
+        // Add global functions for easy console access
+        window.resetGameScreen = () => this.resetGameScreen();
+        window.centerOnCurrentLocation = () => this.centerOnCurrentLocation();
         
         // Set up map ready callback BEFORE initializing
         this.systems.mapEngine.onMapReady = () => {
@@ -411,6 +430,8 @@ class EldritchSanctuaryApp {
         window.npcSystem = this.systems.npc;
         window.pathPaintingSystem = this.systems.pathPainting;
         window.unifiedDebugPanel = this.systems.unifiedDebug;
+        window.inventoryUI = this.systems.inventoryUI;
+        window.questLogUI = this.systems.questLogUI;
         window.questSimulation = this.systems.questSimulation;
         window.otherPlayerSimulation = this.systems.otherPlayerSimulation;
         
@@ -429,10 +450,20 @@ class EldritchSanctuaryApp {
                 this.systems.encounter.updatePlayerPosition(position);
             }
             
-            // Center map on first position update for debugging
-            if (!this.hasCenteredOnLocation) {
+            // Center map on first position update with better accuracy check
+            if (!this.hasCenteredOnLocation && position.accuracy && position.accuracy < 100) {
+                console.log('📍 Centering map on accurate GPS position:', position);
                 this.systems.mapEngine.centerOnPosition(position);
                 this.hasCenteredOnLocation = true;
+            } else if (!this.hasCenteredOnLocation && (!position.accuracy || position.accuracy >= 100)) {
+                // If accuracy is poor or unknown, center anyway after a delay
+                setTimeout(() => {
+                    if (!this.hasCenteredOnLocation) {
+                        console.log('📍 Centering map on GPS position (poor accuracy):', position);
+                        this.systems.mapEngine.centerOnPosition(position);
+                        this.hasCenteredOnLocation = true;
+                    }
+                }, 2000);
             }
         };
 
@@ -606,6 +637,36 @@ class EldritchSanctuaryApp {
 
     isReady() {
         return this.isInitialized;
+    }
+
+    // Reset game screen and recreate all markers
+    resetGameScreen() {
+        console.log('🔄 Resetting game screen from main app...');
+        if (this.systems.mapEngine) {
+            this.systems.mapEngine.resetGameScreen();
+            this.showNotification('🔄 Game screen reset and markers recreated!', 'success');
+        } else {
+            console.error('🗺️ Map engine not available for reset');
+            this.showError('Map engine not available for reset');
+        }
+    }
+
+    // Force center map on current location
+    centerOnCurrentLocation() {
+        console.log('📍 Forcing center on current location...');
+        if (this.systems.geolocation && this.systems.geolocation.currentPosition) {
+            const position = this.systems.geolocation.currentPosition;
+            console.log('📍 Current position:', position);
+            this.systems.mapEngine.centerOnPosition(position);
+            this.showNotification('📍 Map centered on your location', 'success');
+        } else {
+            console.log('📍 No current position available, requesting location...');
+            if (this.systems.geolocation) {
+                this.systems.geolocation.startTracking();
+            } else {
+                this.showError('Geolocation not available');
+            }
+        }
     }
 
     // Cleanup

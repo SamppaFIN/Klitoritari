@@ -65,6 +65,10 @@ class QuestSimulation {
     startSimulation() {
         if (this.isRunning) return;
         
+        // Disable automatic simulation
+        console.log('🎭 Quest simulation is disabled for manual play');
+        return;
+        
         this.isRunning = true;
         this.simulationStep = 0;
         

@@ -61,6 +61,14 @@
                     </div>
                 </div>
                 <div class="header-controls">
+                    <button id="inventory-btn" class="inventory-btn" title="Inventory">
+                        <span class="inventory-icon">🎒</span>
+                        <span class="inventory-text">INVENTORY</span>
+                    </button>
+                    <button id="quest-log-btn" class="quest-log-btn" title="Quest Log">
+                        <span class="quest-icon">📜</span>
+                        <span class="quest-text">QUESTS</span>
+                    </button>
                     <button id="locate-me-btn" class="locate-me-btn" title="Locate Me">
                         <span class="locate-icon">📍</span>
                         <span class="locate-text">LOCATE ME</span>
@@ -115,6 +123,107 @@
                         <button id="cancel-investigation" class="sacred-button secondary">
                             Cancel
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Modal -->
+        <div id="inventory-modal" class="modal hidden">
+            <div class="modal-content inventory-modal">
+                <div class="modal-header">
+                    <h2>🎒 Cosmic Inventory</h2>
+                    <button id="close-inventory" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="inventory-tabs">
+                        <button class="inventory-tab active" data-tab="inventory">Inventory</button>
+                        <button class="inventory-tab" data-tab="equipment">Equipment</button>
+                        <button class="inventory-tab" data-tab="stats">Stats</button>
+                    </div>
+                    
+                    <!-- Inventory Tab -->
+                    <div id="inventory-tab" class="inventory-tab-content active">
+                        <div class="inventory-grid" id="inventory-grid">
+                            <!-- Items will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Equipment Tab -->
+                    <div id="equipment-tab" class="inventory-tab-content">
+                        <div class="equipment-slots">
+                            <div class="equipment-slot" data-slot="weapon">
+                                <div class="slot-label">⚔️ Weapon</div>
+                                <div class="slot-content" id="weapon-slot">
+                                    <div class="empty-slot">No weapon equipped</div>
+                                </div>
+                            </div>
+                            <div class="equipment-slot" data-slot="armor">
+                                <div class="slot-label">🛡️ Armor</div>
+                                <div class="slot-content" id="armor-slot">
+                                    <div class="empty-slot">No armor equipped</div>
+                                </div>
+                            </div>
+                            <div class="equipment-slot" data-slot="accessory">
+                                <div class="slot-label">💍 Accessory</div>
+                                <div class="slot-content" id="accessory-slot">
+                                    <div class="empty-slot">No accessory equipped</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Tab -->
+                    <div id="stats-tab" class="inventory-tab-content">
+                        <div class="equipment-stats" id="equipment-stats">
+                            <!-- Equipment stats will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quest Log Modal -->
+        <div id="quest-log-modal" class="modal hidden">
+            <div class="modal-content quest-log-modal">
+                <div class="modal-header">
+                    <h2>📜 Quest Log & Lore Journal</h2>
+                    <button id="close-quest-log" class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="quest-log-tabs">
+                        <button class="quest-tab active" data-tab="active-quests">Active Quests</button>
+                        <button class="quest-tab" data-tab="completed-quests">Completed</button>
+                        <button class="quest-tab" data-tab="lore-journal">Lore Journal</button>
+                        <button class="quest-tab" data-tab="mysteries">Mysteries</button>
+                    </div>
+                    
+                    <!-- Active Quests Tab -->
+                    <div id="active-quests-tab" class="quest-tab-content active">
+                        <div class="quest-list" id="active-quest-list">
+                            <!-- Active quests will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Completed Quests Tab -->
+                    <div id="completed-quests-tab" class="quest-tab-content">
+                        <div class="quest-list" id="completed-quest-list">
+                            <!-- Completed quests will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Lore Journal Tab -->
+                    <div id="lore-journal-tab" class="quest-tab-content">
+                        <div class="lore-entries" id="lore-entries">
+                            <!-- Lore entries will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Mysteries Tab -->
+                    <div id="mysteries-tab" class="quest-tab-content">
+                        <div class="mystery-list" id="mystery-list">
+                            <!-- Mystery entries will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -224,6 +333,27 @@
                 </div>
                 <div class="welcome-tips">
                     <p>💡 <strong>Tip:</strong> Keep the debug console open to test features and see your progress!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Encounter Modal -->
+    <div id="encounter-modal" class="modal hidden">
+        <div class="modal-content encounter-modal">
+            <div class="modal-header">
+                <h2 id="encounter-title">🎭 Cosmic Encounter</h2>
+                <button id="close-encounter" class="close-btn" onclick="if(window.encounterSystem) window.encounterSystem.closeEncounter(); else console.error('Encounter system not available');">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="dialog-text" class="encounter-dialog">
+                    <!-- Encounter text will be populated here -->
+                </div>
+                <div id="encounter-actions" class="encounter-actions">
+                    <!-- Action buttons will be populated here -->
+                </div>
+                <div id="battle-interface" class="battle-interface hidden">
+                    <!-- Battle interface will be populated here -->
                 </div>
             </div>
         </div>
@@ -375,6 +505,8 @@
     <script src="js/database-client.js"></script>
     <script src="js/base-system.js"></script>
     <script src="js/item-system.js"></script>
+    <script src="js/inventory-ui.js"></script>
+    <script src="js/quest-log-ui.js"></script>
     <script src="js/quest-system.js"></script>
     <script src="js/quest-simulation.js"></script>
     <script src="js/encounter-system.js"></script>

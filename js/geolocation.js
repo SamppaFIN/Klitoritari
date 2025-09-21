@@ -58,8 +58,8 @@ class GeolocationManager {
 
         const options = {
             enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 5000  // Accept positions up to 5 seconds old
+            timeout: 20000,  // Increased timeout for better accuracy
+            maximumAge: 10000  // Accept positions up to 10 seconds old
         };
 
         try {

@@ -133,7 +133,7 @@ class WelcomeScreen {
             
             setTimeout(() => {
                 if (callback) callback();
-            }, 500);
+            }, 200);
         } else {
             if (callback) callback();
         }
@@ -162,11 +162,11 @@ class WelcomeScreen {
         // Show some helpful tips after the game loads
         setTimeout(() => {
             this.showTip('💡 Welcome to Eldritch Sanctuary! Use the debug console (🔧) to test features and see your progress.');
-        }, 1000);
+        }, 500);
         
         setTimeout(() => {
             this.showTip('🌟 Try clicking on the HEVY marker to start your first legendary encounter!');
-        }, 5000);
+        }, 2000);
     }
 
     showTip(message) {

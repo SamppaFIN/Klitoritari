@@ -10,6 +10,7 @@ class MapEngine {
         this.otherPlayerMarkers = new Map();
         this.investigationMarkers = new Map();
         this.mysteryZoneMarkers = new Map();
+        this.testQuestMarkers = new Map();
         this.playerBaseMarker = null;
         this.territoryPolygon = null;
         this.isInitialized = false;
@@ -35,6 +36,13 @@ class MapEngine {
         this.setupManualControls();
         this.isInitialized = true;
         console.log('🗺️ Map engine initialized');
+        
+        // Clear any existing markers on initialization
+        setTimeout(() => {
+            this.clearAllMarkers();
+            // Add some test quest markers for interaction
+            this.addTestQuestMarkers();
+        }, 300);
     }
 
     setupMap() {
@@ -499,6 +507,314 @@ class MapEngine {
         }
     }
 
+    // Clear all markers
+    clearAllMarkers() {
+        if (!this.map) return;
+        
+        console.log('🗺️ Clearing all markers...');
+        
+        // Clear player marker
+        if (this.playerMarker) {
+            this.map.removeLayer(this.playerMarker);
+            this.playerMarker = null;
+            console.log('🗺️ Player marker cleared');
+        }
+        
+        // Clear other player markers
+        this.otherPlayerMarkers.forEach(marker => {
+            this.map.removeLayer(marker);
+        });
+        this.otherPlayerMarkers.clear();
+        console.log('🗺️ Other player markers cleared');
+        
+        // Clear investigation markers
+        this.investigationMarkers.forEach(marker => {
+            this.map.removeLayer(marker);
+        });
+        this.investigationMarkers.clear();
+        console.log('🗺️ Investigation markers cleared');
+        
+        // Clear mystery zone markers
+        this.mysteryZoneMarkers.forEach(marker => {
+            this.map.removeLayer(marker);
+        });
+        this.mysteryZoneMarkers.clear();
+        console.log('🗺️ Mystery zone markers cleared');
+        
+        // Clear test quest markers
+        this.testQuestMarkers.forEach(marker => {
+            this.map.removeLayer(marker);
+        });
+        this.testQuestMarkers.clear();
+        console.log('🗺️ Test quest markers cleared');
+        
+        // Clear base marker
+        if (this.playerBaseMarker) {
+            this.map.removeLayer(this.playerBaseMarker);
+            this.playerBaseMarker = null;
+            console.log('🗺️ Base marker cleared');
+        }
+        
+        // Clear showcase markers
+        if (this.showcaseMarkers) {
+            this.showcaseMarkers.forEach(marker => {
+                this.map.removeLayer(marker);
+            });
+            this.showcaseMarkers = [];
+            console.log('🗺️ Showcase markers cleared');
+        }
+        
+        // Clear POI markers
+        if (this.pointsOfInterest) {
+            this.pointsOfInterest.forEach(poi => {
+                this.map.removeLayer(poi);
+            });
+            this.pointsOfInterest = [];
+            console.log('🗺️ POI markers cleared');
+        }
+        
+        // Clear monster markers
+        if (this.monsters) {
+            this.monsters.forEach(monster => {
+                this.map.removeLayer(monster.marker);
+            });
+            this.monsters = [];
+            console.log('🗺️ Monster markers cleared');
+        }
+        
+        // Clear legendary markers
+        if (this.legendaryMarkers) {
+            this.legendaryMarkers.forEach(marker => {
+                this.map.removeLayer(marker);
+            });
+            this.legendaryMarkers = [];
+            console.log('🗺️ Legendary markers cleared');
+        }
+        
+        // Clear quest markers
+        if (this.questMarkers) {
+            this.questMarkers.forEach(marker => {
+                this.map.removeLayer(marker);
+            });
+            this.questMarkers = [];
+            console.log('🗺️ Quest markers cleared');
+        }
+        
+        // Clear territory polygon
+        if (this.territoryPolygon) {
+            this.map.removeLayer(this.territoryPolygon);
+            this.territoryPolygon = null;
+            console.log('🗺️ Territory polygon cleared');
+        }
+        
+        // Clear accuracy circle
+        if (this.accuracyCircle) {
+            this.map.removeLayer(this.accuracyCircle);
+            this.accuracyCircle = null;
+            console.log('🗺️ Accuracy circle cleared');
+        }
+        
+        // Clear any remaining markers by iterating through all layers
+        this.map.eachLayer((layer) => {
+            if (layer instanceof L.Marker || layer instanceof L.CircleMarker || layer instanceof L.Circle) {
+                this.map.removeLayer(layer);
+                console.log('🗺️ Removed additional marker:', layer);
+            }
+        });
+        
+        console.log('🗺️ All markers cleared');
+    }
+
+    // Reset entire game screen and recreate all markers
+    resetGameScreen() {
+        console.log('🔄 Resetting entire game screen...');
+        
+        // Clear all existing markers
+        this.clearAllMarkers();
+        
+        // Stop any ongoing animations
+        if (this.monsterMovementInterval) {
+            clearInterval(this.monsterMovementInterval);
+            this.monsterMovementInterval = null;
+        }
+        
+        if (this.movementInterval) {
+            clearInterval(this.movementInterval);
+            this.movementInterval = null;
+        }
+        
+        // Reset manual mode
+        this.manualMode = false;
+        this.manualClickHandler = null;
+        
+        // Reset position to default
+        this.manualPosition = { lat: 61.4978, lng: 23.7608 };
+        
+        // Center map on default position
+        if (this.map) {
+            this.map.setView([61.4978, 23.7608], 15);
+        }
+        
+        console.log('🔄 Game screen reset complete');
+        
+        // Recreate all markers after a short delay
+        setTimeout(() => {
+            this.recreateAllMarkers();
+        }, 500);
+    }
+
+    // Recreate all marker types
+    recreateAllMarkers() {
+        console.log('🎯 Recreating all markers...');
+        
+        if (!this.map) {
+            console.error('🗺️ Map not available for marker recreation');
+            return;
+        }
+        
+        // 1. Add test quest markers
+        this.addTestQuestMarkers();
+        
+        // 2. Generate points of interest
+        this.generatePointsOfInterest();
+        
+        // 3. Generate monsters
+        this.generateMonsters();
+        
+        // 4. Generate legendary encounters
+        this.generateLegendaryEncounters();
+        
+        // 5. Create marker showcase
+        this.createMarkerShowcase();
+        
+        // 6. Add quest markers if quest system is available
+        if (window.lovecraftianQuest) {
+            this.addQuestMarkers();
+        }
+        
+        // 7. Add player base marker if exists
+        if (window.baseSystem) {
+            const playerBase = window.baseSystem.getPlayerBase();
+            if (playerBase) {
+                this.addPlayerBaseMarker(playerBase);
+            }
+        }
+        
+        // 8. Add player marker at default position
+        this.updatePlayerPosition({
+            lat: 61.4978,
+            lng: 23.7608,
+            accuracy: 1,
+            timestamp: Date.now()
+        });
+        
+        // 9. Start proximity detection
+        this.startProximityDetection();
+        
+        // 10. Load mystery zones if investigation system is available
+        if (window.investigationSystem) {
+            const zones = window.investigationSystem.getMysteryZones();
+            this.addMysteryZoneMarkers(zones);
+            console.log('🎯 Mystery zones recreated:', zones.length);
+        }
+        
+        // 11. Load NPCs if NPC system is available
+        if (window.npcSystem) {
+            window.npcSystem.generateNPCs();
+            console.log('🎯 NPCs recreated');
+        }
+        
+        console.log('🎯 All markers recreated successfully');
+    }
+
+    // Start proximity detection for encounters
+    startProximityDetection() {
+        if (window.encounterSystem) {
+            window.encounterSystem.startProximityDetection();
+            console.log('🎯 Proximity detection started');
+        }
+    }
+
+    // Add test quest markers for interaction
+    addTestQuestMarkers() {
+        if (!this.map) return;
+        
+        console.log('🎯 Adding test quest markers...');
+        
+        // Test quest locations around Tampere
+        const testQuests = [
+            {
+                name: "Mysterious Forest",
+                lat: 61.4978,
+                lng: 23.7608,
+                type: "mystery",
+                description: "A strange forest where reality seems to bend..."
+            },
+            {
+                name: "Ancient Ruins",
+                lat: 61.5000,
+                lng: 23.7700,
+                type: "poi",
+                description: "Crumbling stones that whisper of forgotten times..."
+            },
+            {
+                name: "Cosmic Anomaly",
+                lat: 61.4950,
+                lng: 23.7500,
+                type: "monster",
+                description: "A swirling vortex of otherworldly energy..."
+            }
+        ];
+        
+        testQuests.forEach((quest, index) => {
+            const questIcon = L.divIcon({
+                className: 'quest-marker',
+                html: `
+                    <div style="position: relative; width: 60px; height: 60px;">
+                        <!-- Quest aura -->
+                        <div style="position: absolute; top: -12px; left: -12px; width: 84px; height: 84px; background: radial-gradient(circle, #00ff8840 0%, #00ff8820 30%, transparent 70%); border-radius: 50%; animation: questPulse 2s infinite;"></div>
+                        <!-- Quest ring -->
+                        <div style="position: absolute; top: 3px; left: 3px; width: 54px; height: 54px; background: #00ff88; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px #00ff8880;"></div>
+                        <!-- Quest icon -->
+                        <div style="position: absolute; top: 12px; left: 12px; width: 36px; height: 36px; background: linear-gradient(45deg, #00ff88, #00cc66); border: 3px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);">🎯</div>
+                    </div>
+                `,
+                iconSize: [60, 60],
+                iconAnchor: [30, 30]
+            });
+            
+            const questMarker = L.marker([quest.lat, quest.lng], {
+                icon: questIcon,
+                interactive: true,
+                clickable: true
+            });
+            
+            // Mark as quest marker for encounter system
+            questMarker.isQuestMarker = true;
+            questMarker.questIndex = index;
+            questMarker.questType = quest.type;
+            questMarker.questName = quest.name;
+            
+            questMarker.bindPopup(`
+                <div class="quest-popup">
+                    <h4>🎯 ${quest.name}</h4>
+                    <p>${quest.description}</p>
+                    <p><strong>Type:</strong> ${quest.type}</p>
+                    <p><strong>Distance:</strong> <span id="quest-distance-${index}">Calculating...</span></p>
+                </div>
+            `);
+            
+            questMarker.addTo(this.map);
+            
+            // Add to test quest markers collection
+            this.testQuestMarkers.set(`quest-${index}`, questMarker);
+            
+            console.log(`🎯 Added quest marker: ${quest.name} at ${quest.lat}, ${quest.lng}`);
+        });
+        
+        console.log('🎯 Added', testQuests.length, 'test quest markers');
+    }
+
     // Base marker management
     addPlayerBaseMarker(base) {
         if (!this.map) return;
@@ -620,9 +936,9 @@ class MapEngine {
         // Generate legendary encounters
         this.generateLegendaryEncounters();
         
-        // Disabled for main quest focus - no POIs or monsters
-        // this.generatePointsOfInterest();
-        // this.generateMonsters();
+        // Generate map content
+        this.generatePointsOfInterest();
+        this.generateMonsters();
     }
 
     openBaseManagement() {
@@ -696,6 +1012,11 @@ class MapEngine {
         let growing = true;
 
         const animate = () => {
+            // Check if marker still exists and is on map
+            if (!this.playerBaseMarker || !this.playerBaseMarker._map) {
+                return;
+            }
+
             if (growing) {
                 scale += 0.02;
                 if (scale >= 1.3) growing = false;
@@ -705,14 +1026,18 @@ class MapEngine {
             }
 
             // Update star marker scale using CSS transform
-            const starElement = this.playerBaseMarker.getElement();
-            if (starElement) {
-                starElement.style.transform = `scale(${scale})`;
+            try {
+                const starElement = this.playerBaseMarker.getElement();
+                if (starElement) {
+                    starElement.style.transform = `scale(${scale})`;
+                }
+            } catch (error) {
+                // Marker might have been removed, stop animation
+                console.log('🏗️ Base marker animation stopped - marker removed');
+                return;
             }
             
-            if (this.playerBaseMarker._map) {
-                requestAnimationFrame(animate);
-            }
+            requestAnimationFrame(animate);
         };
 
         animate();
@@ -1289,40 +1614,35 @@ class MapEngine {
         console.log(`🎮 Teleporting player to: ${lat}, ${lng}`);
         this.hideContextMenu();
         
+        // Disable device location when user moves manually
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            console.log('🎮 Disabling device location for manual movement');
+            window.eldritchApp.systems.geolocation.stopTracking();
+        }
+        
         if (this.manualMode) {
             // Instant teleport in manual mode
             this.manualPosition.lat = lat;
             this.manualPosition.lng = lng;
             this.updateManualPosition(true); // Center map on teleport
         } else {
-            // For other modes, update geolocation position
-            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-                window.eldritchApp.systems.geolocation.currentPosition = {
-                    lat: lat,
-                    lng: lng,
-                    accuracy: 1,
-                    timestamp: Date.now()
-                };
-                // Update player marker
-                this.updatePlayerPosition({
-                    lat: lat,
-                    lng: lng,
-                    accuracy: 1,
-                    timestamp: Date.now()
-                });
-                // Center map
-                this.map.setView([lat, lng], this.map.getZoom());
-                // Trigger encounters
-                if (window.encounterSystem) {
-                    window.encounterSystem.checkProximityEncounters();
-                }
-            }
+            // Switch to manual mode and move
+            this.enableManualMode();
+            setTimeout(() => {
+                this.movePlayerToPosition(lat, lng);
+            }, 50);
         }
     }
     
     movePlayer(lat, lng) {
         console.log(`🎮 Moving player to: ${lat}, ${lng}`);
         this.hideContextMenu();
+        
+        // Disable device location when user moves manually
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            console.log('🎮 Disabling device location for manual movement');
+            window.eldritchApp.systems.geolocation.stopTracking();
+        }
         
         if (this.manualMode) {
             this.movePlayerToPosition(lat, lng);
@@ -1331,7 +1651,7 @@ class MapEngine {
             this.enableManualMode();
             setTimeout(() => {
                 this.movePlayerToPosition(lat, lng);
-            }, 100);
+            }, 50);
         }
     }
     
@@ -1371,6 +1691,26 @@ class MapEngine {
         // Trigger proximity checks
         if (window.encounterSystem) {
             window.encounterSystem.checkProximityEncounters();
+        }
+    }
+
+    getPlayerPosition() {
+        if (this.manualMode) {
+            return {
+                lat: this.manualPosition.lat,
+                lng: this.manualPosition.lng
+            };
+        } else if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            return {
+                lat: window.eldritchApp.systems.geolocation.currentPosition?.lat || 61.4978,
+                lng: window.eldritchApp.systems.geolocation.currentPosition?.lng || 23.7608
+            };
+        } else {
+            // Fallback to default position
+            return {
+                lat: 61.4978,
+                lng: 23.7608
+            };
         }
     }
     

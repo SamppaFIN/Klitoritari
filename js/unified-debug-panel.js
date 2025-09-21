@@ -133,6 +133,62 @@ class UnifiedDebugPanel {
                         <span>Steps: <span id="debug-steps">100</span></span>
                         <button id="add-steps" class="debug-btn small">+50 Steps</button>
                     </div>
+                    <div class="stat-row">
+                        <span>Level: <span id="debug-level">1</span></span>
+                        <span>Exp: <span id="debug-exp">0</span>/<span id="debug-exp-needed">100</span></span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Attack: <span id="debug-attack">15</span></span>
+                        <span>Defense: <span id="debug-defense">10</span></span>
+                        <span>Luck: <span id="debug-luck">12</span></span>
+                    </div>
+                    <div class="stat-row">
+                        <button id="add-exp" class="debug-btn small">+100 Exp</button>
+                        <button id="level-up" class="debug-btn small">Level Up</button>
+                        <button id="reset-stats" class="debug-btn small">Reset Stats</button>
+                    </div>
+            <div class="stat-row">
+                <span>Items: <span id="debug-item-count">0</span></span>
+                <button id="add-random-item" class="debug-btn small">Random Item</button>
+                <button id="clear-inventory" class="debug-btn small">Clear Items</button>
+            </div>
+            <div class="stat-row">
+                <span>NPCs: <span id="debug-npc-count">0</span></span>
+                <button id="clear-npcs" class="debug-btn small">Clear NPCs</button>
+            </div>
+            <div class="stat-row">
+                <span>Map Markers:</span>
+                <button id="clear-all-markers" class="debug-btn small">Clear All Markers</button>
+                <button id="reset-game-screen" class="debug-btn small">Reset Game Screen</button>
+            </div>
+            <div class="stat-row">
+                <span>Proximity:</span>
+                <button id="reset-encounter-flags" class="debug-btn small">Reset Encounters</button>
+                <button id="toggle-proximity-debug" class="debug-btn small">Debug Mode</button>
+            </div>
+            <div class="stat-row">
+                <span>Location:</span>
+                <button id="center-on-location" class="debug-btn small">Center Map</button>
+                <button id="force-geolocation" class="debug-btn small">Get Location</button>
+            </div>
+            <div class="stat-row">
+                <span>Movement:</span>
+                <button id="test-distance" class="debug-btn small">Test Distance</button>
+                <button id="add-steps-manual" class="debug-btn small">+10 Steps</button>
+            </div>
+            <div class="stat-row">
+                <span>Quest Markers:</span>
+                <button id="add-quest-markers" class="debug-btn small">Add Quest Markers</button>
+                <button id="clear-quest-markers" class="debug-btn small">Clear Quest Markers</button>
+                <button id="test-quest-proximity" class="debug-btn small">Test Proximity</button>
+                <button id="force-quest-trigger" class="debug-btn small">Force Trigger</button>
+            </div>
+            <div class="stat-row">
+                <span>Map Content:</span>
+                <button id="add-map-content" class="debug-btn small">Add All Content</button>
+                <button id="add-npcs" class="debug-btn small">Add NPCs</button>
+                <button id="add-monsters" class="debug-btn small">Add Monsters</button>
+            </div>
                 </div>
             </div>
             <div class="debug-section">
@@ -371,6 +427,31 @@ class UnifiedDebugPanel {
             document.getElementById('restore-sanity').addEventListener('click', () => this.restoreSanity());
             document.getElementById('lose-sanity').addEventListener('click', () => this.loseSanity());
             
+            // Enhanced player stats controls
+            document.getElementById('add-exp').addEventListener('click', () => this.addExperience());
+            document.getElementById('level-up').addEventListener('click', () => this.forceLevelUp());
+            document.getElementById('reset-stats').addEventListener('click', () => this.resetPlayerStats());
+            
+            // Item system controls
+            document.getElementById('add-random-item').addEventListener('click', () => this.addRandomItem());
+            document.getElementById('clear-inventory').addEventListener('click', () => this.clearInventory());
+            document.getElementById('clear-npcs').addEventListener('click', () => this.clearNPCs());
+        document.getElementById('clear-all-markers').addEventListener('click', () => this.clearAllMarkers());
+        document.getElementById('reset-game-screen').addEventListener('click', () => this.resetGameScreen());
+        document.getElementById('reset-encounter-flags').addEventListener('click', () => this.resetEncounterFlags());
+        document.getElementById('toggle-proximity-debug').addEventListener('click', () => this.toggleProximityDebug());
+        document.getElementById('center-on-location').addEventListener('click', () => this.centerOnLocation());
+        document.getElementById('force-geolocation').addEventListener('click', () => this.forceGeolocation());
+        document.getElementById('test-distance').addEventListener('click', () => this.testDistanceCalculation());
+        document.getElementById('add-steps-manual').addEventListener('click', () => this.addStepsManual());
+        document.getElementById('add-quest-markers').addEventListener('click', () => this.addQuestMarkers());
+        document.getElementById('clear-quest-markers').addEventListener('click', () => this.clearQuestMarkers());
+        document.getElementById('test-quest-proximity').addEventListener('click', () => this.testQuestProximity());
+        document.getElementById('force-quest-trigger').addEventListener('click', () => this.forceQuestTrigger());
+        document.getElementById('add-map-content').addEventListener('click', () => this.addMapContent());
+        document.getElementById('add-npcs').addEventListener('click', () => this.addNPCs());
+        document.getElementById('add-monsters').addEventListener('click', () => this.addMonsters());
+            
             // Distortion controls
             document.getElementById('trigger-distortion').addEventListener('click', () => this.triggerDistortion());
             document.getElementById('stop-distortion-timer').addEventListener('click', () => this.stopDistortionTimer());
@@ -425,6 +506,11 @@ class UnifiedDebugPanel {
         document.getElementById('damage-player').addEventListener('click', () => this.showNotImplemented('Damage Player'));
         document.getElementById('restore-sanity').addEventListener('click', () => this.showNotImplemented('Restore Sanity'));
         document.getElementById('lose-sanity').addEventListener('click', () => this.showNotImplemented('Lose Sanity'));
+        document.getElementById('add-exp').addEventListener('click', () => this.showNotImplemented('Add Experience'));
+        document.getElementById('level-up').addEventListener('click', () => this.showNotImplemented('Level Up'));
+        document.getElementById('reset-stats').addEventListener('click', () => this.showNotImplemented('Reset Stats'));
+        document.getElementById('add-random-item').addEventListener('click', () => this.showNotImplemented('Add Random Item'));
+        document.getElementById('clear-inventory').addEventListener('click', () => this.showNotImplemented('Clear Inventory'));
         document.getElementById('trigger-distortion').addEventListener('click', () => this.showNotImplemented('Trigger Distortion'));
         document.getElementById('stop-distortion-timer').addEventListener('click', () => this.showNotImplemented('Stop Distortion Timer'));
         // Distortion test buttons are handled in setupDistortionEvents()
@@ -718,6 +804,305 @@ Items: ${status.items.join(', ') || 'None'}`);
             console.log('👤 Player lost 10 sanity');
         }
     }
+
+    addExperience() {
+        if (window.encounterSystem) {
+            window.encounterSystem.gainExperience(100, 'Debug experience gain');
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player gained 100 experience');
+        }
+    }
+
+    forceLevelUp() {
+        if (window.encounterSystem) {
+            const requiredExp = window.encounterSystem.getRequiredExperience(window.encounterSystem.playerStats.level);
+            const expNeeded = requiredExp - window.encounterSystem.playerStats.experience;
+            window.encounterSystem.gainExperience(expNeeded + 1, 'Debug forced level up');
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player forced to level up');
+        }
+    }
+
+    resetPlayerStats() {
+        if (window.encounterSystem) {
+            window.encounterSystem.playerStats = {
+                health: 100,
+                maxHealth: 100,
+                sanity: 100,
+                maxSanity: 100,
+                steps: 0,
+                attack: 15,
+                defense: 10,
+                luck: 12,
+                experience: 0,
+                level: 1,
+                inventory: [],
+                equipment: {
+                    weapon: null,
+                    armor: null,
+                    accessory: null
+                },
+                skills: {
+                    combat: 1,
+                    diplomacy: 1,
+                    investigation: 1,
+                    survival: 1
+                },
+                traits: [],
+                reputation: {},
+                isDead: false,
+                deathReason: null
+            };
+            window.encounterSystem.playerSteps = 0;
+            window.encounterSystem.updateStatBars();
+            this.updatePlayerStatsDisplay();
+            console.log('👤 Player stats reset to default');
+        }
+    }
+
+    addRandomItem() {
+        if (window.encounterSystem?.itemSystem) {
+            const lootResult = window.encounterSystem.itemSystem.generateRandomLoot('monster');
+            window.encounterSystem.itemSystem.addToInventory(lootResult.itemId, 1);
+            this.updatePlayerStatsDisplay();
+            this.updateInventoryUI();
+            console.log(`🎒 Added random item: ${lootResult.item.name} (${lootResult.rarity})`);
+        }
+    }
+
+    clearInventory() {
+        if (window.encounterSystem?.itemSystem) {
+            window.encounterSystem.itemSystem.playerInventory = [];
+            window.encounterSystem.itemSystem.equippedItems = {
+                weapon: null,
+                armor: null,
+                accessory: null
+            };
+            window.encounterSystem.itemSystem.savePlayerInventory();
+            this.updatePlayerStatsDisplay();
+            this.updateInventoryUI();
+            console.log('🎒 Inventory cleared');
+        }
+    }
+
+    clearNPCs() {
+        if (window.npcSystem) {
+            window.npcSystem.clearAllMarkers();
+            this.updatePlayerStatsDisplay();
+            console.log('👥 All NPC markers cleared');
+        }
+    }
+
+    clearAllMarkers() {
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
+            window.eldritchApp.systems.mapEngine.clearAllMarkers();
+            console.log('🗺️ All map markers cleared');
+        }
+    }
+
+    resetGameScreen() {
+        if (window.eldritchApp) {
+            window.eldritchApp.resetGameScreen();
+            console.log('🔄 Game screen reset and markers recreated');
+        } else {
+            console.error('🔄 Main app not available for reset');
+        }
+    }
+
+    resetEncounterFlags() {
+        if (window.encounterSystem) {
+            window.encounterSystem.resetEncounterFlags();
+            console.log('🔄 Encounter flags reset');
+        } else {
+            console.error('🔄 Encounter system not available');
+        }
+    }
+
+    toggleProximityDebug() {
+        if (window.encounterSystem) {
+            window.encounterSystem.toggleDebugMode();
+            console.log('🎯 Proximity debug toggled');
+        } else {
+            console.error('🎯 Encounter system not available');
+        }
+    }
+
+    centerOnLocation() {
+        if (window.eldritchApp) {
+            window.eldritchApp.centerOnCurrentLocation();
+            console.log('📍 Centering map on current location');
+        } else {
+            console.error('📍 Main app not available');
+        }
+    }
+
+    forceGeolocation() {
+        if (window.geolocationManager) {
+            window.geolocationManager.startTracking();
+            console.log('📍 Forcing geolocation update');
+        } else {
+            console.error('📍 Geolocation manager not available');
+        }
+    }
+
+    testDistanceCalculation() {
+        if (window.encounterSystem) {
+            // Test distance calculation between two points
+            const lat1 = 61.4978; // Tampere
+            const lng1 = 23.7608;
+            const lat2 = 61.5000; // 200m away
+            const lng2 = 23.7650;
+            
+            const distance = window.encounterSystem.calculateDistance(lat1, lng1, lat2, lng2);
+            console.log(`🧪 Distance test: ${distance.toFixed(1)}m between points`);
+            alert(`Distance test: ${distance.toFixed(1)}m between test points`);
+        }
+    }
+
+    addStepsManual() {
+        if (window.encounterSystem) {
+            window.encounterSystem.addSteps(10);
+            this.updatePlayerStatsDisplay();
+            console.log('👣 Added 10 steps manually');
+        }
+    }
+
+    addQuestMarkers() {
+        console.log('🎯 DEBUG: addQuestMarkers called');
+        console.log('🎯 DEBUG: eldritchApp available:', !!window.eldritchApp);
+        console.log('🎯 DEBUG: mapEngine available:', !!window.eldritchApp?.systems?.mapEngine);
+        console.log('🎯 DEBUG: map available:', !!window.eldritchApp?.systems?.mapEngine?.map);
+        
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
+            window.eldritchApp.systems.mapEngine.addTestQuestMarkers();
+            console.log('🎯 Quest markers added');
+        } else {
+            console.error('🎯 DEBUG: Map engine not available');
+        }
+    }
+
+    clearQuestMarkers() {
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
+            // Clear test quest markers
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach(marker => {
+                if (window.eldritchApp.systems.mapEngine.map) {
+                    window.eldritchApp.systems.mapEngine.map.removeLayer(marker);
+                }
+            });
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.clear();
+            console.log('🎯 Quest markers cleared');
+        }
+    }
+
+    testQuestProximity() {
+        console.log('🎯 DEBUG: Testing quest proximity manually...');
+        
+        if (!window.encounterSystem) {
+            console.error('🎯 DEBUG: Encounter system not available');
+            return;
+        }
+        
+        if (!window.eldritchApp?.systems?.mapEngine) {
+            console.error('🎯 DEBUG: Map engine not available');
+            return;
+        }
+        
+        const playerPos = window.eldritchApp.systems.mapEngine.getPlayerPosition();
+        if (!playerPos) {
+            console.error('🎯 DEBUG: Player position not available');
+            return;
+        }
+        
+        console.log('🎯 DEBUG: Player position:', playerPos);
+        console.log('🎯 DEBUG: Test quest markers count:', window.eldritchApp.systems.mapEngine.testQuestMarkers?.size || 0);
+        
+        // Manually call the proximity check
+        window.encounterSystem.checkTestQuestProximity(playerPos);
+        
+        // Also test individual markers
+        if (window.eldritchApp.systems.mapEngine.testQuestMarkers) {
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((marker, key) => {
+                const questPos = marker.getLatLng();
+                const distance = window.encounterSystem.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    questPos.lat, questPos.lng
+                );
+                console.log(`🎯 DEBUG: Marker ${key} - Distance: ${distance.toFixed(1)}m, Position: ${questPos.lat}, ${questPos.lng}`);
+            });
+        }
+    }
+
+    forceQuestTrigger() {
+        console.log('🎯 DEBUG: Force triggering quest encounter...');
+        
+        if (!window.encounterSystem) {
+            console.error('🎯 DEBUG: Encounter system not available');
+            return;
+        }
+        
+        if (!window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
+            console.error('🎯 DEBUG: No test quest markers available');
+            return;
+        }
+        
+        // Get the first available quest marker
+        const firstMarker = window.eldritchApp.systems.mapEngine.testQuestMarkers.values().next().value;
+        if (!firstMarker) {
+            console.error('🎯 DEBUG: No quest markers found');
+            return;
+        }
+        
+        console.log('🎯 DEBUG: Force triggering quest with marker:', firstMarker);
+        
+        // Reset the encountered flag and trigger
+        firstMarker.encountered = false;
+        window.encounterSystem.startTestQuestEncounter(firstMarker);
+    }
+
+    addMapContent() {
+        console.log('🗺️ Adding all map content...');
+        
+        // Add quest markers
+        this.addQuestMarkers();
+        
+        // Add NPCs
+        this.addNPCs();
+        
+        // Add monsters
+        this.addMonsters();
+        
+        console.log('🗺️ All map content added');
+    }
+
+    addNPCs() {
+        console.log('👥 Adding NPCs...');
+        
+        if (window.npcSystem) {
+            window.npcSystem.generateNPCs();
+            console.log('👥 NPCs added');
+        } else {
+            console.error('👥 NPC system not available');
+        }
+    }
+
+    addMonsters() {
+        console.log('👹 Adding monsters...');
+        
+        if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
+            window.eldritchApp.systems.mapEngine.generateMonsters();
+            console.log('👹 Monsters added');
+        } else {
+            console.error('👹 Map engine not available');
+        }
+    }
+
+    updateInventoryUI() {
+        if (window.inventoryUI) {
+            window.inventoryUI.updateInventory();
+            window.inventoryUI.updateEquipment();
+            window.inventoryUI.updateStats();
+        }
+    }
     
     triggerDistortion() {
         if (window.sanityDistortion) {
@@ -865,6 +1250,12 @@ Items: ${status.items.join(', ') || 'None'}`);
             const healthElement = document.getElementById('debug-health');
             const sanityElement = document.getElementById('debug-sanity');
             const stepsElement = document.getElementById('debug-steps');
+            const levelElement = document.getElementById('debug-level');
+            const expElement = document.getElementById('debug-exp');
+            const expNeededElement = document.getElementById('debug-exp-needed');
+            const attackElement = document.getElementById('debug-attack');
+            const defenseElement = document.getElementById('debug-defense');
+            const luckElement = document.getElementById('debug-luck');
             
             if (healthElement) {
                 healthElement.textContent = `${Math.floor(window.encounterSystem.playerStats.health)}/${Math.floor(window.encounterSystem.playerStats.maxHealth)}`;
@@ -875,6 +1266,41 @@ Items: ${status.items.join(', ') || 'None'}`);
             if (stepsElement) {
                 stepsElement.textContent = Math.floor(window.encounterSystem.playerStats.steps);
             }
+            if (levelElement) {
+                levelElement.textContent = window.encounterSystem.playerStats.level;
+            }
+            if (expElement) {
+                expElement.textContent = window.encounterSystem.playerStats.experience;
+            }
+            if (expNeededElement) {
+                const requiredExp = window.encounterSystem.getRequiredExperience(window.encounterSystem.playerStats.level);
+                expNeededElement.textContent = requiredExp;
+            }
+            if (attackElement) {
+                attackElement.textContent = window.encounterSystem.playerStats.attack;
+            }
+            if (defenseElement) {
+                defenseElement.textContent = window.encounterSystem.playerStats.defense;
+            }
+            if (luckElement) {
+                luckElement.textContent = window.encounterSystem.playerStats.luck;
+            }
+            
+                    // Update item count
+                    const itemCountElement = document.getElementById('debug-item-count');
+                    if (itemCountElement && window.encounterSystem?.itemSystem?.playerInventory) {
+                        const itemCount = window.encounterSystem.itemSystem.playerInventory.length;
+                        itemCountElement.textContent = itemCount;
+                    } else if (itemCountElement) {
+                        itemCountElement.textContent = '0';
+                    }
+
+                    // Update NPC count
+                    const npcCountElement = document.getElementById('debug-npc-count');
+                    if (npcCountElement && window.npcSystem) {
+                        const npcCount = window.npcSystem.npcs.length;
+                        npcCountElement.textContent = npcCount;
+                    }
         }
     }
 

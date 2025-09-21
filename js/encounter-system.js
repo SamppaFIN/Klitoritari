@@ -10,11 +10,11 @@ class EncounterSystem {
         this.encounters = new Map();
         this.activeEncounter = null;
         this.proximityCheckInterval = null;
-        this.stepGainRate = 0.1; // Steps per position update
+        // Step calculation now based on distance moved
         this.lastPosition = null;
         
-        // Initialize item system (disabled for testing)
-        // this.itemSystem = new ItemSystem();
+        // Initialize item system
+        this.itemSystem = new ItemSystem();
         
         // Initialize quest system (disabled for testing)
         // this.questSystem = new QuestSystem();
@@ -355,27 +355,37 @@ class EncounterSystem {
     startProximityDetection() {
         this.proximityCheckInterval = setInterval(() => {
             this.checkProximityEncounters();
-        }, 3000); // Check every 3 seconds to slow down encounters
+        }, 1000); // Check every 1 second for more responsive detection
     }
 
     checkProximityEncounters() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) {
-            console.log('🎭 No app or geolocation system available');
+        if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine) {
             return;
         }
         
-        const playerPos = window.eldritchApp.systems.geolocation.currentPosition;
-        if (!playerPos) {
-            console.log('🎭 No player position available');
+        // Check if getPlayerPosition method exists
+        if (typeof window.eldritchApp.systems.mapEngine.getPlayerPosition !== 'function') {
+            console.error('🎭 ERROR: getPlayerPosition method not found on map engine');
+            console.log('🎭 Map engine methods:', Object.getOwnPropertyNames(window.eldritchApp.systems.mapEngine));
             return;
         }
 
-        console.log('🎭 Checking proximity encounters at:', playerPos);
+        const playerPos = window.eldritchApp.systems.mapEngine.getPlayerPosition();
+        if (!playerPos) {
+            return;
+        }
+
+        // Debug: Log player position and nearby markers
+        this.debugProximityInfo(playerPos);
+
+        // Add visual proximity indicators
+        this.addProximityIndicators(playerPos);
 
         // Check distance to all markers
         this.checkMonsterProximity(playerPos);
         this.checkPOIProximity(playerPos);
         this.checkMysteryProximity(playerPos);
+        this.checkTestQuestProximity(playerPos);
         
         // Check for legendary encounters
         this.checkLegendaryEncounters(playerPos);
@@ -386,11 +396,8 @@ class EncounterSystem {
 
     checkMonsterProximity(playerPos) {
         if (!window.eldritchApp.systems.mapEngine.monsters) {
-            console.log('🎭 No monsters available');
             return;
         }
-        
-        console.log('🎭 Checking', window.eldritchApp.systems.mapEngine.monsters.length, 'monsters');
         
         window.eldritchApp.systems.mapEngine.monsters.forEach((monster, index) => {
             const distance = this.calculateDistance(
@@ -398,10 +405,8 @@ class EncounterSystem {
                 monster.lat, monster.lng
             );
             
-            console.log(`🎭 Monster ${index} distance:`, distance, 'meters');
-            
-            if (distance < 50 && !monster.encountered) { // 50m
-                console.log('🎭 Monster encounter triggered!');
+            if (distance < 50 && !monster.encountered) { // 50m for closer interaction
+                console.log(`🎭 Monster encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 monster.encountered = true;
                 this.startMonsterEncounter(monster);
             }
@@ -410,11 +415,8 @@ class EncounterSystem {
 
     checkPOIProximity(playerPos) {
         if (!window.eldritchApp.systems.mapEngine.pointsOfInterest) {
-            console.log('🎭 No POIs available');
             return;
         }
-        
-        console.log('🎭 Checking', window.eldritchApp.systems.mapEngine.pointsOfInterest.length, 'POIs');
         
         window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach((poi, index) => {
             const distance = this.calculateDistance(
@@ -422,10 +424,8 @@ class EncounterSystem {
                 poi.getLatLng().lat, poi.getLatLng().lng
             );
             
-            console.log(`🎭 POI ${index} distance:`, distance, 'meters');
-            
-            if (distance < 50 && !poi.encountered) { // 50m
-                console.log('🎭 POI encounter triggered!');
+            if (distance < 30 && !poi.encountered) { // 30m for closer interaction
+                console.log(`🎭 POI encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 poi.encountered = true;
                 this.startPOIEncounter(poi);
             }
@@ -434,11 +434,8 @@ class EncounterSystem {
 
     checkMysteryProximity(playerPos) {
         if (!window.eldritchApp.systems.mapEngine.mysteryZoneMarkers) {
-            console.log('🎭 No mystery zones available');
             return;
         }
-        
-        console.log('🎭 Checking', window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.length, 'mystery zones');
         
         window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach((mystery, index) => {
             const distance = this.calculateDistance(
@@ -446,12 +443,35 @@ class EncounterSystem {
                 mystery.getLatLng().lat, mystery.getLatLng().lng
             );
             
-            console.log(`🎭 Mystery ${index} distance:`, distance, 'meters');
-            
-            if (distance < 50 && !mystery.encountered) { // 50m
-                console.log('🎭 Mystery encounter triggered!');
+            if (distance < 40 && !mystery.encountered) { // 40m for closer interaction
+                console.log(`🎭 Mystery encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 mystery.encountered = true;
                 this.startMysteryEncounter(mystery);
+            }
+        });
+    }
+
+    checkTestQuestProximity(playerPos) {
+        if (!window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
+            return;
+        }
+
+        window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((questMarker, key) => {
+            if (questMarker.encountered) {
+                return; // Skip already encountered markers
+            }
+            
+            const questPos = questMarker.getLatLng();
+            const distance = this.calculateDistance(
+                playerPos.lat, playerPos.lng,
+                questPos.lat, questPos.lng
+            );
+            
+            // Use visual proximity - closer trigger area for better UX
+            if (distance < 25) { // 25m for closer interaction
+                console.log(`🎯 Test quest encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                questMarker.encountered = true;
+                this.startTestQuestEncounter(questMarker);
             }
         });
     }
@@ -601,9 +621,9 @@ class EncounterSystem {
         this.playerStats.steps += encounter.quest.rewards.steps;
         
         // Add items to inventory (if item system is available)
-        if (window.itemSystem) {
+        if (this.itemSystem) {
             encounter.quest.rewards.items.forEach(item => {
-                window.itemSystem.addToInventory(item, 1);
+                this.itemSystem.addToInventory(item, 1);
             });
         }
 
@@ -718,10 +738,24 @@ class EncounterSystem {
             });
         }
         
+        // Check test quest markers
+        if (window.eldritchApp.systems.mapEngine.testQuestMarkers) {
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach(questMarker => {
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    questMarker.getLatLng().lat, questMarker.getLatLng().lng
+                );
+                if (distance < closestDistance && distance < 100) {
+                    closestDistance = distance;
+                    closestType = 'quest';
+                }
+            });
+        }
+        
         // Show proximity warning if close
-        if (closestDistance < 100 && closestDistance > 50) {
+        if (closestDistance < 300 && closestDistance > 200) {
             this.showProximityWarning(closestType, Math.round(closestDistance));
-        } else if (closestDistance >= 100) {
+        } else if (closestDistance >= 300) {
             this.hideProximityWarning();
         }
     }
@@ -735,7 +769,7 @@ class EncounterSystem {
             document.body.appendChild(warning);
         }
         
-        const typeEmoji = type === 'monster' ? '👹' : type === 'poi' ? '💎' : '🔍';
+        const typeEmoji = type === 'monster' ? '👹' : type === 'poi' ? '💎' : type === 'quest' ? '🎯' : '🔍';
         warning.innerHTML = `${typeEmoji} ${type.toUpperCase()} nearby! ${distance}m away`;
         warning.classList.remove('hidden');
     }
@@ -760,6 +794,132 @@ class EncounterSystem {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         return R * c; // Distance in meters
+    }
+
+    // Debug method to show proximity information
+    debugProximityInfo(playerPos) {
+        if (!this.debugMode) return;
+        
+        console.log(`🎯 Player position: ${playerPos.lat.toFixed(6)}, ${playerPos.lng.toFixed(6)}`);
+        
+        // Check test quest markers
+        if (window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((questMarker, index) => {
+                const questPos = questMarker.getLatLng();
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    questPos.lat, questPos.lng
+                );
+                console.log(`🎯 Quest marker ${index + 1}: ${distance.toFixed(2)}m away (encountered: ${questMarker.encountered})`);
+            });
+        }
+        
+        // Check POI markers
+        if (window.eldritchApp?.systems?.mapEngine?.pointsOfInterest) {
+            window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach((poi, index) => {
+                const poiPos = poi.getLatLng();
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    poiPos.lat, poiPos.lng
+                );
+                console.log(`💎 POI ${index + 1}: ${distance.toFixed(2)}m away (encountered: ${poi.encountered})`);
+            });
+        }
+    }
+
+    // Method to reset all encounter flags for testing
+    resetEncounterFlags() {
+        console.log('🔄 Resetting all encounter flags...');
+        
+        // Reset test quest markers
+        if (window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach(questMarker => {
+                questMarker.encountered = false;
+            });
+        }
+        
+        // Reset POI markers
+        if (window.eldritchApp?.systems?.mapEngine?.pointsOfInterest) {
+            window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach(poi => {
+                poi.encountered = false;
+            });
+        }
+        
+        // Reset monster markers
+        if (window.eldritchApp?.systems?.mapEngine?.monsters) {
+            window.eldritchApp.systems.mapEngine.monsters.forEach(monster => {
+                monster.encountered = false;
+            });
+        }
+        
+        // Reset mystery zone markers
+        if (window.eldritchApp?.systems?.mapEngine?.mysteryZoneMarkers) {
+            window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach(mystery => {
+                mystery.encountered = false;
+            });
+        }
+        
+        console.log('🔄 All encounter flags reset!');
+    }
+
+    // Toggle debug mode for proximity detection
+    toggleDebugMode() {
+        this.debugMode = !this.debugMode;
+        console.log(`🎯 Proximity debug mode: ${this.debugMode ? 'ON' : 'OFF'}`);
+    }
+
+    // Add visual proximity indicators to markers
+    addProximityIndicators(playerPos) {
+        if (!window.eldritchApp?.systems?.mapEngine?.map) return;
+
+        // Check test quest markers
+        if (window.eldritchApp.systems.mapEngine.testQuestMarkers) {
+            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((questMarker, index) => {
+                const questPos = questMarker.getLatLng();
+                const distance = this.calculateDistance(
+                    playerPos.lat, playerPos.lng,
+                    questPos.lat, questPos.lng
+                );
+                
+                // Add proximity ring if close but not encountered
+                if (distance < 100 && !questMarker.encountered) {
+                    this.addProximityRing(questPos, 'quest', distance);
+                }
+            });
+        }
+    }
+
+    // Add proximity ring around marker
+    addProximityRing(position, type, distance) {
+        if (!window.eldritchApp?.systems?.mapEngine?.map) return;
+
+        const ringId = `proximity-ring-${type}-${position.lat}-${position.lng}`;
+        
+        // Remove existing ring
+        const existingRing = document.getElementById(ringId);
+        if (existingRing) {
+            existingRing.remove();
+        }
+
+        // Create proximity ring
+        const ring = L.circle([position.lat, position.lng], {
+            radius: 25, // 25m radius
+            color: '#ffaa00',
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.1,
+            dashArray: '10, 5',
+            interactive: false
+        });
+
+        ring.addTo(window.eldritchApp.systems.mapEngine.map);
+        
+        // Auto-remove after 2 seconds
+        setTimeout(() => {
+            if (window.eldritchApp?.systems?.mapEngine?.map) {
+                window.eldritchApp.systems.mapEngine.map.removeLayer(ring);
+            }
+        }, 2000);
     }
 
     startMonsterEncounter(monster) {
@@ -819,6 +979,19 @@ class EncounterSystem {
         } else {
             console.error('🐙 Lovecraftian quest system not available');
         }
+    }
+
+    startTestQuestEncounter(questMarker) {
+        console.log('🎯 Test quest encounter started:', questMarker.questName);
+        
+        this.activeEncounter = {
+            type: 'testQuest',
+            data: questMarker,
+            startTime: Date.now()
+        };
+        
+        this.showEncounterModal();
+        this.showTestQuestCutscene(questMarker);
     }
 
     showMonsterCutscene(monster) {
@@ -903,6 +1076,32 @@ class EncounterSystem {
         document.getElementById('action-1').addEventListener('click', () => this.investigateMystery(mystery));
         document.getElementById('action-2').addEventListener('click', () => this.meditateMystery(mystery));
         document.getElementById('action-3').addEventListener('click', () => this.leaveMystery(mystery));
+    }
+
+    showTestQuestCutscene(questMarker) {
+        const dialog = document.getElementById('dialog-text');
+        const actions = document.getElementById('encounter-actions');
+        
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>🎯 ${questMarker.questName}</h3>
+                <p>${questMarker.questType === 'mystery' ? 'A strange forest where reality seems to bend...' : 
+                   questMarker.questType === 'poi' ? 'Crumbling stones that whisper of forgotten times...' : 
+                   'A swirling vortex of otherworldly energy...'}</p>
+                <p>You've discovered a ${questMarker.questType} location! What will you do?</p>
+            </div>
+        `;
+        
+        actions.innerHTML = `
+            <button id="action-1" class="encounter-btn">Investigate (15 steps)</button>
+            <button id="action-2" class="encounter-btn">Study (10 steps)</button>
+            <button id="action-3" class="encounter-btn">Leave (0 steps)</button>
+        `;
+        
+        // Re-add event listeners
+        document.getElementById('action-1').addEventListener('click', () => this.investigateTestQuest(questMarker));
+        document.getElementById('action-2').addEventListener('click', () => this.studyTestQuest(questMarker));
+        document.getElementById('action-3').addEventListener('click', () => this.leaveTestQuest(questMarker));
     }
 
     startBattle(monster) {
@@ -1108,11 +1307,81 @@ class EncounterSystem {
         this.closeEncounter();
     }
 
+    investigateTestQuest(questMarker) {
+        this.spendSteps(15);
+        const stepsReward = Math.floor(Math.random() * 30) + 20;
+        this.addSteps(stepsReward);
+        this.giveReward('experience', 40);
+        this.giveReward('discoveries', `${questMarker.questName} Knowledge`);
+        this.showDialog(`You investigated ${questMarker.questName} and gained ${stepsReward} steps and knowledge!`);
+        this.closeEncounter();
+    }
+
+    studyTestQuest(questMarker) {
+        this.spendSteps(10);
+        const stepsReward = Math.floor(Math.random() * 20) + 10;
+        this.addSteps(stepsReward);
+        this.giveReward('experience', 25);
+        this.showDialog(`You studied ${questMarker.questName} and gained ${stepsReward} steps and wisdom!`);
+        this.closeEncounter();
+    }
+
+    leaveTestQuest(questMarker) {
+        this.showDialog(`You leave ${questMarker.questName}.`);
+        this.closeEncounter();
+    }
+
     // Step management
     addSteps(amount) {
         this.playerSteps += amount;
         this.updateStepCounter();
         console.log(`👣 Gained ${amount} steps. Total: ${this.playerSteps}`);
+    }
+
+    // Handle position updates from geolocation system
+    handlePositionUpdate(position) {
+        if (!position || !position.coords) return;
+        
+        const currentPos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+        };
+        
+        if (this.lastPosition) {
+            const distance = this.calculateDistance(
+                this.lastPosition.lat, this.lastPosition.lng,
+                currentPos.lat, currentPos.lng
+            );
+            
+            // Gain steps based on distance moved
+            if (distance > 10) { // Only count significant movement
+                const stepsGained = Math.floor(distance / 100); // 1 step per 100 meters
+                if (stepsGained > 0) {
+                    this.addSteps(stepsGained);
+                    console.log(`👣 Moved ${distance.toFixed(1)}m, gained ${stepsGained} steps`);
+                }
+            }
+        }
+        
+        this.lastPosition = currentPos;
+    }
+
+    // Calculate distance between two points (in meters)
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = this.toRadians(lat2 - lat1);
+        const dLng = this.toRadians(lng2 - lng1);
+        
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+                  Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    toRadians(degrees) {
+        return degrees * (Math.PI / 180);
     }
 
     spendSteps(amount) {
@@ -1131,21 +1400,225 @@ class EncounterSystem {
         // Sync with player stats and check for death
         this.playerStats.steps = this.playerSteps;
         this.checkPlayerDeath();
+        this.updateStatBars();
+    }
+
+    // Update visual stat bars with animations
+    updateStatBars() {
+        this.updateHealthBar();
+        this.updateSanityBar();
+        this.updateStepsDisplay();
+    }
+
+    updateHealthBar() {
+        const healthFill = document.getElementById('health-fill');
+        const healthValue = document.getElementById('health-value');
+        const healthExplanation = document.getElementById('health-explanation');
+        
+        if (!healthFill || !healthValue || !healthExplanation) return;
+
+        const healthPercent = (this.playerStats.health / this.playerStats.maxHealth) * 100;
+        const healthPercentRounded = Math.round(healthPercent);
+        
+        // Update bar width with smooth animation
+        healthFill.style.width = `${healthPercentRounded}%`;
+        healthValue.textContent = `${this.playerStats.health}/${this.playerStats.maxHealth}`;
+        
+        // Update visual state based on health level
+        healthFill.classList.remove('low-health');
+        if (healthPercent <= 25) {
+            healthFill.classList.add('low-health');
+            healthExplanation.textContent = 'Critical Health!';
+        } else if (healthPercent <= 50) {
+            healthExplanation.textContent = 'Low Health';
+        } else if (healthPercent <= 75) {
+            healthExplanation.textContent = 'Good Health';
+        } else {
+            healthExplanation.textContent = 'Perfect Health';
+        }
+    }
+
+    updateSanityBar() {
+        const sanityFill = document.getElementById('sanity-fill');
+        const sanityValue = document.getElementById('sanity-value');
+        const sanityExplanation = document.getElementById('sanity-explanation');
+        
+        if (!sanityFill || !sanityValue || !sanityExplanation) return;
+
+        const sanityPercent = (this.playerStats.sanity / this.playerStats.maxSanity) * 100;
+        const sanityPercentRounded = Math.round(sanityPercent);
+        
+        // Update bar width with smooth animation
+        sanityFill.style.width = `${sanityPercentRounded}%`;
+        sanityValue.textContent = `${this.playerStats.sanity}/${this.playerStats.maxSanity}`;
+        
+        // Update visual state based on sanity level
+        sanityFill.classList.remove('low-sanity', 'critical-sanity');
+        if (sanityPercent <= 15) {
+            sanityFill.classList.add('critical-sanity');
+            sanityExplanation.textContent = 'Reality Breaking!';
+        } else if (sanityPercent <= 30) {
+            sanityFill.classList.add('low-sanity');
+            sanityExplanation.textContent = 'Sanity Failing';
+        } else if (sanityPercent <= 60) {
+            sanityExplanation.textContent = 'Stable Mind';
+        } else {
+            sanityExplanation.textContent = 'Perfect Sanity';
+        }
+    }
+
+    updateStepsDisplay() {
+        const stepsValue = document.getElementById('steps-value');
+        const stepsExplanation = document.getElementById('steps-explanation');
+        
+        if (!stepsValue || !stepsExplanation) return;
+
+        stepsValue.textContent = this.playerSteps;
+        
+        // Update explanation based on steps
+        if (this.playerSteps >= 1000) {
+            stepsExplanation.textContent = 'Cosmic Master';
+        } else if (this.playerSteps >= 500) {
+            stepsExplanation.textContent = 'Cosmic Explorer';
+        } else if (this.playerSteps >= 100) {
+            stepsExplanation.textContent = 'Cosmic Energy';
+        } else {
+            stepsExplanation.textContent = 'Cosmic Energy';
+        }
+    }
+
+    // Experience and Leveling System
+    gainExperience(amount, reason = "Cosmic knowledge gained") {
+        this.playerStats.experience += amount;
+        console.log(`⭐ Experience gained: ${amount}. Reason: ${reason}`);
+        
+        // Check for level up
+        this.checkLevelUp();
+        this.updateStatBars();
+    }
+
+    checkLevelUp() {
+        const currentLevel = this.playerStats.level;
+        const requiredExp = this.getRequiredExperience(currentLevel);
+        
+        if (this.playerStats.experience >= requiredExp) {
+            this.levelUp();
+        }
+    }
+
+    getRequiredExperience(level) {
+        // Exponential growth: level 1 = 100 exp, level 2 = 250 exp, level 3 = 450 exp, etc.
+        return Math.floor(100 * Math.pow(level, 1.5));
+    }
+
+    levelUp() {
+        const oldLevel = this.playerStats.level;
+        this.playerStats.level++;
+        
+        // Increase max health and sanity
+        const healthIncrease = Math.floor(Math.random() * 10) + 5; // 5-14 points
+        const sanityIncrease = Math.floor(Math.random() * 8) + 3;  // 3-10 points
+        
+        this.playerStats.maxHealth += healthIncrease;
+        this.playerStats.maxSanity += sanityIncrease;
+        
+        // Restore some health and sanity
+        this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + Math.floor(healthIncrease * 0.5));
+        this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + Math.floor(sanityIncrease * 0.5));
+        
+        // Increase combat stats
+        this.playerStats.attack += Math.floor(Math.random() * 3) + 1; // 1-3 points
+        this.playerStats.defense += Math.floor(Math.random() * 2) + 1; // 1-2 points
+        this.playerStats.luck += Math.floor(Math.random() * 2) + 1;    // 1-2 points
+        
+        // Show level up notification
+        this.showLevelUpNotification(oldLevel, this.playerStats.level, {
+            health: healthIncrease,
+            sanity: sanityIncrease,
+            attack: this.playerStats.attack,
+            defense: this.playerStats.defense,
+            luck: this.playerStats.luck
+        });
+        
+        console.log(`🌟 Level up! ${oldLevel} → ${this.playerStats.level}`);
+        console.log(`❤️ Max Health: +${healthIncrease} (${this.playerStats.maxHealth})`);
+        console.log(`🧠 Max Sanity: +${sanityIncrease} (${this.playerStats.maxSanity})`);
+        console.log(`⚔️ Attack: ${this.playerStats.attack}, Defense: ${this.playerStats.defense}, Luck: ${this.playerStats.luck}`);
+        
+        // Check for another level up
+        this.checkLevelUp();
+    }
+
+    showLevelUpNotification(oldLevel, newLevel, statIncreases) {
+        // Create level up notification
+        const notification = document.createElement('div');
+        notification.className = 'level-up-notification';
+        notification.innerHTML = `
+            <div class="level-up-content">
+                <div class="level-up-header">
+                    <div class="level-up-icon">🌟</div>
+                    <h3>Level Up!</h3>
+                </div>
+                <div class="level-up-stats">
+                    <div class="level-up-stat">
+                        <span class="stat-name">Level:</span>
+                        <span class="stat-change">${oldLevel} → ${newLevel}</span>
+                    </div>
+                    <div class="level-up-stat">
+                        <span class="stat-name">Max Health:</span>
+                        <span class="stat-change">+${statIncreases.health}</span>
+                    </div>
+                    <div class="level-up-stat">
+                        <span class="stat-name">Max Sanity:</span>
+                        <span class="stat-change">+${statIncreases.sanity}</span>
+                    </div>
+                    <div class="level-up-stat">
+                        <span class="stat-name">Attack:</span>
+                        <span class="stat-change">${statIncreases.attack}</span>
+                    </div>
+                    <div class="level-up-stat">
+                        <span class="stat-name">Defense:</span>
+                        <span class="stat-change">${statIncreases.defense}</span>
+                    </div>
+                    <div class="level-up-stat">
+                        <span class="stat-name">Luck:</span>
+                        <span class="stat-change">${statIncreases.luck}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Show with animation
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 5000);
     }
 
     // Death mechanics - because cosmic horror is no joke... or is it?
     checkPlayerDeath() {
-        if (this.playerStats.health <= 0) {
+        if (this.playerStats.health <= 0 && !this.playerStats.isDead) {
             this.playerStats.isDead = true;
-            this.playerStats.deathReason = "Your physical form has been consumed by the cosmic void. The eldritch entities found your health bar... lacking.";
+            this.playerStats.deathReason = "health";
             this.handlePlayerDeath();
-        } else if (this.playerStats.sanity <= 0) {
+        } else if (this.playerStats.sanity <= 0 && !this.playerStats.isDead) {
             this.playerStats.isDead = true;
-            this.playerStats.deathReason = "Your mind has shattered like a cosmic egg dropped from the 47th dimension. The forbidden knowledge was simply too much to bear.";
+            this.playerStats.deathReason = "sanity";
             this.handlePlayerDeath();
-        } else if (this.playerStats.steps <= 0) {
+        } else if (this.playerStats.steps <= 0 && !this.playerStats.isDead) {
             this.playerStats.isDead = true;
-            this.playerStats.deathReason = "You have run out of steps in the cosmic dance of existence. Even the eldritch entities are impressed by your dedication to standing still.";
+            this.playerStats.deathReason = "steps";
             this.handlePlayerDeath();
         }
     }
@@ -1165,40 +1638,157 @@ class EncounterSystem {
     }
 
     showDeathScreen() {
+        // Remove existing death modal if it exists
+        const existingModal = document.getElementById('death-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
         const deathModal = document.createElement('div');
         deathModal.id = 'death-modal';
         deathModal.className = 'death-modal';
+        
+        const deathMessages = {
+            health: {
+                title: '💀 Physical Demise',
+                icon: '💀',
+                message: 'Your physical form has been consumed by the cosmic forces. The void claims another soul...',
+                subtext: 'But in the cosmic realm, death is merely a transition to another state of being.'
+            },
+            sanity: {
+                title: '🌀 Reality Collapse',
+                icon: '🌀',
+                message: 'Your mind has shattered under the weight of forbidden knowledge. Reality itself rejects your consciousness...',
+                subtext: 'The cosmic truth was too much for mortal comprehension. You have become one with the madness.'
+            },
+            steps: {
+                title: '⚡ Energy Depletion',
+                icon: '⚡',
+                message: 'You have run out of cosmic energy. Without steps, you cannot traverse the infinite realms.',
+                subtext: 'The cosmic dance requires movement. Even the eldritch entities need to stretch their tentacles.'
+            }
+        };
+
+        const deathData = deathMessages[this.playerStats.deathReason] || deathMessages.health;
+
         deathModal.innerHTML = `
             <div class="death-content">
                 <div class="death-header">
-                    <h2>💀 Cosmic Demise</h2>
+                    <div class="death-icon">${deathData.icon}</div>
+                    <h2>${deathData.title}</h2>
                 </div>
                 <div class="death-message">
-                    <p>${this.playerStats.deathReason}</p>
-                    <p class="death-subtitle">The cosmic realm is not without mercy... mostly.</p>
+                    <p>${deathData.message}</p>
+                    <p class="death-subtext">${deathData.subtext}</p>
+                </div>
+                <div class="death-stats">
+                    <div class="death-stat">
+                        <span class="stat-label">Final Steps:</span>
+                        <span class="stat-value">${this.playerSteps}</span>
+                    </div>
+                    <div class="death-stat">
+                        <span class="stat-label">Final Level:</span>
+                        <span class="stat-value">${this.playerStats.level}</span>
+                    </div>
+                    <div class="death-stat">
+                        <span class="stat-label">Experience Gained:</span>
+                        <span class="stat-value">${this.playerStats.experience}</span>
+                    </div>
                 </div>
                 <div class="death-actions">
-                    <button class="death-btn" onclick="window.encounterSystem.resurrectPlayer()">
-                        🌌 Embrace Cosmic Rebirth
+                    <button id="resurrect-btn" class="sacred-button primary">
+                        🌟 Resurrect (Cost: 100 Steps)
+                    </button>
+                    <button id="new-game-btn" class="sacred-button secondary">
+                        🌌 New Journey
                     </button>
                 </div>
             </div>
         `;
         
         document.body.appendChild(deathModal);
+        
+        // Show with animation
+        setTimeout(() => {
+            deathModal.classList.add('show');
+        }, 100);
+        
+        // Add event listeners
+        document.getElementById('resurrect-btn').addEventListener('click', () => {
+            this.resurrectPlayer();
+        });
+        
+        document.getElementById('new-game-btn').addEventListener('click', () => {
+            this.startNewGame();
+        });
     }
 
     resurrectPlayer() {
+        if (this.playerSteps >= 100) {
+            this.playerSteps -= 100;
+            this.playerStats.health = Math.floor(this.playerStats.maxHealth * 0.5);
+            this.playerStats.sanity = Math.floor(this.playerStats.maxSanity * 0.5);
+            this.playerStats.isDead = false;
+            this.playerStats.deathReason = null;
+            
+            // Hide death modal
         const deathModal = document.getElementById('death-modal');
         if (deathModal) {
-            deathModal.remove();
+                deathModal.style.display = 'none';
+                deathModal.classList.remove('show');
+                setTimeout(() => deathModal.remove(), 300);
+            }
+            
+            this.updateStatBars();
+            this.showDialog('🌟 You have been resurrected! The cosmic forces grant you a second chance...');
+        } else {
+            this.showDialog('Not enough steps to resurrect! You need at least 100 steps.');
+        }
+    }
+
+    startNewGame() {
+        // Reset all player stats
+        this.playerStats = {
+            health: 100,
+            maxHealth: 100,
+            sanity: 100,
+            maxSanity: 100,
+            steps: 0,
+            attack: 15,
+            defense: 10,
+            luck: 12,
+            experience: 0,
+            level: 1,
+            inventory: [],
+            equipment: {
+                weapon: null,
+                armor: null,
+                accessory: null
+            },
+            skills: {
+                combat: 1,
+                diplomacy: 1,
+                investigation: 1,
+                survival: 1
+            },
+            traits: [],
+            reputation: {},
+            isDead: false,
+            deathReason: null
+        };
+        
+        this.playerSteps = 0;
+        
+        // Hide death modal
+        const deathModal = document.getElementById('death-modal');
+        if (deathModal) {
+            deathModal.style.display = 'none';
+            deathModal.classList.remove('show');
+            setTimeout(() => deathModal.remove(), 300);
         }
         
-        // Update UI
-        this.updateHealthBars();
-        this.updateStepCounter();
-        
-        console.log('🌌 Player resurrected with cosmic mercy!');
+        this.updateStatBars();
+        this.showDialog('🌌 A new cosmic journey begins... Welcome back to the infinite realm!');
     }
 
     // Sanity system - because knowing too much is... problematic
@@ -1288,8 +1878,10 @@ class EncounterSystem {
             
             // Gain steps based on distance moved (simulation mode)
             if (distance > 10) { // Only count significant movement
-                const stepsGained = Math.floor(distance / 10) * this.stepGainRate;
+                const stepsGained = Math.floor(distance / 100); // 1 step per 100 meters
+                if (stepsGained > 0) {
                 this.addSteps(stepsGained);
+                }
             }
         }
         
@@ -1815,10 +2407,27 @@ class EncounterSystem {
                         </div>
                     </div>
                     <div class="battle-actions">
+                        <div class="combat-stance">
+                            <label for="stance-select">Combat Stance:</label>
+                            <select id="stance-select" onchange="window.encounterSystem.changeStance(this.value)">
+                                <option value="balanced">⚖️ Balanced</option>
+                                <option value="aggressive">⚔️ Aggressive</option>
+                                <option value="defensive">🛡️ Defensive</option>
+                                <option value="tactical">🎯 Tactical</option>
+                            </select>
+                        </div>
+                        <div class="basic-actions">
                         <button class="battle-btn" onclick="window.encounterSystem.playerAttack('${monster.id}')">⚔️ Attack</button>
                         <button class="battle-btn" onclick="window.encounterSystem.playerDefend('${monster.id}')">🛡️ Defend</button>
                         <button class="battle-btn" onclick="window.encounterSystem.playerFlee('${monster.id}')">🏃 Flee</button>
                         <button class="battle-btn" onclick="window.encounterSystem.useItem('${monster.id}')">🧪 Use Item</button>
+                        </div>
+                        <div class="special-abilities">
+                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'cosmic_strike')" id="cosmic-strike-btn">🌟 Cosmic Strike</button>
+                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'reality_anchor')" id="reality-anchor-btn">⚓ Reality Anchor</button>
+                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'sanity_blast')" id="sanity-blast-btn">🧠 Sanity Blast</button>
+                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'void_dodge')" id="void-dodge-btn">🌀 Void Dodge</button>
+                        </div>
                     </div>
                     <div class="battle-log" id="battle-log">
                         <div class="log-entry">Battle begins! Roll for initiative...</div>
@@ -1858,9 +2467,13 @@ class EncounterSystem {
         // Get equipped weapon stats
         const equippedWeapon = this.itemSystem.getEquippedItems().weapon;
         const weaponAttack = equippedWeapon ? equippedWeapon.stats.attack : 0;
-        const totalAttack = this.playerStats.attack + weaponAttack;
         
-        const attackRoll = this.rollDice(20, totalAttack);
+        // Apply stance modifiers
+        const stanceMods = this.stanceModifiers || { attack: 0, defense: 0, accuracy: 0, critChance: 0 };
+        const totalAttack = this.playerStats.attack + weaponAttack + stanceMods.attack;
+        const accuracyBonus = stanceMods.accuracy || 0;
+        
+        const attackRoll = this.rollDice(20, totalAttack + accuracyBonus);
         const defenseRoll = this.rollDice(20, monster.defense);
         
         const log = document.getElementById('battle-log');
@@ -1868,14 +2481,38 @@ class EncounterSystem {
         log.innerHTML += `<div class="log-entry">You attack${weaponName}! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
         log.innerHTML += `<div class="log-entry">${monster.name} defends! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
         
-        if (attackRoll.total > defenseRoll.total) {
+        // Check for critical hit (natural 20 or stance bonus)
+        const critChance = stanceMods.critChance || 0;
+        const isCritical = attackRoll.roll === 20 || (attackRoll.roll >= 18 && Math.random() < critChance);
+        const isMiss = attackRoll.total <= defenseRoll.total;
+        
+        if (isCritical) {
+            // Critical hit - always hits and deals extra damage
+            const baseDamage = this.rollDice(8, totalAttack);
+            const criticalBonus = this.rollDice(8, totalAttack);
+            const totalDamage = baseDamage.total + criticalBonus.total;
+            
+            monster.health -= totalDamage;
+            log.innerHTML += `<div class="log-entry critical">CRITICAL HIT! You deal ${totalDamage} damage! (${baseDamage.total} + ${criticalBonus.total} crit bonus)</div>`;
+            
+            // Apply weapon effects with critical bonus
+            if (equippedWeapon && equippedWeapon.effects) {
+                this.applyWeaponEffects(equippedWeapon, monster, log, true);
+            }
+            
+            if (monster.health <= 0) {
+                this.victory(monster);
+                return;
+            }
+        } else if (!isMiss) {
+            // Normal hit
             const damage = this.rollDice(8, totalAttack);
             monster.health -= damage.total;
             log.innerHTML += `<div class="log-entry success">Hit! You deal ${damage.total} damage!</div>`;
             
             // Apply weapon effects
             if (equippedWeapon && equippedWeapon.effects) {
-                this.applyWeaponEffects(equippedWeapon, monster, log);
+                this.applyWeaponEffects(equippedWeapon, monster, log, false);
             }
             
             if (monster.health <= 0) {
@@ -1891,23 +2528,103 @@ class EncounterSystem {
     }
 
     // Apply weapon effects
-    applyWeaponEffects(weapon, monster, log) {
+    applyWeaponEffects(weapon, monster, log, isCritical = false) {
         weapon.effects.forEach(effect => {
             switch (effect) {
                 case 'void_damage':
                     const voidDamage = this.rollDice(4, 2);
-                    monster.health -= voidDamage.total;
-                    log.innerHTML += `<div class="log-entry success">Void damage! +${voidDamage.total} damage!</div>`;
+                    const voidMultiplier = isCritical ? 2 : 1;
+                    monster.health -= voidDamage.total * voidMultiplier;
+                    log.innerHTML += `<div class="log-entry success">Void damage! +${voidDamage.total * voidMultiplier} damage!</div>`;
                     break;
                 case 'tentacle_whisper':
-                    log.innerHTML += `<div class="log-entry">The tentacle whispers: "Why don't cosmic entities ever get cold? Because they're always in their element!"</div>`;
+                    const jokes = [
+                        "Why don't cosmic entities ever get cold? Because they're always in their element!",
+                        "What do you call a cosmic entity that's always late? A procrastinator from another dimension!",
+                        "Why did the eldritch horror break up with its girlfriend? Because it couldn't handle the relationship's complexity!"
+                    ];
+                    const joke = jokes[Math.floor(Math.random() * jokes.length)];
+                    log.innerHTML += `<div class="log-entry">The tentacle whispers: "${joke}"</div>`;
                     break;
                 case 'starlight_arrows':
                     log.innerHTML += `<div class="log-entry">Starlight arrows pierce through ${monster.name}'s defenses!</div>`;
+                    if (isCritical) {
+                        monster.defense -= 3; // Critical starlight arrows reduce defense more
+                        log.innerHTML += `<div class="log-entry critical">Critical starlight! Defense reduced by 3!</div>`;
+                    }
                     break;
                 case 'reality_breach':
                     log.innerHTML += `<div class="log-entry">Reality tears around ${monster.name}! It looks confused!</div>`;
-                    monster.defense -= 2; // Reduce defense
+                    const defenseReduction = isCritical ? 4 : 2;
+                    monster.defense -= defenseReduction;
+                    log.innerHTML += `<div class="log-entry success">Defense reduced by ${defenseReduction}!</div>`;
+                    break;
+                case 'cosmic_humor':
+                    // Tentacle club's humor effect
+                    if (Math.random() < 0.3) {
+                        monster.defense -= 1;
+                        log.innerHTML += `<div class="log-entry">The cosmic humor confuses ${monster.name}! Defense -1!</div>`;
+                    }
+                    break;
+                case 'dimensional_portal':
+                    // Reality gun's portal effect
+                    if (Math.random() < 0.2) {
+                        const portalDamage = this.rollDice(6, 3);
+                        monster.health -= portalDamage.total;
+                        log.innerHTML += `<div class="log-entry success">Dimensional portal opens! +${portalDamage.total} damage!</div>`;
+                    }
+                    break;
+                case 'wisdom_protection':
+                    // Crystal plate's wisdom effect
+                    if (isCritical) {
+                        this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + 5);
+                        log.innerHTML += `<div class="log-entry success">Ancient wisdom flows through you! +5 Sanity!</div>`;
+                    }
+                    break;
+                case 'existential_whispers':
+                    // Void armor's existential effect
+                    if (Math.random() < 0.4) {
+                        monster.attack -= 2;
+                        log.innerHTML += `<div class="log-entry">Existential dread weakens ${monster.name}! Attack -2!</div>`;
+                    }
+                    break;
+                case 'sanity_protection':
+                    // Sanity amulet's protection
+                    if (isCritical) {
+                        this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + 3);
+                        log.innerHTML += `<div class="log-entry success">Sanity amulet protects your mind! +3 Sanity!</div>`;
+                    }
+                    break;
+                case 'void_walking':
+                    // Void ring's walking effect
+                    if (Math.random() < 0.3) {
+                        log.innerHTML += `<div class="log-entry">You phase through ${monster.name}'s attack! Next attack guaranteed hit!</div>`;
+                        // Set a flag for guaranteed next hit
+                        this.guaranteedHit = true;
+                    }
+                    break;
+                case 'cosmic_navigation':
+                    // Cosmic compass's navigation effect
+                    if (isCritical) {
+                        log.innerHTML += `<div class="log-entry">Cosmic compass reveals ${monster.name}'s weakness!</div>`;
+                        monster.defense -= 2;
+                        log.innerHTML += `<div class="log-entry success">Defense reduced by 2!</div>`;
+                    }
+                    break;
+                case 'reality_stability':
+                    // Reality anchor's stability effect
+                    if (isCritical) {
+                        this.playerStats.defense += 3;
+                        log.innerHTML += `<div class="log-entry success">Reality anchor stabilizes your defenses! +3 Defense!</div>`;
+                    }
+                    break;
+                case 'infinite_storage':
+                    // Void pocket's storage effect
+                    if (Math.random() < 0.1) {
+                        const randomItem = this.itemSystem.generateRandomLoot('monster');
+                        this.itemSystem.addToInventory(randomItem.itemId, 1);
+                        log.innerHTML += `<div class="log-entry success">Void pocket produces ${randomItem.item.name}!</div>`;
+                    }
                     break;
             }
         });
@@ -1922,6 +2639,151 @@ class EncounterSystem {
         this.playerStats.defense += 5; // Temporary defense boost
         this.playerTurn = false;
         setTimeout(() => this.monsterTurn(monsterId), 1000);
+    }
+
+    // Combat Stance System
+    changeStance(stance) {
+        this.currentStance = stance;
+        const log = document.getElementById('battle-log');
+        
+        switch (stance) {
+            case 'balanced':
+                this.stanceModifiers = { attack: 0, defense: 0, accuracy: 0, critChance: 0 };
+                log.innerHTML += `<div class="log-entry">You adopt a balanced stance. Ready for any situation.</div>`;
+                break;
+            case 'aggressive':
+                this.stanceModifiers = { attack: 3, defense: -2, accuracy: -1, critChance: 0.05 };
+                log.innerHTML += `<div class="log-entry">You adopt an aggressive stance! Attack +3, Defense -2, Accuracy -1, Crit +5%</div>`;
+                break;
+            case 'defensive':
+                this.stanceModifiers = { attack: -2, defense: 4, accuracy: 1, critChance: -0.02 };
+                log.innerHTML += `<div class="log-entry">You adopt a defensive stance! Attack -2, Defense +4, Accuracy +1, Crit -2%</div>`;
+                break;
+            case 'tactical':
+                this.stanceModifiers = { attack: 0, defense: 1, accuracy: 2, critChance: 0.03 };
+                log.innerHTML += `<div class="log-entry">You adopt a tactical stance! Defense +1, Accuracy +2, Crit +3%</div>`;
+                break;
+        }
+    }
+
+    // Special Abilities System
+    useSpecialAbility(monsterId, ability) {
+        if (!this.playerTurn) return;
+        
+        const monster = this.encounters.get(monsterId);
+        if (!monster) return;
+
+        const log = document.getElementById('battle-log');
+        const abilityData = this.getSpecialAbility(ability);
+        
+        if (!abilityData) {
+            log.innerHTML += `<div class="log-entry error">Unknown ability!</div>`;
+            return;
+        }
+
+        // Check if player has enough resources
+        if (this.playerStats.sanity < abilityData.sanityCost) {
+            log.innerHTML += `<div class="log-entry error">Not enough sanity! Need ${abilityData.sanityCost}, have ${this.playerStats.sanity}</div>`;
+            return;
+        }
+
+        // Check cooldown
+        if (this.abilityCooldowns && this.abilityCooldowns[ability] > 0) {
+            log.innerHTML += `<div class="log-entry error">${abilityData.name} is on cooldown for ${this.abilityCooldowns[ability]} turns!</div>`;
+            return;
+        }
+
+        // Use ability
+        this.playerStats.sanity -= abilityData.sanityCost;
+        this.updateStatBars();
+
+        log.innerHTML += `<div class="log-entry ability">You use ${abilityData.name}!</div>`;
+        
+        // Execute ability effect
+        this.executeSpecialAbility(ability, monster, log);
+        
+        // Set cooldown
+        if (!this.abilityCooldowns) this.abilityCooldowns = {};
+        this.abilityCooldowns[ability] = abilityData.cooldown;
+
+        this.playerTurn = false;
+        setTimeout(() => this.monsterTurn(monsterId), 1000);
+    }
+
+    getSpecialAbility(ability) {
+        const abilities = {
+            cosmic_strike: {
+                name: 'Cosmic Strike',
+                description: 'Channel cosmic energy into a devastating attack',
+                sanityCost: 15,
+                cooldown: 3,
+                type: 'attack'
+            },
+            reality_anchor: {
+                name: 'Reality Anchor',
+                description: 'Stabilize reality around you, reducing incoming damage',
+                sanityCost: 10,
+                cooldown: 4,
+                type: 'defensive'
+            },
+            sanity_blast: {
+                name: 'Sanity Blast',
+                description: 'Attack the enemy\'s mind directly',
+                sanityCost: 20,
+                cooldown: 5,
+                type: 'mental'
+            },
+            void_dodge: {
+                name: 'Void Dodge',
+                description: 'Phase through the void to avoid the next attack',
+                sanityCost: 12,
+                cooldown: 2,
+                type: 'defensive'
+            }
+        };
+        
+        return abilities[ability];
+    }
+
+    executeSpecialAbility(ability, monster, log) {
+        switch (ability) {
+            case 'cosmic_strike':
+                const cosmicDamage = this.rollDice(12, this.playerStats.attack + 5);
+                monster.health -= cosmicDamage.total;
+                log.innerHTML += `<div class="log-entry success">Cosmic energy courses through your weapon! ${cosmicDamage.total} cosmic damage!</div>`;
+                
+                // Cosmic strike has a chance to stun
+                if (Math.random() < 0.3) {
+                    monster.stunned = 2;
+                    log.innerHTML += `<div class="log-entry success">The cosmic energy stuns ${monster.name} for 2 turns!</div>`;
+                }
+                break;
+                
+            case 'reality_anchor':
+                this.realityAnchored = 3;
+                log.innerHTML += `<div class="log-entry success">Reality stabilizes around you! Next 3 attacks deal 50% less damage!</div>`;
+                break;
+                
+            case 'sanity_blast':
+                const sanityDamage = this.rollDice(8, this.playerStats.attack);
+                monster.health -= sanityDamage.total;
+                log.innerHTML += `<div class="log-entry success">You assault ${monster.name}'s mind! ${sanityDamage.total} mental damage!</div>`;
+                
+                // Sanity blast reduces monster's attack
+                monster.attack = Math.max(1, monster.attack - 2);
+                log.innerHTML += `<div class="log-entry success">${monster.name}'s attack reduced by 2!</div>`;
+                break;
+                
+            case 'void_dodge':
+                this.voidDodgeActive = 1;
+                log.innerHTML += `<div class="log-entry success">You phase into the void! Next attack will miss!</div>`;
+                break;
+        }
+        
+        if (monster.health <= 0) {
+            this.victory(monster);
+            return;
+        }
     }
 
     playerFlee(monsterId) {
@@ -1942,15 +2804,40 @@ class EncounterSystem {
     }
 
     monsterTurn(monster) {
+        const log = document.getElementById('battle-log');
+        
+        // Check for stunned status
+        if (monster.stunned && monster.stunned > 0) {
+            monster.stunned--;
+            log.innerHTML += `<div class="log-entry">${monster.name} is stunned and cannot act!</div>`;
+            this.playerTurn = true;
+            return;
+        }
+        
+        // Check for void dodge
+        if (this.voidDodgeActive && this.voidDodgeActive > 0) {
+            this.voidDodgeActive--;
+            log.innerHTML += `<div class="log-entry success">You phase through ${monster.name}'s attack!</div>`;
+            this.playerTurn = true;
+            return;
+        }
+        
         const attackRoll = this.rollDice(20, monster.attack);
         const defenseRoll = this.rollDice(20, this.playerStats.defense);
         
-        const log = document.getElementById('battle-log');
         log.innerHTML += `<div class="log-entry">${monster.name} attacks! Roll: ${attackRoll.roll} + ${attackRoll.modifier} = ${attackRoll.total}</div>`;
         log.innerHTML += `<div class="log-entry">You defend! Roll: ${defenseRoll.roll} + ${defenseRoll.modifier} = ${defenseRoll.total}</div>`;
         
         if (attackRoll.total > defenseRoll.total) {
-            const damage = this.rollDice(6, monster.attack);
+            let damage = this.rollDice(6, monster.attack);
+            
+            // Apply reality anchor damage reduction
+            if (this.realityAnchored && this.realityAnchored > 0) {
+                damage.total = Math.floor(damage.total * 0.5);
+                this.realityAnchored--;
+                log.innerHTML += `<div class="log-entry">Reality anchor reduces damage by 50%!</div>`;
+            }
+            
             this.loseHealth(damage.total, `${monster.name}'s attack strikes true!`);
             log.innerHTML += `<div class="log-entry danger">Hit! ${monster.name} deals ${damage.total} damage!</div>`;
             
@@ -1969,6 +2856,15 @@ class EncounterSystem {
             log.innerHTML += `<div class="log-entry miss">Miss! You dodge ${monster.name}'s attack!</div>`;
         }
         
+        // Update cooldowns
+        if (this.abilityCooldowns) {
+            Object.keys(this.abilityCooldowns).forEach(ability => {
+                if (this.abilityCooldowns[ability] > 0) {
+                    this.abilityCooldowns[ability]--;
+                }
+            });
+        }
+        
         this.playerTurn = true;
         this.updateHealthBars();
     }
@@ -1982,7 +2878,7 @@ class EncounterSystem {
         const lootItem = lootResult.item;
         
         // Add experience and item
-        this.playerStats.experience += experience;
+        this.gainExperience(experience, 'Monster defeated');
         this.itemSystem.addToInventory(lootResult.itemId, 1);
         
         const log = document.getElementById('battle-log');
