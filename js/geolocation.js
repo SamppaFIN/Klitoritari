@@ -23,6 +23,7 @@ class GeolocationManager {
     init() {
         this.setupUI();
         this.checkGeolocationSupport();
+        this.createDeviceLocationDisplay();
         console.log('📍 Geolocation manager initialized');
     }
 
@@ -89,6 +90,10 @@ class GeolocationManager {
         if (!this.deviceGPSEnabled) {
             // Use fixed position instead of device GPS
             console.log('📍 Using fixed position (device GPS disabled)');
+            this.updateDeviceLocationDisplay(
+                `${this.fixedPosition.lat.toFixed(6)}, ${this.fixedPosition.lng.toFixed(6)}`,
+                'Fixed'
+            );
             this.handlePositionUpdate({
                 coords: {
                     latitude: this.fixedPosition.lat,
@@ -100,7 +105,15 @@ class GeolocationManager {
             return;
         }
 
-        if (!this.checkGeolocationSupport()) return;
+        if (!this.checkGeolocationSupport()) {
+            console.error('📍 Geolocation not supported');
+            this.updateDeviceLocationDisplay('Not Supported', 'N/A');
+            return;
+        }
+
+        // Request location permission explicitly
+        console.log('📍 Requesting location permission...');
+        this.updateDeviceLocationDisplay('Requesting permission...', '--');
 
         const options = {
             enableHighAccuracy: true,
@@ -239,21 +252,28 @@ class GeolocationManager {
 
     handleError(error) {
         let message = 'Unknown geolocation error';
+        let displayMessage = 'Error';
         
         switch (error.code) {
             case error.PERMISSION_DENIED:
                 message = 'Geolocation access denied. Please enable location services.';
+                displayMessage = 'Permission Denied';
                 break;
             case error.POSITION_UNAVAILABLE:
                 message = 'Location information unavailable.';
+                displayMessage = 'Unavailable';
                 break;
             case error.TIMEOUT:
                 message = 'Location request timed out.';
+                displayMessage = 'Timeout';
                 break;
         }
 
         console.error('📍 Geolocation error:', message, error);
         this.showError(message);
+        
+        // Update device location display with error
+        this.updateDeviceLocationDisplay(displayMessage, 'Error');
         
         // Don't stop tracking on timeout errors - keep trying
         if (error.code === error.TIMEOUT) {
@@ -382,16 +402,26 @@ class GeolocationManager {
 
     // Update device location display
     updateDeviceLocationDisplay(coords, accuracy) {
-        if (!this.deviceLocationDisplay) return;
+        if (!this.deviceLocationDisplay) {
+            console.log('📍 Device location display not found, creating...');
+            this.createDeviceLocationDisplay();
+            if (!this.deviceLocationDisplay) return;
+        }
 
         const coordsElement = this.deviceLocationDisplay.querySelector('.location-coords');
         const accuracyElement = this.deviceLocationDisplay.querySelector('.accuracy-value');
 
+        console.log('📍 Updating device location display:', { coords, accuracy });
+
         if (coordsElement) {
             coordsElement.textContent = coords;
+        } else {
+            console.warn('📍 Location coords element not found');
         }
         if (accuracyElement) {
             accuracyElement.textContent = accuracy;
+        } else {
+            console.warn('📍 Accuracy element not found');
         }
     }
 

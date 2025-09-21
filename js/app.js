@@ -431,8 +431,9 @@ class EldritchSanctuaryApp {
         // Load mystery zones
         this.loadMysteryZones();
         
-        // Disable simulator mode by default - use real device location
-        this.systems.geolocation.disableSimulator();
+        // Start geolocation tracking automatically
+        console.log('📍 Starting geolocation tracking...');
+        this.systems.geolocation.startTracking();
     }
 
     loadMysteryZones() {
