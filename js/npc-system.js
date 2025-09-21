@@ -64,6 +64,9 @@ class NPCSystem {
         this.createZephyrNPC();
         
         console.log('👥 Generated', this.npcs.length, 'NPCs');
+        
+        // Return early to prevent old NPC generation code from running
+        return;
 
         // Enhanced NPC types with lore integration
         const npcTypes = [
@@ -369,6 +372,7 @@ class NPCSystem {
     }
 
     createChatModal() {
+        console.log('💬 Creating chat modal...');
         this.chatModal = document.createElement('div');
         this.chatModal.id = 'chat-modal';
         this.chatModal.className = 'chat-modal hidden';
@@ -398,22 +402,29 @@ class NPCSystem {
         `;
         
         document.body.appendChild(this.chatModal);
+        console.log('💬 Chat modal created and appended to body');
         this.setupChatEventListeners();
     }
 
     setupChatEventListeners() {
-        document.getElementById('close-chat').addEventListener('click', () => this.hideChat());
-        document.getElementById('end-chat').addEventListener('click', () => this.hideChat());
-        document.getElementById('send-message').addEventListener('click', () => this.sendMessage());
-        document.getElementById('ask-topic').addEventListener('click', () => this.askAboutTopics());
-        document.getElementById('ask-quest').addEventListener('click', () => this.askAboutQuests());
-        document.getElementById('ask-lore').addEventListener('click', () => this.askAboutLore());
-        
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                this.sendMessage();
-            }
-        });
+        console.log('💬 Setting up chat event listeners...');
+        try {
+            document.getElementById('close-chat').addEventListener('click', () => this.hideChat());
+            document.getElementById('end-chat').addEventListener('click', () => this.hideChat());
+            document.getElementById('send-message').addEventListener('click', () => this.sendMessage());
+            document.getElementById('ask-topic').addEventListener('click', () => this.askAboutTopics());
+            document.getElementById('ask-quest').addEventListener('click', () => this.askAboutQuests());
+            document.getElementById('ask-lore').addEventListener('click', () => this.askAboutLore());
+            
+            document.getElementById('chat-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.sendMessage();
+                }
+            });
+            console.log('💬 Chat event listeners set up successfully');
+        } catch (error) {
+            console.log('💬 Error setting up chat event listeners:', error);
+        }
     }
 
     createChatDebugPanel() {
@@ -445,6 +456,11 @@ class NPCSystem {
                     <label for="chat-distance">Chat Distance (m):</label>
                     <input type="number" id="chat-distance" value="20" min="5" max="100">
                     <button id="update-chat-distance" class="debug-btn">Update Distance</button>
+                </div>
+                <div class="debug-section">
+                    <h4>Debug</h4>
+                    <button id="test-chat-modal" class="debug-btn">Test Chat Modal</button>
+                    <button id="check-chat-modal" class="debug-btn">Check Chat Modal</button>
                 </div>
                 <div class="debug-section">
                     <h4>Info</h4>
@@ -479,6 +495,10 @@ class NPCSystem {
         
         // Chat settings
         document.getElementById('update-chat-distance').addEventListener('click', () => this.updateChatDistance());
+        
+        // Debug buttons
+        document.getElementById('test-chat-modal').addEventListener('click', () => this.testChatModal());
+        document.getElementById('check-chat-modal').addEventListener('click', () => this.checkChatModal());
         
         // Toggle panel
         document.getElementById('toggle-chat-debug').addEventListener('click', () => {
@@ -688,10 +708,51 @@ class NPCSystem {
         }
     }
 
-    startChat(npcId) {
-        const npc = this.npcs.find(n => n.id === npcId);
-        if (!npc) return;
+    testChatModal() {
+        console.log('💬 Testing chat modal...');
+        if (!this.chatModal) {
+            console.log('💬 Chat modal not found, creating it...');
+            this.createChatModal();
+        }
+        
+        // Create a test NPC
+        const testNPC = {
+            id: 'test',
+            name: 'Test NPC',
+            emoji: '🧪',
+            personality: 'test',
+            greeting: 'Hello! This is a test chat.'
+        };
+        
+        this.currentNPC = testNPC;
+        this.showChat();
+        this.addMessage(testNPC.name, testNPC.greeting, 'npc');
+    }
 
+    checkChatModal() {
+        console.log('💬 Checking chat modal...');
+        console.log('💬 Chat modal exists:', !!this.chatModal);
+        console.log('💬 Chat modal element:', this.chatModal);
+        console.log('💬 Chat modal classes:', this.chatModal ? this.chatModal.className : 'N/A');
+        console.log('💬 Chat modal visible:', this.chatModal ? !this.chatModal.classList.contains('hidden') : 'N/A');
+        console.log('💬 Current NPC:', this.currentNPC);
+        
+        if (this.chatModal) {
+            const chatContent = this.chatModal.querySelector('.chat-content');
+            console.log('💬 Chat content exists:', !!chatContent);
+            console.log('💬 Chat messages container exists:', !!document.getElementById('chat-messages'));
+        }
+    }
+
+    startChat(npcId) {
+        console.log('💬 startChat called with npcId:', npcId);
+        const npc = this.npcs.find(n => n.id === npcId);
+        if (!npc) {
+            console.log('💬 NPC not found for id:', npcId);
+            return;
+        }
+
+        console.log('💬 Found NPC:', npc.name);
         this.currentNPC = npc;
         this.showChat();
         this.addMessage(npc.name, npc.greeting, 'npc');
@@ -708,10 +769,16 @@ class NPCSystem {
     }
 
     showChat() {
-        if (!this.chatModal) return;
+        console.log('💬 showChat called');
+        if (!this.chatModal) {
+            console.log('💬 Chat modal not found!');
+            return;
+        }
         
+        console.log('💬 Chat modal found, showing chat for:', this.currentNPC.name);
         document.getElementById('chat-npc-name').textContent = `${this.currentNPC.emoji} ${this.currentNPC.name}`;
         this.chatModal.classList.remove('hidden');
+        console.log('💬 Chat modal should now be visible');
     }
 
     hideChat() {
@@ -722,7 +789,12 @@ class NPCSystem {
     }
 
     addMessage(sender, message, type) {
+        console.log('💬 addMessage called:', sender, message, type);
         const messagesContainer = document.getElementById('chat-messages');
+        if (!messagesContainer) {
+            console.log('💬 Chat messages container not found!');
+            return;
+        }
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${type}`;
         messageDiv.innerHTML = `
@@ -730,6 +802,7 @@ class NPCSystem {
         `;
         messagesContainer.appendChild(messageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        console.log('💬 Message added to chat');
     }
 
     sendMessage() {

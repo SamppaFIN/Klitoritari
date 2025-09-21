@@ -785,48 +785,6 @@ class EldritchSanctuaryApp {
         return guide;
     }
     
-    addLocationTestButton() {
-        // Add a debug button to test location services
-        const debugPanel = document.querySelector('.debug-panel');
-        if (debugPanel) {
-            const testButton = document.createElement('button');
-            testButton.textContent = '🧪 Test Location';
-            testButton.className = 'debug-btn';
-            testButton.style.marginTop = '10px';
-            testButton.addEventListener('click', () => {
-                this.testLocationServices();
-            });
-            debugPanel.appendChild(testButton);
-        }
-    }
-    
-    addQuestMarkerDebugButton() {
-        // Add a test button for quest marker debugging
-        const testButton = document.createElement('button');
-        testButton.textContent = '🎭 Test Quest Markers';
-        testButton.style.cssText = `
-            position: fixed;
-            top: 150px;
-            right: 20px;
-            z-index: 10000;
-            background: var(--cosmic-green);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        `;
-        
-        testButton.addEventListener('click', () => {
-            if (this.systems.unifiedQuest) {
-                this.systems.unifiedQuest.forceShowAllMarkers();
-            } else {
-                console.log('🎭 Quest system not available');
-            }
-        });
-        
-        document.body.appendChild(testButton);
-    }
     
     testLocationServices() {
         console.log('🧪 Testing location services...');
@@ -930,12 +888,75 @@ class EldritchSanctuaryApp {
         
         // Quest debug buttons removed for mobile optimization
         
-        // Add location test button for debugging
-        this.addLocationTestButton();
-        
-        // Add quest marker debug button
-        this.addQuestMarkerDebugButton();
+        // Initialize button status
+        this.updateInventoryStatus();
+        this.updateLocateStatus();
     }
+    
+    updateInventoryStatus() {
+        const inventoryStatus = document.getElementById('inventory-status');
+        const inventoryDetails = document.getElementById('inventory-details');
+        
+        if (inventoryStatus && inventoryDetails) {
+            // Get inventory count from inventory system if available
+            const itemCount = window.inventorySystem ? window.inventorySystem.items.length : 0;
+            const maxItems = 50; // Maximum inventory capacity
+            
+            if (itemCount === 0) {
+                inventoryStatus.textContent = 'Empty';
+                inventoryStatus.style.color = '#ff6b6b';
+            } else if (itemCount < 5) {
+                inventoryStatus.textContent = `${itemCount} items`;
+                inventoryStatus.style.color = '#ffa726';
+            } else {
+                inventoryStatus.textContent = `${itemCount} items`;
+                inventoryStatus.style.color = '#4caf50';
+            }
+            
+            // Update details with capacity info
+            inventoryDetails.textContent = `${itemCount}/${maxItems} items`;
+            
+            // Color code based on capacity
+            const capacityPercent = (itemCount / maxItems) * 100;
+            if (capacityPercent >= 90) {
+                inventoryDetails.style.color = '#ff6b6b'; // Red for nearly full
+            } else if (capacityPercent >= 70) {
+                inventoryDetails.style.color = '#ffa726'; // Orange for getting full
+            } else {
+                inventoryDetails.style.color = '#4caf50'; // Green for good capacity
+            }
+        }
+    }
+    
+    updateLocateStatus() {
+        const locateStatus = document.getElementById('locate-status');
+        const locateDetails = document.getElementById('locate-details');
+        
+        if (locateStatus && locateDetails) {
+            if (this.systems.geolocation) {
+                const isEnabled = this.systems.geolocation.isDeviceGPSEnabled();
+                const accuracy = this.systems.geolocation.getCurrentAccuracy();
+                
+                if (isEnabled) {
+                    locateStatus.textContent = 'GPS Active';
+                    locateStatus.style.color = '#4caf50';
+                    locateDetails.textContent = `Accuracy: ${accuracy ? accuracy.toFixed(1) + 'm' : 'Unknown'}`;
+                    locateDetails.style.color = '#4caf50';
+                } else {
+                    locateStatus.textContent = 'GPS Off';
+                    locateStatus.style.color = '#ff6b6b';
+                    locateDetails.textContent = 'Location disabled';
+                    locateDetails.style.color = '#ff6b6b';
+                }
+            } else {
+                locateStatus.textContent = 'GPS Ready';
+                locateStatus.style.color = '#ffa726';
+                locateDetails.textContent = 'Click to enable';
+                locateDetails.style.color = '#ffa726';
+            }
+        }
+    }
+
     
     cycleLocationMode() {
         console.log('📍 Toggling device GPS...');
@@ -943,9 +964,20 @@ class EldritchSanctuaryApp {
         if (this.systems.geolocation) {
             const isEnabled = this.systems.geolocation.toggleDeviceGPS();
             this.updateLocationButtonText(isEnabled);
+            this.updateLocateStatus();
         } else {
             console.error('📍 Geolocation system not available');
         }
+    }
+    
+    updateLocationAccuracy() {
+        // Update locate button details when accuracy changes
+        this.updateLocateStatus();
+    }
+    
+    updateInventoryCount() {
+        // Update inventory button when items change
+        this.updateInventoryStatus();
     }
     
     enableDeviceMode() {

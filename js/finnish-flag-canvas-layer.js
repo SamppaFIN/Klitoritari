@@ -89,21 +89,83 @@ class FinnishFlagCanvasLayer {
     }
     
     addFlagPin(lat, lng, size = null, rotation = null) {
+        // Check for nearby flags and determine size
+        const nearbyFlag = this.findNearbyFlag(lat, lng);
+        let flagSize;
+        
+        if (nearbyFlag) {
+            // Make the nearby flag bigger
+            const currentSizeIndex = this.flagSizes.indexOf(nearbyFlag.size);
+            const newSizeIndex = Math.min(currentSizeIndex + 1, this.flagSizes.length - 1);
+            nearbyFlag.size = this.flagSizes[newSizeIndex];
+            nearbyFlag.timestamp = Date.now(); // Update timestamp
+            console.log(`🇫🇮 Enlarged nearby flag to size ${nearbyFlag.size} (was ${this.flagSizes[currentSizeIndex]})`);
+            
+            // Don't add a new flag, just update the existing one
+            this.render();
+            return;
+        } else {
+            // No nearby flag found, add a new one with smallest size
+            flagSize = this.flagSizes[0]; // Start with smallest size
+        }
+        
         const pin = {
             lat: lat,
             lng: lng,
-            size: size || this.flagSizes[Math.floor(Math.random() * this.flagSizes.length)],
+            size: size || flagSize,
             rotation: rotation || Math.random() * Math.PI * 2,
             timestamp: Date.now()
         };
         
         this.flagPins.push(pin);
-        console.log('🇫🇮 Added flag pin:', pin);
+        console.log('🇫🇮 Added new flag pin:', pin);
         
         // Limit number of pins to prevent performance issues
         if (this.flagPins.length > 1000) {
             this.flagPins = this.flagPins.slice(-500); // Keep last 500 pins
         }
+        
+        this.render();
+    }
+    
+    findNearbyFlag(lat, lng, maxDistance = 10) {
+        // Check if there's already a flag within maxDistance meters
+        for (let i = 0; i < this.flagPins.length; i++) {
+            const flag = this.flagPins[i];
+            const distance = this.calculateDistance(lat, lng, flag.lat, flag.lng);
+            
+            if (distance <= maxDistance) {
+                console.log(`🇫🇮 Found nearby flag at distance ${distance.toFixed(2)}m`);
+                return flag;
+            }
+        }
+        
+        return null;
+    }
+    
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c; // Distance in meters
+    }
+    
+    getFlagStatistics() {
+        const stats = {
+            totalFlags: this.flagPins.length,
+            sizeDistribution: {}
+        };
+        
+        // Count flags by size
+        this.flagSizes.forEach(size => {
+            stats.sizeDistribution[size] = this.flagPins.filter(flag => flag.size === size).length;
+        });
+        
+        return stats;
     }
     
     latLngToCanvas(lat, lng) {

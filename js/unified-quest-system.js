@@ -335,8 +335,7 @@ class UnifiedQuestSystem {
             activeQuests: this.activeQuests.size
         });
         
-        // Aurora quest giver marker
-        this.createAuroraMarker();
+        // Aurora is now handled by NPC system - no need to create marker here
         
         // Quest location markers
         this.createQuestLocationMarkers();
@@ -689,6 +688,16 @@ class UnifiedQuestSystem {
     }
     
     handleAuroraProximity() {
+        console.log('🌟 Handling Aurora proximity - starting chat');
+        // Start chat with Aurora
+        if (window.eldritchApp && window.eldritchApp.systems.npc) {
+            const aurora = window.eldritchApp.systems.npc.npcs.find(npc => npc.name === 'Aurora');
+            if (aurora) {
+                console.log('🌟 Starting chat with Aurora');
+                window.eldritchApp.systems.npc.startChat(aurora.id);
+            }
+        }
+        
         // Check if this is the first time approaching Aurora
         const auroraQuest = this.availableQuests.get('aurora_meeting');
         if (auroraQuest && auroraQuest.status === 'available') {
@@ -708,7 +717,8 @@ class UnifiedQuestSystem {
         if (window.eldritchApp && window.eldritchApp.systems.npc) {
             const zephyr = window.eldritchApp.systems.npc.npcs.find(npc => npc.name === 'Zephyr');
             if (zephyr) {
-                window.eldritchApp.systems.npc.startChat(zephyr);
+                console.log('💨 Starting chat with Zephyr');
+                window.eldritchApp.systems.npc.startChat(zephyr.id);
             }
         }
     }

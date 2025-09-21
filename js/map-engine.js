@@ -1259,7 +1259,6 @@ class MapEngine {
         }
         
         console.log('⚡ Generating legendary encounters...');
-        console.log('⚡ Map available:', !!this.map);
         
         // Clear existing legendary markers
         if (this.legendaryMarkers) {
@@ -1952,6 +1951,30 @@ class MapEngine {
                 this.addFinnishFlagToPath(testLat, testLng, i / 4);
             }
             console.log('🇫🇮 Test flags created, total flags:', this.pathwayMarkers ? this.pathwayMarkers.length : 0);
+        }
+    }
+    
+    // Debug function to show flag statistics
+    showFlagStatistics() {
+        if (this.finnishFlagLayer) {
+            const stats = this.finnishFlagLayer.getFlagStatistics();
+            console.log('🇫🇮 Flag Statistics:', stats);
+            
+            // Show notification with flag stats
+            if (window.gruesomeNotifications) {
+                const sizeText = Object.entries(stats.sizeDistribution)
+                    .map(([size, count]) => `${size}px: ${count}`)
+                    .join(', ');
+                
+                window.gruesomeNotifications.showNotification({
+                    type: 'info',
+                    title: 'Flag Statistics',
+                    message: `Total: ${stats.totalFlags} flags. Sizes: ${sizeText}`,
+                    duration: 5000
+                });
+            }
+        } else {
+            console.log('🇫🇮 Finnish flag layer not available');
         }
     }
     
