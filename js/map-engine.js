@@ -1696,16 +1696,28 @@ class MapEngine {
 
     getPlayerPosition() {
         if (this.manualMode) {
+            console.log('🎮 Using manual position:', this.manualPosition);
             return {
                 lat: this.manualPosition.lat,
                 lng: this.manualPosition.lng
             };
         } else if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            return {
-                lat: window.eldritchApp.systems.geolocation.currentPosition?.lat || 61.4978,
-                lng: window.eldritchApp.systems.geolocation.currentPosition?.lng || 23.7608
-            };
+            const geolocation = window.eldritchApp.systems.geolocation;
+            const position = geolocation.getCurrentPositionSafe();
+            if (position) {
+                console.log('📍 Using GPS position:', position);
+                return {
+                    lat: position.lat,
+                    lng: position.lng
+                };
+            } else {
+                console.log('📍 No valid GPS position available, waiting for location...');
+                // Don't fall back to default position if GPS is available but not ready yet
+                // Return null to indicate no position available
+                return null;
+            }
         } else {
+            console.log('📍 No geolocation system available, using fallback position');
             // Fallback to default position
             return {
                 lat: 61.4978,

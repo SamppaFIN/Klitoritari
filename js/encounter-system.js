@@ -372,6 +372,7 @@ class EncounterSystem {
 
         const playerPos = window.eldritchApp.systems.mapEngine.getPlayerPosition();
         if (!playerPos) {
+            console.log('🎯 No player position available for proximity check');
             return;
         }
 

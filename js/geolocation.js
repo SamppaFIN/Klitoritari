@@ -94,12 +94,22 @@ class GeolocationManager {
             return;
         }
 
-        this.currentPosition = {
+        const newPosition = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
             accuracy: position.coords.accuracy || null,
             timestamp: position.timestamp || Date.now()
         };
+
+        // Log position updates for debugging
+        console.log('📍 GPS Position Update:', {
+            lat: newPosition.lat.toFixed(6),
+            lng: newPosition.lng.toFixed(6),
+            accuracy: newPosition.accuracy ? `${newPosition.accuracy.toFixed(1)}m` : 'unknown',
+            timestamp: new Date(newPosition.timestamp).toLocaleTimeString()
+        });
+
+        this.currentPosition = newPosition;
 
         this.updateAccuracyDisplay();
         
@@ -130,7 +140,15 @@ class GeolocationManager {
                 break;
         }
 
+        console.error('📍 Geolocation error:', message, error);
         this.showError(message);
+        
+        // Don't stop tracking on timeout errors - keep trying
+        if (error.code === error.TIMEOUT) {
+            console.log('📍 Geolocation timeout - will retry...');
+            return;
+        }
+        
         this.stopTracking();
     }
 
@@ -209,6 +227,23 @@ class GeolocationManager {
         this.isTracking = false;
         this.updateUI();
         console.log('📍 Geolocation tracking stopped');
+    }
+
+    // Check if we have a valid current position
+    hasValidPosition() {
+        return this.currentPosition && 
+               this.currentPosition.lat && 
+               this.currentPosition.lng &&
+               this.currentPosition.timestamp &&
+               (Date.now() - this.currentPosition.timestamp) < 30000; // Position less than 30 seconds old
+    }
+
+    // Get current position with better error handling
+    getCurrentPositionSafe() {
+        if (this.hasValidPosition()) {
+            return this.currentPosition;
+        }
+        return null;
     }
 
     // Simulator mode for testing

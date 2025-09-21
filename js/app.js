@@ -654,18 +654,19 @@ class EldritchSanctuaryApp {
     // Force center map on current location
     centerOnCurrentLocation() {
         console.log('📍 Forcing center on current location...');
-        if (this.systems.geolocation && this.systems.geolocation.currentPosition) {
-            const position = this.systems.geolocation.currentPosition;
-            console.log('📍 Current position:', position);
-            this.systems.mapEngine.centerOnPosition(position);
-            this.showNotification('📍 Map centered on your location', 'success');
-        } else {
-            console.log('📍 No current position available, requesting location...');
-            if (this.systems.geolocation) {
-                this.systems.geolocation.startTracking();
+        if (this.systems.geolocation) {
+            const position = this.systems.geolocation.getCurrentPositionSafe();
+            if (position) {
+                console.log('📍 Current position:', position);
+                this.systems.mapEngine.centerOnPosition(position);
+                this.showNotification('📍 Map centered on your location', 'success');
             } else {
-                this.showError('Geolocation not available');
+                console.log('📍 No valid position available, requesting location...');
+                this.systems.geolocation.startTracking();
+                this.showNotification('📍 Requesting your location...', 'info');
             }
+        } else {
+            this.showError('Geolocation not available');
         }
     }
 
