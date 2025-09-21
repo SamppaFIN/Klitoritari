@@ -25,7 +25,6 @@ class EncounterSystem {
             maxHealth: 100,
             sanity: 100,
             maxSanity: 100,
-            steps: 0, // Integer only - no half steps in the cosmic realm!
             attack: 15,
             defense: 10,
             luck: 12,
@@ -58,7 +57,6 @@ class EncounterSystem {
         
         // Rewards system
         this.rewards = {
-            steps: 0,
             items: [],
             experience: 0,
             discoveries: []
@@ -78,9 +76,6 @@ class EncounterSystem {
         this.startProximityDetection();
         this.setupUI();
         
-        // Add some initial steps for testing
-        this.addSteps(100);
-        console.log('🎭 Added 100 initial steps for testing');
         
         // Debug panel disabled - using unified debug console instead
         // this.createDebugPanel();
@@ -125,10 +120,6 @@ class EncounterSystem {
                                     <div class="stat-label">Health:</div>
                                     <div class="stat-value" id="player-health">100/100</div>
                                 </div>
-                                <div class="stat-bar">
-                                    <div class="stat-label">Steps:</div>
-                                    <div class="stat-value" id="player-steps">0</div>
-                                </div>
                             </div>
                             <div class="monster-stats">
                                 <h3 id="monster-name">Monster</h3>
@@ -139,9 +130,9 @@ class EncounterSystem {
                             </div>
                         </div>
                         <div class="battle-actions">
-                            <button id="attack-btn" class="battle-btn">Attack (10 steps)</button>
-                            <button id="defend-btn" class="battle-btn">Defend (5 steps)</button>
-                            <button id="flee-btn" class="battle-btn">Flee (20 steps)</button>
+                            <button id="attack-btn" class="battle-btn">Attack</button>
+                            <button id="defend-btn" class="battle-btn">Defend</button>
+                            <button id="flee-btn" class="battle-btn">Flee</button>
                         </div>
                     </div>
                     <div id="puzzle-interface" class="puzzle-interface hidden">
@@ -149,7 +140,7 @@ class EncounterSystem {
                         <div id="puzzle-content" class="puzzle-content"></div>
                         <div class="puzzle-actions">
                             <button id="submit-puzzle" class="puzzle-btn">Submit</button>
-                            <button id="skip-puzzle" class="puzzle-btn">Skip (50 steps)</button>
+                            <button id="skip-puzzle" class="puzzle-btn">Skip</button>
                         </div>
                     </div>
                 </div>
@@ -232,10 +223,6 @@ class EncounterSystem {
                             </div>
                             <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
                         </div>
-                        <div class="stat-bar">
-                            <span class="stat-label">Steps:</span>
-                            <span class="stat-value">${this.playerStats.steps}</span>
-                        </div>
                     </div>
                     
                     <div class="debug-controls">
@@ -244,7 +231,6 @@ class EncounterSystem {
                         <button id="restore-sanity" class="debug-btn">Restore Sanity</button>
                         <button id="lose-health" class="debug-btn">Lose 10 Health</button>
                         <button id="lose-sanity" class="debug-btn">Lose 10 Sanity</button>
-                        <button id="add-steps" class="debug-btn">Add 50 Steps</button>
                         <button id="start-simulation" class="debug-btn simulation-btn">🎭 Start Quest Simulation</button>
                         <button id="stop-simulation" class="debug-btn simulation-btn">⏹️ Stop Simulation</button>
                     </div>
@@ -259,7 +245,6 @@ class EncounterSystem {
         
         // Add event listeners
         document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
-        document.getElementById('add-steps').addEventListener('click', () => this.addSteps(50));
         document.getElementById('toggle-debug').addEventListener('click', () => {
             panel.classList.toggle('hidden');
         });
@@ -314,7 +299,6 @@ class EncounterSystem {
         const sanityFill = document.querySelector('.sanity-fill');
         const healthValue = document.querySelector('.stat-value');
         const sanityValue = document.querySelectorAll('.stat-value')[1];
-        const stepsValue = document.querySelectorAll('.stat-value')[2];
         
         if (healthFill) {
             healthFill.style.width = `${(this.playerStats.health / this.playerStats.maxHealth) * 100}%`;
@@ -332,9 +316,6 @@ class EncounterSystem {
             sanityValue.textContent = `${this.playerStats.sanity}/${this.playerStats.maxSanity}`;
         }
         
-        if (stepsValue) {
-            stepsValue.textContent = this.playerStats.steps;
-        }
     }
 
     // Simple debug action methods
@@ -610,7 +591,6 @@ class EncounterSystem {
             <div class="quest-rewards">
                 <h3>🌟 Rewards Earned:</h3>
                 <p>+${encounter.quest.rewards.experience} Experience</p>
-                <p>+${encounter.quest.rewards.steps} Steps</p>
                 <p>+${encounter.quest.rewards.items.join(', ')}</p>
                 <p>Title: ${encounter.quest.rewards.title}</p>
             </div>
@@ -619,7 +599,6 @@ class EncounterSystem {
 
         // Apply rewards
         this.playerStats.experience += encounter.quest.rewards.experience;
-        this.playerStats.steps += encounter.quest.rewards.steps;
         
         // Add items to inventory (if item system is available)
         if (this.itemSystem) {
@@ -1010,9 +989,9 @@ class EncounterSystem {
         `;
         
         actions.innerHTML = `
-            <button id="action-1" class="encounter-btn">Fight (10 steps)</button>
-            <button id="action-2" class="encounter-btn">Try to Flee (20 steps)</button>
-            <button id="action-3" class="encounter-btn">Observe (5 steps)</button>
+            <button id="action-1" class="encounter-btn">Fight</button>
+            <button id="action-2" class="encounter-btn">Try to Flee</button>
+            <button id="action-3" class="encounter-btn">Observe</button>
         `;
         
         battle.classList.add('hidden');
@@ -1042,9 +1021,9 @@ class EncounterSystem {
         `;
         
         actions.innerHTML = `
-            <button id="action-1" class="encounter-btn">Investigate (15 steps)</button>
-            <button id="action-2" class="encounter-btn">Take a Sample (10 steps)</button>
-            <button id="action-3" class="encounter-btn">Leave (0 steps)</button>
+            <button id="action-1" class="encounter-btn">Investigate</button>
+            <button id="action-2" class="encounter-btn">Take a Sample</button>
+            <button id="action-3" class="encounter-btn">Leave</button>
         `;
         
         puzzle.classList.add('hidden');
@@ -1068,9 +1047,9 @@ class EncounterSystem {
         `;
         
         actions.innerHTML = `
-            <button id="action-1" class="encounter-btn">Investigate (20 steps)</button>
-            <button id="action-2" class="encounter-btn">Meditate (15 steps)</button>
-            <button id="action-3" class="encounter-btn">Leave (0 steps)</button>
+            <button id="action-1" class="encounter-btn">Investigate</button>
+            <button id="action-2" class="encounter-btn">Meditate</button>
+            <button id="action-3" class="encounter-btn">Leave</button>
         `;
         
         // Re-add event listeners
@@ -1094,9 +1073,9 @@ class EncounterSystem {
         `;
         
         actions.innerHTML = `
-            <button id="action-1" class="encounter-btn">Investigate (15 steps)</button>
-            <button id="action-2" class="encounter-btn">Study (10 steps)</button>
-            <button id="action-3" class="encounter-btn">Leave (0 steps)</button>
+            <button id="action-1" class="encounter-btn">Investigate</button>
+            <button id="action-2" class="encounter-btn">Study</button>
+            <button id="action-3" class="encounter-btn">Leave</button>
         `;
         
         // Re-add event listeners
@@ -1106,7 +1085,6 @@ class EncounterSystem {
     }
 
     startBattle(monster) {
-        this.spendSteps(10);
         
         const battle = document.getElementById('battle-interface');
         const actions = document.getElementById('encounter-actions');
@@ -1118,7 +1096,6 @@ class EncounterSystem {
         document.getElementById('monster-name').textContent = monster.type.name;
         document.getElementById('monster-health').textContent = `${this.activeEncounter.battleState.monsterHealth}/100`;
         document.getElementById('player-health').textContent = `${this.activeEncounter.battleState.playerHealth}/100`;
-        document.getElementById('player-steps').textContent = this.playerSteps;
     }
 
     battleAction(action) {
@@ -1126,7 +1103,6 @@ class EncounterSystem {
         
         switch(action) {
             case 'attack':
-                this.spendSteps(10);
                 const damage = Math.floor(Math.random() * 20) + 10;
                 battleState.monsterHealth -= damage;
                 document.getElementById('monster-health').textContent = `${battleState.monsterHealth}/100`;
@@ -1141,18 +1117,15 @@ class EncounterSystem {
                 break;
                 
             case 'defend':
-                this.spendSteps(5);
                 battleState.playerDefending = true;
                 this.showDialog('You brace for impact!');
                 break;
                 
             case 'flee':
-                this.spendSteps(20);
                 this.fleeBattle();
                 break;
         }
         
-        document.getElementById('player-steps').textContent = this.playerSteps;
     }
 
     monsterAttack() {
@@ -1172,11 +1145,7 @@ class EncounterSystem {
     }
 
     winBattle() {
-        const stepsReward = Math.floor(Math.random() * 50) + 25;
-        this.addSteps(stepsReward);
-        
-        this.showDialog(`Victory! You defeated the monster and gained ${stepsReward} steps!`);
-        this.giveReward('steps', stepsReward);
+        this.showDialog(`Victory! You defeated the monster!`);
         this.closeEncounter();
     }
 
@@ -1191,7 +1160,6 @@ class EncounterSystem {
     }
 
     startPOIPuzzle(poi) {
-        this.spendSteps(15);
         
         const puzzle = document.getElementById('puzzle-interface');
         const actions = document.getElementById('encounter-actions');
@@ -1227,13 +1195,10 @@ class EncounterSystem {
         
         if (answer === this.puzzleAnswer) {
             feedback.innerHTML = '<span style="color: green;">Correct! Well done!</span>';
-            const stepsReward = Math.floor(Math.random() * 30) + 20;
-            this.addSteps(stepsReward);
-            this.giveReward('steps', stepsReward);
             this.giveReward('discoveries', 'Ancient Knowledge');
             
             setTimeout(() => {
-                this.showDialog(`Puzzle solved! You gained ${stepsReward} steps and ancient knowledge!`);
+                this.showDialog(`Puzzle solved! You gained ancient knowledge!`);
                 this.closeEncounter();
             }, 2000);
         } else {
@@ -1242,8 +1207,7 @@ class EncounterSystem {
     }
 
     skipPuzzle() {
-        this.spendSteps(50);
-        this.showDialog('You skipped the puzzle but it cost you 50 steps.');
+        this.showDialog('You skipped the puzzle.');
         this.closeEncounter();
     }
 
@@ -1253,7 +1217,6 @@ class EncounterSystem {
     }
 
     attemptFlee(monster) {
-        this.spendSteps(20);
         const success = Math.random() < 0.7; // 70% chance
         
         if (success) {
@@ -1265,17 +1228,13 @@ class EncounterSystem {
     }
 
     observeMonster(monster) {
-        this.spendSteps(5);
         this.showDialog(`You observe the ${monster.type.name}. It seems ${monster.type.speed > 0.0001 ? 'agile' : 'slow'} and ${monster.type.color === '#4B0082' ? 'mysterious' : 'powerful'}.`);
         this.closeEncounter();
     }
 
     samplePOI(poi) {
-        this.spendSteps(10);
-        const stepsReward = Math.floor(Math.random() * 20) + 10;
-        this.addSteps(stepsReward);
         this.giveReward('items', 'Mysterious Sample');
-        this.showDialog(`You collected a sample and gained ${stepsReward} steps!`);
+        this.showDialog(`You collected a sample!`);
         this.closeEncounter();
     }
 
@@ -1285,21 +1244,15 @@ class EncounterSystem {
     }
 
     investigateMystery(mystery) {
-        this.spendSteps(20);
-        const stepsReward = Math.floor(Math.random() * 40) + 30;
-        this.addSteps(stepsReward);
         this.giveReward('experience', 50);
         this.giveReward('discoveries', 'Cosmic Insight');
-        this.showDialog(`You investigated the mystery and gained ${stepsReward} steps and cosmic insight!`);
+        this.showDialog(`You investigated the mystery and gained cosmic insight!`);
         this.closeEncounter();
     }
 
     meditateMystery(mystery) {
-        this.spendSteps(15);
-        const stepsReward = Math.floor(Math.random() * 25) + 15;
-        this.addSteps(stepsReward);
         this.giveReward('experience', 25);
-        this.showDialog(`You meditated and gained ${stepsReward} steps and inner peace!`);
+        this.showDialog(`You meditated and gained inner peace!`);
         this.closeEncounter();
     }
 
@@ -1309,21 +1262,15 @@ class EncounterSystem {
     }
 
     investigateTestQuest(questMarker) {
-        this.spendSteps(15);
-        const stepsReward = Math.floor(Math.random() * 30) + 20;
-        this.addSteps(stepsReward);
         this.giveReward('experience', 40);
         this.giveReward('discoveries', `${questMarker.questName} Knowledge`);
-        this.showDialog(`You investigated ${questMarker.questName} and gained ${stepsReward} steps and knowledge!`);
+        this.showDialog(`You investigated ${questMarker.questName} and gained knowledge!`);
         this.closeEncounter();
     }
 
     studyTestQuest(questMarker) {
-        this.spendSteps(10);
-        const stepsReward = Math.floor(Math.random() * 20) + 10;
-        this.addSteps(stepsReward);
         this.giveReward('experience', 25);
-        this.showDialog(`You studied ${questMarker.questName} and gained ${stepsReward} steps and wisdom!`);
+        this.showDialog(`You studied ${questMarker.questName} and gained wisdom!`);
         this.closeEncounter();
     }
 
@@ -1332,12 +1279,6 @@ class EncounterSystem {
         this.closeEncounter();
     }
 
-    // Step management
-    addSteps(amount) {
-        this.playerSteps += amount;
-        this.updateStepCounter();
-        console.log(`👣 Gained ${amount} steps. Total: ${this.playerSteps}`);
-    }
 
     // Handle position updates from geolocation system
     handlePositionUpdate(position) {
@@ -1385,17 +1326,6 @@ class EncounterSystem {
         return degrees * (Math.PI / 180);
     }
 
-    spendSteps(amount) {
-        if (this.playerSteps >= amount) {
-            this.playerSteps -= amount;
-            this.updateStepCounter();
-            console.log(`👣 Spent ${amount} steps. Remaining: ${this.playerSteps}`);
-            return true;
-        } else {
-            this.showDialog('Not enough steps!');
-            return false;
-        }
-    }
 
     updateStepCounter() {
         // Sync with player stats and check for death

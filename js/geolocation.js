@@ -114,6 +114,11 @@ class GeolocationManager {
         // Request location permission explicitly
         console.log('📍 Requesting location permission...');
         this.updateDeviceLocationDisplay('Requesting permission...', '--');
+        
+        // Show a notification to the user about location permission
+        if (window.eldritchApp) {
+            window.eldritchApp.showNotification('📍 Please allow location access for the game to work properly', 'info');
+        }
 
         const options = {
             enableHighAccuracy: true,
