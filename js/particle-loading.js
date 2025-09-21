@@ -185,20 +185,16 @@ class ParticleLoadingScreen {
         // Show the loading screen
         this.show();
         
-        // Start the loading steps
+        // Start the loading steps immediately
         this.updateStep(0);
         this.updateProgress(0);
+        this.updateStep(1);
+        this.updateStep(2);
+        this.updateStep(3);
+        this.updateStep(4);
         
-        // Simulate loading steps with delays
-        setTimeout(() => this.updateStep(1), 50);
-        setTimeout(() => this.updateStep(2), 100);
-        setTimeout(() => this.updateStep(3), 150);
-        setTimeout(() => this.updateStep(4), 200);
-        
-        // Complete loading after minimum 300ms
-        setTimeout(() => {
-            this.completeLoading();
-        }, 300);
+        // Complete loading immediately
+        this.completeLoading();
     }
 
     updateStep(stepIndex) {
@@ -253,10 +249,8 @@ class ParticleLoadingScreen {
             loadingText.textContent = '✨ Cosmic realm ready!';
         }
         
-        // Hide loading screen after a short delay
-        setTimeout(() => {
-            this.hide();
-        }, 200);
+        // Hide loading screen immediately
+        this.hide();
     }
 
     show() {

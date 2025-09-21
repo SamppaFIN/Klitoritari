@@ -322,10 +322,15 @@ class UnifiedDebugPanel {
     createQuestTab() {
         return `
             <div class="debug-section">
-                <h4>🐙 Lovecraftian Quest</h4>
+                <h4>🎭 Quest System</h4>
                 <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">
-                    A dark humorous narrative combining H.P. Lovecraft with Terry Pratchett
+                    Quest proximity detection and debugging
                 </p>
+                <div id="quest-distance-info" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin-bottom: 15px;">
+                    <div style="color: #00ff88; font-weight: bold;">📍 Quest Distance Debug</div>
+                    <div id="quest-distance-display">Calculating distance...</div>
+                    <div style="color: #ffaa00; font-size: 11px;">Trigger distance: 50m</div>
+                </div>
                 <button id="start-quest" class="debug-btn">Start Quest</button>
                 <button id="start-quest-simulation" class="debug-btn">Start Quest Simulation</button>
                 <button id="reset-quest" class="debug-btn">Reset Quest</button>
@@ -417,7 +422,7 @@ class UnifiedDebugPanel {
             // Encounter tests
             document.getElementById('test-monster').addEventListener('click', () => window.encounterSystem.triggerMonsterEncounter());
             document.getElementById('test-poi').addEventListener('click', () => window.encounterSystem.triggerPOIEncounter());
-            document.getElementById('test-mystery').addEventListener('click', () => window.encounterSystem.triggerMysteryEncounter());
+            // Mystery encounter test removed as requested
             document.getElementById('test-heavy').addEventListener('click', () => window.encounterSystem.testHeavyEncounter());
             document.getElementById('force-heavy-spawn').addEventListener('click', () => window.encounterSystem.forceHeavySpawn());
             document.getElementById('add-steps').addEventListener('click', () => window.encounterSystem.addSteps(50));
@@ -1395,6 +1400,9 @@ Items: ${status.items.join(', ') || 'None'}`);
                 chatStats.textContent = `NPCs: ${npcCount} | Chat: ${chatStatus}`;
             }
         }
+        
+        // Update quest distance
+        this.updateQuestDistance();
 
         // Update path stats
         if (window.pathPaintingSystem) {
@@ -1408,6 +1416,60 @@ Items: ${status.items.join(', ') || 'None'}`);
                 currentBrush.textContent = `Brush: ${window.pathPaintingSystem.currentBrushColor || '#FF6B6B'} (${brushSizeM}m)`;
             }
         }
+    }
+
+    updateQuestDistance() {
+        const questDistanceDisplay = document.getElementById('quest-distance-display');
+        if (!questDistanceDisplay) return;
+        
+        // Get player position
+        let playerPos = null;
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            const position = window.eldritchApp.systems.geolocation.getCurrentPositionSafe();
+            if (position) {
+                playerPos = { lat: position.lat, lng: position.lng };
+            }
+        }
+        
+        if (!playerPos) {
+            questDistanceDisplay.textContent = 'No GPS position available';
+            questDistanceDisplay.style.color = '#ff6b6b';
+            return;
+        }
+        
+        // Quest start location
+        const questLat = 61.476173436868;
+        const questLng = 23.725432936819306;
+        
+        // Calculate distance
+        const distance = this.calculateDistance(playerPos.lat, playerPos.lng, questLat, questLng);
+        
+        // Update display
+        questDistanceDisplay.textContent = `${distance.toFixed(2)}m to cosmic entity`;
+        
+        // Color code based on distance
+        if (distance <= 50) {
+            questDistanceDisplay.style.color = '#00ff88'; // Green - within trigger range
+        } else if (distance <= 100) {
+            questDistanceDisplay.style.color = '#ffaa00'; // Orange - getting close
+        } else {
+            questDistanceDisplay.style.color = '#ff6b6b'; // Red - far away
+        }
+    }
+    
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371e3; // Earth's radius in meters
+        const φ1 = lat1 * Math.PI/180;
+        const φ2 = lat2 * Math.PI/180;
+        const Δφ = (lat2-lat1) * Math.PI/180;
+        const Δλ = (lng2-lng1) * Math.PI/180;
+
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c; // Distance in meters
     }
 
     startStatsUpdate() {

@@ -13,17 +13,20 @@ class GeolocationManager {
         this.onPositionUpdate = null;
         this.onAccuracyChange = null;
         this.deviceGPSEnabled = true; // Toggle for device GPS
-        this.fixedPosition = { lat: 61.4978, lng: 23.7608 }; // Default Tampere area
+        this.fixedPosition = { lat: 61.472768, lng: 23.724032 }; // Initial fallback, will be updated with last known position
         this.lastValidPosition = null;
         this.positionHistory = [];
         this.maxHistorySize = 10;
         this.deviceLocationDisplay = null;
+        this.targetQuestLocation = null;
+        this.locationUpdatesPaused = false;
     }
 
     init() {
         this.setupUI();
         this.checkGeolocationSupport();
         this.createDeviceLocationDisplay();
+        this.startPeriodicUpdates();
         console.log('📍 Geolocation manager initialized');
     }
 
@@ -35,11 +38,17 @@ class GeolocationManager {
             locateBtn.addEventListener('click', () => this.startTracking());
         }
         
-        // Create device location display in header
-        this.createDeviceLocationDisplay();
+        // Device location display is created in init(), no need to create it again
     }
 
     createDeviceLocationDisplay() {
+        // Check if display already exists
+        if (document.getElementById('device-location-display')) {
+            console.log('📍 Device location display already exists, skipping creation');
+            this.deviceLocationDisplay = document.getElementById('device-location-display');
+            return;
+        }
+
         // Find the header controls area
         const headerControls = document.querySelector('.header-controls');
         if (!headerControls) return;
@@ -50,17 +59,21 @@ class GeolocationManager {
         locationDisplay.className = 'device-location-display';
         locationDisplay.innerHTML = `
             <div class="location-info">
-                <span class="location-label">📍 Device:</span>
+                <span class="location-label">📍 Location:</span>
                 <span class="location-coords">Getting location...</span>
             </div>
             <div class="location-accuracy">
                 <span class="accuracy-label">Accuracy:</span>
                 <span class="accuracy-value">--</span>
             </div>
+            <div class="quest-distance">
+                <span class="quest-label">🎭 Quest:</span>
+                <span class="quest-distance-value">--</span>
+            </div>
         `;
 
         // Insert after the locate button
-        const locateBtn = document.getElementById('locate-btn');
+        const locateBtn = document.getElementById('locate-me-btn');
         if (locateBtn && locateBtn.parentNode) {
             locateBtn.parentNode.insertBefore(locationDisplay, locateBtn.nextSibling);
         } else {
@@ -68,6 +81,39 @@ class GeolocationManager {
         }
 
         this.deviceLocationDisplay = locationDisplay;
+        console.log('📍 Device location display created');
+    }
+    
+    // Start periodic updates to maintain display values
+    startPeriodicUpdates() {
+        // Update display every 5 seconds to maintain values
+        setInterval(() => {
+            this.refreshLocationDisplay();
+        }, 5000);
+        
+        console.log('📍 Started periodic location display updates');
+    }
+    
+    // Refresh location display with current values
+    refreshLocationDisplay() {
+        if (!this.deviceLocationDisplay) return;
+        
+        const position = this.getCurrentPositionSafe();
+        if (position) {
+            const coords = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+            const accuracy = position.accuracy ? `${position.accuracy.toFixed(1)}m` : 'unknown';
+            
+            this.updateDeviceLocationDisplay(coords, accuracy);
+            console.log('📍 Refreshed location display:', { coords, accuracy });
+        } else {
+            // Show fallback position
+            const fallback = this.getFallbackPosition();
+            this.updateDeviceLocationDisplay(
+                `${fallback.lat.toFixed(6)}, ${fallback.lng.toFixed(6)}`,
+                'N/A'
+            );
+            console.log('📍 Using fallback position in display');
+        }
     }
 
     checkGeolocationSupport() {
@@ -86,6 +132,9 @@ class GeolocationManager {
 
         this.isTracking = true;
         this.updateUI();
+        
+        // Resume location updates when starting tracking
+        this.resumeLocationUpdates();
 
         if (!this.deviceGPSEnabled) {
             // Use fixed position instead of device GPS
@@ -189,6 +238,12 @@ class GeolocationManager {
             console.error('Invalid position object received:', position);
             return;
         }
+        
+        // Skip updates if location updates are paused
+        if (this.locationUpdatesPaused) {
+            console.log('📍 Location update skipped - updates are paused');
+            return;
+        }
 
         const newPosition = {
             lat: position.coords.latitude,
@@ -234,6 +289,14 @@ class GeolocationManager {
 
         this.currentPosition = newPosition;
         this.lastValidPosition = newPosition;
+        
+        // Update fallback position with the new valid position
+        this.updateFallbackPosition();
+        
+        // Update quest marker position if investigation system is available
+        if (window.eldritchApp && window.eldritchApp.systems.investigation) {
+            window.eldritchApp.systems.investigation.updateQuestMarkerPosition();
+        }
 
         // Update device location display
         this.updateDeviceLocationDisplay(
@@ -378,8 +441,29 @@ class GeolocationManager {
     // Get current position with better error handling
     getCurrentPositionSafe() {
         if (this.hasValidPosition()) {
+            console.log('📍 Using valid cached position:', this.currentPosition);
             return this.currentPosition;
         }
+        
+        // Log why we're using fallback
+        console.log('📍 No valid position available. Current position:', this.currentPosition);
+        console.log('📍 Is tracking:', this.isTracking);
+        console.log('📍 Device GPS enabled:', this.deviceGPSEnabled);
+        
+        // Fallback to fixed position if no GPS available
+        if (this.fixedPosition) {
+            // Update fallback position with last known position if available
+            this.updateFallbackPosition();
+            
+            console.log('📍 Using fallback position:', this.fixedPosition);
+            return {
+                lat: this.fixedPosition.lat,
+                lng: this.fixedPosition.lng,
+                accuracy: 1,
+                timestamp: Date.now()
+            };
+        }
+        
         return null;
     }
 
@@ -428,8 +512,108 @@ class GeolocationManager {
         } else {
             console.warn('📍 Accuracy element not found');
         }
+        
+        // Update quest distance
+        this.updateQuestDistance();
     }
-
+    
+    // Set target quest location for distance tracking
+    setTargetQuestLocation(lat, lng, questName = 'Quest') {
+        this.targetQuestLocation = { lat, lng, name: questName };
+        console.log('📍 Set target quest location:', { lat, lng, name: questName });
+        this.updateQuestDistance();
+    }
+    
+    // Clear target quest location
+    clearTargetQuestLocation() {
+        this.targetQuestLocation = null;
+        console.log('📍 Cleared target quest location');
+        this.updateQuestDistance();
+    }
+    
+    // Update quest distance display
+    updateQuestDistance() {
+        if (!this.deviceLocationDisplay) return;
+        
+        const questDistanceElement = this.deviceLocationDisplay.querySelector('.quest-distance-value');
+        if (!questDistanceElement) return;
+        
+        // Get current player position
+        const playerPosition = this.getCurrentPositionSafe();
+        if (!playerPosition) {
+            questDistanceElement.textContent = 'No position';
+            return;
+        }
+        
+        // Use target quest location if set, otherwise use Questionable Sanity quest location
+        let questLat, questLng, questName;
+        if (this.targetQuestLocation) {
+            questLat = this.targetQuestLocation.lat;
+            questLng = this.targetQuestLocation.lng;
+            questName = this.targetQuestLocation.name;
+        } else {
+            // Default quest start location (Questionable Sanity quest)
+            questLat = 61.472768; // User's known location
+            questLng = 23.724032;
+            questName = 'Questionable Sanity';
+        }
+        
+        // Calculate distance
+        const distance = this.calculateDistance(
+            playerPosition.lat, playerPosition.lng,
+            questLat, questLng
+        );
+        
+        // Update display with color coding
+        questDistanceElement.textContent = `${distance.toFixed(0)}m`;
+        
+        // Update quest label to show which quest is being tracked
+        const questLabelElement = this.deviceLocationDisplay.querySelector('.quest-label');
+        if (questLabelElement) {
+            questLabelElement.textContent = `🎭 ${questName}:`;
+        }
+        
+        // Color code based on distance
+        if (distance <= 50) {
+            questDistanceElement.style.color = '#00ff00'; // Green - within trigger range
+        } else if (distance <= 100) {
+            questDistanceElement.style.color = '#ffaa00'; // Orange - getting close
+        } else {
+            questDistanceElement.style.color = '#ff6b6b'; // Red - far away
+        }
+        
+        console.log(`📍 Quest distance to ${questName}: ${distance.toFixed(0)}m`);
+    }
+    
+    // Pause location updates (e.g., during simulated movement)
+    pauseLocationUpdates() {
+        this.locationUpdatesPaused = true;
+        console.log('📍 Location updates paused');
+    }
+    
+    // Resume location updates (e.g., when Locate Me is clicked)
+    resumeLocationUpdates() {
+        this.locationUpdatesPaused = false;
+        console.log('📍 Location updates resumed');
+        // Refresh display with current position
+        this.refreshLocationDisplay();
+    }
+    
+    // Check if location updates are paused
+    isLocationUpdatesPaused() {
+        return this.locationUpdatesPaused;
+    }
+    
+    // Update fallback position with last known position
+    updateFallbackPosition() {
+        if (this.lastValidPosition) {
+            this.fixedPosition = {
+                lat: this.lastValidPosition.lat,
+                lng: this.lastValidPosition.lng
+            };
+            console.log('📍 Updated fallback position to last known position:', this.fixedPosition);
+        }
+    }
 
     // Toggle device GPS on/off
     toggleDeviceGPS() {

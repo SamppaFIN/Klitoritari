@@ -53,7 +53,11 @@ class BaseSystem {
             padding: 8px 15px;
         `;
 
-        baseButton.addEventListener('click', () => this.showBaseEstablishmentModal());
+        baseButton.addEventListener('click', (e) => {
+            console.log('🏗️ Base button clicked (header button)');
+            e.stopPropagation();
+            this.showBaseEstablishmentModal();
+        });
         header.appendChild(baseButton);
     }
 
@@ -127,7 +131,11 @@ class BaseSystem {
         // Base establishment modal events
         const establishBtn = document.getElementById('establish-base-btn');
         if (establishBtn) {
-            establishBtn.addEventListener('click', () => this.showBaseEstablishmentModal());
+            establishBtn.addEventListener('click', (e) => {
+                console.log('🏗️ Establish base button clicked (ID button)');
+                e.stopPropagation();
+                this.showBaseEstablishmentModal();
+            });
         }
 
         // Base management panel events
@@ -209,6 +217,13 @@ class BaseSystem {
         // Check if player already has a base
         if (this.playerBase) {
             this.showNotification('You already have a base established!', 'info');
+            return;
+        }
+
+        // Check if modal is already open to prevent duplicates
+        const existingModal = document.getElementById('base-establishment-modal');
+        if (existingModal) {
+            console.log('🏗️ Base establishment modal already open, ignoring duplicate request');
             return;
         }
 
@@ -303,13 +318,20 @@ class BaseSystem {
         }
 
         // Create base establishment modal
+        console.log('🏗️ Creating base establishment modal with position:', currentPosition);
         this.createBaseEstablishmentModal(currentPosition);
     }
 
     createBaseEstablishmentModal(position) {
+        console.log('🏗️ Creating base establishment modal...');
         const modal = document.createElement('div');
         modal.id = 'base-establishment-modal';
         modal.className = 'modal';
+        
+        // Store position data in modal dataset
+        modal.dataset.lat = position.lat;
+        modal.dataset.lng = position.lng;
+        modal.dataset.accuracy = position.accuracy || 0;
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
@@ -347,11 +369,11 @@ class BaseSystem {
                             </div>
                         </div>
                     </div>
-                    <div class="modal-actions">
-                        <button id="confirm-base-establishment" class="sacred-button">
+                    <div class="modal-footer">
+                        <button id="confirm-base-establishment" class="confirm-btn">
                             <span class="icon">🏗️</span> Establish Base
                         </button>
-                        <button id="cancel-base-establishment" class="sacred-button secondary">
+                        <button id="cancel-base-establishment" class="cancel-btn">
                             Cancel
                         </button>
                     </div>
@@ -360,11 +382,66 @@ class BaseSystem {
         `;
 
         document.body.appendChild(modal);
+        console.log('🏗️ Base establishment modal added to DOM');
 
-        // Setup modal event listeners
-        // Modal events are handled by the main setupBaseModalEvents method
+        // Setup modal event listeners after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            this.setupBaseEstablishmentModalEvents(modal);
+        }, 100);
     }
 
+    setupBaseEstablishmentModalEvents(modal) {
+        console.log('🏗️ Setting up base establishment modal events...');
+        
+        // Close modal button
+        const closeBtn = modal.querySelector('#close-base-modal');
+        console.log('🏗️ Close button found:', !!closeBtn);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                console.log('🏗️ Close button clicked');
+                modal.remove();
+            });
+        }
+
+        // Confirm establishment button
+        const confirmBtn = modal.querySelector('#confirm-base-establishment');
+        console.log('🏗️ Confirm button found:', !!confirmBtn);
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                console.log('🏗️ Confirm button clicked');
+                const nameInput = modal.querySelector('#base-name-input');
+                const baseName = nameInput ? nameInput.value.trim() : '';
+                
+                if (!baseName) {
+                    this.showNotification('Please enter a base name', 'error');
+                    return;
+                }
+                
+                // Get position from the modal data
+                const position = {
+                    lat: parseFloat(modal.dataset.lat),
+                    lng: parseFloat(modal.dataset.lng),
+                    accuracy: parseFloat(modal.dataset.accuracy) || 0
+                };
+                
+                console.log('🏗️ Establishing base:', baseName, 'at', position);
+                this.establishBase(baseName, position);
+                modal.remove();
+            });
+        }
+
+        // Cancel button
+        const cancelBtn = modal.querySelector('#cancel-base-establishment');
+        console.log('🏗️ Cancel button found:', !!cancelBtn);
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                console.log('🏗️ Cancel button clicked');
+                modal.remove();
+            });
+        }
+
+        console.log('🏗️ Base establishment modal events setup complete');
+    }
 
     async establishBase(name, position) {
         try {
@@ -533,15 +610,15 @@ class BaseSystem {
                 baseActions.classList.remove('hidden');
             }
 
-            // Hide establish button
+            // Hide establish button when base exists
             if (establishBtn) {
                 establishBtn.style.display = 'none';
             }
         } else {
-            // Hide base management panel
+            // Hide base management panel when no base
             basePanel.classList.add('hidden');
             
-            // Show establish button
+            // Show establish button when no base exists
             if (establishBtn) {
                 establishBtn.style.display = 'block';
             }
@@ -748,8 +825,14 @@ class BaseSystem {
     }
 
     showBaseManagementModal() {
-        // Show base management modal
+        // Check if modal is already open
         const baseModal = document.getElementById('base-management-modal');
+        if (baseModal && !baseModal.classList.contains('hidden')) {
+            console.log('🏗️ Base management modal already open, ignoring duplicate request');
+            return;
+        }
+        
+        // Show base management modal
         if (baseModal) {
             baseModal.classList.remove('hidden');
             this.updateBaseModalInfo();

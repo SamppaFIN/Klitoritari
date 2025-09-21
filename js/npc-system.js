@@ -22,6 +22,12 @@ class NPCSystem {
         this.createChatModal();
         this.createChatDebugPanel();
         this.hideIndividualDebugPanel();
+        // Don't start NPC simulation until game is ready
+        console.log('👥 NPC simulation paused until game screen loads');
+    }
+
+    startSimulation() {
+        console.log('👥 Starting NPC simulation...');
         this.generateNPCs();
         this.startNPCMovement();
         this.startProximityDetection();
@@ -47,7 +53,7 @@ class NPCSystem {
         // Generate new NPCs
         console.log('👥 Generating new NPCs...');
         
-        const npcCount = 5; // Generate 5 NPCs
+        const npcCount = 2; // Generate only 2 test NPCs to reduce log spam
         for (let i = 0; i < npcCount; i++) {
             this.createTestNPC(`NPC_${i + 1}`);
         }
@@ -210,6 +216,8 @@ class NPCSystem {
             console.log('👥 Map not ready for NPC marker creation');
             return;
         }
+        
+        console.log('👥 Creating NPC marker for:', npc.name, 'at:', npc.lat, npc.lng);
 
         const npcIcon = L.divIcon({
             className: 'npc-marker multilayered',
@@ -231,12 +239,12 @@ class NPCSystem {
         
         marker.bindPopup(`
             <div class="npc-popup">
-                <h4>${npc.emoji} ${npc.name} <span class="npc-role ${npc.role}">${npc.role.replace('_', ' ')}</span></h4>
+                <h4>${npc.emoji} ${npc.name} <span class="npc-role ${npc.role || 'wanderer'}">${(npc.role || 'wanderer').replace('_', ' ')}</span></h4>
                 <p><strong>Personality:</strong> ${npc.personality}</p>
                 <p><strong>Status:</strong> ${npc.encountered ? 'Met' : 'Unknown'}</p>
                 ${npc.knowledge ? `<div class="npc-knowledge">
                     <strong>Knowledge:</strong>
-                    ${npc.knowledge.map(k => `<span class="knowledge-tag">${k.replace('-', ' ')}</span>`).join('')}
+                    ${(npc.knowledge || []).map(k => `<span class="knowledge-tag">${(k || '').replace('-', ' ')}</span>`).join('')}
                 </div>` : ''}
                 <div class="popup-actions">
                     <button onclick="window.npcSystem.startChat('${npc.id}')" class="chat-btn">💬 Chat</button>
@@ -292,10 +300,19 @@ class NPCSystem {
     }
 
     checkNPCProximity() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) return;
+        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) {
+            console.log('👥 NPC proximity check: No geolocation system available');
+            return;
+        }
 
         const playerPos = window.eldritchApp.systems.geolocation.currentPosition;
-        if (!playerPos) return;
+        if (!playerPos) {
+            console.log('👥 NPC proximity check: No player position available');
+            return;
+        }
+
+        console.log('👥 NPC proximity check: Player position:', playerPos);
+        console.log('👥 NPC proximity check: NPCs available:', this.npcs.length);
 
         this.npcs.forEach(npc => {
             const distance = this.calculateDistance(
@@ -303,7 +320,10 @@ class NPCSystem {
                 npc.lat, npc.lng
             );
 
-            console.log(`👥 ${npc.name} distance:`, distance, 'meters');
+            // Only log distance when close to encounter
+            if (distance < this.chatDistance * 2) {
+                console.log(`👥 ${npc.name} distance:`, distance, 'meters (encounter distance: ${this.chatDistance})');
+            }
 
             if (distance < this.chatDistance && !npc.encountered) {
                 console.log(`👥 Chat encounter with ${npc.name}!`);
@@ -469,6 +489,22 @@ class NPCSystem {
 
     createTestNPC(npcName) {
         console.log(`💬 Creating test NPC: ${npcName}`);
+        
+        // Get player position for NPC placement
+        let baseLat = 61.473683430224284;
+        let baseLng = 23.726548746143216;
+        
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
+            baseLat = window.eldritchApp.systems.geolocation.currentPosition.lat;
+            baseLng = window.eldritchApp.systems.geolocation.currentPosition.lng;
+        }
+        
+        // Generate random position around player (within 200m radius)
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 0.001 + Math.random() * 0.002; // 100-300m in degrees
+        const lat = baseLat + Math.cos(angle) * distance;
+        const lng = baseLng + Math.sin(angle) * distance;
+        
         const testNPC = {
             id: `test_${npcName.toLowerCase()}`,
             name: npcName,
@@ -477,14 +513,15 @@ class NPCSystem {
             personality: 'mystical',
             greeting: `Greetings! I am ${npcName}, a test NPC created for your convenience.`,
             topics: ['cosmic mysteries', 'testing', 'development'],
-            lat: 61.473683430224284,
-            lng: 23.726548746143216,
+            lat: lat,
+            lng: lng,
             encountered: false,
             lastChatTime: 0
         };
         
         this.npcs.push(testNPC);
-        this.startChat(testNPC.id);
+        // Don't auto-start chat for test NPCs
+        console.log(`💬 Test NPC ${npcName} created but chat not auto-started`);
     }
 
     moveNPCsCloser() {

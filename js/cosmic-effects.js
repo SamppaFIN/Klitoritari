@@ -155,7 +155,10 @@ class CosmicEffects {
             }
         });
 
-        this.renderer.render(this.scene, this.camera);
+        // Check if WebGL context is still valid before rendering
+        if (this.renderer && this.renderer.getContext() && !this.renderer.getContext().isContextLost()) {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 
     onWindowResize() {

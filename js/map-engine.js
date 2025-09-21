@@ -20,6 +20,11 @@ class MapEngine {
         this.monsters = [];
         this.monsterMovementInterval = null;
         this.movementInterval = null; // For smooth movement animation
+        this.pathwayMarkers = [];
+        this.flagLayerVisible = true; // Start with flags visible by default
+        this.finnishFlagLayer = null; // Canvas-based flag layer
+        this.distortionEffectsLayer = null; // Canvas-based distortion effects layer
+        this.distortionEffectsVisible = false; // Start with effects hidden by default
     }
 
     init() {
@@ -31,15 +36,16 @@ class MapEngine {
         this.setupMap();
         this.setupMapEvents();
         this.setupManualControls();
+        // Initialize Finnish flag canvas layer
+        this.initFinnishFlagLayer();
+        
+        // Initialize distortion effects canvas layer
+        this.initDistortionEffectsLayer();
+        
         this.isInitialized = true;
         console.log('🗺️ Map engine initialized');
         
-        // Clear any existing markers on initialization
-        setTimeout(() => {
-            this.clearAllMarkers();
-            // Add some test quest markers for interaction
-            this.addTestQuestMarkers();
-        }, 300);
+        // Don't clear markers on initialization - they should remain visible
     }
 
     setupMap() {
@@ -236,6 +242,20 @@ class MapEngine {
         if (position.accuracy) {
             this.updateAccuracyCircle(latlng, position.accuracy);
         }
+        
+        // Update geolocation system with new position
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            const geolocation = window.eldritchApp.systems.geolocation;
+            
+            // Update the geolocation system's position tracking
+            geolocation.currentPosition = position;
+            geolocation.lastValidPosition = position;
+            
+            // Update fallback position with the new position
+            geolocation.updateFallbackPosition();
+            
+            console.log('📍 Updated geolocation system with new position:', position);
+        }
     }
 
     animatePlayerMarker() {
@@ -420,6 +440,18 @@ class MapEngine {
                 </div>
             `);
 
+            // Add click handler to set this as target quest location
+            marker.on('click', () => {
+                if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                    window.eldritchApp.systems.geolocation.setTargetQuestLocation(
+                        zone.lat, 
+                        zone.lng, 
+                        zone.name
+                    );
+                    console.log(`🎭 Set ${zone.name} as target quest location`);
+                }
+            });
+
             this.mysteryZoneMarkers.set(zone.id, marker);
         });
     }
@@ -541,14 +573,7 @@ class MapEngine {
             console.log('🗺️ Base marker cleared');
         }
         
-        // Clear showcase markers
-        if (this.showcaseMarkers) {
-            this.showcaseMarkers.forEach(marker => {
-                this.map.removeLayer(marker);
-            });
-            this.showcaseMarkers = [];
-            console.log('🗺️ Showcase markers cleared');
-        }
+        // Showcase markers removed - using WebGL rendering instead
         
         // Clear POI markers
         if (this.pointsOfInterest) {
@@ -652,8 +677,7 @@ class MapEngine {
             return;
         }
         
-        // 1. Add test quest markers
-        this.addTestQuestMarkers();
+        // 1. Test quest markers removed as requested
         
         // 2. Generate points of interest
         this.generatePointsOfInterest();
@@ -664,13 +688,9 @@ class MapEngine {
         // 4. Generate legendary encounters
         this.generateLegendaryEncounters();
         
-        // 5. Create marker showcase
-        this.createMarkerShowcase();
+        // 5. Marker showcase removed - using WebGL rendering instead
         
-        // 6. Add quest markers if quest system is available
-        if (window.lovecraftianQuest) {
-            this.addQuestMarkers();
-        }
+        // 6. Quest markers handled by unified quest system
         
         // 7. Add player base marker if exists
         if (window.baseSystem) {
@@ -822,7 +842,7 @@ class MapEngine {
                     <!-- Inner star -->
                     <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; background: linear-gradient(45deg, #ff0000, #cc0000); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(255, 0, 0, 0.8); pointer-events: none;">⭐</div>
                     <!-- Clickable overlay -->
-                    <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: transparent; cursor: pointer; z-index: 1001;" onclick="if(window.mapEngine) window.mapEngine.openBaseManagement(); else console.error('Map engine not available');"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: transparent; cursor: pointer; z-index: 1001;"></div>
                 </div>
             `,
             iconSize: [50, 50],
@@ -872,7 +892,9 @@ class MapEngine {
         console.log('🏗️ Binding popup to base marker:', popupContent);
         this.playerBaseMarker.bindPopup(popupContent);
         
-        // Add click event to open base management
+        // Add click event to open base management with delay to prevent immediate triggering
+        setTimeout(() => {
+            if (this.playerBaseMarker) {
         this.playerBaseMarker.on('click', (e) => {
             console.log('🏗️ Base marker clicked! Opening base management...');
             console.log('🏗️ Click event details:', e);
@@ -889,18 +911,10 @@ class MapEngine {
             // Open base management modal
             this.openBaseManagement();
         });
+            }
+        }, 2000); // 2 second delay to prevent immediate triggering after creation
 
-        // Also add mousedown event as backup
-        this.playerBaseMarker.on('mousedown', (e) => {
-            console.log('🏗️ Base marker mousedown! Opening base management...');
-            e.originalEvent.preventDefault();
-            e.originalEvent.stopPropagation();
-            this.openBaseManagement();
-        });
-        
-        this.playerBaseMarker.on('mouseup', (e) => {
-            console.log('🏗️ Base marker mouseup!', e);
-        });
+        // Note: Removed duplicate mousedown event listener to prevent multiple modal opens
         
         // Check if marker is interactive
         console.log('🏗️ Base marker interactive?', this.playerBaseMarker.options.interactive);
@@ -910,8 +924,7 @@ class MapEngine {
         // this.createTerritoryCircle(latlng, base.radius);
         console.log('🏗️ Territory circle disabled for testing');
         
-        // Create marker showcase
-        this.createMarkerShowcase();
+        // Marker showcase removed - using WebGL rendering instead
         
         // Generate legendary encounters
         this.generateLegendaryEncounters();
@@ -1103,112 +1116,7 @@ class MapEngine {
         }
     }
 
-    createMarkerShowcase() {
-        if (!this.map) return;
-        
-        console.log('🎨 Creating marker showcase...');
-        
-        // Clear existing showcase markers
-        if (this.showcaseMarkers) {
-            this.showcaseMarkers.forEach(marker => this.map.removeLayer(marker));
-        }
-        this.showcaseMarkers = [];
-        
-        // Base location for showcase
-        const baseLat = 61.4978;
-        const baseLng = 23.7608;
-        
-        // 1. Circle Marker (Basic)
-        const circleMarker = L.circleMarker([baseLat + 0.001, baseLng + 0.001], {
-            radius: 15,
-            fillColor: '#ff6b6b',
-            color: '#ffffff',
-            weight: 3,
-            opacity: 1,
-            fillOpacity: 0.8
-        }).addTo(this.map);
-        circleMarker.bindPopup('<b>Circle Marker</b><br>Basic circle marker with custom colors');
-        this.showcaseMarkers.push(circleMarker);
-        
-        // 2. Square Marker (Custom Icon)
-        const squareIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="width: 30px; height: 30px; background: #4ecdc4; border: 3px solid #fff; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white;">⬜</div>',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-        });
-        const squareMarker = L.marker([baseLat + 0.002, baseLng + 0.001], { icon: squareIcon }).addTo(this.map);
-        squareMarker.bindPopup('<b>Square Marker</b><br>Custom divIcon with square shape');
-        this.showcaseMarkers.push(squareMarker);
-        
-        // 3. Triangle Marker
-        const triangleIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-bottom: 25px solid #ff9ff3; filter: drop-shadow(0 0 5px rgba(255, 159, 243, 0.8));"></div>',
-            iconSize: [30, 25],
-            iconAnchor: [15, 25]
-        });
-        const triangleMarker = L.marker([baseLat + 0.001, baseLng + 0.002], { icon: triangleIcon }).addTo(this.map);
-        triangleMarker.bindPopup('<b>Triangle Marker</b><br>CSS triangle with glow effect');
-        this.showcaseMarkers.push(triangleMarker);
-        
-        // 4. Star Marker (Unicode)
-        const starIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="width: 40px; height: 40px; background: linear-gradient(45deg, #ffd700, #ffed4e); border: 3px solid #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #333; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8); box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);">⭐</div>',
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        });
-        const starMarker = L.marker([baseLat - 0.001, baseLng + 0.001], { icon: starIcon }).addTo(this.map);
-        starMarker.bindPopup('<b>Star Marker</b><br>Unicode star with gradient background');
-        this.showcaseMarkers.push(starMarker);
-        
-        // 5. Diamond Marker
-        const diamondIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-bottom: 15px solid #a8e6cf; transform: rotate(45deg); filter: drop-shadow(0 0 8px rgba(168, 230, 207, 0.8));"></div>',
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        });
-        const diamondMarker = L.marker([baseLat - 0.001, baseLng - 0.001], { icon: diamondIcon }).addTo(this.map);
-        diamondMarker.bindPopup('<b>Diamond Marker</b><br>Rotated triangle creating diamond shape');
-        this.showcaseMarkers.push(diamondMarker);
-        
-        // 6. Hexagon Marker
-        const hexagonIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="width: 30px; height: 30px; background: #ff8a80; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); border: 3px solid #fff; filter: drop-shadow(0 0 10px rgba(255, 138, 128, 0.8));"></div>',
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
-        });
-        const hexagonMarker = L.marker([baseLat + 0.001, baseLng - 0.001], { icon: hexagonIcon }).addTo(this.map);
-        hexagonMarker.bindPopup('<b>Hexagon Marker</b><br>CSS clip-path hexagon shape');
-        this.showcaseMarkers.push(hexagonMarker);
-        
-        // 7. Pulsing Circle Marker
-        const pulsingIcon = L.divIcon({
-            className: 'custom-marker pulsing',
-            html: '<div style="width: 25px; height: 25px; background: #9c27b0; border: 3px solid #fff; border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 20px rgba(156, 39, 176, 0.8);"></div>',
-            iconSize: [25, 25],
-            iconAnchor: [12.5, 12.5]
-        });
-        const pulsingMarker = L.marker([baseLat - 0.002, baseLng - 0.001], { icon: pulsingIcon }).addTo(this.map);
-        pulsingMarker.bindPopup('<b>Pulsing Marker</b><br>Animated pulsing circle with CSS animation');
-        this.showcaseMarkers.push(pulsingMarker);
-        
-        // 8. Multi-layer Marker
-        const multiLayerIcon = L.divIcon({
-            className: 'custom-marker',
-            html: '<div style="position: relative; width: 40px; height: 40px;"><div style="position: absolute; top: 0; left: 0; width: 40px; height: 40px; background: #ff5722; border-radius: 50%; opacity: 0.3;"></div><div style="position: absolute; top: 5px; left: 5px; width: 30px; height: 30px; background: #ff9800; border-radius: 50%; opacity: 0.6;"></div><div style="position: absolute; top: 10px; left: 10px; width: 20px; height: 20px; background: #ffc107; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #333;">🔥</div></div>',
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        });
-        const multiLayerMarker = L.marker([baseLat + 0.002, baseLng - 0.001], { icon: multiLayerIcon }).addTo(this.map);
-        multiLayerMarker.bindPopup('<b>Multi-layer Marker</b><br>Layered circles with emoji center');
-        this.showcaseMarkers.push(multiLayerMarker);
-        
-        console.log('🎨 Marker showcase created with', this.showcaseMarkers.length, 'markers');
-    }
+    // Marker showcase removed - using WebGL rendering instead
 
     generatePointsOfInterest() {
         if (!this.map) return;
@@ -1345,9 +1253,13 @@ class MapEngine {
     }
 
     generateLegendaryEncounters() {
-        if (!this.map) return;
+        if (!this.map) {
+            console.log('⚡ Legendary encounters: Map not ready');
+            return;
+        }
         
         console.log('⚡ Generating legendary encounters...');
+        console.log('⚡ Map available:', !!this.map);
         
         // Clear existing legendary markers
         if (this.legendaryMarkers) {
@@ -1379,6 +1291,7 @@ class MapEngine {
         });
         
         const heavyMarker = L.marker([heavyLat, heavyLng], { icon: heavyIcon }).addTo(this.map);
+        console.log('⚡ HEVY marker created at:', heavyLat, heavyLng);
         heavyMarker.bindPopup(`
             <div style="text-align: center; color: #ff4500; font-weight: bold;">
                 <h3>⚡ HEVY</h3>
@@ -1399,77 +1312,7 @@ class MapEngine {
         console.log('⚡ Generated HEVY legendary encounter marker');
     }
 
-    addQuestMarkers() {
-        if (!this.map || !window.lovecraftianQuest) return;
-        
-        console.log('🐙 Adding quest markers...');
-        
-        // Clear existing quest markers
-        if (this.questMarkers) {
-            this.questMarkers.forEach(marker => {
-                this.map.removeLayer(marker);
-                // Also remove from mystery zone markers
-                const index = this.mysteryZoneMarkers.indexOf(marker);
-                if (index > -1) {
-                    this.mysteryZoneMarkers.splice(index, 1);
-                }
-            });
-        }
-        this.questMarkers = [];
-        
-        window.lovecraftianQuest.questLocations.forEach((location, index) => {
-            const questIcon = L.divIcon({
-                className: 'quest-marker',
-                html: `
-                    <div style="position: relative; width: 35px; height: 35px;">
-                        <!-- Quest aura -->
-                        <div style="position: absolute; top: -6px; left: -6px; width: 47px; height: 47px; background: radial-gradient(circle, #00ff8840 0%, #00ff8820 30%, transparent 70%); border-radius: 50%; animation: questPulse 2s infinite;"></div>
-                        <!-- Quest ring -->
-                        <div style="position: absolute; top: -3px; left: -3px; width: 41px; height: 41px; border: 2px solid #00ff88; border-radius: 50%; animation: questRotate 3s linear infinite; opacity: 0.7;"></div>
-                        <!-- Quest core -->
-                        <div style="position: absolute; top: 2px; left: 2px; width: 31px; height: 31px; background: linear-gradient(45deg, #00ff88, #66ffaa); border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 10px #00ff88;"></div>
-                        <!-- Quest number -->
-                        <div style="position: absolute; top: 6px; left: 6px; width: 23px; height: 23px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: #000000; text-shadow: 0 0 3px rgba(255, 255, 255, 0.8);">${index + 1}</div>
-                    </div>
-                `,
-                iconSize: [35, 35],
-                iconAnchor: [17.5, 17.5]
-            });
-            
-            const questMarker = L.marker([location.lat, location.lng], {
-                icon: questIcon,
-                interactive: true,
-                clickable: true
-            });
-            
-            // Mark as quest marker for encounter system
-            questMarker.isQuestMarker = true;
-            questMarker.questIndex = index;
-            
-            questMarker.bindPopup(`
-                <div class="quest-popup">
-                    <div class="popup-header">
-                        <h4>🐙 ${location.name}</h4>
-                    </div>
-                    <div class="quest-info">
-                        <div><strong>Step:</strong> ${index + 1}/5</div>
-                        <div><strong>Description:</strong> ${location.description}</div>
-                    </div>
-                    <div class="quest-actions">
-                        <button onclick="window.lovecraftianQuest.teleportToLocation(${index})" class="sacred-button" style="margin-top: 10px; width: 100%;">Teleport Here</button>
-                        <button onclick="window.lovecraftianQuest.startQuestFromLocation(${index})" class="sacred-button" style="background: var(--cosmic-purple); margin-top: 5px; width: 100%;">Start Quest Here</button>
-                    </div>
-                </div>
-            `);
-            
-            this.questMarkers.push(questMarker);
-            questMarker.addTo(this.map);
-            
-            // Don't add quest markers to mystery zone markers - they should only be triggered manually
-        });
-        
-        console.log('🐙 Added', this.questMarkers.length, 'quest markers');
-    }
+    // Quest markers handled by unified quest system
 
     startMonsterMovement() {
         if (this.monsterMovementInterval) {
@@ -1561,14 +1404,32 @@ class MapEngine {
             <div style="color: var(--cosmic-light); font-size: 12px; margin-bottom: 10px; text-align: center;">
                 ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}
             </div>
-            <button class="context-menu-btn" onclick="window.mapEngine.teleportPlayer(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
-                ⚡ Teleport Here
-            </button>
             <button class="context-menu-btn" onclick="window.mapEngine.movePlayer(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
                 🚶 Move Here
             </button>
             <button class="context-menu-btn" onclick="window.mapEngine.centerOnLocation(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
                 🎯 Center Map
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.clearPathwayMarkers()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-blue);">
+                🧹 Clear Pathway
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.cycleFlagTheme()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-pink);">
+                🌈 Flag Theme
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.toggleDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-purple);">
+                🌀 Distortion Effects
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.createTestDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-red);">
+                👻 Test Effects
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.createTestRealisticEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-blue);">
+                🌊 Realistic Effects
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.showcaseAllEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-purple);">
+                🎭 Effects Showcase
+            </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.clearDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-dark);">
+                🧹 Clear Effects
             </button>
             <button class="context-menu-btn" onclick="window.mapEngine.hideContextMenu()" style="width: 100%; background: var(--cosmic-red);">
                 ❌ Close
@@ -1607,13 +1468,181 @@ class MapEngine {
         console.log(`🎮 Moving player to: ${lat}, ${lng}`);
         this.hideContextMenu();
         
-        // Disable device GPS and use fixed position
+        // Pause location updates during movement
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            console.log('🎮 Disabling device GPS for manual movement');
-            window.eldritchApp.systems.geolocation.deviceGPSEnabled = false;
-            window.eldritchApp.systems.geolocation.fixedPosition = { lat, lng };
-            window.eldritchApp.systems.geolocation.startTracking();
+            window.eldritchApp.systems.geolocation.pauseLocationUpdates();
         }
+        
+        // Get current player position
+        const currentPos = this.getPlayerPosition();
+        if (!currentPos) {
+            console.warn('🎮 No current player position available, using fallback');
+            // Use fallback position if no GPS position available
+            const fallback = { lat: 61.472768, lng: 23.724032 }; // User's known location
+            this.simulatePlayerMovement(fallback, { lat, lng });
+            return;
+        }
+        
+        // Start simulated movement with pathway painting
+        this.simulatePlayerMovement(currentPos, { lat, lng });
+    }
+    
+    simulatePlayerMovement(startPos, endPos) {
+        console.log(`🎮 Simulating movement from ${startPos.lat}, ${startPos.lng} to ${endPos.lat}, ${endPos.lng}`);
+        
+        // Disable device GPS for manual movement
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            window.eldritchApp.systems.geolocation.deviceGPSEnabled = false;
+        }
+        
+        // Calculate movement parameters
+        const totalDistance = this.calculateDistance(startPos.lat, startPos.lng, endPos.lat, endPos.lng);
+        const steps = Math.max(10, Math.floor(totalDistance / 5)); // 5m per step
+        const stepDuration = 100; // 100ms per step
+        
+        console.log(`🎮 Movement: ${totalDistance.toFixed(1)}m in ${steps} steps`);
+        
+        let currentStep = 0;
+        const movementInterval = setInterval(() => {
+            if (currentStep >= steps) {
+                clearInterval(movementInterval);
+                console.log('🎮 Movement simulation complete');
+                
+                // Resume location updates when movement is complete
+                if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                    window.eldritchApp.systems.geolocation.resumeLocationUpdates();
+                }
+                return;
+            }
+            
+            // Calculate intermediate position
+            const progress = currentStep / steps;
+            const currentLat = startPos.lat + (endPos.lat - startPos.lat) * progress;
+            const currentLng = startPos.lng + (endPos.lng - startPos.lng) * progress;
+            
+            // Update player position
+            this.updatePlayerPosition({
+                lat: currentLat,
+                lng: currentLng,
+                accuracy: 1,
+                timestamp: Date.now()
+            });
+            
+            // Paint pathway with Finnish flags
+            this.paintPathwayStep(currentLat, currentLng, progress);
+            
+            currentStep++;
+        }, stepDuration);
+    }
+    
+    paintPathwayStep(lat, lng, progress) {
+        console.log(`🎨 Painting pathway step at ${lat.toFixed(6)}, ${lng.toFixed(6)}, progress: ${progress.toFixed(2)}`);
+        
+        // Add to path painting system visited points
+        if (window.eldritchApp && window.eldritchApp.systems.pathPainting) {
+            const pathPainting = window.eldritchApp.systems.pathPainting;
+            if (pathPainting.visitedPoints) {
+                pathPainting.visitedPoints.push({
+                    lat: lat,
+                    lng: lng,
+                    timestamp: Date.now()
+                });
+                console.log(`🎨 Added to visited points, total: ${pathPainting.visitedPoints.length}`);
+            }
+        }
+        
+        // Add Finnish flag every few steps using canvas layer
+        if (Math.floor(progress * 20) % 3 === 0) {
+            console.log(`🎨 Adding Finnish flag at progress ${progress.toFixed(2)}`);
+            if (this.finnishFlagLayer) {
+                this.finnishFlagLayer.addFlagPin(lat, lng);
+            } else {
+                // Fallback to old method
+                this.addFinnishFlagToPath(lat, lng, progress);
+            }
+        }
+    }
+    
+    addFinnishFlagToPath(lat, lng, progress) {
+        console.log(`🇫🇮 Creating Finnish flag at ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        
+        // Create a more visible Finnish flag marker for the pathway
+        const flagIcon = L.divIcon({
+            className: 'pathway-flag',
+            html: `
+                <div style="
+                    width: 40px; 
+                    height: 24px; 
+                    background: linear-gradient(to right, #003580 0%, #003580 20%, #FFFFFF 20%, #FFFFFF 80%, #003580 80%, #003580 100%);
+                    border: 2px solid #000;
+                    border-radius: 4px;
+                    position: relative;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                    animation: flagWave 2s ease-in-out infinite;
+                ">
+                    <div style="
+                        position: absolute;
+                        top: 50%;
+                        left: 0;
+                        right: 0;
+                        height: 4px;
+                        background: #003580;
+                        transform: translateY(-50%);
+                    "></div>
+                    <div style="
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        left: 50%;
+                        width: 4px;
+                        background: #003580;
+                        transform: translateX(-50%);
+                    "></div>
+                    <div style="
+                        position: absolute;
+                        top: -8px;
+                        left: -2px;
+                        width: 44px;
+                        height: 40px;
+                        background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+                        border-radius: 50%;
+                        z-index: -1;
+                    "></div>
+                </div>
+            `,
+            iconSize: [40, 24],
+            iconAnchor: [20, 12]
+        });
+        
+        const flagMarker = L.marker([lat, lng], { icon: flagIcon }).addTo(this.map);
+        console.log(`🇫🇮 Flag marker created and added to map:`, flagMarker);
+        
+        // Add to pathway markers collection
+        if (!this.pathwayMarkers) {
+            this.pathwayMarkers = [];
+            console.log(`🇫🇮 Initialized pathwayMarkers array`);
+        }
+        this.pathwayMarkers.push(flagMarker);
+        console.log(`🇫🇮 Added flag to collection, total flags: ${this.pathwayMarkers.length}`);
+        
+        // Fade out after some time
+        setTimeout(() => {
+            if (flagMarker && this.map.hasLayer(flagMarker)) {
+                flagMarker.setOpacity(0.3);
+                console.log(`🇫🇮 Flag faded to 30% opacity`);
+            }
+        }, 5000);
+    }
+    
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
     }
     
     centerOnLocation(lat, lng) {
@@ -1622,29 +1651,345 @@ class MapEngine {
         this.map.setView([lat, lng], this.map.getZoom());
     }
     
+    clearPathwayMarkers() {
+        if (this.finnishFlagLayer) {
+            this.finnishFlagLayer.clearFlags();
+            console.log('🎮 Cleared canvas flag layer');
+        }
+        
+        if (this.pathwayMarkers) {
+            this.pathwayMarkers.forEach(marker => {
+                if (this.map.hasLayer(marker)) {
+                    this.map.removeLayer(marker);
+                }
+            });
+            this.pathwayMarkers = [];
+            console.log('🎮 Cleared pathway markers');
+        }
+    }
+    
+    showFlagLayer() {
+        console.log('🇫🇮 Showing flag layer...');
+        
+        if (this.finnishFlagLayer) {
+            this.finnishFlagLayer.toggleVisibility();
+            console.log('🇫🇮 Canvas flag layer toggled, total flags:', this.finnishFlagLayer.getFlagCount());
+        } else {
+            // Fallback to old method
+            console.log('🇫🇮 Pathway markers count:', this.pathwayMarkers ? this.pathwayMarkers.length : 0);
+            if (this.pathwayMarkers) {
+                this.pathwayMarkers.forEach((marker, index) => {
+                    console.log(`🇫🇮 Processing marker ${index}:`, marker);
+                    if (!this.map.hasLayer(marker)) {
+                        console.log(`🇫🇮 Adding marker ${index} to map`);
+                        marker.addTo(this.map);
+                    } else {
+                        console.log(`🇫🇮 Marker ${index} already on map`);
+                    }
+                    marker.setOpacity(1);
+                    console.log(`🇫🇮 Set marker ${index} opacity to 1`);
+                });
+            }
+        }
+        
+        this.flagLayerVisible = true;
+        console.log('🇫🇮 Flag layer visibility set to true');
+    }
+    
+    hideFlagLayer() {
+        console.log('🇫🇮 Hiding flag layer...');
+        if (this.pathwayMarkers) {
+            this.pathwayMarkers.forEach(marker => {
+                marker.setOpacity(0);
+            });
+        }
+        this.flagLayerVisible = false;
+    }
+    
+    toggleFlagLayer() {
+        if (this.flagLayerVisible) {
+            this.hideFlagLayer();
+        } else {
+            this.showFlagLayer();
+        }
+        
+        // Update button state in app
+        if (window.eldritchApp) {
+            window.eldritchApp.updateFlagButtonState();
+        }
+    }
+    
+    zoomToFlagLayer() {
+        console.log('🇫🇮 Zooming to flag layer...');
+        if (!this.pathwayMarkers || this.pathwayMarkers.length === 0) {
+            console.log('🇫🇮 No flags to zoom to');
+            return;
+        }
+        
+        // Calculate bounds of all flags
+        const group = new L.featureGroup(this.pathwayMarkers);
+        this.map.fitBounds(group.getBounds().pad(0.1));
+        console.log('🇫🇮 Zoomed to flag bounds');
+    }
+    
+    initFinnishFlagLayer() {
+        if (typeof FinnishFlagCanvasLayer !== 'undefined') {
+            this.finnishFlagLayer = new FinnishFlagCanvasLayer(this);
+            console.log('🇫🇮 Finnish flag canvas layer initialized');
+        } else {
+            console.warn('🇫🇮 FinnishFlagCanvasLayer not available');
+        }
+    }
+    
+    initDistortionEffectsLayer() {
+        if (typeof DistortionEffectsCanvasLayer !== 'undefined') {
+            this.distortionEffectsLayer = new DistortionEffectsCanvasLayer(this);
+            console.log('🌀 Distortion effects canvas layer initialized');
+        } else {
+            console.warn('🌀 DistortionEffectsCanvasLayer not available');
+        }
+    }
+    
+    toggleFlagOpacity() {
+        if (this.finnishFlagLayer) {
+            const currentOpacity = this.finnishFlagLayer.opacity;
+            const newOpacity = currentOpacity === 0.5 ? 1.0 : currentOpacity === 1.0 ? 0.2 : 0.5;
+            this.finnishFlagLayer.setOpacity(newOpacity);
+            console.log('🇫🇮 Flag opacity toggled to:', newOpacity);
+        } else {
+            console.log('🇫🇮 Finnish flag layer not available');
+        }
+    }
+    
+    cycleFlagColors() {
+        if (this.finnishFlagLayer) {
+            this.finnishFlagLayer.cycleColorScheme();
+            console.log('🇫🇮 Flag colors cycled to:', this.finnishFlagLayer.currentColorScheme);
+        } else {
+            console.log('🇫🇮 Finnish flag layer not available');
+        }
+    }
+    
+    cycleFlagTheme() {
+        if (this.finnishFlagLayer) {
+            this.finnishFlagLayer.cycleColorScheme();
+            const currentTheme = this.finnishFlagLayer.currentColorScheme;
+            console.log('🇫🇮 Flag theme cycled to:', currentTheme);
+            
+            // Show notification of theme change
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.showNotification({
+                    type: 'info',
+                    title: 'Flag Theme Changed',
+                    message: `Switched to ${currentTheme} theme`,
+                    duration: 3000
+                });
+            }
+        } else {
+            console.log('🇫🇮 Finnish flag layer not available');
+        }
+    }
+    
+    // Distortion Effects Layer Methods
+    showDistortionEffects() {
+        console.log('🌀 Showing distortion effects layer...');
+        if (this.distortionEffectsLayer) {
+            this.distortionEffectsLayer.toggleVisibility();
+            console.log('🌀 Canvas distortion effects layer toggled, total effects:', this.distortionEffectsLayer.getEffectCount());
+        }
+        this.distortionEffectsVisible = true;
+        console.log('🌀 Distortion effects visibility set to true');
+    }
+    
+    hideDistortionEffects() {
+        console.log('🌀 Hiding distortion effects layer...');
+        if (this.distortionEffectsLayer) {
+            this.distortionEffectsLayer.toggleVisibility();
+        }
+        this.distortionEffectsVisible = false;
+    }
+    
+    toggleDistortionEffects() {
+        if (this.distortionEffectsVisible) {
+            this.hideDistortionEffects();
+        } else {
+            this.showDistortionEffects();
+        }
+        
+        // Update button state in app
+        if (window.eldritchApp) {
+            window.eldritchApp.updateDistortionButtonState();
+        }
+    }
+    
+    addDistortionEffect(effectType, lat, lng, intensity = 1.0) {
+        if (this.distortionEffectsLayer) {
+            this.distortionEffectsLayer.addEffect(effectType, lat, lng, intensity);
+            console.log('🌀 Added distortion effect:', effectType, 'at', lat, lng);
+        } else {
+            console.log('🌀 Distortion effects layer not available');
+        }
+    }
+    
+    clearDistortionEffects() {
+        if (this.distortionEffectsLayer) {
+            this.distortionEffectsLayer.clearEffects();
+            console.log('🌀 Cleared all distortion effects');
+        }
+    }
+    
+    createTestDistortionEffects() {
+        console.log('🌀 Creating test distortion effects...');
+        const playerPos = this.getPlayerPosition();
+        if (!playerPos) {
+            console.log('🌀 No player position available for test effects');
+            return;
+        }
+        
+        if (this.distortionEffectsLayer) {
+            // Create one of each effect type around the player
+            const effects = ['drippingBlood', 'ghost', 'cosmicDistortion', 'shadowTendrils', 'eldritchEyes'];
+            effects.forEach((effectType, index) => {
+                const testLat = playerPos.lat + (index * 0.0001);
+                const testLng = playerPos.lng + (index * 0.0001);
+                this.distortionEffectsLayer.addEffect(effectType, testLat, testLng, 0.5);
+            });
+            console.log('🌀 Test distortion effects created, total effects:', this.distortionEffectsLayer.getEffectCount());
+        } else {
+            console.log('🌀 Distortion effects layer not available');
+        }
+    }
+    
+    createTestRealisticEffects() {
+        console.log('🌊 Creating test realistic effects...');
+        if (this.distortionEffectsLayer) {
+            this.distortionEffectsLayer.createTestRealisticEffects();
+        } else {
+            console.log('🌊 Distortion effects layer not available');
+        }
+    }
+    
+    showcaseAllEffects() {
+        console.log('🎭 Starting effects showcase...');
+        if (!this.distortionEffectsLayer) {
+            console.log('🎭 Distortion effects layer not available');
+            return;
+        }
+        
+        // Clear existing effects first
+        this.distortionEffectsLayer.clearEffects();
+        
+        // Show the effects layer
+        this.showDistortionEffects();
+        
+        // Get all available effect types
+        const allEffectTypes = this.distortionEffectsLayer.getAvailableEffectTypes();
+        console.log('🎭 Available effect types:', allEffectTypes);
+        
+        // Get player position
+        const playerPos = this.getPlayerPosition();
+        if (!playerPos) {
+            console.log('🎭 No player position available for effects showcase');
+            return;
+        }
+        
+        // Show each effect type for 5 seconds
+        allEffectTypes.forEach((effectType, index) => {
+            setTimeout(() => {
+                console.log(`🎭 Showcasing effect: ${effectType}`);
+                
+                // Clear previous effects
+                this.distortionEffectsLayer.clearEffects();
+                
+                // Create multiple instances of the current effect type around the player
+                for (let i = 0; i < 3; i++) {
+                    const angle = (i * Math.PI * 2 / 3) + (index * 0.5); // Spread around player
+                    const offset = 0.0001; // Small offset for multiple instances
+                    const testLat = playerPos.lat + Math.cos(angle) * offset;
+                    const testLng = playerPos.lng + Math.sin(angle) * offset;
+                    
+                    this.distortionEffectsLayer.addEffect(effectType, testLat, testLng, 1.0);
+                }
+                
+                // Show effect name in console
+                const effectConfig = this.distortionEffectsLayer.effectTypes[effectType];
+                console.log(`🎭 Now showing: ${effectConfig.emoji} ${effectConfig.name}`);
+                
+            }, index * 5000); // 5 seconds between each effect
+        });
+        
+        // Clear all effects after showcase is complete
+        setTimeout(() => {
+            console.log('🎭 Effects showcase complete, clearing all effects...');
+            this.distortionEffectsLayer.clearEffects();
+        }, allEffectTypes.length * 5000 + 2000); // Clear after all effects + 2 seconds
+        
+        console.log(`🎭 Effects showcase started! Will show ${allEffectTypes.length} effect types over ${allEffectTypes.length * 5} seconds`);
+    }
+    
+    // Debug function to create test flags
+    createTestFlags() {
+        console.log('🇫🇮 Creating test flags for debugging...');
+        const playerPos = this.getPlayerPosition();
+        if (!playerPos) {
+            console.log('🇫🇮 No player position available for test flags');
+            return;
+        }
+        
+        if (this.finnishFlagLayer) {
+            // Create 5 test flags in a line using canvas layer
+            for (let i = 0; i < 5; i++) {
+                const testLat = playerPos.lat + (i * 0.0001);
+                const testLng = playerPos.lng + (i * 0.0001);
+                this.finnishFlagLayer.addFlagPin(testLat, testLng);
+            }
+            console.log('🇫🇮 Test flags created on canvas layer, total flags:', this.finnishFlagLayer.getFlagCount());
+        } else {
+            // Fallback to old method
+            for (let i = 0; i < 5; i++) {
+                const testLat = playerPos.lat + (i * 0.0001);
+                const testLng = playerPos.lng + (i * 0.0001);
+                this.addFinnishFlagToPath(testLat, testLng, i / 4);
+            }
+            console.log('🇫🇮 Test flags created, total flags:', this.pathwayMarkers ? this.pathwayMarkers.length : 0);
+        }
+    }
+    
 
     getPlayerPosition() {
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             const geolocation = window.eldritchApp.systems.geolocation;
+            
+            // First try to get current GPS position
             const position = geolocation.getCurrentPositionSafe();
             if (position) {
-                console.log('📍 Using position:', position);
+                console.log('📍 Using GPS position:', position);
                 return {
                     lat: position.lat,
                     lng: position.lng
                 };
-            } else {
-                console.log('📍 No position available, waiting for location...');
-                // Don't fall back to default position if geolocation is available but not ready yet
-                // Return null to indicate no position available
-                return null;
             }
+            
+            // If no GPS position, try to get the last valid position
+            if (geolocation.lastValidPosition) {
+                console.log('📍 Using last valid position:', geolocation.lastValidPosition);
+                return {
+                    lat: geolocation.lastValidPosition.lat,
+                    lng: geolocation.lastValidPosition.lng
+                };
+            }
+            
+            // If no valid position at all, use fallback
+            console.log('📍 No valid position available, using fallback position');
+            return {
+                lat: 61.472768, // User's known location
+                lng: 23.724032
+            };
         } else {
             console.log('📍 No geolocation system available, using fallback position');
-            // Fallback to default position
             return {
-                lat: 61.4978,
-                lng: 23.7608
+                lat: 61.472768, // User's known location
+                lng: 23.724032
             };
         }
     }

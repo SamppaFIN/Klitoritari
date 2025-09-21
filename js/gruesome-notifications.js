@@ -31,6 +31,12 @@ class GruesomeNotifications {
                 20: { name: 'Insane', color: '#cc00ff', icon: '👻' },
                 10: { name: 'Completely Mad', color: '#ff00ff', icon: '👽' },
                 0: { name: 'MADNESS', color: '#ff00cc', icon: '💀' }
+            },
+            info: {
+                success: { name: 'Success', color: '#00ff00', icon: '✅' },
+                warning: { name: 'Warning', color: '#ffaa00', icon: '⚠️' },
+                error: { name: 'Error', color: '#ff0000', icon: '❌' },
+                info: { name: 'Info', color: '#00aaff', icon: 'ℹ️' }
             }
         };
     }
@@ -52,6 +58,11 @@ class GruesomeNotifications {
                 window.sanityDistortion.playScreamEffect();
             }
         }
+    }
+    
+    // Simple method for general notifications
+    showGeneralNotification(message, level = 'info', type = 'info') {
+        this.showNotification(message, level, type);
     }
 
     getLevel(value, type) {

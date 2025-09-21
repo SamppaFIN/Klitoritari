@@ -86,6 +86,13 @@ class EncounterSystem {
         this.createEncounterModal();
         this.createRewardsPanel();
     }
+    
+    // Update mobile UI stats
+    updateMobileStats() {
+        if (window.eldritchApp && window.eldritchApp.isMobile) {
+            window.eldritchApp.updateMobileStats();
+        }
+    }
 
     createEncounterModal() {
         // Remove existing modal if it exists
@@ -367,7 +374,7 @@ class EncounterSystem {
         this.checkMonsterProximity(playerPos);
         this.checkPOIProximity(playerPos);
         this.checkMysteryProximity(playerPos);
-        this.checkTestQuestProximity(playerPos);
+        // Test quest proximity checking disabled as requested
         
         // Check for legendary encounters
         this.checkLegendaryEncounters(playerPos);
@@ -419,18 +426,7 @@ class EncounterSystem {
             return;
         }
         
-        window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach((mystery, index) => {
-            const distance = this.calculateDistance(
-                playerPos.lat, playerPos.lng,
-                mystery.getLatLng().lat, mystery.getLatLng().lng
-            );
-            
-            if (distance < 40 && !mystery.encountered) { // 40m for closer interaction
-                console.log(`🎭 Mystery encounter triggered! Distance: ${distance.toFixed(2)}m`);
-                mystery.encountered = true;
-                this.startMysteryEncounter(mystery);
-            }
-        });
+        // Mystery encounters removed as requested
     }
 
     checkTestQuestProximity(playerPos) {
@@ -905,6 +901,9 @@ class EncounterSystem {
     startMonsterEncounter(monster) {
         console.log('👹 Monster encounter started:', monster.type.name);
         
+        // Trigger distortion effects for monster encounters
+        this.triggerDistortionEffects();
+        
         this.activeEncounter = {
             type: this.encounterTypes.MONSTER,
             data: monster,
@@ -931,24 +930,7 @@ class EncounterSystem {
         this.showPOICutscene(poi);
     }
 
-    startMysteryEncounter(mystery) {
-        console.log('🔍 Mystery encounter started');
-        
-        // Check if this is a quest marker
-        if (mystery.isQuestMarker) {
-            console.log('🐙 Quest marker detected, starting quest system');
-            this.startQuestEncounter(mystery);
-            return;
-        }
-        
-        this.activeEncounter = {
-            type: this.encounterTypes.MYSTERY,
-            data: mystery
-        };
-        
-        this.showEncounterModal();
-        this.showMysteryCutscene(mystery);
-    }
+    // Mystery encounters removed as requested
     
     startQuestEncounter(questMarker) {
         console.log('🐙 Starting quest encounter for marker:', questMarker.questIndex);
@@ -996,6 +978,14 @@ class EncounterSystem {
         
         battle.classList.add('hidden');
         
+        // Debug: Check if buttons are visible
+        console.log('🎭 Encounter buttons created:', {
+            action1: document.getElementById('action-1'),
+            action2: document.getElementById('action-2'),
+            action3: document.getElementById('action-3'),
+            actionsElement: actions
+        });
+        
         // Re-add event listeners
         document.getElementById('action-1').addEventListener('click', () => this.startBattle(monster));
         document.getElementById('action-2').addEventListener('click', () => this.attemptFlee(monster));
@@ -1028,35 +1018,21 @@ class EncounterSystem {
         
         puzzle.classList.add('hidden');
         
+        // Debug: Check if POI buttons are visible
+        console.log('🎭 POI Encounter buttons created:', {
+            action1: document.getElementById('action-1'),
+            action2: document.getElementById('action-2'),
+            action3: document.getElementById('action-3'),
+            actionsElement: actions
+        });
+        
         // Re-add event listeners
         document.getElementById('action-1').addEventListener('click', () => this.startPOIPuzzle(poi));
         document.getElementById('action-2').addEventListener('click', () => this.samplePOI(poi));
         document.getElementById('action-3').addEventListener('click', () => this.leavePOI(poi));
     }
 
-    showMysteryCutscene(mystery) {
-        const dialog = document.getElementById('dialog-text');
-        const actions = document.getElementById('encounter-actions');
-        
-        dialog.innerHTML = `
-            <div class="cutscene-text">
-                <h3>🔍 Mystery Zone Entered!</h3>
-                <p>You've entered a mysterious area filled with cosmic energy.</p>
-                <p>The air crackles with unknown power. What will you do?</p>
-            </div>
-        `;
-        
-        actions.innerHTML = `
-            <button id="action-1" class="encounter-btn">Investigate</button>
-            <button id="action-2" class="encounter-btn">Meditate</button>
-            <button id="action-3" class="encounter-btn">Leave</button>
-        `;
-        
-        // Re-add event listeners
-        document.getElementById('action-1').addEventListener('click', () => this.investigateMystery(mystery));
-        document.getElementById('action-2').addEventListener('click', () => this.meditateMystery(mystery));
-        document.getElementById('action-3').addEventListener('click', () => this.leaveMystery(mystery));
-    }
+    // Mystery cutscene removed as requested
 
     showTestQuestCutscene(questMarker) {
         const dialog = document.getElementById('dialog-text');
@@ -1243,23 +1219,7 @@ class EncounterSystem {
         this.closeEncounter();
     }
 
-    investigateMystery(mystery) {
-        this.giveReward('experience', 50);
-        this.giveReward('discoveries', 'Cosmic Insight');
-        this.showDialog(`You investigated the mystery and gained cosmic insight!`);
-        this.closeEncounter();
-    }
-
-    meditateMystery(mystery) {
-        this.giveReward('experience', 25);
-        this.showDialog(`You meditated and gained inner peace!`);
-        this.closeEncounter();
-    }
-
-    leaveMystery(mystery) {
-        this.showDialog('You leave the mysterious area.');
-        this.closeEncounter();
-    }
+    // Mystery encounter actions removed as requested
 
     investigateTestQuest(questMarker) {
         this.giveReward('experience', 40);
@@ -1732,7 +1692,11 @@ class EncounterSystem {
             console.log('⚠️ Warning: Your sanity is dangerously low! The cosmic entities are starting to look... reasonable.');
         }
         
+        // Trigger distortion effects based on sanity level
+        this.triggerDistortionEffects();
+        
         this.updateHealthBars();
+        this.updateMobileStats();
         this.checkPlayerDeath();
     }
 
@@ -1741,6 +1705,49 @@ class EncounterSystem {
         console.log(`🧠 Sanity gained: ${amount}. Reason: ${reason}`);
         
         this.updateHealthBars();
+    }
+    
+    triggerDistortionEffects() {
+        if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine) {
+            return;
+        }
+        
+        const mapEngine = window.eldritchApp.systems.mapEngine;
+        const playerPos = mapEngine.getPlayerPosition();
+        
+        if (!playerPos) {
+            return;
+        }
+        
+        // Determine effect type and intensity based on sanity level
+        let effectType = null;
+        let intensity = 0.5;
+        
+        if (this.playerStats.sanity <= 10) {
+            // Critical sanity - all effects
+            const effects = ['drippingBlood', 'ghost', 'cosmicDistortion', 'shadowTendrils', 'eldritchEyes'];
+            effectType = effects[Math.floor(Math.random() * effects.length)];
+            intensity = 1.0;
+        } else if (this.playerStats.sanity <= 30) {
+            // Low sanity - strong effects
+            const effects = ['ghost', 'cosmicDistortion', 'shadowTendrils'];
+            effectType = effects[Math.floor(Math.random() * effects.length)];
+            intensity = 0.8;
+        } else if (this.playerStats.sanity <= 50) {
+            // Medium sanity - mild effects
+            const effects = ['cosmicDistortion', 'shadowTendrils'];
+            effectType = effects[Math.floor(Math.random() * effects.length)];
+            intensity = 0.6;
+        } else if (this.playerStats.sanity <= 70) {
+            // High sanity - subtle effects
+            effectType = 'cosmicDistortion';
+            intensity = 0.3;
+        }
+        
+        if (effectType) {
+            console.log(`🌀 Triggering distortion effect: ${effectType} (intensity: ${intensity})`);
+            mapEngine.addDistortionEffect(effectType, playerPos.lat, playerPos.lng, intensity);
+        }
     }
 
     // Health system - because physical damage is... physical
@@ -1819,6 +1826,17 @@ class EncounterSystem {
         this.lastPosition = position;
     }
 
+    // Add steps to player's step count
+    addSteps(steps) {
+        this.playerSteps += steps;
+        console.log(`👣 Added ${steps} steps. Total: ${this.playerSteps}`);
+        
+        // Update debug panel if available
+        if (window.unifiedDebugPanel) {
+            window.unifiedDebugPanel.updatePlayerStatsDisplay();
+        }
+    }
+
     // Debug methods for testing
     triggerMonsterEncounter() {
         console.log('🎭 Triggering monster encounter...');
@@ -1860,23 +1878,7 @@ class EncounterSystem {
         }
     }
 
-    triggerMysteryEncounter() {
-        console.log('🎭 Triggering mystery encounter...');
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.size > 0) {
-            const mystery = Array.from(window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.values())[0];
-            this.startMysteryEncounter(mystery);
-        } else {
-            console.log('🎭 No mysteries available, creating test mystery...');
-            // Create a test mystery for demonstration
-            const testMystery = {
-                id: 'test_mystery',
-                name: 'Test Cosmic Rift',
-                type: 'cosmicRift',
-                description: 'A swirling portal to another dimension'
-            };
-            this.startMysteryEncounter(testMystery);
-        }
-    }
+    // Mystery encounters removed as requested
 
     triggerPvPCombat(otherPlayer) {
         console.log(`⚔️ Starting PvP combat with ${otherPlayer.name}!`);

@@ -15,19 +15,23 @@ class WelcomeScreen {
         console.log('🌟 Welcome screen initialized');
         this.checkIfFirstVisit();
         this.setupEventListeners();
+        this.showInitialLoading();
+    }
+
+    showInitialLoading() {
+        // Show welcome screen immediately with integrated Klitoritarit branding
         this.showWelcomeScreen();
     }
+
 
     checkIfFirstVisit() {
         // Check if user has seen the welcome screen before
         const hasSeenWelcome = localStorage.getItem('eldritch_welcome_seen');
         if (hasSeenWelcome === 'true') {
             this.hasSeenWelcome = true;
-            this.hideWelcomeScreen();
-            // If user has seen welcome before, initialize game immediately
-            if (window.eldritchApp) {
-                window.eldritchApp.initializeGame();
-            }
+            // Skip welcome screen for returning users, but still show it briefly
+            console.log('🌟 Returning user detected, showing welcome screen briefly');
+            // Don't auto-start the game, let user click "Begin Adventure"
         }
     }
 
@@ -102,13 +106,15 @@ class WelcomeScreen {
         localStorage.setItem('eldritch_welcome_seen', 'true');
         this.hasSeenWelcome = true;
         
-        // Hide welcome screen with animation
-        console.log('🌟 Animating out welcome screen...');
-        this.animateOut(() => {
-            console.log('🌟 Hiding welcome screen and initializing game...');
-            this.hideWelcomeScreen();
-            this.initializeGame();
-        });
+        // Hide welcome screen immediately and start game
+        console.log('🌟 Hiding welcome screen and initializing game...');
+        this.hideWelcomeScreen();
+        this.initializeGame();
+        
+        // Start NPC simulation after welcome screen is dismissed
+        if (window.eldritchApp) {
+            window.eldritchApp.startNPCSimulation();
+        }
     }
 
     skipTutorial() {
@@ -121,6 +127,11 @@ class WelcomeScreen {
         // Hide welcome screen immediately
         this.hideWelcomeScreen();
         this.initializeGame();
+        
+        // Start NPC simulation after welcome screen is dismissed
+        if (window.eldritchApp) {
+            window.eldritchApp.startNPCSimulation();
+        }
     }
 
 
@@ -151,22 +162,15 @@ class WelcomeScreen {
             console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
         }
         
-        // The particle loading screen will handle its own timing
-        setTimeout(() => {
-            console.log('🌟 Showing game tips...');
-            this.showGameTips();
-        }, 2000);
+        // Show game tips immediately
+        console.log('🌟 Showing game tips...');
+        this.showGameTips();
     }
 
     showGameTips() {
         // Show some helpful tips after the game loads
-        setTimeout(() => {
-            this.showTip('💡 Welcome to Eldritch Sanctuary! Use the debug console (🔧) to test features and see your progress.');
-        }, 500);
-        
-        setTimeout(() => {
-            this.showTip('🌟 Try clicking on the HEVY marker to start your first legendary encounter!');
-        }, 2000);
+        this.showTip('💡 Welcome to Eldritch Sanctuary! Use the debug console (🔧) to test features and see your progress.');
+        this.showTip('🌟 Try clicking on the HEVY marker to start your first legendary encounter!');
     }
 
     showTip(message) {

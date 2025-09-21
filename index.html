@@ -16,6 +16,9 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
     
+    <!-- GLMatrix for WebGL math operations (load first) -->
+    <script src="https://unpkg.com/gl-matrix@3.4.3/gl-matrix-min.js"></script>
+    
     <!-- Three.js for WebGL effects -->
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 </head>
@@ -68,6 +71,18 @@
                         <span class="locate-icon">📍</span>
                         <span class="locate-text">LOCATE ME</span>
                     </button>
+        <button id="quest-test-btn" class="quest-test-btn" title="Test Quest">
+            <span class="quest-test-icon">🎭</span>
+            <span class="quest-test-text">TEST QUEST</span>
+        </button>
+        <button id="quest-progress-btn" class="quest-progress-btn" title="Test Quest Progress">
+            <span class="quest-progress-icon">🎯</span>
+            <span class="quest-progress-text">PROGRESS</span>
+        </button>
+        <button id="quest-visibility-btn" class="quest-visibility-btn" title="Show Quest Markers">
+            <span class="quest-visibility-icon">👁️</span>
+            <span class="quest-visibility-text">MARKERS</span>
+        </button>
                     <div id="connection-status" class="status-indicator">
                         <span class="status-dot"></span>
                         <span class="status-text">Connecting...</span>
@@ -225,11 +240,17 @@
         </div>
     </div>
     
+
     <!-- Welcome Screen -->
     <div id="welcome-screen" class="welcome-screen">
         <div class="welcome-content">
             <div class="welcome-header">
-                <h1 class="welcome-title">🌟 Welcome to Eldritch Sanctuary 🌟</h1>
+                <div class="klitoritarit-branding">
+                    <h1 class="klitoritarit-title">Klitoritarit</h1>
+                    <p class="klitoritarit-subtitle">Cosmic Exploration Platform</p>
+                    <div class="klitoritarit-particles"></div>
+                </div>
+                <h2 class="welcome-title">🌟 Welcome to Eldritch Sanctuary 🌟</h2>
                 <p class="welcome-subtitle">A Cosmic Exploration Adventure</p>
             </div>
             
@@ -502,18 +523,25 @@
     <script src="js/item-system.js"></script>
     <script src="js/inventory-ui.js"></script>
     <script src="js/quest-log-ui.js"></script>
-    <script src="js/quest-system.js"></script>
-    <script src="js/quest-simulation.js"></script>
+    <script src="js/unified-quest-system.js"></script>
     <script src="js/encounter-system.js"></script>
     <script src="js/npc-system.js"></script>
     <script src="js/path-painting-system.js"></script>
+    <script src="js/finnish-flag-generator.js"></script>
+    <script src="js/webgl-vector-renderer.js"></script>
+    <script src="js/enhanced-path-painting-system.js"></script>
+    <script src="js/finnish-flag-canvas-layer.js"></script>
+    <script src="js/distortion-effects-canvas-layer.js"></script>
     <script src="js/other-player-simulation.js"></script>
     <script src="js/unified-debug-panel.js"></script>
-    <script src="js/lovecraftian-quest.js"></script>
     <script src="js/sanity-distortion.js"></script>
     <script src="js/gruesome-notifications.js"></script>
     <script src="js/welcome-screen.js"></script>
     <script src="js/map-engine.js"></script>
+    <script src="js/webgl-map-renderer.js"></script>
+    <script src="js/webgl-map-integration.js"></script>
+    <script src="js/enhanced-map-engine.js"></script>
+    <script src="js/webgl-test.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

@@ -72,35 +72,51 @@ class InvestigationSystem {
     }
 
     loadMysteryZones() {
-        // Only main quest mystery zone - Härmälä Convergence
-        this.mysteryZones = [
-            {
-                id: 'harmala-convergence-main',
-                name: 'The Härmälä Convergence',
-                type: 'main_quest',
-                lat: 61.473683430224284,
-                lng: 23.726548746143216,
-                description: 'Something ancient stirs beneath the streets of Härmälä. The cosmic entities whisper of a convergence that will reshape reality itself... or at least the local bus schedule.',
-                requirements: 'Investigate the cosmic anomalies appearing around Härmälä',
-                difficulty: 'Main Quest',
-                rewards: ['Reality Anchor', 'Void Pocket', 'Härmälä Mystery Solver Title'],
-                icon: '🌌'
-            },
-            {
-                id: 'lovecraftian-quest',
-                name: 'The Quest of Questionable Sanity',
-                type: 'lovecraftian_quest',
-                lat: 61.476173436868,
-                lng: 23.725432936819306,
-                description: 'A dark humorous narrative combining H.P. Lovecraft with Terry Pratchett. Follow the cosmic horror adventure through 5 locations, where sanity is optional and death is just another plot device.',
-                requirements: 'Complete the Lovecraftian quest sequence',
-                difficulty: 'Epic Quest',
-                rewards: ['Staff of Questionable Sanity', 'Tentacle Hat of Madness', 'Sanity (Optional)'],
-                icon: '🐙'
-            }
-        ];
+        // No mystery zones - quest system now handles all quest markers
+        this.mysteryZones = [];
 
         this.updateZoneList();
+    }
+    
+    // Update quest marker position based on last known player position
+    updateQuestMarkerPosition() {
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            const geolocation = window.eldritchApp.systems.geolocation;
+            const lastPosition = geolocation.lastValidPosition || geolocation.fixedPosition;
+            
+            if (lastPosition && this.mysteryZones.length > 0) {
+                // Keep quest marker at a fixed position 100m north of player
+                // This ensures quests can actually trigger when player approaches
+                const distanceKm = 0.1; // 100 meters in kilometers
+                const bearing = 0; // North direction
+                
+                // Calculate position 100m north of player
+                const R = 6371; // Earth's radius in kilometers
+                const lat1 = lastPosition.lat * Math.PI / 180;
+                const lng1 = lastPosition.lng * Math.PI / 180;
+                const bearingRad = bearing * Math.PI / 180;
+                
+                const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distanceKm / R) +
+                                      Math.cos(lat1) * Math.sin(distanceKm / R) * Math.cos(bearingRad));
+                
+                const lng2 = lng1 + Math.atan2(Math.sin(bearingRad) * Math.sin(distanceKm / R) * Math.cos(lat1),
+                                               Math.cos(distanceKm / R) - Math.sin(lat1) * Math.sin(lat2));
+                
+                const questPosition = {
+                    lat: lat2 * 180 / Math.PI,
+                    lng: lng2 * 180 / Math.PI
+                };
+                
+                // Update the quest marker position
+                this.mysteryZones[0].lat = questPosition.lat;
+                this.mysteryZones[0].lng = questPosition.lng;
+                
+                console.log('🎭 Updated quest marker position to be 100m north of player:', questPosition);
+                
+                // Update the quest distance calculation coordinates
+                geolocation.setTargetQuestLocation(questPosition.lat, questPosition.lng, 'Questionable Sanity');
+            }
+        }
     }
 
     updateZoneList() {
