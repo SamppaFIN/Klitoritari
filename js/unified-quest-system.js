@@ -219,29 +219,36 @@ class UnifiedQuestSystem {
     }
     
     addQuestButton() {
-        const header = document.getElementById('header');
-        if (!header) return;
+        const headerControls = document.querySelector('.header-controls');
+        if (!headerControls) return;
         
         const questButton = document.createElement('button');
         questButton.id = 'quest-button';
-        questButton.className = 'sacred-button';
-        questButton.innerHTML = '🎭 Quests';
+        questButton.className = 'sacred-button quest-log-btn';
+        questButton.innerHTML = '<span class="quest-icon">🎭</span><span class="quest-text">QUESTS</span>';
         questButton.style.cssText = `
-            background: var(--cosmic-purple);
+            background: linear-gradient(45deg, #ff9800, #ff5722);
             color: white;
-            border: 2px solid var(--cosmic-purple);
-            padding: 8px 16px;
-            border-radius: 8px;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
-            margin-left: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 80px;
         `;
         
         questButton.addEventListener('click', () => {
             this.toggleQuestPanel();
         });
         
-        header.appendChild(questButton);
+        headerControls.appendChild(questButton);
     }
     
     toggleQuestPanel() {
@@ -1465,10 +1472,10 @@ class UnifiedQuestSystem {
     triggerTestQuestDialog() {
         console.log('🎭 Triggering test quest dialog...');
         
-        // Get the questionable sanity quest
-        const quest = this.availableQuests.get('questionable_sanity');
+        // Get the corroding lake quest
+        const quest = this.availableQuests.get('corroding_lake');
         if (!quest) {
-            console.log('🎭 No questionable sanity quest found');
+            console.log('🎭 No corroding lake quest found');
             return;
         }
         
@@ -1481,7 +1488,7 @@ class UnifiedQuestSystem {
         
         // Start the quest if it's available
         if (quest.status === 'available') {
-            this.startQuest('questionable_sanity');
+            this.startQuest('corroding_lake');
         }
         
         // Show the quest dialog
@@ -1491,7 +1498,7 @@ class UnifiedQuestSystem {
     // Force trigger quest for testing
     forceTriggerQuest() {
         console.log('🎭 Force triggering quest for testing...');
-        const quest = this.availableQuests.get('questionable_sanity');
+        const quest = this.availableQuests.get('corroding_lake');
         if (quest) {
             this.showQuestDialog(quest, quest.objectives[0]);
         }

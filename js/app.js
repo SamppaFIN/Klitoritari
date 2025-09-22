@@ -891,6 +891,18 @@ class EldritchSanctuaryApp {
         // Initialize button status
         this.updateInventoryStatus();
         this.updateLocateStatus();
+        
+        // Initialize step currency system
+        this.initializeStepSystem();
+        
+        // Initialize side panel
+        this.initializeSidePanel();
+        
+        // Initialize control panel
+        this.initializeControlPanel();
+        
+        // Initialize debug panel
+        // Debug functionality now integrated into side panel
     }
     
     updateInventoryStatus() {
@@ -962,9 +974,26 @@ class EldritchSanctuaryApp {
         console.log('📍 Toggling device GPS...');
         
         if (this.systems.geolocation) {
-            const isEnabled = this.systems.geolocation.toggleDeviceGPS();
-            this.updateLocationButtonText(isEnabled);
+            // Check if we have a good GPS signal (accuracy <= 50m)
+            const hasGoodSignal = this.systems.geolocation.currentPosition && 
+                                 this.systems.geolocation.currentPosition.accuracy && 
+                                 this.systems.geolocation.currentPosition.accuracy <= 50;
+            
+            if (hasGoodSignal) {
+                // We have good GPS signal, keep GPS enabled for real tracking
+                console.log('📍 Good GPS signal detected, keeping GPS enabled for real tracking');
+                this.systems.geolocation.deviceGPSEnabled = true;
+                this.systems.geolocation.startTracking();
+            } else {
+                // No good signal, disable GPS and use fixed position (allows Move Here to work)
+                console.log('📍 No good GPS signal, switching to fixed position mode (Move Here enabled)');
+                this.systems.geolocation.deviceGPSEnabled = false;
+                this.systems.geolocation.updateDeviceLocationDisplay('Fixed Position', 'N/A');
+            }
+            
+            this.updateLocationButtonText(this.systems.geolocation.deviceGPSEnabled);
             this.updateLocateStatus();
+            this.updateStepDetectionMode();
         } else {
             console.error('📍 Geolocation system not available');
         }
@@ -978,6 +1007,392 @@ class EldritchSanctuaryApp {
     updateInventoryCount() {
         // Update inventory button when items change
         this.updateInventoryStatus();
+    }
+    
+    initializeStepSystem() {
+        // Wait for step currency system to be available
+        setTimeout(() => {
+            if (window.stepCurrencySystem) {
+                console.log('🚶‍♂️ Step currency system initialized');
+                
+                // Ensure step counter exists
+                if (!document.getElementById('step-counter')) {
+                    console.log('🚶‍♂️ Step counter not found, creating it...');
+                    window.stepCurrencySystem.createStepCounter();
+                }
+                
+                // Update location when steps are added (for flag placement)
+                const originalAddStep = window.stepCurrencySystem.addStep.bind(window.stepCurrencySystem);
+                window.stepCurrencySystem.addStep = () => {
+                    originalAddStep();
+                    // Update player position for accurate flag placement
+                    this.updatePlayerPositionFromGPS();
+                };
+                
+                // Set step detection mode based on GPS status
+                this.updateStepDetectionMode();
+            } else {
+                console.log('🚶‍♂️ Step currency system not available, retrying...');
+                // Retry after another second
+                setTimeout(() => {
+                    this.initializeStepSystem();
+                }, 1000);
+            }
+        }, 1000);
+    }
+    
+    updatePlayerPositionFromGPS() {
+        // Force update player position from GPS when steps are added
+        if (this.systems.geolocation) {
+            this.systems.geolocation.getCurrentPosition(true); // Force update
+        }
+    }
+    
+    updateStepDetectionMode() {
+        // Update step detection mode based on GPS tracking status
+        if (window.stepCurrencySystem && this.systems.geolocation) {
+            const isGPSTracking = this.systems.geolocation.isDeviceGPSEnabled();
+            window.stepCurrencySystem.setStepDetectionMode(isGPSTracking);
+        }
+    }
+    
+    initializeDebugPanel() {
+        const debugPanel = document.getElementById('debug-panel');
+        const debugToggle = document.getElementById('debug-panel-toggle');
+        
+        if (debugPanel && debugToggle) {
+            // Toggle debug panel
+            debugToggle.addEventListener('click', () => {
+                debugPanel.classList.toggle('open');
+                debugToggle.classList.toggle('open');
+            });
+            
+            // Close panel when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!debugPanel.contains(e.target) && !debugToggle.contains(e.target)) {
+                    debugPanel.classList.remove('open');
+                    debugToggle.classList.remove('open');
+                }
+            });
+            
+            // Setup debug button functionality
+            this.setupDebugButtons();
+            
+            // Update debug status
+            this.updateDebugStatus();
+            
+            // Update debug status every 2 seconds
+            setInterval(() => {
+                this.updateDebugStatus();
+            }, 2000);
+        }
+    }
+    
+    setupDebugButtons() {
+        console.log('🔧 Setting up debug buttons...');
+        
+        // Add step buttons
+        const addStepBtn = document.getElementById('debug-add-step');
+        const add50StepsBtn = document.getElementById('debug-add-50-steps');
+        const add100StepsBtn = document.getElementById('debug-add-100-steps');
+        
+        console.log('🔧 Debug buttons found:', {
+            addStep: !!addStepBtn,
+            add50: !!add50StepsBtn,
+            add100: !!add100StepsBtn
+        });
+        
+        if (addStepBtn) {
+            addStepBtn.addEventListener('click', () => {
+                if (window.stepCurrencySystem) {
+                    window.stepCurrencySystem.addManualStep();
+                }
+            });
+        }
+        
+        if (add50StepsBtn) {
+            add50StepsBtn.addEventListener('click', () => {
+                if (window.stepCurrencySystem) {
+                    for (let i = 0; i < 50; i++) {
+                        window.stepCurrencySystem.addManualStep();
+                    }
+                }
+            });
+        }
+        
+        if (add100StepsBtn) {
+            add100StepsBtn.addEventListener('click', () => {
+                if (window.stepCurrencySystem) {
+                    for (let i = 0; i < 100; i++) {
+                        window.stepCurrencySystem.addManualStep();
+                    }
+                }
+            });
+        }
+        
+        // Game control buttons
+        const resetStepsBtn = document.getElementById('debug-reset-steps');
+        const clearFlagsBtn = document.getElementById('debug-clear-flags');
+        const testLocationBtn = document.getElementById('debug-test-location');
+        
+        if (resetStepsBtn) {
+            resetStepsBtn.addEventListener('click', () => {
+                if (window.stepCurrencySystem) {
+                    window.stepCurrencySystem.totalSteps = 0;
+                    window.stepCurrencySystem.sessionSteps = 0;
+                    window.stepCurrencySystem.saveSteps();
+                    window.stepCurrencySystem.updateStepCounter();
+                }
+            });
+        }
+        
+        if (clearFlagsBtn) {
+            clearFlagsBtn.addEventListener('click', () => {
+                if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
+                    window.mapEngine.finnishFlagLayer.flagPins = [];
+                    window.mapEngine.finnishFlagLayer.render();
+                }
+            });
+        }
+        
+        if (testLocationBtn) {
+            testLocationBtn.addEventListener('click', () => {
+                if (this.systems.geolocation) {
+                    this.systems.geolocation.getCurrentPosition(true);
+                }
+            });
+        }
+    }
+    
+    updateDebugStatus() {
+        // Update step detection status
+        const stepStatusEl = document.getElementById('debug-step-status');
+        if (stepStatusEl && window.stepCurrencySystem) {
+            const stats = window.stepCurrencySystem.getStepStats();
+            stepStatusEl.textContent = stats.detectionActive ? 'Active' : 'Inactive';
+            stepStatusEl.className = `stat-value ${stats.detectionActive ? 'accuracy' : ''}`;
+        }
+        
+        // Update GPS status
+        const gpsStatusEl = document.getElementById('debug-gps-status');
+        if (gpsStatusEl && this.systems.geolocation) {
+            const isEnabled = this.systems.geolocation.isDeviceGPSEnabled();
+            gpsStatusEl.textContent = isEnabled ? 'Active' : 'Inactive';
+            gpsStatusEl.className = `stat-value ${isEnabled ? 'accuracy' : ''}`;
+        }
+        
+        // Update map engine status
+        const mapStatusEl = document.getElementById('debug-map-status');
+        if (mapStatusEl) {
+            mapStatusEl.textContent = 'Ready';
+            mapStatusEl.className = 'stat-value accuracy';
+        }
+    }
+    
+    initializeSidePanel() {
+        console.log('⚙️ Initializing side panel...');
+        
+        // Add a small delay to ensure DOM is fully loaded
+        setTimeout(() => {
+            const sidePanel = document.getElementById('glassmorphic-side-panel');
+            const toggleBtn = document.getElementById('unified-panel-toggle');
+            
+            console.log('⚙️ Side panel found:', !!sidePanel);
+            console.log('⚙️ Toggle button found:', !!toggleBtn);
+            console.log('⚙️ Button element:', toggleBtn);
+            
+            if (sidePanel && toggleBtn) {
+                console.log('⚙️ Setting up settings button event listener...');
+                
+                // Toggle side panel
+                toggleBtn.addEventListener('click', (e) => {
+                    console.log('⚙️ Settings button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isOpen = sidePanel.classList.contains('open');
+                    console.log('⚙️ Current panel state:', isOpen ? 'open' : 'closed');
+                    
+                    sidePanel.classList.toggle('open');
+                    toggleBtn.classList.toggle('open');
+                    
+                    console.log('⚙️ New panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
+                });
+                
+                console.log('⚙️ Settings button event listener attached successfully');
+            
+            // Close panel when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!sidePanel.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    sidePanel.classList.remove('open');
+                    toggleBtn.classList.remove('open');
+                }
+            });
+            
+            // Initialize panel data
+            this.updateSidePanel();
+            
+            // Setup debug button functionality
+            this.setupDebugButtons();
+            
+            // Update debug status
+            this.updateDebugStatus();
+            
+            // Update panel every 2 seconds
+            setInterval(() => {
+                this.updateSidePanel();
+                this.updateDebugStatus();
+                this.updateLocationDisplay();
+            }, 2000);
+        }
+        }, 100); // Close the setTimeout
+        
+        // Also add a fallback event listener after a longer delay
+        setTimeout(() => {
+            const toggleBtn = document.getElementById('unified-panel-toggle');
+            const sidePanel = document.getElementById('glassmorphic-side-panel');
+            
+            console.log('⚙️ Fallback check - Button:', toggleBtn);
+            console.log('⚙️ Fallback check - Panel:', sidePanel);
+            
+            if (toggleBtn && sidePanel) {
+                console.log('⚙️ Adding fallback event listener to footer button...');
+                
+                // Add a simple onclick handler as backup
+                toggleBtn.onclick = function(e) {
+                    console.log('⚙️ ONCLICK settings button clicked!');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Test alert to confirm click is working
+                    alert('Settings button clicked! Panel should open now.');
+                    
+                    sidePanel.classList.toggle('open');
+                    toggleBtn.classList.toggle('open');
+                    
+                    console.log('⚙️ ONCLICK panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
+                };
+                
+                console.log('⚙️ ONCLICK event listener attached');
+            } else {
+                console.log('⚙️ Footer button or panel not found:', {
+                    button: !!toggleBtn,
+                    panel: !!sidePanel
+                });
+            }
+        }, 1000);
+    }
+    
+    initializeControlPanel() {
+        console.log('🎮 Initializing control panel...');
+        
+        // Update location display
+        this.updateLocationDisplay();
+        
+        console.log('🎮 Control panel initialized');
+    }
+    
+    updateLocationDisplay() {
+        const locationDisplay = document.getElementById('location-display');
+        const accuracyDisplay = document.getElementById('accuracy-display');
+        
+        if (this.systems.geolocation) {
+            const position = this.systems.geolocation.getCurrentPositionSafe();
+            if (position) {
+                if (locationDisplay) {
+                    locationDisplay.innerHTML = `📍 Location: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+                }
+                if (accuracyDisplay) {
+                    accuracyDisplay.textContent = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(1) + 'm' : 'Unknown'}`;
+                }
+            }
+        }
+    }
+    
+    updateSidePanel() {
+        // Update location data
+        if (this.systems.geolocation) {
+            const position = this.systems.geolocation.getCurrentPosition();
+            const accuracy = this.systems.geolocation.getCurrentAccuracy();
+            const isEnabled = this.systems.geolocation.isDeviceGPSEnabled();
+            
+            const coordsEl = document.getElementById('panel-coordinates');
+            const accuracyEl = document.getElementById('panel-accuracy');
+            const gpsStatusEl = document.getElementById('panel-gps-status');
+            
+            if (coordsEl && position) {
+                coordsEl.textContent = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+            }
+            
+            if (accuracyEl) {
+                accuracyEl.textContent = accuracy ? `${accuracy.toFixed(1)}m` : 'Unknown';
+            }
+            
+            if (gpsStatusEl) {
+                gpsStatusEl.textContent = isEnabled ? 'Active' : 'Off';
+                gpsStatusEl.className = `stat-value ${isEnabled ? 'accuracy' : ''}`;
+            }
+        }
+        
+        // Update player stats
+        const healthEl = document.getElementById('panel-health');
+        const sanityEl = document.getElementById('panel-sanity');
+        const inventoryEl = document.getElementById('panel-inventory');
+        
+        if (healthEl) {
+            const healthValue = document.getElementById('health-value');
+            if (healthValue) {
+                healthEl.textContent = healthValue.textContent;
+            }
+        }
+        
+        if (sanityEl) {
+            const sanityValue = document.getElementById('sanity-value');
+            if (sanityValue) {
+                sanityEl.textContent = sanityValue.textContent;
+            }
+        }
+        
+        if (inventoryEl) {
+            const inventoryStatus = document.getElementById('inventory-status');
+            if (inventoryStatus) {
+                inventoryEl.textContent = inventoryStatus.textContent;
+            }
+        }
+        
+        // Update step data
+        if (window.stepCurrencySystem) {
+            const stats = window.stepCurrencySystem.getStepStats();
+            const totalStepsEl = document.getElementById('panel-total-steps');
+            const sessionStepsEl = document.getElementById('panel-session-steps');
+            const nextFlagEl = document.getElementById('panel-next-flag');
+            
+            if (totalStepsEl) {
+                totalStepsEl.textContent = stats.totalSteps.toLocaleString();
+            }
+            
+            if (sessionStepsEl) {
+                sessionStepsEl.textContent = stats.sessionSteps.toLocaleString();
+            }
+            
+            if (nextFlagEl) {
+                const stepsToNextFlag = 50 - (stats.sessionSteps % 50);
+                nextFlagEl.textContent = `${stepsToNextFlag} steps`;
+            }
+        }
+        
+        // Update connection status
+        const connectionEl = document.getElementById('panel-connection');
+        const playersEl = document.getElementById('panel-players');
+        
+        if (connectionEl) {
+            connectionEl.textContent = 'Connected';
+            connectionEl.className = 'stat-value accuracy';
+        }
+        
+        if (playersEl) {
+            playersEl.textContent = '1';
+        }
     }
     
     enableDeviceMode() {
@@ -1075,6 +1490,9 @@ class EldritchSanctuaryApp {
         this.systems.geolocation = new GeolocationManager();
         this.systems.geolocation.init();
         
+        // Start tracking automatically
+        this.systems.geolocation.startTracking();
+        
         // Make geolocation manager globally available
         window.geolocationManager = this.systems.geolocation;
         
@@ -1149,9 +1567,7 @@ class EldritchSanctuaryApp {
         this.systems.mapEngine = new EnhancedMapEngine();
         console.log('🗺️ Enhanced map engine created:', !!this.systems.mapEngine);
         
-        // Initialize unified debug panel
-        this.systems.unifiedDebug = new UnifiedDebugPanel();
-        this.systems.unifiedDebug.init();
+        // Debug functionality now integrated into side panel
         
         // Initialize inventory UI
         this.systems.inventoryUI = new InventoryUI();

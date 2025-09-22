@@ -20,7 +20,10 @@
     <script src="https://unpkg.com/gl-matrix@3.4.3/gl-matrix-min.js"></script>
     
     <!-- Three.js for WebGL effects -->
-    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        window.THREE = THREE;
+    </script>
 </head>
 <body>
     <!-- Cosmic Background Canvas -->
@@ -34,7 +37,7 @@
         <div id="ui-overlay">
             <!-- Header -->
             <header id="header">
-                <h1>🌌 Eldritch Sanctuary</h1>
+                <h1>🌌 Klitoritarit</h1>
                 <div class="player-stats-header">
                     <div class="stat-meter">
                         <span class="stat-label">❤️ Health:</span>
@@ -71,13 +74,24 @@
                         <span class="locate-status" id="locate-status">GPS Ready</span>
                         <span class="locate-details" id="locate-details">Accuracy: 1.0m</span>
                     </button>
-                    <div id="connection-status" class="status-indicator">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Connecting...</span>
-                    </div>
                 </div>
             </header>
             
+            <!-- Control Panel -->
+            <div id="control-panel">
+                <!-- Step Counter -->
+                <div id="step-counter-container"></div>
+                
+                <!-- Main Controls -->
+                <div class="main-controls">
+                    <div class="control-group">
+                        <div class="location-info">
+                            <div class="location-coords" id="location-display">Loading...</div>
+                            <div class="location-accuracy" id="accuracy-display">Accuracy: Unknown</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- Investigation Panel -->
             <div id="investigation-panel" class="control-panel hidden">
@@ -233,7 +247,7 @@
     <div id="welcome-screen" class="welcome-screen">
         <div class="welcome-content">
             <div class="welcome-header">
-                <h1 class="welcome-title">🌌 Eldritch Sanctuary</h1>
+                <h1 class="welcome-title">🌌 Klitoritarit</h1>
                 <p class="welcome-subtitle">A Cosmic Exploration Adventure</p>
             </div>
             
@@ -295,9 +309,6 @@
                 <div class="welcome-actions">
                     <button id="start-adventure" class="welcome-btn primary">
                         🚀 Start Your Cosmic Adventure
-                    </button>
-                    <button id="skip-tutorial" class="welcome-btn secondary">
-                        ⏭️ Skip Tutorial
                     </button>
                 </div>
                 <div class="welcome-tips">
@@ -486,7 +497,6 @@
     <script src="js/finnish-flag-canvas-layer.js"></script>
     <script src="js/distortion-effects-canvas-layer.js"></script>
     <script src="js/other-player-simulation.js"></script>
-    <script src="js/unified-debug-panel.js"></script>
     <script src="js/sanity-distortion.js"></script>
     <script src="js/gruesome-notifications.js"></script>
     <script src="js/welcome-screen.js"></script>
@@ -496,5 +506,87 @@
     <script src="js/enhanced-map-engine.js"></script>
     <script src="js/webgl-test.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/step-currency-system.js"></script>
+    
+    <!-- Glassmorphic Side Panel -->
+    <div class="glassmorphic-side-panel" id="glassmorphic-side-panel">
+        <h3>🌌 Game Stats</h3>
+        
+        <!-- Compact Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-info">
+                    <div class="stat-label">Health</div>
+                    <div class="stat-value health" id="panel-health">100/100</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🧠</div>
+                <div class="stat-info">
+                    <div class="stat-label">Sanity</div>
+                    <div class="stat-value sanity" id="panel-sanity">100/100</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎒</div>
+                <div class="stat-info">
+                    <div class="stat-label">Inventory</div>
+                    <div class="stat-value" id="panel-inventory">Empty</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚶‍♂️</div>
+                <div class="stat-info">
+                    <div class="stat-label">Steps</div>
+                    <div class="stat-value" id="panel-total-steps">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Location Info -->
+        <div class="location-info">
+            <div class="location-coords" id="panel-coordinates">Loading...</div>
+            <div class="location-accuracy">Accuracy: <span id="panel-accuracy">Unknown</span></div>
+            <div class="location-gps">GPS: <span id="panel-gps-status">Ready</span></div>
+        </div>
+        
+        <!-- Debug Tools - Compact -->
+        <div class="debug-tools">
+            <h4>🔧 Debug Tools</h4>
+            <div class="debug-buttons">
+                <button id="debug-add-step" class="debug-btn small">+1 Step</button>
+                <button id="debug-add-50-steps" class="debug-btn small">+50 Steps</button>
+                <button id="debug-add-100-steps" class="debug-btn small">+100 Steps</button>
+                <button id="debug-reset-steps" class="debug-btn small">Reset</button>
+                <button id="debug-clear-flags" class="debug-btn small">Clear Flags</button>
+                <button id="debug-test-location" class="debug-btn small">Test GPS</button>
+            </div>
+        </div>
+        
+        <!-- System Status - Compact -->
+        <div class="system-status">
+            <div class="status-item">
+                <span class="status-icon">🚶‍♂️</span>
+                <span class="status-text">Steps: <span id="debug-step-status">Active</span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">📍</span>
+                <span class="status-text">GPS: <span id="debug-gps-status">Ready</span></span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">🗺️</span>
+                <span class="status-text">Map: <span id="debug-map-status">Ready</span></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer with Settings Button -->
+    <footer id="game-footer">
+        <button id="unified-panel-toggle" class="settings-button" title="Settings">
+            <span class="settings-icon">⚙️</span>
+        </button>
+    </footer>
+    
 </body>
 </html>

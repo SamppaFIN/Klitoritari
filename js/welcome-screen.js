@@ -48,17 +48,7 @@ class WelcomeScreen {
             console.error('🌟 Start adventure button not found!');
         }
 
-        // Skip tutorial button
-        const skipBtn = document.getElementById('skip-tutorial');
-        if (skipBtn) {
-            console.log('🌟 Skip tutorial button found, adding event listener');
-            skipBtn.addEventListener('click', () => {
-                console.log('⏭️ Skip tutorial button clicked!');
-                this.skipTutorial();
-            });
-        } else {
-            console.error('🌟 Skip tutorial button not found!');
-        }
+        // Skip tutorial button removed - using single start button only
 
         // Close welcome screen on escape key
         document.addEventListener('keydown', (e) => {

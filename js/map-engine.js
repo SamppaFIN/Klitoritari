@@ -1467,6 +1467,11 @@ class MapEngine {
         console.log(`🎮 Moving player to: ${lat}, ${lng}`);
         this.hideContextMenu();
         
+        // Give 50 cosmic steps for using Move Here (async to not block movement)
+        setTimeout(() => {
+            this.giveMoveHereSteps();
+        }, 100);
+        
         // Pause location updates during movement
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             window.eldritchApp.systems.geolocation.pauseLocationUpdates();
@@ -1500,9 +1505,12 @@ class MapEngine {
         const stepDuration = 100; // 100ms per step
         
         console.log(`🎮 Movement: ${totalDistance.toFixed(1)}m in ${steps} steps`);
+        console.log(`🎮 Starting movement interval with ${stepDuration}ms duration`);
         
         let currentStep = 0;
         const movementInterval = setInterval(() => {
+            console.log(`🎮 Movement step ${currentStep + 1}/${steps}`);
+            
             if (currentStep >= steps) {
                 clearInterval(movementInterval);
                 console.log('🎮 Movement simulation complete');
@@ -1518,6 +1526,8 @@ class MapEngine {
             const progress = currentStep / steps;
             const currentLat = startPos.lat + (endPos.lat - startPos.lat) * progress;
             const currentLng = startPos.lng + (endPos.lng - startPos.lng) * progress;
+            
+            console.log(`🎮 Step ${currentStep + 1}: Moving to ${currentLat.toFixed(6)}, ${currentLng.toFixed(6)} (progress: ${(progress * 100).toFixed(1)}%)`);
             
             // Update player position
             this.updatePlayerPosition({
@@ -1555,10 +1565,46 @@ class MapEngine {
             console.log(`🎨 Adding Finnish flag at progress ${progress.toFixed(2)}`);
             if (this.finnishFlagLayer) {
                 this.finnishFlagLayer.addFlagPin(lat, lng);
+                // Give 50 cosmic steps for drawing a flag (async to not block movement)
+                setTimeout(() => {
+                    this.giveFlagSteps();
+                }, 50);
             } else {
                 // Fallback to old method
                 this.addFinnishFlagToPath(lat, lng, progress);
+                // Give 50 cosmic steps for drawing a flag (async to not block movement)
+                setTimeout(() => {
+                    this.giveFlagSteps();
+                }, 50);
             }
+        }
+    }
+    
+    giveMoveHereSteps() {
+        // Give 50 cosmic steps for using Move Here button
+        try {
+            if (window.stepCurrencySystem) {
+                for (let i = 0; i < 50; i++) {
+                    window.stepCurrencySystem.addManualStep();
+                }
+                console.log('🚶‍♂️ Gave 50 cosmic steps for Move Here action');
+            } else {
+                console.warn('🚶‍♂️ Step currency system not available');
+            }
+        } catch (error) {
+            console.error('🚶‍♂️ Error giving Move Here steps:', error);
+        }
+    }
+    
+    giveFlagSteps() {
+        // Give 50 cosmic steps for drawing a flag
+        if (window.stepCurrencySystem) {
+            for (let i = 0; i < 50; i++) {
+                window.stepCurrencySystem.addManualStep();
+            }
+            console.log('🚶‍♂️ Gave 50 cosmic steps for drawing flag');
+        } else {
+            console.warn('🚶‍♂️ Step currency system not available');
         }
     }
     

@@ -37,8 +37,8 @@ class BaseSystem {
     }
 
     addBaseEstablishmentButton() {
-        const header = document.getElementById('header');
-        if (!header) return;
+        const headerControls = document.querySelector('.header-controls');
+        if (!headerControls) return;
 
         // Check if button already exists
         if (document.getElementById('establish-base-btn')) return;
@@ -46,11 +46,23 @@ class BaseSystem {
         const baseButton = document.createElement('button');
         baseButton.id = 'establish-base-btn';
         baseButton.className = 'sacred-button base-button';
-        baseButton.innerHTML = '<span class="icon">🏗️</span> Establish Base';
+        baseButton.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE</span>';
         baseButton.style.cssText = `
-            margin-left: 10px;
-            font-size: 0.8rem;
-            padding: 8px 15px;
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            min-width: 80px;
         `;
 
         baseButton.addEventListener('click', (e) => {
@@ -58,7 +70,7 @@ class BaseSystem {
             e.stopPropagation();
             this.showBaseEstablishmentModal();
         });
-        header.appendChild(baseButton);
+        headerControls.appendChild(baseButton);
     }
 
     createBaseManagementPanel() {
@@ -610,17 +622,27 @@ class BaseSystem {
                 baseActions.classList.remove('hidden');
             }
 
-            // Hide establish button when base exists
+            // Change establish button to "Open Base" when base exists
             if (establishBtn) {
-                establishBtn.style.display = 'none';
+                establishBtn.innerHTML = '<span class="base-icon">🏠</span><span class="base-text">OPEN BASE</span>';
+                establishBtn.onclick = (e) => {
+                    console.log('🏠 Open base button clicked');
+                    e.stopPropagation();
+                    this.showBaseManagementModal();
+                };
             }
         } else {
             // Hide base management panel when no base
             basePanel.classList.add('hidden');
             
-            // Show establish button when no base exists
+            // Reset establish button when no base exists
             if (establishBtn) {
-                establishBtn.style.display = 'block';
+                establishBtn.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE</span>';
+                establishBtn.onclick = (e) => {
+                    console.log('🏗️ Establish base button clicked');
+                    e.stopPropagation();
+                    this.showBaseEstablishmentModal();
+                };
             }
         }
     }
@@ -890,7 +912,7 @@ class BaseSystem {
         if (territorySize) territorySize.textContent = `${this.territorySize}m²`;
         if (buildingCount) buildingCount.textContent = this.buildings.length + 1; // +1 for base itself
         if (availableSteps) {
-            const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+            const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
             availableSteps.textContent = Math.floor(steps);
         }
 
@@ -899,7 +921,7 @@ class BaseSystem {
     }
 
     updateButtonStates() {
-        const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+        const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
         
         // Update build buttons
         document.querySelectorAll('.build-btn').forEach(btn => {
@@ -925,7 +947,7 @@ class BaseSystem {
     }
 
     buildStructure(buildingType, cost) {
-        const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+        const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
         
         if (steps < cost) {
             this.showNotification(`Not enough steps! Need ${cost}, have ${Math.floor(steps)}`, 'error');
@@ -939,9 +961,9 @@ class BaseSystem {
         }
 
         // Deduct steps
-        if (window.encounterSystem) {
-            window.encounterSystem.playerStats.steps -= cost;
-            window.encounterSystem.updateHealthBars();
+        if (window.stepCurrencySystem) {
+            window.stepCurrencySystem.subtractSteps(cost);
+            console.log(`🏗️ Built ${buildingType} for ${cost} steps`);
         }
 
         // Add building
@@ -993,7 +1015,7 @@ class BaseSystem {
     }
 
     expandTerritory(cost) {
-        const steps = window.encounterSystem ? window.encounterSystem.playerStats.steps : 0;
+        const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
         
         if (steps < cost) {
             this.showNotification(`Not enough steps! Need ${cost}, have ${Math.floor(steps)}`, 'error');
@@ -1001,9 +1023,9 @@ class BaseSystem {
         }
 
         // Deduct steps
-        if (window.encounterSystem) {
-            window.encounterSystem.playerStats.steps -= cost;
-            window.encounterSystem.updateHealthBars();
+        if (window.stepCurrencySystem) {
+            window.stepCurrencySystem.subtractSteps(cost);
+            console.log(`🏗️ Built ${buildingType} for ${cost} steps`);
         }
 
         // Expand territory
