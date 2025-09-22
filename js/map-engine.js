@@ -25,6 +25,9 @@ class MapEngine {
         this.finnishFlagLayer = null; // Canvas-based flag layer
         this.distortionEffectsLayer = null; // Canvas-based distortion effects layer
         this.distortionEffectsVisible = false; // Start with effects hidden by default
+        this.lastPlayerPosition = null; // Track last position for path line
+        this.pathLine = null; // Leaflet polyline for path visualization
+        this.flagDropDistance = 10; // Drop flag every 10 meters
     }
 
     init() {
@@ -242,6 +245,12 @@ class MapEngine {
         if (position.accuracy) {
             this.updateAccuracyCircle(latlng, position.accuracy);
         }
+        
+        // Add flag to path if player has moved significantly
+        this.addFlagToPathIfMoved(position);
+        
+        // Update path line between current and last position
+        this.updatePathLine(position);
         
         // Update geolocation system with new position
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
@@ -1418,6 +1427,9 @@ class MapEngine {
             <button class="context-menu-btn" onclick="window.mapEngine.createTestDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-red);">
                 👻 Test Effects
             </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.clearPathLine()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-orange);">
+                🗑️ Clear Path
+            </button>
             <button class="context-menu-btn" onclick="window.mapEngine.openBaseManagement()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-green);">
                 🏗️ Establish/Open Base
             </button>
@@ -2110,6 +2122,70 @@ class MapEngine {
                 Math.sin(dLng/2) * Math.sin(dLng/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return R * c;
+    }
+    
+    // Add flag to path if player has moved significantly
+    addFlagToPathIfMoved(position) {
+        if (!this.finnishFlagLayer) return;
+        
+        if (this.lastPlayerPosition) {
+            const distance = this.calculateDistance(
+                this.lastPlayerPosition.lat, this.lastPlayerPosition.lng,
+                position.lat, position.lng
+            );
+            
+            // Drop flag every 10 meters of movement
+            if (distance >= this.flagDropDistance) {
+                console.log(`🎨 Player moved ${distance.toFixed(1)}m - dropping flag`);
+                this.finnishFlagLayer.addFlagPin(position.lat, position.lng);
+                
+                // Give steps for movement
+                if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {
+                    const stepsToAdd = Math.floor(distance / 5); // 1 step per 5 meters
+                    for (let i = 0; i < stepsToAdd; i++) {
+                        window.eldritchApp.systems.stepCurrency.addManualStep();
+                    }
+                }
+            }
+        }
+        
+        // Update last position
+        this.lastPlayerPosition = { lat: position.lat, lng: position.lng };
+    }
+    
+    // Update path line between current and last position
+    updatePathLine(position) {
+        if (!this.map) return;
+        
+        if (this.lastPlayerPosition) {
+            // Create or update path line
+            if (this.pathLine) {
+                // Update existing path line
+                const currentPath = this.pathLine.getLatLngs();
+                currentPath.push([position.lat, position.lng]);
+                this.pathLine.setLatLngs(currentPath);
+            } else {
+                // Create new path line
+                this.pathLine = L.polyline([
+                    [this.lastPlayerPosition.lat, this.lastPlayerPosition.lng],
+                    [position.lat, position.lng]
+                ], {
+                    color: '#00ff00',
+                    weight: 3,
+                    opacity: 0.8,
+                    dashArray: '5, 10'
+                }).addTo(this.map);
+            }
+        }
+    }
+    
+    // Clear path line
+    clearPathLine() {
+        if (this.pathLine) {
+            this.map.removeLayer(this.pathLine);
+            this.pathLine = null;
+            console.log('🗺️ Path line cleared');
+        }
     }
     
 }
