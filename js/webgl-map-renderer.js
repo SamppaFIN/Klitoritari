@@ -489,6 +489,10 @@ class WebGLMapRenderer {
     }
     
     setupUniforms() {
+        if (!this.isEnabled || !this.uniformLocations) {
+            return;
+        }
+        
         // Zoom level
         this.gl.uniform1f(this.uniformLocations.zoomLevel, this.currentZoom);
         

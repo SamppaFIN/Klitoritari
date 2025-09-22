@@ -2374,7 +2374,7 @@ class EldritchSanctuaryApp {
         this.systems.stepCurrency.init();
         
         // Initialize session persistence
-        this.systems.sessionPersistence = new SessionPersistence();
+        this.systems.sessionPersistence = new SessionPersistenceManager();
         this.systems.sessionPersistence.init();
         
         // Initialize multiplayer manager
@@ -2950,6 +2950,16 @@ class SoundManager {
         this.playTone(600, 0.1, 'sine', 0.1);
         setTimeout(() => this.playTone(800, 0.1, 'sine', 0.1), 50);
         setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.1), 100);
+    }
+    
+    playEerieHum(options = {}) {
+        const duration = options.duration || 2.0;
+        const volume = options.volume || 0.05;
+        
+        // Create a low-frequency eerie hum
+        this.playTone(60, duration, 'sine', volume);
+        setTimeout(() => this.playTone(80, duration * 0.8, 'sine', volume * 0.7), 200);
+        setTimeout(() => this.playTone(100, duration * 0.6, 'sine', volume * 0.5), 400);
     }
 
     // Quest-related cues used by UnifiedQuestSystem

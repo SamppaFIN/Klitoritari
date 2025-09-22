@@ -233,11 +233,21 @@ class EncounterSystem {
                     </div>
                     
                     <div class="debug-controls">
-                        <button id="test-monster" class="debug-btn">Test Monster</button>
+                        <h4>🎭 Test Encounters</h4>
+                        <button id="test-heavy" class="debug-btn">⚡ Test HEVY</button>
+                        <button id="test-cosmic-shrine" class="debug-btn">🏛️ Test Cosmic Shrine</button>
+                        <button id="test-eldritch-horror" class="debug-btn">👹 Test Eldritch Horror</button>
+                        <button id="test-wisdom-crystal" class="debug-btn">💎 Test Wisdom Crystal</button>
+                        <button id="test-cosmic-merchant" class="debug-btn">🛒 Test Cosmic Merchant</button>
+                        <button id="test-monster" class="debug-btn">👹 Test Monster</button>
+                        
+                        <h4>📊 Player Stats</h4>
                         <button id="heal-player" class="debug-btn">Heal Player</button>
                         <button id="restore-sanity" class="debug-btn">Restore Sanity</button>
                         <button id="lose-health" class="debug-btn">Lose 10 Health</button>
                         <button id="lose-sanity" class="debug-btn">Lose 10 Sanity</button>
+                        
+                        <h4>🎮 Simulation</h4>
                         <button id="start-simulation" class="debug-btn simulation-btn">🎭 Start Quest Simulation</button>
                         <button id="stop-simulation" class="debug-btn simulation-btn">⏹️ Stop Simulation</button>
                     </div>
@@ -251,6 +261,11 @@ class EncounterSystem {
         console.log('🎭 Debug panel created and added to DOM');
         
         // Add event listeners
+        document.getElementById('test-heavy').addEventListener('click', () => this.testLegendaryEncounter('heavy'));
+        document.getElementById('test-cosmic-shrine').addEventListener('click', () => this.testLegendaryEncounter('cosmicShrine'));
+        document.getElementById('test-eldritch-horror').addEventListener('click', () => this.testLegendaryEncounter('eldritchMonster'));
+        document.getElementById('test-wisdom-crystal').addEventListener('click', () => this.testLegendaryEncounter('wisdomCrystal'));
+        document.getElementById('test-cosmic-merchant').addEventListener('click', () => this.testLegendaryEncounter('cosmicMerchant'));
         document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
         document.getElementById('toggle-debug').addEventListener('click', () => {
             panel.classList.toggle('hidden');
@@ -651,8 +666,9 @@ class EncounterSystem {
                 <div class="legendary-dialogue">
                     <div class="legendary-text">
                         <p>${encounter.dialogue.greeting}</p>
-                        <p class="quest-question">${encounter.quest.question}</p>
+                        ${encounter.quest ? `<p class="quest-question">${encounter.quest.question}</p>` : ''}
                     </div>
+                    ${encounter.quest ? `
                     <div class="quest-answer-section">
                         <input type="text" id="quest-answer" placeholder="Your answer..." class="quest-input">
                         <button onclick="window.encounterSystem.submitQuestAnswer('heavy')" class="quest-submit-btn">Submit Answer</button>
@@ -661,6 +677,7 @@ class EncounterSystem {
                         <button onclick="window.encounterSystem.showQuestHint('heavy')" class="hint-btn">Need a hint?</button>
                         <div id="hint-display" class="hint-display hidden"></div>
                     </div>
+                    ` : ''}
                 </div>
             </div>
         `;
@@ -2324,6 +2341,16 @@ class EncounterSystem {
                 experience: 25
             };
             this.startMonsterEncounter(testMonster);
+        }
+    }
+
+    testLegendaryEncounter(encounterType) {
+        console.log(`🎭 Testing legendary encounter: ${encounterType}`);
+        const encounter = this.legendaryEncounters[encounterType];
+        if (encounter) {
+            this.startLegendaryEncounter(encounter, encounterType);
+        } else {
+            console.error(`🎭 Encounter type not found: ${encounterType}`);
         }
     }
 
