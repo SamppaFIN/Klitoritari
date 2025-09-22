@@ -91,6 +91,9 @@ class SimpleDiceCombat {
         `;
 
         document.body.appendChild(modal);
+        if (window.soundManager) {
+            try { window.soundManager.playEerieHum({ duration: 2.0 }); } catch (e) {}
+        }
         
         // Start the dice rolling animation
         this.animateDiceRoll();
@@ -212,6 +215,9 @@ class SimpleDiceCombat {
     handleWin() {
         console.log('🎉 Player wins dice combat!');
         this.addLogEntry('🎉 Victory! You have defeated your opponent!', 'success');
+        if (window.soundManager) {
+            try { window.soundManager.playBling({ frequency: 1700, duration: 0.22, type: 'triangle' }); } catch (e) {}
+        }
         
         // Call win callback
         if (this.combatData.onWin) {
@@ -230,6 +236,9 @@ class SimpleDiceCombat {
     handleLose() {
         console.log('💀 Player loses dice combat!');
         this.addLogEntry('💀 Defeat! Your opponent has bested you!', 'danger');
+        if (window.soundManager) {
+            try { window.soundManager.playTerrifyingBling(); } catch (e) {}
+        }
         
         // Call lose callback
         if (this.combatData.onLose) {

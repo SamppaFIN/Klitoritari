@@ -85,6 +85,7 @@ class MapEngine {
             maxBounds: [[-90, -180], [90, 180]], // Prevent infinite panning
             maxBoundsViscosity: 1.0
         });
+        if (window.soundManager) { try { window.soundManager.playBling({ frequency: 880, duration: 0.1, type: 'sine' }); } catch (e) {} }
 
         // Add cosmic-styled tile layer
         this.addCosmicTileLayer();
