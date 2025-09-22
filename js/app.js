@@ -1337,6 +1337,29 @@ class EldritchSanctuaryApp {
             if (sidePanel && toggleBtn) {
                 console.log('⚙️ Setting up settings button event listener...');
                 
+                // Fallback: if panel has no content, inject minimal content so it's visible
+                try {
+                    const hasContent = sidePanel.innerText && sidePanel.innerText.trim().length > 0;
+                    if (!hasContent) {
+                        sidePanel.innerHTML = `
+                            <h3>🌌 Game Stats</h3>
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-info"><div class="stat-label">Health</div><div class="stat-value" id="panel-health">100/100</div></div></div>
+                                <div class="stat-card"><div class="stat-icon">🧠</div><div class="stat-info"><div class="stat-label">Sanity</div><div class="stat-value" id="panel-sanity">100/100</div></div></div>
+                                <div class="stat-card"><div class="stat-icon">🚶‍♂️</div><div class="stat-info"><div class="stat-label">Steps</div><div class="stat-value" id="panel-total-steps">0</div></div></div>
+                            </div>
+                            <div class="debug-tools"><h4>🔧 Debug Tools</h4><div class="debug-buttons">
+                                <button id="debug-add-step" class="debug-btn small">+1 Step</button>
+                                <button id="debug-add-50-steps" class="debug-btn small">+50 Steps</button>
+                                <button id="debug-add-100-steps" class="debug-btn small">+100 Steps</button>
+                                <button id="debug-reset-steps" class="debug-btn small">Reset</button>
+                            </div></div>
+                        `;
+                    }
+                } catch (e) {
+                    console.warn('⚙️ Could not probe/inject side panel content:', e);
+                }
+
                 // Toggle side panel
                 toggleBtn.addEventListener('click', (e) => {
                     console.log('⚙️ Settings button clicked!');

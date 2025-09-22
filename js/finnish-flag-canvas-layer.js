@@ -103,6 +103,8 @@ class FinnishFlagCanvasLayer {
             
             // Don't add a new flag, just update the existing one
             this.render();
+            // Evaluate capture around the nearby flag center
+            this.evaluateCapture(nearbyFlag.lat, nearbyFlag.lng);
             return;
         } else {
             // No nearby flag found, add a new one with smallest size
@@ -126,6 +128,8 @@ class FinnishFlagCanvasLayer {
         }
         
         this.render();
+        // Evaluate capture around the new pin
+        this.evaluateCapture(lat, lng);
     }
     
     findNearbyFlag(lat, lng, maxDistance = 10) {
@@ -152,6 +156,38 @@ class FinnishFlagCanvasLayer {
                 Math.sin(dLng/2) * Math.sin(dLng/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return R * c; // Distance in meters
+    }
+
+    evaluateCapture(lat, lng, radiusMeters = 30, threshold = 10) {
+        // Count flags within radius
+        let count = 0;
+        const indicesWithin = [];
+        for (let i = 0; i < this.flagPins.length; i++) {
+            const f = this.flagPins[i];
+            const d = this.calculateDistance(lat, lng, f.lat, f.lng);
+            if (d <= radiusMeters) {
+                count++;
+                indicesWithin.push(i);
+            }
+        }
+        if (count >= threshold) {
+            console.log(`🇫🇮 Region captured! ${count} flags within ${radiusMeters}m. Clearing overlaps.`);
+            this.removeFlagsWithinRadius(lat, lng, radiusMeters);
+            // Optional celebratory effect
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.showNotification({
+                    type: 'success',
+                    title: 'Territory Captured',
+                    message: `Cleared overlapping flags in a ${radiusMeters}m radius`,
+                    duration: 2500
+                });
+            }
+        }
+    }
+
+    removeFlagsWithinRadius(lat, lng, radiusMeters) {
+        this.flagPins = this.flagPins.filter(f => this.calculateDistance(lat, lng, f.lat, f.lng) > radiusMeters);
+        this.render();
     }
     
     getFlagStatistics() {
