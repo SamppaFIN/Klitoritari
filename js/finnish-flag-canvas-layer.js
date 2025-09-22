@@ -89,6 +89,11 @@ class FinnishFlagCanvasLayer {
     }
     
     addFlagPin(lat, lng, size = null, rotation = null) {
+        // Validate coordinates
+        if (!this.isValidLatLng(lat, lng)) {
+            console.warn('🇫🇮 Skipping addFlagPin due to invalid coordinates:', { lat, lng });
+            return;
+        }
         // Check for nearby flags and determine size
         const nearbyFlag = this.findNearbyFlag(lat, lng);
         let flagSize;
@@ -136,6 +141,7 @@ class FinnishFlagCanvasLayer {
         // Check if there's already a flag within maxDistance meters
         for (let i = 0; i < this.flagPins.length; i++) {
             const flag = this.flagPins[i];
+            if (!this.isValidLatLng(flag.lat, flag.lng)) continue;
             const distance = this.calculateDistance(lat, lng, flag.lat, flag.lng);
             
             if (distance <= maxDistance) {
@@ -192,6 +198,10 @@ class FinnishFlagCanvasLayer {
     removeFlagsWithinRadius(lat, lng, radiusMeters) {
         this.flagPins = this.flagPins.filter(f => this.calculateDistance(lat, lng, f.lat, f.lng) > radiusMeters);
         this.render();
+    }
+    
+    isValidLatLng(lat, lng) {
+        return typeof lat === 'number' && typeof lng === 'number' && isFinite(lat) && isFinite(lng);
     }
     
     getFlagStatistics() {
@@ -259,6 +269,16 @@ class FinnishFlagCanvasLayer {
         
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Purge any invalid pins silently
+        if (this.flagPins.length) {
+            const before = this.flagPins.length;
+            this.flagPins = this.flagPins.filter(p => this.isValidLatLng(p.lat, p.lng));
+            const removed = before - this.flagPins.length;
+            if (removed > 0) {
+                console.warn(`🇫🇮 Removed ${removed} invalid flag pins`);
+            }
+        }
         
         // Draw all flag pins
         this.flagPins.forEach(pin => {
