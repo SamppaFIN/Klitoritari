@@ -1293,19 +1293,45 @@ class EldritchSanctuaryApp {
     }
     
     updateLocationDisplay() {
-        const locationDisplay = document.getElementById('location-display');
-        const accuracyDisplay = document.getElementById('accuracy-display');
+        const locationDisplayHeader = document.getElementById('location-display-header');
+        const accuracyDisplayHeader = document.getElementById('accuracy-display-header');
         
         if (this.systems.geolocation) {
             const position = this.systems.geolocation.getCurrentPositionSafe();
             if (position) {
-                if (locationDisplay) {
-                    locationDisplay.innerHTML = `📍 Location: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+                if (locationDisplayHeader) {
+                    locationDisplayHeader.textContent = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
                 }
-                if (accuracyDisplay) {
-                    accuracyDisplay.textContent = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(1) + 'm' : 'Unknown'}`;
+                if (accuracyDisplayHeader) {
+                    accuracyDisplayHeader.textContent = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(1) + 'm' : 'Unknown'}`;
+                }
+            } else {
+                // Show getting location message if no position available
+                if (locationDisplayHeader) {
+                    locationDisplayHeader.textContent = 'Getting location...';
+                }
+                if (accuracyDisplayHeader) {
+                    accuracyDisplayHeader.textContent = 'Accuracy: --';
                 }
             }
+        }
+    }
+
+    toggleSidePanel() {
+        const sidePanel = document.getElementById('glassmorphic-side-panel');
+        const toggleBtn = document.getElementById('unified-panel-toggle');
+        
+        if (sidePanel && toggleBtn) {
+            console.log('⚙️ Toggling side panel...');
+            const isOpen = sidePanel.classList.contains('open');
+            console.log('⚙️ Current panel state:', isOpen ? 'open' : 'closed');
+            
+            sidePanel.classList.toggle('open');
+            toggleBtn.classList.toggle('open');
+            
+            console.log('⚙️ New panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
+        } else {
+            console.error('⚙️ Side panel or toggle button not found');
         }
     }
     

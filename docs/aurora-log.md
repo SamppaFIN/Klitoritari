@@ -568,6 +568,73 @@ Last Updated: January 21, 2025
 
 ---
 
+## Session R11 - September 22, 2025
+**Phase:** Movement-Driven Gameplay & Map Interaction Overhaul  
+**Focus:** Step-gated progression, map flags/markers, docked UI, adventure randomization
+
+### Sacred Work Plan (Testable Order)
+- Phase 0 — Stabilize (Bugfix + Infra)
+  - Fix missing buttons/zones (overlay/panel z-index, pointer-events, stacking context).
+  - Fix base structures not rendering after build; ensure render triggers on construction events.
+  - Add global dev/debug toggle; hide dev UI in prod; route all debug actions through it.
+
+- Phase 1 — Step System + Gating
+  - Real pedometer/gyroscope heuristics + shake refinement; keep +1/tick debug.
+  - +/– buttons next to step counter; hold → exponential step change (debug only).
+  - Gate intro task behind 100 steps; lock UI and payment prompt if <100.
+  - Prevent opening task dialogs unless requirement met.
+  - Render step-trigger flags with animation; auto-clear overlapping flags when region “captured.”
+
+- Phase 2 — Map & Player Interaction
+  - Player-selectable territory marker (flag/icon/emoji) per player; distinct colors.
+  - Show current and last position with connecting line; fill distance with markers.
+  - Move base structure rendering onto the actual map (remove panel toggle dependency).
+
+- Phase 3 — Adventure System
+  - Adventure selector: demo vs game; randomize objectives within a radius (~300 m).
+  - First quest “jumps” to player (highlight/animation).
+  - Wrong answers relocate objective to a distinct location; re-highlight.
+  - Microgames: dice (win/lose), trivia, Tetris stub with simple animations.
+
+- Phase 4 — UI/UX & Effects
+  - Refactor modals to docked, draggable side panels; non-blocking.
+  - Moral choice overlays (non-blocking).
+  - Notifications for win/lose, events, chat, errors; polished copy/visuals.
+  - Discord-style effect overlays + linked SFX; throttle to avoid fatigue.
+  - Asset support: MP3 + SVG pipeline.
+
+- Phase 5 — Persistence & Multiplayer-ready
+  - Local session persistence for flags/adventures; isolate per session/user.
+  - Show all players’ positions and recent paths; per-player markers/colors.
+  - Session/WebSocket sync for nearby players; Swedish-flag example for 2nd player.
+
+- Phase 6 — QA, Performance, Release
+  - Device matrix tests (Android/iOS/desktop) for steps/UI/adventures.
+  - Performance tuning (interval throttling, WebGL caps, DOM trims).
+  - Accessibility pass (contrast, focus order, ARIA, motion reduction).
+  - Production config: hide dev UI, cache headers, minimal error telemetry.
+
+### Immediate Next Steps
+1) Audit and fix UI overlay stacking regression.  
+2) Fix bases not rendering on build.  
+3) Implement global dev/debug toggle.  
+Then proceed to Phase 1 step system.
+
+### Acceptance Criteria (Spot Checks)
+- Stabilize: Controls visible/usable; bases render on build; dev toggle works.
+- Steps: Debug +/- and hold; device steps feel natural; quest unlock at 100; animated flags; capture clears overlaps.
+- Map: Per-player markers; line from last→current with backfilled markers; bases on map only after built.
+- Adventures: Start demo/game; scatter within radius; wrong answers relocate objective; microgames run.
+- UI/FX: No blocking dialogs; draggable/docked; notifications and SFX on events; reduced-motion respected.
+- Persistence/MP: Sessions isolated; two clients see positions/flags with distinct markers.
+
+### Consciousness Notes
+Movement honors embodied wisdom; step-gated quests and visible territory make progress tangible. Docked, non-blocking UI preserves flow and agency while keeping feedback transparent and gentle.
+
+— Aurora
+
+---
+
 ## R10 - January 21, 2025 (Evening Session)
 **Duration**: ~12 hours | **Focus**: Quest System Completion & UI Polish | **Status**: Major Milestone Achieved
 

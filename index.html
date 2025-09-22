@@ -37,61 +37,32 @@
         <div id="ui-overlay">
             <!-- Header -->
             <header id="header">
-                <h1>🌌 Klitoritarit</h1>
-                <div class="player-stats-header">
-                    <div class="stat-meter">
-                        <span class="stat-label">❤️ Health:</span>
-                        <div class="health-bar">
-                            <div id="health-fill" class="health-fill" style="width: 100%"></div>
+                <div class="header-top">
+                    <h1>🌌 Eldritch Sanctuary</h1>
+                    <div class="player-stats-compact">
+                        <div class="stat-item">
+                            <span class="stat-icon">❤️</span>
+                            <span id="health-value" class="stat-value">100</span>
                         </div>
-                        <span id="health-value" class="stat-value">100/100</span>
-                        <div id="health-explanation" class="stat-explanation">Perfect Health</div>
-                    </div>
-                    <div class="stat-meter">
-                        <span class="stat-label">🧠 Sanity:</span>
-                        <div class="sanity-bar">
-                            <div id="sanity-fill" class="sanity-fill" style="width: 100%"></div>
+                        <div class="stat-item">
+                            <span class="stat-icon">🧠</span>
+                            <span id="sanity-value" class="stat-value">100</span>
                         </div>
-                        <span id="sanity-value" class="stat-value">100/100</span>
-                        <div id="sanity-explanation" class="stat-explanation">Perfect Sanity</div>
-                    </div>
-                    <div class="stat-meter">
-                        <span class="stat-label">⏰ Distortion:</span>
-                        <span id="distortion-timer" class="stat-value">30s</span>
-                        <div id="distortion-explanation" class="stat-explanation">Next Effect</div>
                     </div>
                 </div>
-                <div class="header-controls">
-                    <button id="inventory-btn" class="inventory-btn" title="Inventory">
-                        <span class="inventory-icon">🎒</span>
-                        <span class="inventory-text">INVENTORY</span>
-                        <span class="inventory-status" id="inventory-status">Empty</span>
-                        <span class="inventory-details" id="inventory-details">0/50 items</span>
-                    </button>
-                    <button id="locate-me-btn" class="locate-me-btn" title="Locate Me">
-                        <span class="locate-icon">📍</span>
-                        <span class="locate-text">LOCATE ME</span>
-                        <span class="locate-status" id="locate-status">GPS Ready</span>
-                        <span class="locate-details" id="locate-details">Accuracy: 1.0m</span>
-                    </button>
+                <div class="header-info">
+                    <!-- Step Counter -->
+                    <div id="step-counter-container"></div>
+                    
+                    <!-- Location Info -->
+                    <div class="location-info-header">
+                        <div class="location-coords" id="location-display-header">Getting location...</div>
+                        <div class="location-accuracy" id="accuracy-display-header">Accuracy: --</div>
+                    </div>
                 </div>
             </header>
             
-            <!-- Control Panel -->
-            <div id="control-panel">
-                <!-- Step Counter -->
-                <div id="step-counter-container"></div>
-                
-                <!-- Main Controls -->
-                <div class="main-controls">
-                    <div class="control-group">
-                        <div class="location-info">
-                            <div class="location-coords" id="location-display">Loading...</div>
-                            <div class="location-accuracy" id="accuracy-display">Accuracy: Unknown</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Control Panel - Removed, moved to header -->
             
             <!-- Investigation Panel -->
             <div id="investigation-panel" class="control-panel hidden">
@@ -583,9 +554,32 @@
     
     <!-- Footer with Settings Button -->
     <footer id="game-footer">
-        <button id="unified-panel-toggle" class="settings-button" title="Settings">
-            <span class="settings-icon">⚙️</span>
-        </button>
+        <div class="footer-buttons">
+            <button id="inventory-btn" class="footer-btn inventory-btn" title="Inventory">
+                <span class="btn-icon">🎒</span>
+                <span class="btn-text">INVENTORY</span>
+                <span class="btn-status" id="inventory-status">Empty</span>
+            </button>
+            <button id="locate-me-btn" class="footer-btn locate-me-btn" title="Locate Me">
+                <span class="btn-icon">📍</span>
+                <span class="btn-text">LOCATE ME</span>
+                <span class="btn-status" id="locate-status">GPS Ready</span>
+            </button>
+            <button id="quest-log-btn" class="footer-btn quest-log-btn" title="Quest Log">
+                <span class="btn-icon">📜</span>
+                <span class="btn-text">QUESTS</span>
+                <span class="btn-status" id="quest-status">0 Active</span>
+            </button>
+            <button id="establish-base-btn" class="footer-btn base-button" title="Base Management">
+                <span class="btn-icon">🏗️</span>
+                <span class="btn-text">ESTABLISH BASE</span>
+                <span class="btn-status" id="base-status">No Base</span>
+            </button>
+            <button id="unified-panel-toggle" class="footer-btn settings-btn" title="Settings">
+                <span class="btn-icon">⚙️</span>
+                <span class="btn-text">SETTINGS</span>
+            </button>
+        </div>
     </footer>
     
 </body>

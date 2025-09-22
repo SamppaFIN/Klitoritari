@@ -1409,26 +1409,23 @@ class MapEngine {
             <button class="context-menu-btn" onclick="window.mapEngine.centerOnLocation(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
                 🎯 Center Map
             </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.clearPathwayMarkers()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-blue);">
-                🧹 Clear Pathway
-            </button>
             <button class="context-menu-btn" onclick="window.mapEngine.cycleFlagTheme()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-pink);">
                 🌈 Flag Theme
-            </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.toggleDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-purple);">
-                🌀 Distortion Effects
             </button>
             <button class="context-menu-btn" onclick="window.mapEngine.createTestDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-red);">
                 👻 Test Effects
             </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.createTestRealisticEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-blue);">
-                🌊 Realistic Effects
+            <button class="context-menu-btn" onclick="window.mapEngine.openBaseManagement()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-green);">
+                🏗️ Establish/Open Base
             </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.showcaseAllEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-purple);">
-                🎭 Effects Showcase
+            <button class="context-menu-btn" onclick="window.unifiedQuestSystem.showQuestLog()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-orange);">
+                📜 Quests
             </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.clearDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-dark);">
-                🧹 Clear Effects
+            <button class="context-menu-btn" onclick="window.eldritchApp.toggleSidePanel()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-gray);">
+                ⚙️ Settings
+            </button>
+            <button class="context-menu-btn" onclick="window.eldritchApp.systems.inventory.showInventory()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-purple);">
+                🎒 Inventory
             </button>
             <button class="context-menu-btn" onclick="window.mapEngine.hideContextMenu()" style="width: 100%; background: var(--cosmic-red);">
                 ❌ Close

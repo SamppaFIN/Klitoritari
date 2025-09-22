@@ -10,9 +10,10 @@ class StepCurrencySystem {
         this.lastStepCount = 0;
         this.stepDetectionActive = false;
         this.accelerationData = [];
-        this.stepThreshold = 0.5; // Acceleration threshold for step detection
+        this.stepThreshold = 2.5; // Higher acceleration threshold for step detection
         this.lastStepTime = 0;
-        this.minStepInterval = 300; // Minimum ms between steps
+        this.minStepInterval = 1000; // Minimum 1 second between steps
+        this.stepCooldown = 2000; // 2 second cooldown after each step
         
         // Step milestones for rewards
         this.milestones = {
@@ -118,12 +119,12 @@ class StepCurrencySystem {
                 
                 const totalChange = alphaChange + betaChange + gammaChange;
                 
-                // Detect significant orientation changes (walking motion)
-                if (totalChange > 10 && totalChange < 50) {
+                // Detect significant orientation changes (walking motion) - more strict
+                if (totalChange > 20 && totalChange < 80) {
                     orientationChangeCount++;
                     
-                    // Add step every 3-5 orientation changes (walking pattern)
-                    if (orientationChangeCount >= 4) {
+                    // Add step every 8-10 orientation changes (more walking pattern required)
+                    if (orientationChangeCount >= 8) {
                         this.addStep();
                         orientationChangeCount = 0;
                     }
@@ -180,17 +181,26 @@ class StepCurrencySystem {
             return;
         }
         
+        // Check cooldown period
+        if (now - this.lastStepTime < this.stepCooldown) {
+            return;
+        }
+        
         // Simple step detection: look for acceleration peaks
-        if (this.accelerationData.length >= 3) {
-            const recent = this.accelerationData.slice(-3);
-            const current = recent[2].magnitude;
-            const previous = recent[1].magnitude;
-            const before = recent[0].magnitude;
+        if (this.accelerationData.length >= 5) {
+            const recent = this.accelerationData.slice(-5);
+            const current = recent[4].magnitude;
+            const previous = recent[3].magnitude;
+            const before = recent[2].magnitude;
             
-            // Step detected if current is peak and above threshold
+            // More strict step detection: current must be significantly higher than previous readings
             if (current > previous && current > before && current > this.stepThreshold) {
-                this.addStep();
-                this.lastStepTime = now;
+                // Additional check: ensure it's a real peak, not just noise
+                const isPeak = current > recent[1].magnitude && current > recent[0].magnitude;
+                if (isPeak) {
+                    this.addStep();
+                    this.lastStepTime = now;
+                }
             }
         }
     }
@@ -387,13 +397,26 @@ class StepCurrencySystem {
     
     setStepDetectionMode(gpsTracking) {
         if (gpsTracking) {
-            // GPS is tracking - use both accelerometer and gyroscope
-            this.stepDetectionActive = true;
-            console.log('🚶‍♂️ Step detection enabled for GPS tracking mode');
+            // Only enable step detection if GPS is actually tracking with good accuracy
+            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                const position = window.eldritchApp.systems.geolocation.getCurrentPosition();
+                if (position && position.accuracy && position.accuracy <= 50) {
+                    // Good GPS signal, enable step detection
+                    this.stepDetectionActive = true;
+                    console.log('🚶‍♂️ Step detection enabled - GPS tracking with good accuracy');
+                } else {
+                    // Poor GPS signal or fixed position, disable step detection
+                    this.stepDetectionActive = false;
+                    console.log('🚶‍♂️ Step detection disabled - using fixed position or poor GPS');
+                }
+            } else {
+                this.stepDetectionActive = false;
+                console.log('🚶‍♂️ Step detection disabled - no geolocation system');
+            }
         } else {
-            // GPS not tracking - use fallback mode
-            this.stepDetectionActive = true;
-            console.log('🚶‍♂️ Step detection enabled for fallback mode');
+            // GPS not tracking - disable step detection to prevent false steps
+            this.stepDetectionActive = false;
+            console.log('🚶‍♂️ Step detection disabled - GPS not tracking');
         }
     }
     
