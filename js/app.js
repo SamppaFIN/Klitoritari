@@ -10,6 +10,7 @@ class EldritchSanctuaryApp {
         this.hasCenteredOnLocation = false;
         this.playerBasesLoaded = false;
         this.isMobile = this.detectMobile();
+        this.panelManager = null;
         this.systems = {
             cosmicEffects: null,
             geolocation: null,
@@ -394,6 +395,9 @@ class EldritchSanctuaryApp {
         
         // Set up header buttons
         this.setupHeaderButtons();
+
+        // Initialize docked/draggable panels (non-blocking)
+        this.initDockedPanels();
         
         // Load initial data
         await this.loadInitialData();
@@ -411,6 +415,18 @@ class EldritchSanctuaryApp {
             console.error('🌌 Failed to initialize Eldritch Sanctuary:', error);
             this.hideParticleLoadingScreen();
             this.showError('Failed to initialize the cosmic map. Please refresh the page.');
+        }
+    }
+
+    // Initialize a minimal docked/draggable panel manager
+    initDockedPanels() {
+        if (this.panelManager) return;
+        try {
+            this.panelManager = new DockedPanelManager();
+            window.panelManager = this.panelManager;
+            console.log('🧩 Docked panel manager initialized');
+        } catch (e) {
+            console.warn('🧩 Failed to initialize docked panels', e);
         }
     }
 
@@ -2357,6 +2373,118 @@ class EldritchSanctuaryApp {
     }
 }
 
+// Lightweight docked/draggable panel manager
+class DockedPanelManager {
+    constructor() {
+        this.container = null;
+        this.ensureContainer();
+        this.panels = new Map();
+    }
+    
+    ensureContainer() {
+        if (this.container) return;
+        let container = document.getElementById('docked-panels');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'docked-panels';
+            container.style.cssText = `
+                position: fixed; right: 0; top: 60px; bottom: 0; width: 340px; max-width: 85vw;
+                display: flex; flex-direction: column; gap: 10px; padding: 10px; z-index: 1001;
+                pointer-events: none; /* panels will re-enable */
+            `;
+            document.body.appendChild(container);
+        }
+        this.container = container;
+    }
+    
+    openPanel(id, { title = 'Panel', content = '', height = 320, draggable = true, dock = 'right' } = {}) {
+        this.ensureContainer();
+        // Close if exists
+        this.closePanel(id);
+        
+        const panel = document.createElement('div');
+        panel.className = 'docked-panel';
+        panel.style.cssText = `
+            pointer-events: auto; background: rgba(12,12,18,0.95); border: 1px solid var(--cosmic-purple);
+            border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden; user-select: none;
+        `;
+        panel.innerHTML = `
+            <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:1px solid var(--cosmic-purple);cursor:move;">
+                <div style="font-weight:bold;color:var(--cosmic-purple);font-size:12px;">${title}</div>
+                <div>
+                    <button class="panel-close" style="background:var(--cosmic-red);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕</button>
+                </div>
+            </div>
+            <div class="panel-body" style="padding:10px; height:${height}px; overflow:auto;">${content}</div>
+        `;
+        this.container.appendChild(panel);
+        this.panels.set(id, panel);
+        
+        // Close
+        panel.querySelector('.panel-close').addEventListener('click', () => this.closePanel(id));
+        
+        // Draggable
+        if (draggable) this.makeDraggable(panel);
+        
+        return panel;
+    }
+    
+    updatePanelContent(id, { title, content }) {
+        const panel = this.panels.get(id);
+        if (!panel) return;
+        if (title) panel.querySelector('.panel-header div').textContent = title;
+        if (content !== undefined) panel.querySelector('.panel-body').innerHTML = content;
+    }
+    
+    closePanel(id) {
+        const panel = this.panels.get(id);
+        if (panel) {
+            panel.remove();
+            this.panels.delete(id);
+        }
+    }
+    
+    makeDraggable(panel) {
+        const header = panel.querySelector('.panel-header');
+        if (!header) return;
+        let isDown = false; let startX = 0; let startY = 0; let startLeft = 0; let startTop = 0;
+        panel.style.position = 'fixed';
+        panel.style.right = '10px';
+        panel.style.top = `${this.container.getBoundingClientRect().top}px`;
+        
+        const onDown = (e) => {
+            isDown = true;
+            const rect = panel.getBoundingClientRect();
+            startLeft = rect.left; startTop = rect.top;
+            startX = (e.touches ? e.touches[0].clientX : e.clientX);
+            startY = (e.touches ? e.touches[0].clientY : e.clientY);
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('touchmove', onMove, { passive: false });
+            document.addEventListener('mouseup', onUp);
+            document.addEventListener('touchend', onUp);
+        };
+        const onMove = (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX);
+            const y = (e.touches ? e.touches[0].clientY : e.clientY);
+            const dx = x - startX; const dy = y - startY;
+            panel.style.left = `${startLeft + dx}px`;
+            panel.style.top = `${startTop + dy}px`;
+            panel.style.right = 'auto';
+        };
+        const onUp = () => {
+            isDown = false;
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            document.removeEventListener('touchend', onUp);
+        };
+        header.addEventListener('mousedown', onDown);
+        header.addEventListener('touchstart', onDown, { passive: true });
+    }
+}
 // Global app instance
 let app;
 

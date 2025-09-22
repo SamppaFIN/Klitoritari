@@ -1776,6 +1776,29 @@ class UnifiedQuestSystem {
     showQuestDialog(quest, objective) {
         console.log('🎭 Showing quest dialog for:', quest.name);
         
+        // If docked panel manager exists, render as docked panel and return
+        if (window.panelManager) {
+            const content = `
+                <div style="position: relative; z-index: 1;">
+                    <div style="background: rgba(0, 0, 0, 0.5); padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid #00ffff;">
+                        <div style="margin: 0 0 8px 0; line-height: 1.4; font-size: 13px;">
+                            ${this.getQuestDialogText(quest, objective)}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${this.getQuestOptions(quest, objective)}
+                        </div>
+                    </div>
+                </div>
+            `;
+            const panel = window.panelManager.openPanel(`quest-${quest.id}`, { title: `📜 ${quest.name}` , content, height: 380 });
+            // Wire option handlers inside panel
+            this.addQuestOptionHandlers(panel, quest, objective);
+            this.currentDialog = panel;
+            return;
+        }
+
         // Check if dialog is already open
         if (this.currentDialog) {
             console.log('🎭 Dialog already open, closing existing dialog first');
