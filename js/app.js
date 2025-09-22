@@ -1262,9 +1262,14 @@ class EldritchSanctuaryApp {
             if (this.devModeEnabled) {
                 debugPanel.classList.add('open');
                 debugPanel.style.display = 'block';
+                debugPanel.style.visibility = 'visible';
+                // Force the panel to stay open by adding a data attribute
+                debugPanel.setAttribute('data-dev-forced-open', 'true');
             } else {
                 debugPanel.classList.remove('open');
                 debugPanel.style.display = 'none';
+                debugPanel.style.visibility = 'hidden';
+                debugPanel.removeAttribute('data-dev-forced-open');
             }
         }
         
@@ -1276,6 +1281,11 @@ class EldritchSanctuaryApp {
         
         // Light console cue
         console.log(this.devModeEnabled ? '🔧 Dev mode: ON' : '🔧 Dev mode: OFF');
+    }
+    
+    // Method to check if dev mode should force panel open
+    isDevModeForced() {
+        return this.devModeEnabled;
     }
 
     
@@ -1545,6 +1555,12 @@ class EldritchSanctuaryApp {
                     const isOpen = sidePanel.classList.contains('open');
                     console.log('⚙️ Current panel state:', isOpen ? 'open' : 'closed');
                     
+                    // If dev mode is forced open, don't allow manual toggle
+                    if (this.isDevModeForced()) {
+                        console.log('⚙️ Dev mode forced open - ignoring manual toggle');
+                        return;
+                    }
+                    
                     sidePanel.classList.toggle('open');
                     toggleBtn.classList.toggle('open');
                     
@@ -1553,11 +1569,14 @@ class EldritchSanctuaryApp {
                 
                 console.log('⚙️ Settings button event listener attached successfully');
             
-            // Close panel when clicking outside
+            // Close panel when clicking outside (unless dev mode is forced)
             document.addEventListener('click', (e) => {
                 if (!sidePanel.contains(e.target) && !toggleBtn.contains(e.target)) {
-                    sidePanel.classList.remove('open');
-                    toggleBtn.classList.remove('open');
+                    // Don't close if dev mode is forcing it open
+                    if (!this.isDevModeForced()) {
+                        sidePanel.classList.remove('open');
+                        toggleBtn.classList.remove('open');
+                    }
                 }
             });
             
@@ -1575,6 +1594,15 @@ class EldritchSanctuaryApp {
                 this.updateSidePanel();
                 this.updateDebugStatus();
                 this.updateLocationDisplay();
+                
+                // Ensure dev mode state is maintained
+                if (this.isDevModeForced()) {
+                    const debugPanel = document.getElementById('glassmorphic-side-panel');
+                    if (debugPanel && !debugPanel.classList.contains('open')) {
+                        console.log('🔧 Re-applying dev mode state to panel');
+                        this.toggleDebugElements();
+                    }
+                }
             }, 2000);
         }
         }, 100); // Close the setTimeout
