@@ -8,6 +8,11 @@ class SessionPersistenceManager {
         this.storageKeyPrefix = this.computeSessionPrefix();
     }
 
+    init() {
+        // Initialize session persistence manager
+        console.log('💾 Session Persistence Manager initialized');
+    }
+
     computeSessionPrefix() {
         try {
             const ua = navigator.userAgent || 'ua';

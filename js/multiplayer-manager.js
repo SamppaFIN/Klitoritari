@@ -26,6 +26,11 @@ class MultiplayerManager {
         
         console.log('🌐 MultiplayerManager initialized');
     }
+
+    init() {
+        // Initialize multiplayer manager
+        console.log('🌐 Multiplayer Manager initialized');
+    }
     
     /**
      * Generate unique player ID

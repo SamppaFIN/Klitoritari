@@ -144,6 +144,12 @@ class SimpleDiceCombat {
      * Finish the dice roll and determine winner
      */
     finishDiceRoll() {
+        // Check if combat data is still valid
+        if (!this.combatData) {
+            console.warn('🎲 Combat data is null, ending dice roll');
+            return;
+        }
+        
         // Generate final dice rolls
         this.combatData.playerRoll = Math.floor(Math.random() * 6) + 1;
         this.combatData.enemyRoll = Math.floor(Math.random() * 6) + 1;
@@ -233,7 +239,7 @@ class SimpleDiceCombat {
         }
         
         // Call win callback
-        if (this.combatData.onWin) {
+        if (this.combatData && this.combatData.onWin) {
             this.combatData.onWin(this.combatData.enemy);
         }
         
@@ -262,7 +268,7 @@ class SimpleDiceCombat {
         }
         
         // Call lose callback
-        if (this.combatData.onLose) {
+        if (this.combatData && this.combatData.onLose) {
             this.combatData.onLose(this.combatData.enemy);
         }
         
@@ -290,6 +296,10 @@ class SimpleDiceCombat {
      */
     addLogEntry(message, type = 'info') {
         const log = document.getElementById('combat-log');
+        if (!log) {
+            console.warn('Combat log element not found');
+            return;
+        }
         const entry = document.createElement('div');
         entry.className = `log-entry ${type}`;
         entry.textContent = message;

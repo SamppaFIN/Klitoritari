@@ -2408,7 +2408,7 @@ class EldritchSanctuaryApp {
         this.systems.microgames.init();
         
         // Initialize statistics
-        this.systems.statistics = new Statistics();
+        this.systems.statistics = new StatisticsManager();
         this.systems.statistics.init();
         
         // Initialize NPC system
@@ -2474,6 +2474,7 @@ class EldritchSanctuaryApp {
         // Make all systems globally available for debugging and external access
         window.eldritchApp = this;
         window.cosmicEffects = this.systems.cosmicEffects;
+        window.sanityDistortion = this.systems.sanityDistortion;
         window.geolocationManager = this.systems.geolocation;
         window.mapEngine = this.systems.mapEngine;
         console.log('🌌 Setting window.mapEngine:', !!window.mapEngine);
@@ -2974,6 +2975,30 @@ class SoundManager {
         this.playTone(60, duration, 'sine', volume);
         setTimeout(() => this.playTone(80, duration * 0.8, 'sine', volume * 0.7), 200);
         setTimeout(() => this.playTone(100, duration * 0.6, 'sine', volume * 0.5), 400);
+    }
+
+    playSound(soundName) {
+        // Generic sound player that maps sound names to appropriate methods
+        switch(soundName) {
+            case 'step_sound':
+                this.playTone(400, 0.1, 'sine', 0.1);
+                break;
+            case 'quest_complete':
+                this.playQuestComplete();
+                break;
+            case 'combat_win':
+                this.playSuccess();
+                break;
+            case 'combat_lose':
+                this.playError();
+                break;
+            case 'ambient_hum':
+                this.playEerieHum();
+                break;
+            default:
+                console.warn('Unknown sound:', soundName);
+                this.playTone(440, 0.2, 'sine', 0.1);
+        }
     }
 
     // Quest-related cues used by UnifiedQuestSystem

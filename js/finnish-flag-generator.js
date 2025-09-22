@@ -12,6 +12,11 @@ class FinnishFlagGenerator {
         this.whiteColor = '#FFFFFF'; // White
     }
 
+    init() {
+        // Initialize Finnish flag generator
+        console.log('🇫🇮 Finnish Flag Generator initialized');
+    }
+
     /**
      * Generate SVG for Finnish flag
      * @param {number} x - X position

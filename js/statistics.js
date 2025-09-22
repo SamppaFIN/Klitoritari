@@ -10,6 +10,11 @@ class StatisticsManager {
         this.load();
     }
 
+    init() {
+        // Initialize statistics manager
+        console.log('📊 Statistics Manager initialized');
+    }
+
     load() {
         try {
             const raw = localStorage.getItem(this.storageKey);

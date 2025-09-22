@@ -531,11 +531,11 @@ class SanityDistortion {
         const sanityPercent = this.currentSanity / 100;
         
         // Randomly trigger different effects
-        const effects = ['blur', 'noise', 'chromaticAberration', 'vignette', 'shake', 'ghostlyShadows', 'colorShift'];
+        const effects = ['blur', 'noise', 'chromaticAberration', 'vignette', 'shake', 'ghostlyShadows', 'colorShift', 'screenWarp', 'glitch', 'particles', 'cosmicEffects'];
         const randomEffect = effects[Math.floor(Math.random() * effects.length)];
         
         // Apply the random effect with intensity based on sanity
-        const intensity = Math.random() * (1 - sanityPercent) * 0.5; // Max 50% intensity
+        const intensity = Math.random() * (1 - sanityPercent) * 0.8 + 0.2; // Min 20%, Max 100% intensity
         
         switch (randomEffect) {
             case 'blur':
@@ -560,15 +560,28 @@ class SanityDistortion {
             case 'colorShift':
                 this.distortionEffects.colorShift = intensity;
                 break;
+            case 'screenWarp':
+                this.distortionEffects.screenWarp = intensity;
+                break;
+            case 'glitch':
+                this.distortionEffects.glitch = intensity;
+                break;
+            case 'particles':
+                this.distortionEffects.particles = intensity;
+                this.addRandomParticles();
+                break;
+            case 'cosmicEffects':
+                this.triggerCosmicEffects(intensity);
+                break;
         }
         
-        // Gradually fade out the effect over 5 seconds
+        // Gradually fade out the effect over 10 seconds
         setTimeout(() => {
             this.distortionEffects[randomEffect] = 0;
-        }, 5000);
+        }, 10000);
         
-        // Show a subtle notification
-        if (window.gruesomeNotifications) {
+        // Show a subtle notification only for strong effects (intensity > 0.6)
+        if (intensity > 0.6 && window.gruesomeNotifications) {
             const messages = [
                 "The walls between dimensions grow thin...",
                 "Reality flickers like a dying candle...",
@@ -594,14 +607,39 @@ class SanityDistortion {
             direction: Math.random() * Math.PI * 2
         };
         this.ghostlyShadows.push(shadow);
-        
-        // Remove shadow after 3 seconds
-        setTimeout(() => {
-            const index = this.ghostlyShadows.indexOf(shadow);
-            if (index > -1) {
-                this.ghostlyShadows.splice(index, 1);
+    }
+
+    addRandomParticles() {
+        // Add 5-15 random particles
+        const particleCount = 5 + Math.floor(Math.random() * 10);
+        for (let i = 0; i < particleCount; i++) {
+            const particle = {
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                size: 2 + Math.random() * 6,
+                opacity: 0.3 + Math.random() * 0.7,
+                life: 1.0,
+                color: `hsl(${Math.random() * 360}, 70%, 50%)`
+            };
+            this.particles.push(particle);
+        }
+    }
+
+    triggerCosmicEffects(intensity) {
+        // Trigger cosmic effects if available
+        if (window.cosmicEffects) {
+            console.log('🌌 Triggering cosmic effects with intensity:', intensity);
+            // Create energy wave
+            if (window.cosmicEffects.createEnergyWave) {
+                window.cosmicEffects.createEnergyWave(intensity);
             }
-        }, 3000);
+            // Increase particle activity
+            if (window.cosmicEffects.setParticleIntensity) {
+                window.cosmicEffects.setParticleIntensity(intensity);
+            }
+        }
     }
 
     addRandomSlimeDrop() {

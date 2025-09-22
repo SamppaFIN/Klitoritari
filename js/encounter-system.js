@@ -210,7 +210,7 @@ class EncounterSystem {
         panel.style.position = 'fixed';
         panel.style.top = '20px';
         panel.style.right = '20px';
-        panel.style.width = '400px'; // Make it wider
+        panel.style.width = '1000px'; // Make it 150% wider (400px * 2.5 = 1000px)
         panel.style.maxHeight = '80vh'; // Limit height to avoid scrollbars
         panel.style.overflowY = 'auto'; // Add scroll if needed
         panel.style.zIndex = '10000';
@@ -257,6 +257,28 @@ class EncounterSystem {
                         <h4>🎮 Simulation</h4>
                         <button id="start-simulation" class="debug-btn simulation-btn">🎭 Start Quest Simulation</button>
                         <button id="stop-simulation" class="debug-btn simulation-btn">⏹️ Stop Simulation</button>
+                        
+                        <h4>🎯 Test Minigames</h4>
+                        <button id="test-tetris" class="debug-btn">🧩 Test Tetris</button>
+                        <button id="test-quiz" class="debug-btn">❓ Test Quiz</button>
+                        <button id="test-riddle" class="debug-btn">🧩 Test Riddle</button>
+                        <button id="test-fight" class="debug-btn">⚔️ Test Fight</button>
+                        
+                        <h4>🌀 Test Visual Effects</h4>
+                        <button id="test-distortion-effects" class="debug-btn">🌀 Test Distortion Effects</button>
+                        <button id="test-cosmic-effects" class="debug-btn">🌌 Test Cosmic Effects</button>
+                        <button id="test-sanity-loss" class="debug-btn">😵 Test Sanity Loss</button>
+                        <button id="test-screen-effects" class="debug-btn">📺 Test Screen Effects</button>
+                        
+                        <h4>🔊 Test Audio & Sound</h4>
+                        <button id="test-soundboard" class="debug-btn">🎵 Test Soundboard</button>
+                        <button id="test-ambient-sounds" class="debug-btn">🌊 Test Ambient Sounds</button>
+                        <button id="test-combat-sounds" class="debug-btn">⚔️ Test Combat Sounds</button>
+                        <button id="test-quest-sounds" class="debug-btn">🎭 Test Quest Sounds</button>
+                        
+                        <h4>🎨 Test All Effects</h4>
+                        <button id="test-all-effects" class="debug-btn">✨ Test All Effects</button>
+                        <button id="test-chaos-mode" class="debug-btn">🌪️ Test Chaos Mode</button>
                     </div>
                 </div>
                 
@@ -315,6 +337,28 @@ class EncounterSystem {
                 window.questSimulation.stopSimulation();
             }
         });
+        
+        // Minigame test buttons
+        document.getElementById('test-tetris').addEventListener('click', () => this.testTetrisMinigame());
+        document.getElementById('test-quiz').addEventListener('click', () => this.testQuizMinigame());
+        document.getElementById('test-riddle').addEventListener('click', () => this.testRiddleMinigame());
+        document.getElementById('test-fight').addEventListener('click', () => this.testFightMinigame());
+        
+        // Visual effects test buttons
+        document.getElementById('test-distortion-effects').addEventListener('click', () => this.testDistortionEffects());
+        document.getElementById('test-cosmic-effects').addEventListener('click', () => this.testCosmicEffects());
+        document.getElementById('test-sanity-loss').addEventListener('click', () => this.testSanityLoss());
+        document.getElementById('test-screen-effects').addEventListener('click', () => this.testScreenEffects());
+        
+        // Audio & sound test buttons
+        document.getElementById('test-soundboard').addEventListener('click', () => this.testSoundboard());
+        document.getElementById('test-ambient-sounds').addEventListener('click', () => this.testAmbientSounds());
+        document.getElementById('test-combat-sounds').addEventListener('click', () => this.testCombatSounds());
+        document.getElementById('test-quest-sounds').addEventListener('click', () => this.testQuestSounds());
+        
+        // All effects test buttons
+        document.getElementById('test-all-effects').addEventListener('click', () => this.testAllEffects());
+        document.getElementById('test-chaos-mode').addEventListener('click', () => this.testChaosMode());
         
         // Initialize displays
         this.updateSimpleStatsDisplay();
@@ -380,10 +424,10 @@ class EncounterSystem {
             return;
         }
 
-        // Simple random encounter chance (3% every check)
-        if (Math.random() < 0.03) {
-            this.triggerRandomEncounter();
-        }
+        // Random encounters disabled - only proximity-based encounters
+        // if (Math.random() < 0.03) {
+        //     this.triggerRandomEncounter();
+        // }
     }
 
     triggerRandomEncounter() {
@@ -428,6 +472,7 @@ class EncounterSystem {
     }
     
     checkProximityEncountersWithPosition(playerPos) {
+        console.log('🎭 Encounter system checking proximity at:', playerPos);
 
         // Debug: Log player position and nearby markers
         this.debugProximityInfo(playerPos);
@@ -437,6 +482,7 @@ class EncounterSystem {
 
         // Check distance to all markers
         this.checkMonsterProximity(playerPos);
+        this.checkItemProximity(playerPos);
         this.checkPOIProximity(playerPos);
         this.checkMysteryProximity(playerPos);
         this.checkQuestMarkerProximity(playerPos);
@@ -449,15 +495,39 @@ class EncounterSystem {
     }
 
     checkMonsterProximity(playerPos) {
-        if (!window.eldritchApp.systems.mapEngine.monsters) {
+        if (!window.mapEngine) {
+            console.log('🎭 Map engine not available for monster proximity check');
             return;
         }
         
-        window.eldritchApp.systems.mapEngine.monsters.forEach((monster, index) => {
+        const mapEngine = window.mapEngine;
+        
+        // Check both monster storage systems
+        let monsters = [];
+        if (mapEngine.monsters && mapEngine.monsters.length > 0) {
+            monsters = mapEngine.monsters;
+        } else if (mapEngine.monsterMarkers && mapEngine.monsterMarkers.size > 0) {
+            // Convert Map to array
+            monsters = Array.from(mapEngine.monsterMarkers.values());
+        }
+        
+        if (monsters.length === 0) {
+            console.log('🎭 No monsters available for proximity check');
+            return;
+        }
+        
+        console.log(`🎭 Checking proximity to ${monsters.length} monsters...`);
+        
+        monsters.forEach((monster, index) => {
             const distance = this.calculateDistance(
                 playerPos.lat, playerPos.lng,
                 monster.lat, monster.lng
             );
+            
+            // Log distance for debugging
+            if (distance < 100) {
+                console.log(`🎭 Monster ${monster.name || monster.type?.name} distance: ${distance.toFixed(2)}m`);
+            }
             
             if (distance < 50 && !monster.encountered) { // 50m for closer interaction
                 console.log(`🎭 Monster encounter triggered! Distance: ${distance.toFixed(2)}m`);
@@ -467,12 +537,48 @@ class EncounterSystem {
         });
     }
 
-    checkPOIProximity(playerPos) {
-        if (!window.eldritchApp.systems.mapEngine.pointsOfInterest) {
+    checkItemProximity(playerPos) {
+        if (!window.mapEngine) {
+            console.log('🎭 Map engine not available for item proximity check');
             return;
         }
         
-        window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach((poi, index) => {
+        const mapEngine = window.mapEngine;
+        
+        // Check item markers storage
+        if (!mapEngine.itemMarkers || mapEngine.itemMarkers.size === 0) {
+            console.log('🎭 No items available for proximity check');
+            return;
+        }
+        
+        const items = Array.from(mapEngine.itemMarkers.values());
+        console.log(`🎭 Checking proximity to ${items.length} items...`);
+        
+        items.forEach((item, index) => {
+            const distance = this.calculateDistance(
+                playerPos.lat, playerPos.lng,
+                item.lat, item.lng
+            );
+            
+            // Log distance for debugging
+            if (distance < 100) {
+                console.log(`🎭 Item ${item.name} distance: ${distance.toFixed(2)}m`);
+            }
+            
+            if (distance < 50 && !item.collected) { // 50m for closer interaction
+                console.log(`🎭 Item encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                item.collected = true;
+                this.startItemEncounter(item);
+            }
+        });
+    }
+
+    checkPOIProximity(playerPos) {
+        if (!window.mapEngine || !window.mapEngine.pointsOfInterest) {
+            return;
+        }
+        
+        window.mapEngine.pointsOfInterest.forEach((poi, index) => {
             const distance = this.calculateDistance(
                 playerPos.lat, playerPos.lng,
                 poi.getLatLng().lat, poi.getLatLng().lng
@@ -487,7 +593,7 @@ class EncounterSystem {
     }
 
     checkMysteryProximity(playerPos) {
-        if (!window.eldritchApp.systems.mapEngine.mysteryZoneMarkers) {
+        if (!window.mapEngine || !window.mapEngine.mysteryZoneMarkers) {
             return;
         }
         
@@ -520,11 +626,10 @@ class EncounterSystem {
     }
 
     checkTestQuestProximity(playerPos) {
-        if (!window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
+        if (!window.mapEngine || !window.mapEngine.testQuestMarkers) {
             return;
         }
-
-        window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((questMarker, key) => {
+            window.mapEngine.testQuestMarkers.forEach((questMarker, key) => {
             if (questMarker.encountered) {
                 return; // Skip already encountered markers
             }
@@ -563,8 +668,7 @@ class EncounterSystem {
             startTime: Date.now()
         };
         
-        this.showEncounterModal();
-        this.showLegendaryEncounterCutscene(encounter);
+        this.showLegendaryModal(encounter);
     }
     
     showLegendaryEncounterCutscene(encounter) {
@@ -715,7 +819,11 @@ class EncounterSystem {
                         <button onclick="window.encounterSystem.showQuestHint('heavy')" class="hint-btn">Need a hint?</button>
                         <div id="hint-display" class="hint-display hidden"></div>
                     </div>
-                    ` : ''}
+                    ` : `
+                    <div class="legendary-actions">
+                        ${this.getLegendaryActions(encounter)}
+                    </div>
+                    `}
                 </div>
             </div>
         `;
@@ -723,6 +831,114 @@ class EncounterSystem {
         document.body.appendChild(modal);
         this.currentLegendaryEncounter = encounter;
         this.currentHintIndex = 0;
+        
+        // Add event listeners for action buttons
+        this.addLegendaryActionListeners(encounter);
+    }
+
+    getLegendaryActions(encounter) {
+        // Different actions based on encounter type
+        if (encounter.name === "Cosmic Shrine") {
+            return `
+                <button id="legendary-action-1" class="encounter-btn">Receive Blessing</button>
+                <button id="legendary-action-2" class="encounter-btn">Meditate</button>
+                <button id="legendary-action-3" class="encounter-btn">Leave</button>
+            `;
+        } else if (encounter.name === "Eldritch Horror") {
+            return `
+                <button id="legendary-action-1" class="encounter-btn">Fight</button>
+                <button id="legendary-action-2" class="encounter-btn">Try to Flee</button>
+                <button id="legendary-action-3" class="encounter-btn">Attempt Diplomacy</button>
+            `;
+        } else if (encounter.name === "Wisdom Crystal") {
+            return `
+                <button id="legendary-action-1" class="encounter-btn">Touch Crystal</button>
+                <button id="legendary-action-2" class="encounter-btn">Study Crystal</button>
+                <button id="legendary-action-3" class="encounter-btn">Leave</button>
+            `;
+        } else if (encounter.name === "Cosmic Merchant") {
+            return `
+                <button id="legendary-action-1" class="encounter-btn">Browse Wares</button>
+                <button id="legendary-action-2" class="encounter-btn">Ask About Items</button>
+                <button id="legendary-action-3" class="encounter-btn">Leave</button>
+            `;
+        } else {
+            return `
+                <button id="legendary-action-1" class="encounter-btn">Interact</button>
+                <button id="legendary-action-2" class="encounter-btn">Observe</button>
+                <button id="legendary-action-3" class="encounter-btn">Leave</button>
+            `;
+        }
+    }
+
+    addLegendaryActionListeners(encounter) {
+        // Add event listeners for action buttons
+        const action1 = document.getElementById('legendary-action-1');
+        const action2 = document.getElementById('legendary-action-2');
+        const action3 = document.getElementById('legendary-action-3');
+        
+        if (action1) {
+            action1.addEventListener('click', () => this.handleLegendaryAction(encounter, 1));
+        }
+        if (action2) {
+            action2.addEventListener('click', () => this.handleLegendaryAction(encounter, 2));
+        }
+        if (action3) {
+            action3.addEventListener('click', () => this.handleLegendaryAction(encounter, 3));
+        }
+    }
+
+    handleLegendaryAction(encounter, actionNumber) {
+        if (encounter.name === "Cosmic Shrine") {
+            if (actionNumber === 1) this.receiveShrineBlessing(encounter);
+            else if (actionNumber === 2) this.meditateAtShrine(encounter);
+            else if (actionNumber === 3) this.leaveShrine(encounter);
+        } else if (encounter.name === "Eldritch Horror") {
+            if (actionNumber === 1) this.fightEldritchHorror(encounter);
+            else if (actionNumber === 2) this.fleeFromHorror(encounter);
+            else if (actionNumber === 3) this.diplomacyWithHorror(encounter);
+        } else if (encounter.name === "Wisdom Crystal") {
+            if (actionNumber === 1) this.touchWisdomCrystal(encounter);
+            else if (actionNumber === 2) this.studyWisdomCrystal(encounter);
+            else if (actionNumber === 3) this.leaveWisdomCrystal(encounter);
+        } else if (encounter.name === "Cosmic Merchant") {
+            if (actionNumber === 1) this.browseMerchantWares(encounter);
+            else if (actionNumber === 2) this.askMerchantAboutItems(encounter);
+            else if (actionNumber === 3) this.leaveMerchant(encounter);
+        } else {
+            // Default actions
+            if (actionNumber === 1) this.defaultInteract(encounter);
+            else if (actionNumber === 2) this.defaultObserve(encounter);
+            else if (actionNumber === 3) this.defaultLeave(encounter);
+        }
+    }
+
+    // Default action methods for unknown legendary encounters
+    defaultInteract(encounter) {
+        console.log('🎭 Default interact with:', encounter.name);
+        this.showNotification(`You interact with the ${encounter.name}.`);
+        this.closeLegendaryModal();
+    }
+
+    defaultObserve(encounter) {
+        console.log('🎭 Default observe:', encounter.name);
+        this.showNotification(`You carefully observe the ${encounter.name}.`);
+        this.closeLegendaryModal();
+    }
+
+    defaultLeave(encounter) {
+        console.log('🎭 Default leave:', encounter.name);
+        this.showNotification(`You leave the ${encounter.name} behind.`);
+        this.closeLegendaryModal();
+    }
+
+    closeLegendaryModal() {
+        const modal = document.getElementById('legendary-modal');
+        if (modal) {
+            modal.remove();
+        }
+        this.isDialogOpen = false;
+        console.log('🎭 Legendary modal closed, dialog flag reset');
     }
 
     submitQuestAnswer(encounterName) {
@@ -848,8 +1064,8 @@ class EncounterSystem {
         let closestType = '';
         
         // Check monsters
-        if (window.eldritchApp.systems.mapEngine.monsters) {
-            window.eldritchApp.systems.mapEngine.monsters.forEach(monster => {
+        if (window.mapEngine && window.mapEngine.monsters) {
+            window.mapEngine.monsters.forEach(monster => {
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
                     monster.lat, monster.lng
@@ -862,8 +1078,8 @@ class EncounterSystem {
         }
         
         // Check POIs
-        if (window.eldritchApp.systems.mapEngine.pointsOfInterest) {
-            window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach(poi => {
+        if (window.mapEngine && window.mapEngine.pointsOfInterest) {
+            window.mapEngine.pointsOfInterest.forEach(poi => {
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
                     poi.getLatLng().lat, poi.getLatLng().lng
@@ -876,8 +1092,8 @@ class EncounterSystem {
         }
         
         // Check mystery zones
-        if (window.eldritchApp.systems.mapEngine.mysteryZoneMarkers) {
-            window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach(mystery => {
+        if (window.mapEngine && window.mapEngine.mysteryZoneMarkers) {
+            window.mapEngine.mysteryZoneMarkers.forEach(mystery => {
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
                     mystery.getLatLng().lat, mystery.getLatLng().lng
@@ -890,8 +1106,8 @@ class EncounterSystem {
         }
         
         // Check test quest markers
-        if (window.eldritchApp.systems.mapEngine.testQuestMarkers) {
-            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach(questMarker => {
+        if (window.mapEngine && window.mapEngine.testQuestMarkers) {
+            window.mapEngine.testQuestMarkers.forEach(questMarker => {
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
                     questMarker.getLatLng().lat, questMarker.getLatLng().lng
@@ -954,8 +1170,8 @@ class EncounterSystem {
         console.log(`🎯 Player position: ${playerPos.lat.toFixed(6)}, ${playerPos.lng.toFixed(6)}`);
         
         // Check test quest markers
-        if (window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
-            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((questMarker, index) => {
+        if (window.mapEngine && window.mapEngine.testQuestMarkers) {
+            window.mapEngine.testQuestMarkers.forEach((questMarker, index) => {
                 const questPos = questMarker.getLatLng();
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
@@ -966,8 +1182,8 @@ class EncounterSystem {
         }
         
         // Check POI markers
-        if (window.eldritchApp?.systems?.mapEngine?.pointsOfInterest) {
-            window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach((poi, index) => {
+        if (window.mapEngine && window.mapEngine.pointsOfInterest) {
+            window.mapEngine.pointsOfInterest.forEach((poi, index) => {
                 const poiPos = poi.getLatLng();
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
@@ -983,29 +1199,29 @@ class EncounterSystem {
         console.log('🔄 Resetting all encounter flags...');
         
         // Reset test quest markers
-        if (window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
-            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach(questMarker => {
+        if (window.mapEngine && window.mapEngine.testQuestMarkers) {
+            window.mapEngine.testQuestMarkers.forEach(questMarker => {
                 questMarker.encountered = false;
             });
         }
         
         // Reset POI markers
-        if (window.eldritchApp?.systems?.mapEngine?.pointsOfInterest) {
-            window.eldritchApp.systems.mapEngine.pointsOfInterest.forEach(poi => {
+        if (window.mapEngine && window.mapEngine.pointsOfInterest) {
+            window.mapEngine.pointsOfInterest.forEach(poi => {
                 poi.encountered = false;
             });
         }
         
         // Reset monster markers
-        if (window.eldritchApp?.systems?.mapEngine?.monsters) {
-            window.eldritchApp.systems.mapEngine.monsters.forEach(monster => {
+        if (window.mapEngine && window.mapEngine.monsters) {
+            window.mapEngine.monsters.forEach(monster => {
                 monster.encountered = false;
             });
         }
         
         // Reset mystery zone markers
-        if (window.eldritchApp?.systems?.mapEngine?.mysteryZoneMarkers) {
-            window.eldritchApp.systems.mapEngine.mysteryZoneMarkers.forEach(mystery => {
+        if (window.mapEngine && window.mapEngine.mysteryZoneMarkers) {
+            window.mapEngine.mysteryZoneMarkers.forEach(mystery => {
                 mystery.encountered = false;
             });
         }
@@ -1021,11 +1237,11 @@ class EncounterSystem {
 
     // Add visual proximity indicators to markers
     addProximityIndicators(playerPos) {
-        if (!window.eldritchApp?.systems?.mapEngine?.map) return;
+        if (!window.mapEngine || !window.mapEngine.map) return;
 
         // Check test quest markers
-        if (window.eldritchApp.systems.mapEngine.testQuestMarkers) {
-            window.eldritchApp.systems.mapEngine.testQuestMarkers.forEach((questMarker, index) => {
+        if (window.mapEngine && window.mapEngine.testQuestMarkers) {
+            window.mapEngine.testQuestMarkers.forEach((questMarker, index) => {
                 const questPos = questMarker.getLatLng();
                 const distance = this.calculateDistance(
                     playerPos.lat, playerPos.lng,
@@ -1063,18 +1279,19 @@ class EncounterSystem {
             interactive: false
         });
 
-        ring.addTo(window.eldritchApp.systems.mapEngine.map);
+        ring.addTo(window.mapEngine.map);
         
         // Auto-remove after 2 seconds
         setTimeout(() => {
-            if (window.eldritchApp?.systems?.mapEngine?.map) {
-                window.eldritchApp.systems.mapEngine.map.removeLayer(ring);
+            if (window.mapEngine && window.mapEngine.map) {
+                window.mapEngine.map.removeLayer(ring);
             }
         }, 2000);
     }
 
     startMonsterEncounter(monster) {
-        console.log('👹 Monster encounter started:', monster.type.name);
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
+        console.log('👹 Monster encounter started:', monsterName);
         
         // Trigger distortion effects for monster encounters
         this.triggerDistortionEffects();
@@ -1091,6 +1308,124 @@ class EncounterSystem {
         
         // Use the new dice combat system
         this.startDiceCombat(monster);
+    }
+
+    startItemEncounter(item) {
+        console.log('💎 Item encounter started:', item.name);
+        
+        // Show item collection dialog
+        this.showItemCollectionModal(item);
+    }
+
+    showItemCollectionModal(item) {
+        const dialog = document.getElementById('dialog-text');
+        const actions = document.getElementById('encounter-actions');
+        const battle = document.getElementById('battle-interface');
+        
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>💎 Item Found!</h3>
+                <p>You discovered a <strong>${item.name}</strong>!</p>
+                <p>${item.emoji} ${item.rarity ? `Rarity: ${item.rarity}` : ''}</p>
+                <p>This item could be useful on your journey.</p>
+            </div>
+        `;
+        
+        actions.innerHTML = `
+            <button id="action-1" class="encounter-btn">Collect</button>
+            <button id="action-2" class="encounter-btn">Examine</button>
+            <button id="action-3" class="encounter-btn">Leave</button>
+        `;
+        
+        battle.classList.add('hidden');
+        
+        // Add event listeners
+        document.getElementById('action-1').addEventListener('click', () => this.collectItem(item));
+        document.getElementById('action-2').addEventListener('click', () => this.examineItem(item));
+        document.getElementById('action-3').addEventListener('click', () => this.leaveItem(item));
+        
+        this.showEncounterModal();
+    }
+
+    collectItem(item) {
+        console.log('💎 Collecting item:', item.name);
+        
+        // Close encounter modal
+        this.closeEncounterModal();
+        
+        // Remove item from map
+        if (window.mapEngine && window.mapEngine.removeItemFromMap) {
+            window.mapEngine.removeItemFromMap(item.name);
+        }
+        
+        // Apply item effects
+        this.applyItemEffects(item);
+        
+        // Show collection feedback
+        this.showNotification(`💎 Collected ${item.name}!`);
+    }
+
+    examineItem(item) {
+        console.log('🔍 Examining item:', item.name);
+        
+        const dialog = document.getElementById('dialog-text');
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>🔍 Item Examination</h3>
+                <p><strong>${item.name}</strong></p>
+                <p>${item.emoji} ${item.rarity ? `Rarity: ${item.rarity}` : ''}</p>
+                <p>This item appears to be in good condition and ready to use.</p>
+                <p>It might provide benefits when collected.</p>
+            </div>
+        `;
+    }
+
+    leaveItem(item) {
+        console.log('🚶 Leaving item:', item.name);
+        
+        // Close encounter modal
+        this.closeEncounterModal();
+        
+        // Mark item as not collected so it can be encountered again
+        item.collected = false;
+    }
+
+    applyItemEffects(item) {
+        // Apply different effects based on item type
+        switch(item.name) {
+            case 'Health Potion':
+                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
+                    window.eldritchApp.systems.statistics.restoreHealth(20);
+                    this.showNotification('🧪 Health restored by 20!');
+                }
+                break;
+            case 'Sanity Elixir':
+                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
+                    window.eldritchApp.systems.statistics.restoreSanity(15);
+                    this.showNotification('🧠 Sanity restored by 15!');
+                }
+                break;
+            case 'Power Orb':
+                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
+                    window.eldritchApp.systems.statistics.addExperience(50);
+                    this.showNotification('🔮 Gained 50 experience!');
+                }
+                break;
+            case 'Cosmic Crystal':
+                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
+                    window.eldritchApp.systems.statistics.addExperience(100);
+                    this.showNotification('💎 Gained 100 experience!');
+                }
+                break;
+            case 'Ancient Scroll':
+                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
+                    window.eldritchApp.systems.statistics.addExperience(200);
+                    this.showNotification('📜 Gained 200 experience!');
+                }
+                break;
+            default:
+                this.showNotification(`💎 Collected ${item.name}!`);
+        }
     }
 
     startPOIEncounter(poi) {
@@ -1150,11 +1485,14 @@ class EncounterSystem {
         const actions = document.getElementById('encounter-actions');
         const battle = document.getElementById('battle-interface');
         
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
+        const monsterEmoji = monster.type?.emoji || monster.emoji || '👹';
+        
         dialog.innerHTML = `
             <div class="cutscene-text">
                 <h3>⚠️ Monster Encounter!</h3>
-                <p>A <strong>${monster.type.name}</strong> blocks your path!</p>
-                <p>${monster.type.emoji} The creature looks dangerous and ready to fight.</p>
+                <p>A <strong>${monsterName}</strong> blocks your path!</p>
+                <p>${monsterEmoji} The creature looks dangerous and ready to fight.</p>
                 <p>What will you do?</p>
             </div>
         `;
@@ -1370,7 +1708,8 @@ class EncounterSystem {
         actions.classList.add('hidden');
         
         // Update battle UI
-        document.getElementById('monster-name').textContent = monster.type.name;
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
+        document.getElementById('monster-name').textContent = monsterName;
         document.getElementById('monster-health').textContent = `${this.activeEncounter.battleState.monsterHealth}/100`;
         document.getElementById('player-health').textContent = `${this.activeEncounter.battleState.playerHealth}/100`;
     }
@@ -1537,7 +1876,11 @@ class EncounterSystem {
     }
 
     observeMonster(monster) {
-        this.showDialog(`You observe the ${monster.type.name}. It seems ${monster.type.speed > 0.0001 ? 'agile' : 'slow'} and ${monster.type.color === '#4B0082' ? 'mysterious' : 'powerful'}.`);
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
+        const monsterSpeed = monster.type?.speed || monster.speed || 0.0001;
+        const monsterColor = monster.type?.color || monster.color || '#4B0082';
+        
+        this.showDialog(`You observe the ${monsterName}. It seems ${monsterSpeed > 0.0001 ? 'agile' : 'slow'} and ${monsterColor === '#4B0082' ? 'mysterious' : 'powerful'}.`);
         this.closeEncounter();
     }
 
@@ -2225,11 +2568,11 @@ class EncounterSystem {
     }
     
     triggerDistortionEffects() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine) {
+        if (!window.mapEngine) {
             return;
         }
         
-        const mapEngine = window.eldritchApp.systems.mapEngine;
+        const mapEngine = window.mapEngine;
         const playerPos = mapEngine.getPlayerPosition();
         
         if (!playerPos) {
@@ -2377,8 +2720,8 @@ class EncounterSystem {
     // Debug methods for testing
     triggerMonsterEncounter() {
         console.log('🎭 Triggering monster encounter...');
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.monsters.length > 0) {
-            const monster = window.eldritchApp.systems.mapEngine.monsters[0];
+        if (window.mapEngine && window.mapEngine.monsters && window.mapEngine.monsters.length > 0) {
+            const monster = window.mapEngine.monsters[0];
             this.startMonsterEncounter(monster);
         } else {
             console.log('🎭 No monsters available, creating test monster...');
@@ -2485,8 +2828,8 @@ class EncounterSystem {
 
     triggerPOIEncounter() {
         console.log('🎭 Triggering POI encounter...');
-        if (window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.pointsOfInterest.length > 0) {
-            const poi = window.eldritchApp.systems.mapEngine.pointsOfInterest[0];
+        if (window.mapEngine && window.mapEngine.pointsOfInterest && window.mapEngine.pointsOfInterest.length > 0) {
+            const poi = window.mapEngine.pointsOfInterest[0];
             this.startPOIEncounter(poi);
         } else {
             console.log('🎭 No POIs available, creating test POI...');
@@ -2996,17 +3339,22 @@ class EncounterSystem {
 
     // Simplified dice combat system
     startDiceCombat(monster) {
-        const monsterData = this.stories.monster[monster.type] || this.stories.monster.shadowStalker;
+        // Handle different monster data structures
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
+        const monsterType = monster.type?.type || monster.type || 'shadowStalker';
+        const monsterId = monster.id || monster.name || 'unknown';
         
-        console.log('🎲 Starting simplified dice combat with:', monsterData.name);
+        const monsterData = this.stories.monster[monsterType] || this.stories.monster.shadowStalker;
+        
+        console.log('🎲 Starting simplified dice combat with:', monsterName);
         
         // Use the simple dice combat system
         if (window.simpleDiceCombat) {
             window.simpleDiceCombat.startCombat(
                 {
-                    name: monsterData.name,
-                    type: monster.type,
-                    id: monster.id
+                    name: monsterName,
+                    type: monsterType,
+                    id: monsterId
                 },
                 (enemy) => this.handleCombatWin(enemy),
                 (enemy) => this.handleCombatLose(enemy)
@@ -3851,6 +4199,186 @@ class EncounterSystem {
             return "Complete Madness";
         } else {
             return "MADNESS";
+        }
+    }
+
+    // Minigame test methods
+    testTetrisMinigame() {
+        console.log('🧩 Testing Tetris minigame...');
+        if (window.microgamesManager && window.microgamesManager.startTetrisGame) {
+            window.microgamesManager.startTetrisGame();
+        } else {
+            this.showNotification('Tetris minigame not available');
+        }
+    }
+
+    testQuizMinigame() {
+        console.log('❓ Testing Quiz minigame...');
+        if (window.microgamesManager && window.microgamesManager.startTriviaGame) {
+            window.microgamesManager.startTriviaGame();
+        } else {
+            this.showNotification('Quiz minigame not available');
+        }
+    }
+
+    testRiddleMinigame() {
+        console.log('🧩 Testing Riddle minigame...');
+        if (window.microgamesManager && window.microgamesManager.startDiceGame) {
+            window.microgamesManager.startDiceGame();
+        } else {
+            this.showNotification('Riddle minigame not available');
+        }
+    }
+
+    testFightMinigame() {
+        console.log('⚔️ Testing Fight minigame...');
+        this.triggerMonsterEncounter();
+    }
+
+    showNotification(message) {
+        // Show a simple notification
+        console.log('📢 Notification:', message);
+        
+        // Try to use the app's notification system if available
+        if (window.app && window.app.showNotification) {
+            window.app.showNotification(message);
+        } else {
+            // Fallback to alert
+            alert(message);
+        }
+    }
+
+    // Visual Effects Test Methods
+    testDistortionEffects() {
+        console.log('🌀 Testing distortion effects...');
+        if (window.sanityDistortion && window.sanityDistortion.triggerDistortionEffects) {
+            // Trigger all distortion effects
+            const effects = ['blur', 'noise', 'chromaticAberration', 'vignette', 'shake', 'ghostlyShadows', 'colorShift', 'screenWarp', 'glitch', 'particles', 'cosmicEffects'];
+            effects.forEach((effect, index) => {
+                setTimeout(() => {
+                    window.sanityDistortion.triggerDistortionEffects(effect, 0.8);
+                }, index * 500);
+            });
+            this.showNotification('🌀 Distortion effects triggered!');
+        } else {
+            this.showNotification('🌀 Sanity distortion system not available');
+        }
+    }
+
+    testCosmicEffects() {
+        console.log('🌌 Testing cosmic effects...');
+        if (window.cosmicEffects && window.cosmicEffects.createEnergyWave) {
+            // Create energy wave
+            window.cosmicEffects.createEnergyWave(1.0);
+            // Increase particle intensity
+            if (window.cosmicEffects.setParticleIntensity) {
+                window.cosmicEffects.setParticleIntensity(1.0);
+            }
+            this.showNotification('🌌 Cosmic effects triggered!');
+        } else {
+            this.showNotification('🌌 Cosmic effects system not available');
+        }
+    }
+
+    testSanityLoss() {
+        console.log('😵 Testing sanity loss...');
+        this.loseSanity(30, 'Debug test - sanity loss');
+        this.showNotification('😵 Sanity loss triggered!');
+    }
+
+    testScreenEffects() {
+        console.log('📺 Testing screen effects...');
+        if (window.discordEffects) {
+            // Test various screen effects
+            window.discordEffects.triggerScreenFlash('#ff0000', 1000);
+            setTimeout(() => window.discordEffects.triggerGlowPulse(window.innerWidth/2, window.innerHeight/2, '#00ff00', 200), 500);
+            setTimeout(() => window.discordEffects.triggerParticleBurst(window.innerWidth/2, window.innerHeight/2, 50, '#0000ff'), 1000);
+            this.showNotification('📺 Screen effects triggered!');
+        } else {
+            this.showNotification('📺 Discord effects system not available');
+        }
+    }
+
+    // Audio & Sound Test Methods
+    testSoundboard() {
+        console.log('🎵 Testing soundboard...');
+        if (window.soundManager) {
+            // Test various sounds
+            window.soundManager.playSound('step_sound');
+            setTimeout(() => window.soundManager.playSound('quest_complete'), 500);
+            setTimeout(() => window.soundManager.playSound('combat_win'), 1000);
+            this.showNotification('🎵 Soundboard test triggered!');
+        } else {
+            this.showNotification('🎵 Sound manager not available');
+        }
+    }
+
+    testAmbientSounds() {
+        console.log('🌊 Testing ambient sounds...');
+        if (window.soundManager) {
+            window.soundManager.playEerieHum();
+            this.showNotification('🌊 Ambient sounds triggered!');
+        } else {
+            this.showNotification('🌊 Sound manager not available');
+        }
+    }
+
+    testCombatSounds() {
+        console.log('⚔️ Testing combat sounds...');
+        if (window.soundManager) {
+            window.soundManager.playSound('combat_win');
+            setTimeout(() => window.soundManager.playSound('combat_lose'), 1000);
+            this.showNotification('⚔️ Combat sounds triggered!');
+        } else {
+            this.showNotification('⚔️ Sound manager not available');
+        }
+    }
+
+    testQuestSounds() {
+        console.log('🎭 Testing quest sounds...');
+        if (window.soundManager) {
+            window.soundManager.playSound('quest_complete');
+            this.showNotification('🎭 Quest sounds triggered!');
+        } else {
+            this.showNotification('🎭 Sound manager not available');
+        }
+    }
+
+    // All Effects Test Methods
+    testAllEffects() {
+        console.log('✨ Testing all effects...');
+        this.showNotification('✨ Testing all effects - prepare for chaos!');
+        
+        // Test visual effects
+        setTimeout(() => this.testDistortionEffects(), 0);
+        setTimeout(() => this.testCosmicEffects(), 1000);
+        setTimeout(() => this.testScreenEffects(), 2000);
+        
+        // Test audio effects
+        setTimeout(() => this.testSoundboard(), 500);
+        setTimeout(() => this.testAmbientSounds(), 1500);
+        
+        // Test sanity effects
+        setTimeout(() => this.testSanityLoss(), 3000);
+    }
+
+    testChaosMode() {
+        console.log('🌪️ Testing chaos mode...');
+        this.showNotification('🌪️ CHAOS MODE ACTIVATED!');
+        
+        // Rapid fire all effects
+        for (let i = 0; i < 10; i++) {
+            setTimeout(() => {
+                this.testDistortionEffects();
+                this.testCosmicEffects();
+                this.testScreenEffects();
+                this.testSoundboard();
+            }, i * 200);
+        }
+        
+        // Continuous sanity loss
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => this.loseSanity(10, 'Chaos mode'), i * 1000);
         }
     }
 }

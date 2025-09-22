@@ -200,6 +200,42 @@ class CosmicEffects {
         animateBurst();
     }
 
+    createEnergyWave(intensity = 1.0) {
+        const wave = {
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            radius: 0,
+            maxRadius: 200 + intensity * 300,
+            speed: 2 + intensity * 3,
+            opacity: 0.3 + intensity * 0.7,
+            life: 1.0
+        };
+        this.energyWaves.push(wave);
+        console.log('🌌 Energy wave created with intensity:', intensity);
+    }
+
+    setParticleIntensity(intensity) {
+        if (this.particles) {
+            // Increase particle speed and size based on intensity
+            const positions = this.particles.geometry.attributes.position.array;
+            const colors = this.particles.geometry.attributes.color.array;
+            
+            for (let i = 0; i < positions.length; i += 3) {
+                // Increase particle movement speed
+                positions[i] += (Math.random() - 0.5) * intensity * 0.1;
+                positions[i + 1] += (Math.random() - 0.5) * intensity * 0.1;
+                
+                // Make particles more colorful
+                colors[i] = Math.min(1, colors[i] + intensity * 0.3);
+                colors[i + 1] = Math.min(1, colors[i + 1] + intensity * 0.3);
+                colors[i + 2] = Math.min(1, colors[i + 2] + intensity * 0.3);
+            }
+            
+            this.particles.geometry.attributes.position.needsUpdate = true;
+            this.particles.geometry.attributes.color.needsUpdate = true;
+        }
+    }
+
     // Cleanup
     destroy() {
         if (this.animationId) {

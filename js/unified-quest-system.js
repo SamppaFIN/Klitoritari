@@ -699,6 +699,11 @@ class UnifiedQuestSystem {
         
         // Check shrine proximity
         this.checkShrineProximity(playerPosition);
+        
+        // Check for monster and other encounters
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.encounter) {
+            window.eldritchApp.systems.encounter.checkProximityEncountersWithPosition(playerPosition);
+        }
     }
     
     getPlayerPosition() {
@@ -935,31 +940,75 @@ class UnifiedQuestSystem {
     
     // Check proximity to revive shrine
     checkShrineProximity(playerPosition) {
-        const shrineLocation = {
-            lat: 61.472843139814955,
-            lng: 23.72582986453225
-        };
-        
-        const distance = this.calculateDistance(
-            playerPosition.lat, playerPosition.lng,
-            shrineLocation.lat, shrineLocation.lng
-        );
-        
-        // Check if player is within 30 meters of shrine
-        if (distance <= 30) {
-            // Check if we've already visited this shrine recently (prevent spam)
-            const now = Date.now();
-            if (!this.lastShrineVisit || now - this.lastShrineVisit > 10000) { // 10 second cooldown
-                console.log(`⛩️ Player near revive shrine! Distance: ${distance.toFixed(2)}m`);
-                this.activateReviveShrine();
-                this.lastShrineVisit = now;
+        // Multiple shrine locations with different types
+        const shrines = [
+            {
+                id: 'revive',
+                lat: 61.472843139814955,
+                lng: 23.72582986453225,
+                type: 'healing',
+                name: 'Revive Shrine',
+                emoji: '⛩️',
+                color: '#00ff00',
+                description: 'Restores health and sanity to full'
+            },
+            {
+                id: 'power',
+                lat: 61.473200000000000,
+                lng: 23.726000000000000,
+                type: 'power',
+                name: 'Power Shrine',
+                emoji: '⚡',
+                color: '#ff6b00',
+                description: 'Increases attack and defense temporarily'
+            },
+            {
+                id: 'wisdom',
+                lat: 61.472500000000000,
+                lng: 23.725000000000000,
+                type: 'wisdom',
+                name: 'Wisdom Shrine',
+                emoji: '🧠',
+                color: '#8b5cf6',
+                description: 'Boosts experience and skills'
+            },
+            {
+                id: 'luck',
+                lat: 61.473000000000000,
+                lng: 23.724500000000000,
+                type: 'luck',
+                name: 'Luck Shrine',
+                emoji: '🍀',
+                color: '#10b981',
+                description: 'Increases luck and rare item chances'
             }
-        }
+        ];
+        
+        shrines.forEach(shrine => {
+            const distance = this.calculateDistance(
+                playerPosition.lat, playerPosition.lng,
+                shrine.lat, shrine.lng
+            );
+            
+            // Check if player is within 25 meters of shrine
+            if (distance <= 25) {
+                // Check if we've already visited this shrine recently (prevent spam)
+                const now = Date.now();
+                const shrineKey = `lastShrineVisit_${shrine.id}`;
+                const lastVisit = this[shrineKey];
+                
+                if (!lastVisit || now - lastVisit > 15000) { // 15 second cooldown
+                    console.log(`⛩️ Player near ${shrine.name}! Distance: ${distance.toFixed(2)}m`);
+                    this.activateShrine(shrine);
+                    this[shrineKey] = now;
+                }
+            }
+        });
     }
     
-    // Activate the revive shrine
-    activateReviveShrine() {
-        console.log('⛩️ Activating revive shrine...');
+    // Activate any shrine type
+    activateShrine(shrine) {
+        console.log(`⛩️ Activating ${shrine.name}...`);
         
         // Create shrine activation dialog
         const shrineOverlay = document.createElement('div');
@@ -981,13 +1030,13 @@ class UnifiedQuestSystem {
         const shrineContent = document.createElement('div');
         shrineContent.style.cssText = `
             background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            border: 3px solid #00ff00;
+            border: 3px solid ${shrine.color};
             border-radius: 15px;
             padding: 30px;
             max-width: 500px;
             width: 90%;
             color: #ffffff;
-            box-shadow: 0 0 40px rgba(0, 255, 0, 0.5);
+            box-shadow: 0 0 40px ${shrine.color}50;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -1001,35 +1050,35 @@ class UnifiedQuestSystem {
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 0, 0.1) 0%, transparent 70%),
+            background: radial-gradient(circle at 50% 50%, ${shrine.color}20 0%, transparent 70%),
                         radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
             pointer-events: none;
         `;
         shrineContent.appendChild(mysticalBg);
         
+        // Get shrine-specific content
+        const shrineData = this.getShrineData(shrine);
+        
         shrineContent.innerHTML = `
             <div style="position: relative; z-index: 1;">
                 <div style="margin-bottom: 20px;">
-                    <h2 style="color: #00ff00; text-shadow: 0 0 10px rgba(0, 255, 0, 0.8); margin: 0 0 15px 0; font-size: 24px;">
-                        ⛩️ Revive Shrine ⛩️
+                    <h2 style="color: ${shrine.color}; text-shadow: 0 0 10px ${shrine.color}80; margin: 0 0 15px 0; font-size: 24px;">
+                        ${shrine.emoji} ${shrine.name} ${shrine.emoji}
                     </h2>
-                    <p style="font-style: italic; color: #90ee90; margin-bottom: 20px; font-size: 16px;">
-                        "The ancient shrine pulses with healing energy..."
+                    <p style="font-style: italic; color: ${shrine.color}cc; margin-bottom: 20px; font-size: 16px;">
+                        "${shrineData.description}"
                     </p>
                 </div>
                 
-                <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #00ff00;">
+                <div style="background: rgba(0, 0, 0, 0.5); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid ${shrine.color};">
                     <p style="margin: 0; line-height: 1.6; font-size: 16px;">
-                        You approach the mystical shrine and feel a warm, healing energy emanating from its ancient stones. 
-                        The shrine seems to call to you, offering to restore your body and mind to their full potential.
-                        <br><br>
-                        <em>"The cosmic forces of restoration flow through this sacred place. Will you accept their blessing?"</em>
+                        ${shrineData.dialogue}
                     </p>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <button class="shrine-option" data-action="revive" style="
-                        background: linear-gradient(45deg, #00ff00, #00cc00);
+                    <button class="shrine-option" data-action="accept" data-shrine-id="${shrine.id}" style="
+                        background: linear-gradient(45deg, ${shrine.color}, ${shrine.color}cc);
                         border: 2px solid #ffffff;
                         color: #000000;
                         padding: 20px 30px;
@@ -1040,7 +1089,7 @@ class UnifiedQuestSystem {
                         font-weight: bold;
                         transition: all 0.3s ease;
                     ">
-                        ⛩️ Accept the Blessing
+                        ${shrine.emoji} Accept the Blessing
                     </button>
                     
                     <button class="shrine-option" data-action="decline" style="
@@ -1059,8 +1108,8 @@ class UnifiedQuestSystem {
                     </button>
                 </div>
                 
-                <div style="margin-top: 20px; color: #90ee90; font-size: 12px;">
-                    The shrine's power will restore your health and sanity to maximum
+                <div style="margin-top: 20px; color: ${shrine.color}cc; font-size: 12px;">
+                    ${shrineData.effectDescription}
                 </div>
             </div>
         `;
@@ -1073,13 +1122,14 @@ class UnifiedQuestSystem {
         options.forEach(option => {
             option.addEventListener('click', () => {
                 const action = option.dataset.action;
-                this.handleShrineAction(action, shrineOverlay);
+                const shrineId = option.dataset.shrineId;
+                this.handleShrineAction(action, shrineOverlay, shrineId);
             });
             
             // Add hover effects
             option.addEventListener('mouseenter', () => {
                 option.style.transform = 'scale(1.05)';
-                option.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.5)';
+                option.style.boxShadow = `0 0 20px ${shrine.color}50`;
             });
             
             option.addEventListener('mouseleave', () => {
@@ -1092,57 +1142,119 @@ class UnifiedQuestSystem {
         this.currentDialog = shrineOverlay;
     }
     
-    // Handle shrine action
-    handleShrineAction(action, dialogOverlay) {
-        console.log('⛩️ Shrine action:', action);
-        
-        if (action === 'revive') {
-            // Restore full health and sanity
-            if (window.eldritchApp && window.eldritchApp.systems.encounter) {
-                const encounter = window.eldritchApp.systems.encounter;
-                
-                // Get current max values
-                const maxHealth = encounter.playerStats.maxHealth || 100;
-                const maxSanity = encounter.playerStats.maxSanity || 100;
-                
-                // Restore to full
-                encounter.playerStats.health = maxHealth;
-                encounter.playerStats.sanity = maxSanity;
-                
-                // Update display
-                if (encounter.updateStatsDisplay) {
-                    encounter.updateStatsDisplay();
-                }
-                
-                console.log('⛩️ Player fully restored! Health:', maxHealth, 'Sanity:', maxSanity);
+    // Get shrine-specific data
+    getShrineData(shrine) {
+        const shrineData = {
+            healing: {
+                description: "The ancient shrine pulses with healing energy...",
+                dialogue: "You approach the mystical shrine and feel a warm, healing energy emanating from its ancient stones. The shrine seems to call to you, offering to restore your body and mind to their full potential.<br><br><em>\"The cosmic forces of restoration flow through this sacred place. Will you accept their blessing?\"</em>",
+                effectDescription: "The shrine's power will restore your health and sanity to maximum"
+            },
+            power: {
+                description: "Raw cosmic power crackles through the air...",
+                dialogue: "As you draw near, the shrine crackles with raw energy. Ancient runes glow with an inner fire, and you feel your muscles tense with potential power. The shrine offers to enhance your combat abilities.<br><br><em>\"The warriors of old sought this blessing before great battles. Will you claim this power?\"</em>",
+                effectDescription: "Temporarily increases attack (+10) and defense (+5) for 30 minutes"
+            },
+            wisdom: {
+                description: "Knowledge and insight flow like a river...",
+                dialogue: "The shrine emanates an aura of profound wisdom. Ancient texts seem to float in the air around it, and your mind feels clearer just being near. The shrine offers to expand your understanding and skills.<br><br><em>\"True power comes from knowledge. Will you accept this gift of wisdom?\"</em>",
+                effectDescription: "Grants bonus experience (+50%) and skill points for 1 hour"
+            },
+            luck: {
+                description: "Fortune's favor shines brightly here...",
+                dialogue: "The shrine glows with an otherworldly light that seems to bend probability itself. You feel incredibly fortunate just standing near it. The shrine offers to bless you with good fortune and rare discoveries.<br><br><em>\"Lady Luck smiles upon this place. Will you accept her blessing?\"</em>",
+                effectDescription: "Increases luck (+15) and rare item drop chances for 45 minutes"
             }
-            
-            // Show success message
-            this.showShrineFeedback(true, dialogOverlay);
+        };
+        
+        return shrineData[shrine.type] || shrineData.healing;
+    }
+
+    // Handle shrine action
+    handleShrineAction(action, dialogOverlay, shrineId) {
+        console.log('⛩️ Shrine action:', action, 'for shrine:', shrineId);
+        
+        if (action === 'accept') {
+            this.applyShrineEffect(shrineId);
+            this.showShrineFeedback(true, dialogOverlay, shrineId);
         } else {
             // Just close dialog
             dialogOverlay.remove();
         }
     }
+
+    // Apply shrine effects
+    applyShrineEffect(shrineId) {
+        if (!window.eldritchApp || !window.eldritchApp.systems.encounter) {
+            console.warn('⛩️ Encounter system not available for shrine effect');
+            return;
+        }
+
+        const encounter = window.eldritchApp.systems.encounter;
+        const now = Date.now();
+        
+        switch (shrineId) {
+            case 'revive':
+                // Restore full health and sanity
+                const maxHealth = encounter.playerStats.maxHealth || 100;
+                const maxSanity = encounter.playerStats.maxSanity || 100;
+                encounter.playerStats.health = maxHealth;
+                encounter.playerStats.sanity = maxSanity;
+                console.log('⛩️ Player fully restored! Health:', maxHealth, 'Sanity:', maxSanity);
+                break;
+                
+            case 'power':
+                // Increase attack and defense temporarily
+                encounter.playerStats.attack = (encounter.playerStats.attack || 15) + 10;
+                encounter.playerStats.defense = (encounter.playerStats.defense || 10) + 5;
+                encounter.powerShrineActive = now + (30 * 60 * 1000); // 30 minutes
+                console.log('⚡ Power blessing applied! Attack:', encounter.playerStats.attack, 'Defense:', encounter.playerStats.defense);
+                break;
+                
+            case 'wisdom':
+                // Boost experience gain
+                encounter.wisdomShrineActive = now + (60 * 60 * 1000); // 1 hour
+                encounter.experienceMultiplier = 1.5;
+                console.log('🧠 Wisdom blessing applied! Experience multiplier:', encounter.experienceMultiplier);
+                break;
+                
+            case 'luck':
+                // Increase luck and rare item chances
+                encounter.playerStats.luck = (encounter.playerStats.luck || 12) + 15;
+                encounter.luckShrineActive = now + (45 * 60 * 1000); // 45 minutes
+                console.log('🍀 Luck blessing applied! Luck:', encounter.playerStats.luck);
+                break;
+        }
+        
+        // Remove shrine from map after use
+        this.removeShrineFromMap(shrineId);
+        
+        // Update display
+        if (encounter.updateStatsDisplay) {
+            encounter.updateStatsDisplay();
+        }
+    }
     
     // Show shrine feedback
-    showShrineFeedback(success, dialogOverlay) {
+    showShrineFeedback(success, dialogOverlay, shrineId) {
         const content = dialogOverlay.querySelector('div > div');
         if (success) {
+            const shrineInfo = this.getShrineFeedbackData(shrineId);
             content.innerHTML = `
                 <div style="text-align: center;">
-                    <h2 style="color: #00ff00; text-shadow: 0 0 10px rgba(0, 255, 0, 0.8); margin-bottom: 20px; font-size: 24px;">
-                        ✨ Blessing Received! ✨
+                    <h2 style="color: ${shrineInfo.color}; text-shadow: 0 0 10px ${shrineInfo.color}80; margin-bottom: 20px; font-size: 24px;">
+                        ${shrineInfo.emoji} Blessing Received! ${shrineInfo.emoji}
                     </h2>
                     <p style="color: #ffffff; font-size: 16px; margin-bottom: 20px;">
-                        The shrine's healing energy flows through you, restoring your body and mind to perfect condition. 
-                        You feel refreshed and ready to continue your cosmic journey!
+                        ${shrineInfo.message}
                     </p>
-                    <div style="background: rgba(0, 255, 0, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #00ff00;">
-                        <strong style="color: #00ff00;">Health and Sanity fully restored!</strong>
+                    <div style="background: ${shrineInfo.color}20; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid ${shrineInfo.color};">
+                        <p style="margin: 0; color: ${shrineInfo.color}cc; font-size: 14px;">
+                            ${shrineInfo.effects}
+                        </p>
                     </div>
                     <button onclick="this.closest('.shrine-dialog-overlay').remove()" style="
-                        background: linear-gradient(45deg, #00ff00, #00cc00);
+                        background: linear-gradient(45deg, ${shrineInfo.color}, ${shrineInfo.color}cc);
                         border: 2px solid #ffffff;
                         color: #000000;
                         padding: 15px 30px;
@@ -1152,10 +1264,184 @@ class UnifiedQuestSystem {
                         font-size: 16px;
                         font-weight: bold;
                     ">
-                        Continue
+                        ${shrineInfo.emoji} Continue Your Journey
                     </button>
                 </div>
             `;
+        }
+    }
+
+    // Get shrine feedback data
+    getShrineFeedbackData(shrineId) {
+        const feedbackData = {
+            revive: {
+                emoji: '⛩️',
+                color: '#00ff00',
+                message: "The shrine's healing energy flows through you, restoring your body and mind to perfect condition. You feel refreshed and ready to continue your cosmic journey.",
+                effects: "<strong>Health:</strong> Restored to maximum<br><strong>Sanity:</strong> Restored to maximum"
+            },
+            power: {
+                emoji: '⚡',
+                color: '#ff6b00',
+                message: "Raw cosmic power surges through your veins! Your muscles feel stronger, your reflexes sharper. You are ready for battle.",
+                effects: "<strong>Attack:</strong> +10 bonus<br><strong>Defense:</strong> +5 bonus<br><strong>Duration:</strong> 30 minutes"
+            },
+            wisdom: {
+                emoji: '🧠',
+                color: '#8b5cf6',
+                message: "Ancient knowledge floods your mind! You feel wiser, more perceptive. The mysteries of the cosmos seem clearer now.",
+                effects: "<strong>Experience:</strong> +50% bonus<br><strong>Skills:</strong> Enhanced learning<br><strong>Duration:</strong> 1 hour"
+            },
+            luck: {
+                emoji: '🍀',
+                color: '#10b981',
+                message: "Fortune's favor surrounds you! You feel incredibly lucky, as if the universe itself is conspiring to help you succeed.",
+                effects: "<strong>Luck:</strong> +15 bonus<br><strong>Rare Items:</strong> Increased chance<br><strong>Duration:</strong> 45 minutes"
+            }
+        };
+        
+        return feedbackData[shrineId] || feedbackData.revive;
+    }
+
+    // Create shrine markers on the map
+    createShrineMarkers() {
+        console.log('⛩️ Creating shrine markers...');
+        
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.warn('⛩️ Cannot create shrine markers - map engine not ready');
+            return;
+        }
+
+        // Initialize shrine markers storage if not exists
+        if (!this.shrineMarkers) {
+            this.shrineMarkers = new Map();
+        }
+
+        // Define shrine locations
+        const shrines = [
+            {
+                id: 'revive',
+                lat: 61.472843139814955,
+                lng: 23.72582986453225,
+                type: 'healing',
+                name: 'Revive Shrine',
+                emoji: '⛩️',
+                color: '#00ff00'
+            },
+            {
+                id: 'power',
+                lat: 61.473200000000000,
+                lng: 23.726000000000000,
+                type: 'power',
+                name: 'Power Shrine',
+                emoji: '⚡',
+                color: '#ff6b00'
+            },
+            {
+                id: 'wisdom',
+                lat: 61.472500000000000,
+                lng: 23.725000000000000,
+                type: 'wisdom',
+                name: 'Wisdom Shrine',
+                emoji: '🧠',
+                color: '#8b5cf6'
+            },
+            {
+                id: 'luck',
+                lat: 61.473000000000000,
+                lng: 23.724500000000000,
+                type: 'luck',
+                name: 'Luck Shrine',
+                emoji: '🍀',
+                color: '#10b981'
+            }
+        ];
+
+        shrines.forEach(shrine => {
+            // Check if shrine has already been used
+            if (this.usedShrines && this.usedShrines.has(shrine.id)) {
+                console.log(`⛩️ Shrine ${shrine.name} already used, skipping marker creation`);
+                return;
+            }
+
+            // Create shrine marker
+            const marker = L.marker([shrine.lat, shrine.lng], {
+                icon: L.divIcon({
+                    className: 'shrine-marker',
+                    html: `
+                        <div style="
+                            background: ${shrine.color};
+                            color: white;
+                            border: 2px solid white;
+                            border-radius: 50%;
+                            width: 30px;
+                            height: 30px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 16px;
+                            box-shadow: 0 0 10px ${shrine.color}80;
+                            animation: shrinePulse 2s infinite;
+                        ">
+                            ${shrine.emoji}
+                        </div>
+                        <style>
+                            @keyframes shrinePulse {
+                                0% { transform: scale(1); box-shadow: 0 0 10px ${shrine.color}80; }
+                                50% { transform: scale(1.1); box-shadow: 0 0 20px ${shrine.color}; }
+                                100% { transform: scale(1); box-shadow: 0 0 10px ${shrine.color}80; }
+                            }
+                        </style>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            });
+
+            // Add popup with shrine info
+            marker.bindPopup(`
+                <div style="text-align: center; font-family: 'Courier New', monospace;">
+                    <h3 style="color: ${shrine.color}; margin: 0 0 10px 0;">
+                        ${shrine.emoji} ${shrine.name} ${shrine.emoji}
+                    </h3>
+                    <p style="margin: 0; color: #666;">
+                        ${this.getShrineData(shrine).description}
+                    </p>
+                </div>
+            `);
+
+            // Add to map
+            marker.addTo(window.mapEngine.map);
+            
+            // Store marker reference
+            this.shrineMarkers.set(shrine.id, marker);
+            
+            console.log(`⛩️ Created ${shrine.name} marker at [${shrine.lat}, ${shrine.lng}]`);
+        });
+
+        console.log('⛩️ Shrine markers created successfully');
+    }
+
+    // Remove shrine from map after use
+    removeShrineFromMap(shrineId) {
+        console.log(`⛩️ Removing shrine ${shrineId} from map...`);
+        
+        // Initialize used shrines storage if not exists
+        if (!this.usedShrines) {
+            this.usedShrines = new Set();
+        }
+        
+        // Mark shrine as used
+        this.usedShrines.add(shrineId);
+        
+        // Remove marker from map
+        if (this.shrineMarkers && this.shrineMarkers.has(shrineId)) {
+            const marker = this.shrineMarkers.get(shrineId);
+            if (marker && window.mapEngine && window.mapEngine.map) {
+                window.mapEngine.map.removeLayer(marker);
+                this.shrineMarkers.delete(shrineId);
+                console.log(`⛩️ Shrine ${shrineId} marker removed from map`);
+            }
         }
     }
     
@@ -3398,12 +3684,16 @@ class UnifiedQuestSystem {
         console.log('🎭 Creating quest markers...');
         
         if (!window.mapEngine || !window.mapEngine.map) {
-            console.warn('🎭 Cannot create quest markers - map engine not ready');
+            console.warn('🎭 Cannot create quest markers - map engine not ready, retrying in 1 second...');
+            setTimeout(() => this.createQuestMarkers(), 1000);
             return;
         }
         
         // Create Aurora marker (main quest giver)
         this.createAuroraMarker();
+        
+        // Create shrine markers
+        this.createShrineMarkers();
         
         // Create markers for the first objective of each available quest
         this.availableQuests.forEach((quest, questId) => {

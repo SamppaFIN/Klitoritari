@@ -1434,6 +1434,7 @@ class MapEngine {
         }
         
         console.log('👹 Generated', this.monsters.length, 'monsters');
+        console.log('👹 Monster locations:', this.monsters.map(m => `${m.type.name} at [${m.lat.toFixed(6)}, ${m.lng.toFixed(6)}]`));
         
         // Start monster movement
         this.startMonsterMovement();
@@ -2626,7 +2627,18 @@ class MapEngine {
             { name: 'Ancient Scroll', emoji: '📜', color: '#8b4513', rarity: 'legendary' }
         ];
         
+        // Initialize item markers storage if not exists
+        if (!this.itemMarkers) {
+            this.itemMarkers = new Map();
+        }
+        
         itemTypes.forEach((item, index) => {
+            // Check if item has already been collected
+            if (this.collectedItems && this.collectedItems.has(item.name)) {
+                console.log(`💎 Item ${item.name} already collected, skipping marker creation`);
+                return;
+            }
+            
             const angle = Math.random() * Math.PI * 2;
             const distance = 0.001 + Math.random() * 0.002; // 100-300m
             const lat = baseLat + Math.cos(angle) * distance;
@@ -2659,6 +2671,20 @@ class MapEngine {
                     </div>
                 </div>
             `);
+            
+            // Store item marker reference with full data
+            this.itemMarkers.set(item.name, {
+                marker: itemMarker,
+                name: item.name,
+                emoji: item.emoji,
+                color: item.color,
+                rarity: item.rarity,
+                lat: lat,
+                lng: lng,
+                collected: false
+            });
+            
+            console.log(`💎 Created ${item.name} marker at [${lat}, ${lng}]`);
         });
     }
     
@@ -2670,7 +2696,18 @@ class MapEngine {
             { name: 'Dimensional Beast', emoji: '🐉', color: '#ff4500', difficulty: 'hard' }
         ];
         
+        // Initialize monster markers storage if not exists
+        if (!this.monsterMarkers) {
+            this.monsterMarkers = new Map();
+        }
+        
         monsterTypes.forEach((monster, index) => {
+            // Check if monster has already been defeated
+            if (this.defeatedMonsters && this.defeatedMonsters.has(monster.name)) {
+                console.log(`👹 Monster ${monster.name} already defeated, skipping marker creation`);
+                return;
+            }
+            
             const angle = (Math.PI * 2 / monsterTypes.length) * index + Math.random() * 0.3;
             const distance = 0.002 + Math.random() * 0.001; // 200-300m
             const lat = baseLat + Math.cos(angle) * distance;
@@ -2703,6 +2740,20 @@ class MapEngine {
                     </div>
                 </div>
             `);
+            
+            // Store monster marker reference with full data
+            this.monsterMarkers.set(monster.name, {
+                marker: monsterMarker,
+                name: monster.name,
+                emoji: monster.emoji,
+                color: monster.color,
+                difficulty: monster.difficulty,
+                lat: lat,
+                lng: lng,
+                encountered: false
+            });
+            
+            console.log(`👹 Created ${monster.name} marker at [${lat}, ${lng}]`);
         });
     }
     
@@ -2754,6 +2805,32 @@ class MapEngine {
                 collected: Date.now()
             });
             window.encounterSystem.showNotification(`💎 Collected ${itemName}!`);
+            
+            // Remove item from map after collection
+            this.removeItemFromMap(itemName);
+        }
+    }
+
+    // Remove item from map after collection
+    removeItemFromMap(itemName) {
+        console.log(`💎 Removing collected item ${itemName} from map...`);
+        
+        // Initialize collected items storage if not exists
+        if (!this.collectedItems) {
+            this.collectedItems = new Set();
+        }
+        
+        // Mark item as collected
+        this.collectedItems.add(itemName);
+        
+        // Remove marker from map
+        if (this.itemMarkers && this.itemMarkers.has(itemName)) {
+            const marker = this.itemMarkers.get(itemName);
+            if (marker && this.map) {
+                this.map.removeLayer(marker);
+                this.itemMarkers.delete(itemName);
+                console.log(`💎 Item ${itemName} marker removed from map`);
+            }
         }
     }
     
@@ -2765,6 +2842,32 @@ class MapEngine {
             window.encounterSystem.playerStats.health -= difficulty === 'easy' ? 5 : difficulty === 'medium' ? 15 : 25;
             window.encounterSystem.updateStatBars();
             window.encounterSystem.showNotification(`⚔️ Defeated ${monsterName}! Gained ${baseReward} XP, lost some health.`);
+            
+            // Remove monster from map after defeat
+            this.removeMonsterFromMap(monsterName);
+        }
+    }
+
+    // Remove monster from map after defeat
+    removeMonsterFromMap(monsterName) {
+        console.log(`👹 Removing defeated monster ${monsterName} from map...`);
+        
+        // Initialize defeated monsters storage if not exists
+        if (!this.defeatedMonsters) {
+            this.defeatedMonsters = new Set();
+        }
+        
+        // Mark monster as defeated
+        this.defeatedMonsters.add(monsterName);
+        
+        // Remove marker from map
+        if (this.monsterMarkers && this.monsterMarkers.has(monsterName)) {
+            const marker = this.monsterMarkers.get(monsterName);
+            if (marker && this.map) {
+                this.map.removeLayer(marker);
+                this.monsterMarkers.delete(monsterName);
+                console.log(`👹 Monster ${monsterName} marker removed from map`);
+            }
         }
     }
     
