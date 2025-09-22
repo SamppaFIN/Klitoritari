@@ -1528,6 +1528,7 @@ class EldritchSanctuaryApp {
                     const hasContent = sidePanel.innerText && sidePanel.innerText.trim().length > 0;
                     if (!hasContent) {
                         sidePanel.innerHTML = `
+                            <button id="panel-close" class="close-btn" style="position:absolute; top:8px; right:8px; z-index:2">×</button>
                             <h3>🌌 Game Stats</h3>
                             <div class="stats-grid">
                                 <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-info"><div class="stat-label">Health</div><div class="stat-value" id="panel-health">100/100</div></div></div>
@@ -1541,6 +1542,18 @@ class EldritchSanctuaryApp {
                                 <button id="debug-reset-steps" class="debug-btn small">Reset</button>
                             </div></div>
                         `;
+                    }
+                    // Ensure a close button exists even if content wasn't injected
+                    if (!sidePanel.querySelector('#panel-close')) {
+                        const closeBtn = document.createElement('button');
+                        closeBtn.id = 'panel-close';
+                        closeBtn.className = 'close-btn';
+                        closeBtn.textContent = '×';
+                        closeBtn.style.position = 'absolute';
+                        closeBtn.style.top = '8px';
+                        closeBtn.style.right = '8px';
+                        closeBtn.style.zIndex = '2';
+                        sidePanel.appendChild(closeBtn);
                     }
                 } catch (e) {
                     console.warn('⚙️ Could not probe/inject side panel content:', e);
@@ -1568,6 +1581,24 @@ class EldritchSanctuaryApp {
                 });
                 
                 console.log('⚙️ Settings button event listener attached successfully');
+
+                // Close button inside panel
+                const panelCloseBtn = sidePanel.querySelector('#panel-close');
+                if (panelCloseBtn) {
+                    panelCloseBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // If dev mode is forcing panel open, disable it so user can close
+                        if (this.isDevModeForced()) {
+                            this.devModeEnabled = false;
+                            this.updateDevToggleUI();
+                        }
+                        sidePanel.classList.remove('open');
+                        toggleBtn.classList.remove('open');
+                        // Also hide when explicitly closed
+                        sidePanel.style.display = 'none';
+                    });
+                }
             
             // Close panel when clicking outside (unless dev mode is forced)
             document.addEventListener('click', (e) => {
