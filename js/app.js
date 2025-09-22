@@ -1566,6 +1566,27 @@ class EldritchSanctuaryApp {
                         closeBtn.style.zIndex = '2';
                         sidePanel.appendChild(closeBtn);
                     }
+
+                    // Ensure player marker controls exist even if panel already had content
+                    if (!sidePanel.querySelector('#marker-emoji') || !sidePanel.querySelector('#marker-color')) {
+                        const tools = document.createElement('div');
+                        tools.className = 'debug-tools';
+                        tools.innerHTML = `
+                            <h4>🎯 Player Marker</h4>
+                            <div class="debug-buttons">
+                                <select id="marker-emoji" class="debug-btn small" style="background:#1b2a3a; color:#fff; min-width:120px;">
+                                    <option>👤</option>
+                                    <option>🚩</option>
+                                    <option>⭐</option>
+                                    <option>🛰️</option>
+                                    <option>🧭</option>
+                                </select>
+                                <input id="marker-color" type="color" class="debug-btn small" value="#00ff00" style="padding:4px 6px; min-width:60px;" />
+                                <button id="apply-marker" class="debug-btn small">Apply</button>
+                            </div>
+                        `;
+                        sidePanel.appendChild(tools);
+                    }
                 } catch (e) {
                     console.warn('⚙️ Could not probe/inject side panel content:', e);
                 }
