@@ -11,6 +11,7 @@ class EldritchSanctuaryApp {
         this.playerBasesLoaded = false;
         this.isMobile = this.detectMobile();
         this.panelManager = null;
+        this.sound = null;
         this.systems = {
             cosmicEffects: null,
             geolocation: null,
@@ -398,6 +399,9 @@ class EldritchSanctuaryApp {
 
         // Initialize docked/draggable panels (non-blocking)
         this.initDockedPanels();
+
+        // Initialize lightweight sound manager (no MP3s)
+        this.initSoundManager();
         
         // Load initial data
         await this.loadInitialData();
@@ -427,6 +431,18 @@ class EldritchSanctuaryApp {
             console.log('🧩 Docked panel manager initialized');
         } catch (e) {
             console.warn('🧩 Failed to initialize docked panels', e);
+        }
+    }
+
+    // Initialize a tiny synth-based sound manager
+    initSoundManager() {
+        if (this.sound) return;
+        try {
+            this.sound = new SoundManager();
+            window.soundManager = this.sound;
+            console.log('🔊 Sound manager initialized');
+        } catch (e) {
+            console.warn('🔊 Failed to initialize sound manager', e);
         }
     }
 
@@ -2485,6 +2501,133 @@ class DockedPanelManager {
         header.addEventListener('touchstart', onDown, { passive: true });
     }
 }
+
+// Lightweight WebAudio sound manager (no external assets)
+class SoundManager {
+	constructor() {
+		this.audioCtx = null;
+		this.masterGain = null;
+		this.init();
+	}
+	
+	init() {
+		try {
+			const AudioContextRef = window.AudioContext || window.webkitAudioContext;
+			this.audioCtx = new AudioContextRef();
+			this.masterGain = this.audioCtx.createGain();
+			this.masterGain.gain.value = 0.3;
+			this.masterGain.connect(this.audioCtx.destination);
+		} catch (e) {
+			console.warn('🔊 WebAudio not available', e);
+		}
+	}
+	
+	// Ensure context resumed on user gesture
+	resumeIfNeeded() {
+		if (this.audioCtx && this.audioCtx.state === 'suspended') {
+			this.audioCtx.resume();
+		}
+	}
+	
+	// Basic blip/bling using oscillator
+	playBling({ frequency = 880, duration = 0.15, type = 'sine' } = {}) {
+		if (!this.audioCtx) return;
+		this.resumeIfNeeded();
+		const now = this.audioCtx.currentTime;
+		const osc = this.audioCtx.createOscillator();
+		const gain = this.audioCtx.createGain();
+		osc.type = type;
+		osc.frequency.setValueAtTime(frequency, now);
+		gain.gain.setValueAtTime(0.0001, now);
+		gain.gain.exponentialRampToValueAtTime(0.6, now + 0.02);
+		gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+		osc.connect(gain).connect(this.masterGain);
+		osc.start(now);
+		osc.stop(now + duration + 0.02);
+	}
+	
+	// Terrifying bling: descending minor third with noise burst
+	playTerrifyingBling() {
+		if (!this.audioCtx) return;
+		this.resumeIfNeeded();
+		const now = this.audioCtx.currentTime;
+		// Tone sweep
+		const osc = this.audioCtx.createOscillator();
+		const gain = this.audioCtx.createGain();
+		osc.type = 'sawtooth';
+		osc.frequency.setValueAtTime(740, now);
+		osc.frequency.exponentialRampToValueAtTime(440, now + 0.4);
+		gain.gain.setValueAtTime(0.0001, now);
+		gain.gain.exponentialRampToValueAtTime(0.5, now + 0.05);
+		gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+		osc.connect(gain).connect(this.masterGain);
+		osc.start(now);
+		osc.stop(now + 0.5);
+		// Noise burst
+		const noiseDur = 0.2;
+		const noise = this.createNoiseBufferSource(noiseDur);
+		const nGain = this.audioCtx.createGain();
+		nGain.gain.setValueAtTime(0.0001, now + 0.15);
+		nGain.gain.exponentialRampToValueAtTime(0.4, now + 0.2);
+		nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+		noise.connect(nGain).connect(this.masterGain);
+		noise.start(now + 0.15);
+	}
+	
+	// Eerie hum: layered detuned oscillators with slow tremolo
+	playEerieHum({ duration = 2.5 } = {}) {
+		if (!this.audioCtx) return;
+		this.resumeIfNeeded();
+		const now = this.audioCtx.currentTime;
+		const baseFreq = 110;
+		const voices = [0, -3, +7].map(semi => baseFreq * Math.pow(2, semi / 12));
+		const tremOsc = this.audioCtx.createOscillator();
+		const tremGain = this.audioCtx.createGain();
+		tremOsc.type = 'sine';
+		tremOsc.frequency.setValueAtTime(4.5, now);
+		tremGain.gain.value = 0.3;
+		tremOsc.connect(tremGain);
+		tremOsc.start(now);
+		const outGain = this.audioCtx.createGain();
+		outGain.gain.setValueAtTime(0.0001, now);
+		outGain.gain.exponentialRampToValueAtTime(0.4, now + 0.4);
+		outGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+		voices.forEach((f, idx) => {
+			const osc = this.audioCtx.createOscillator();
+			const vGain = this.audioCtx.createGain();
+			osc.type = 'sine';
+			osc.frequency.setValueAtTime(f * (1 + (idx - 1) * 0.002), now);
+			// Apply tremolo
+			tremGain.connect(vGain.gain);
+			osc.connect(vGain).connect(outGain).connect(this.masterGain);
+			osc.start(now);
+			osc.stop(now + duration + 0.1);
+		});
+		setTimeout(() => tremOsc.stop(), (duration + 0.2) * 1000);
+	}
+	
+	// Short UI ok/cancel
+	playOk() { this.playBling({ frequency: 1200, duration: 0.09, type: 'triangle' }); }
+	playCancel() { this.playBling({ frequency: 300, duration: 0.12, type: 'square' }); }
+	playQuestOpen() { this.playBling({ frequency: 980, duration: 0.14, type: 'sine' }); }
+	playQuestComplete() { this.playBling({ frequency: 1560, duration: 0.18, type: 'triangle' }); }
+	playWarning() { this.playTerrifyingBling(); }
+	
+	// Helpers
+	createNoiseBufferSource(duration = 0.2) {
+		const sampleRate = this.audioCtx.sampleRate;
+		const frameCount = Math.floor(sampleRate * duration);
+		const buffer = this.audioCtx.createBuffer(1, frameCount, sampleRate);
+		const data = buffer.getChannelData(0);
+		for (let i = 0; i < frameCount; i++) {
+			data[i] = (Math.random() * 2 - 1) * (1 - i / frameCount); // quick decay
+		}
+		const source = this.audioCtx.createBufferSource();
+		source.buffer = buffer;
+		return source;
+	}
+}
+
 // Global app instance
 let app;
 

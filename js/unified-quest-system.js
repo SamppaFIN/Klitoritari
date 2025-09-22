@@ -1793,6 +1793,7 @@ class UnifiedQuestSystem {
                 </div>
             `;
             const panel = window.panelManager.openPanel(`quest-${quest.id}`, { title: `📜 ${quest.name}` , content, height: 380 });
+            if (window.soundManager) window.soundManager.playQuestOpen();
             // Wire option handlers inside panel
             this.addQuestOptionHandlers(panel, quest, objective);
             this.currentDialog = panel;
@@ -2461,6 +2462,7 @@ class UnifiedQuestSystem {
         if (shouldCompleteObjective) {
             console.log(`🎭 Completing objective: ${objective.id} for quest: ${quest.id}`);
             this.completeObjective(quest.id, objective.id);
+            if (window.soundManager) window.soundManager.playQuestComplete();
             
             // Hide current quest marker and show next one
             console.log(`🎭 Progressing quest markers for quest: ${quest.id}, objective: ${objective.id}`);
@@ -2474,6 +2476,7 @@ class UnifiedQuestSystem {
                 if (window.eldritchApp && window.eldritchApp.showNotification) {
                     window.eldritchApp.showNotification('🎯 Objective moved to a new location! Try again.', 'warning');
                 }
+                if (window.soundManager) window.soundManager.playWarning();
             } catch (e) {
                 console.warn('🎭 Failed to retarget objective after wrong answer', e);
             }
