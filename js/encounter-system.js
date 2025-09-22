@@ -6,6 +6,7 @@
 class EncounterSystem {
     constructor() {
         this.isInitialized = false;
+        this.isDialogOpen = false; // Prevent duplicate dialogs
         this.playerSteps = 0;
         this.encounters = new Map();
         this.activeEncounter = null;
@@ -77,8 +78,8 @@ class EncounterSystem {
         this.setupUI();
         
         
-        // Debug panel disabled - using unified debug console instead
-        // this.createDebugPanel();
+        // Create debug panel for testing
+        this.createDebugPanel();
     }
 
     setupUI() {
@@ -209,10 +210,16 @@ class EncounterSystem {
         panel.style.position = 'fixed';
         panel.style.top = '20px';
         panel.style.right = '20px';
+        panel.style.width = '400px'; // Make it wider
+        panel.style.maxHeight = '80vh'; // Limit height to avoid scrollbars
+        panel.style.overflowY = 'auto'; // Add scroll if needed
         panel.style.zIndex = '10000';
         panel.innerHTML = `
             <div class="debug-content">
-                <h3>🎭 Debug Panel</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3>🎭 Debug Panel</h3>
+                    <button id="close-debug-panel" style="background: #ff4444; color: white; border: none; border-radius: 3px; padding: 5px 10px; cursor: pointer;">×</button>
+                </div>
                 <div class="debug-content-simple">
                     <h4>📊 Player Stats</h4>
                     <div class="health-sanity-display">
@@ -269,6 +276,11 @@ class EncounterSystem {
         document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
         document.getElementById('toggle-debug').addEventListener('click', () => {
             panel.classList.toggle('hidden');
+        });
+        
+        // Close button
+        document.getElementById('close-debug-panel').addEventListener('click', () => {
+            panel.classList.add('hidden');
         });
         
         // Stats debug buttons
@@ -356,37 +368,63 @@ class EncounterSystem {
     }
 
     startProximityDetection() {
+        console.log('🎭 Starting simplified encounter detection...');
         this.proximityCheckInterval = setInterval(() => {
-            this.checkProximityEncounters();
-        }, 1000); // Check every 1 second for more responsive detection
+            this.checkAllEncounters();
+        }, 2000); // Check every 2 seconds
     }
 
-    checkProximityEncounters() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine) {
-            console.log('🎭 No map engine available for proximity check');
-            return;
-        }
-        
-        // Check if getPlayerPosition method exists
-        if (typeof window.eldritchApp.systems.mapEngine.getPlayerPosition !== 'function') {
-            console.error('🎭 ERROR: getPlayerPosition method not found on map engine');
-            console.log('🎭 Map engine methods:', Object.getOwnPropertyNames(window.eldritchApp.systems.mapEngine));
+    checkAllEncounters() {
+        // Prevent duplicate dialogs
+        if (this.isDialogOpen) {
             return;
         }
 
-        const playerPos = window.eldritchApp.systems.mapEngine.getPlayerPosition();
-        if (!playerPos) {
-            console.log('🎯 No player position available for proximity check');
-            // Try to get position from geolocation system as fallback
-            if (window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
-                console.log('🎯 Using geolocation fallback position');
-                const fallbackPos = window.eldritchApp.systems.geolocation.currentPosition;
-                this.checkProximityEncountersWithPosition(fallbackPos);
-            }
+        // Simple random encounter chance (3% every check)
+        if (Math.random() < 0.03) {
+            this.triggerRandomEncounter();
+        }
+    }
+
+    triggerRandomEncounter() {
+        if (this.isDialogOpen) {
             return;
         }
+
+        const encounterTypes = [
+            'heavy', 'cosmicShrine', 'eldritchMonster', 'wisdomCrystal', 'cosmicMerchant',
+            'monster', 'poi', 'mystery'
+        ];
         
-        this.checkProximityEncountersWithPosition(playerPos);
+        const randomType = encounterTypes[Math.floor(Math.random() * encounterTypes.length)];
+        console.log(`🎭 Triggering random encounter: ${randomType}`);
+        
+        switch(randomType) {
+            case 'heavy':
+                this.testLegendaryEncounter('heavy');
+                break;
+            case 'cosmicShrine':
+                this.testLegendaryEncounter('cosmicShrine');
+                break;
+            case 'eldritchMonster':
+                this.testLegendaryEncounter('eldritchMonster');
+                break;
+            case 'wisdomCrystal':
+                this.testLegendaryEncounter('wisdomCrystal');
+                break;
+            case 'cosmicMerchant':
+                this.testLegendaryEncounter('cosmicMerchant');
+                break;
+            case 'monster':
+                this.triggerMonsterEncounter();
+                break;
+            case 'poi':
+                this.triggerPOIEncounter();
+                break;
+            case 'mystery':
+                this.triggerMysteryEncounter();
+                break;
+        }
     }
     
     checkProximityEncountersWithPosition(playerPos) {
@@ -2279,6 +2317,21 @@ class EncounterSystem {
         }
     }
 
+    closeEncounterModal() {
+        const modal = document.getElementById('encounter-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            this.isDialogOpen = false; // Reset dialog flag
+            console.log('🎭 Encounter modal closed');
+        }
+        
+        // Also close any legendary encounter modals
+        const legendaryModal = document.querySelector('.encounter-modal.legendary-encounter');
+        if (legendaryModal) {
+            legendaryModal.remove();
+        }
+    }
+
     closeEncounter() {
         const modal = document.getElementById('encounter-modal');
         modal.classList.add('hidden');
@@ -2345,13 +2398,89 @@ class EncounterSystem {
     }
 
     testLegendaryEncounter(encounterType) {
+        if (this.isDialogOpen) {
+            console.log('🎭 Dialog already open, skipping encounter');
+            return;
+        }
+
         console.log(`🎭 Testing legendary encounter: ${encounterType}`);
         const encounter = this.legendaryEncounters[encounterType];
         if (encounter) {
+            this.isDialogOpen = true;
             this.startLegendaryEncounter(encounter, encounterType);
         } else {
             console.error(`🎭 Encounter type not found: ${encounterType}`);
         }
+    }
+
+    triggerMysteryEncounter() {
+        if (this.isDialogOpen) {
+            return;
+        }
+
+        console.log('🎭 Triggering mystery encounter...');
+        this.isDialogOpen = true;
+        
+        const mystery = {
+            name: "Mysterious Phenomenon",
+            type: "mystery",
+            description: "You sense something otherworldly nearby...",
+            effects: {
+                sanity: -5,
+                experience: 15
+            }
+        };
+        
+        this.startMysteryEncounter(mystery);
+    }
+
+    startMysteryEncounter(mystery) {
+        console.log('🎭 Starting mystery encounter:', mystery.name);
+        
+        const dialog = document.getElementById('dialog-text');
+        const actions = document.getElementById('encounter-actions');
+        const battle = document.getElementById('battle-interface');
+
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>🔮 ${mystery.name}</h3>
+                <p>${mystery.description}</p>
+                <p>Your sanity feels affected by this mysterious presence...</p>
+            </div>
+        `;
+
+        actions.innerHTML = `
+            <button id="action-1" class="encounter-btn">Investigate</button>
+            <button id="action-2" class="encounter-btn">Observe</button>
+            <button id="action-3" class="encounter-btn">Flee</button>
+        `;
+
+        battle.classList.add('hidden');
+        this.showEncounterModal();
+
+        // Add event listeners
+        document.getElementById('action-1').addEventListener('click', () => this.investigateMystery(mystery));
+        document.getElementById('action-2').addEventListener('click', () => this.observeMystery(mystery));
+        document.getElementById('action-3').addEventListener('click', () => this.fleeMystery(mystery));
+    }
+
+    investigateMystery(mystery) {
+        console.log('🎭 Investigating mystery...');
+        this.closeEncounterModal();
+        this.applyEncounterEffects(mystery.effects);
+        this.showNotification(`You investigated the ${mystery.name} and gained ${mystery.effects.experience} experience!`);
+    }
+
+    observeMystery(mystery) {
+        console.log('🎭 Observing mystery...');
+        this.closeEncounterModal();
+        this.showNotification(`You observed the ${mystery.name} from a safe distance.`);
+    }
+
+    fleeMystery(mystery) {
+        console.log('🎭 Fleeing from mystery...');
+        this.closeEncounterModal();
+        this.showNotification(`You quickly left the area, avoiding the ${mystery.name}.`);
     }
 
     triggerPOIEncounter() {

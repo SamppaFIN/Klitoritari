@@ -1524,11 +1524,11 @@ class EldritchSanctuaryApp {
         // Initialize dev toggle
         this.initializeDevToggle();
         
-        // Wire DEV button to open settings panel (dev mode toggling is wired in initializeDevToggle)
+        // Wire DEV button to toggle debug panel
         const devBtn = document.getElementById('dev-toggle');
         if (devBtn) {
             devBtn.addEventListener('click', () => {
-                this.toggleSidePanel();
+                this.toggleDebugPanel();
             });
         }
         
@@ -2117,6 +2117,20 @@ class EldritchSanctuaryApp {
             console.log('⚙️ New panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
         } else {
             console.error('⚙️ Side panel not found');
+        }
+    }
+
+    toggleDebugPanel() {
+        const debugPanel = document.getElementById('debug-panel');
+        if (debugPanel) {
+            debugPanel.classList.toggle('hidden');
+            console.log('🔧 Debug panel toggled');
+        } else {
+            console.log('🔧 Debug panel not found, creating it...');
+            // Create debug panel if it doesn't exist
+            if (window.encounterSystem) {
+                window.encounterSystem.createDebugPanel();
+            }
         }
     }
     
