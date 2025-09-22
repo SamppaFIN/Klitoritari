@@ -1409,6 +1409,9 @@ class MapEngine {
             <button class="context-menu-btn" onclick="window.mapEngine.centerOnLocation(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
                 🎯 Center Map
             </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.dropFlagHere(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-green);">
+                🇫🇮 Drop Flag Here
+            </button>
             <button class="context-menu-btn" onclick="window.mapEngine.cycleFlagTheme()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-pink);">
                 🌈 Flag Theme
             </button>
@@ -1831,6 +1834,23 @@ class MapEngine {
             }
         } else {
             console.log('🇫🇮 Finnish flag layer not available');
+        }
+    }
+
+    dropFlagHere(lat, lng) {
+        if (!this.finnishFlagLayer) {
+            console.warn('🇫🇮 Finnish flag layer not available');
+            return;
+        }
+        console.log(`🇫🇮 Dropping flag at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        this.finnishFlagLayer.addFlagPin(lat, lng);
+        if (window.gruesomeNotifications) {
+            window.gruesomeNotifications.showNotification({
+                type: 'success',
+                title: 'Flag Dropped',
+                message: 'A Finnish flag was placed at the selected location.',
+                duration: 2000
+            });
         }
     }
     
