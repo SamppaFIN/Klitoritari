@@ -1569,6 +1569,58 @@ class UnifiedQuestSystem {
         console.log('🎭 Objectives scattered within', radiusMeters, 'meters of player');
     }
     
+    // Move a specific objective to a new distinct nearby location
+    retargetObjectiveLocation(quest, objective, radiusMeters = 300, minSeparationMeters = 150) {
+        const player = this.getPlayerPosition && this.getPlayerPosition();
+        if (!player || typeof player.lat !== 'number' || typeof player.lng !== 'number') {
+            console.log('🎭 Cannot retarget objective: no player position');
+            return;
+        }
+        const oldLocation = objective.location;
+        const radiusKm = Math.max(10, radiusMeters) / 1000;
+        const minSepKm = Math.max(0, minSeparationMeters) / 1000;
+        
+        let attempts = 0;
+        let chosen = null;
+        while (attempts < 10) {
+            const bearing = Math.random() * 360;
+            const distanceKm = Math.random() * radiusKm;
+            const dest = this.calculateDestination(player.lat, player.lng, bearing, distanceKm);
+            if (!oldLocation) { chosen = dest; break; }
+            const sepFromOld = this.getDistanceFromLatLonInKm(dest.lat, dest.lng, oldLocation.lat, oldLocation.lng);
+            if (sepFromOld >= minSepKm) { chosen = dest; break; }
+            attempts++;
+        }
+        if (!chosen) {
+            // Fallback: nudge old location by min separation north
+            chosen = this.calculateDestination(oldLocation.lat, oldLocation.lng, 0, minSepKm);
+        }
+        objective.location = { lat: chosen.lat, lng: chosen.lng };
+        console.log('🎭 Objective retargeted:', objective.id, '→', objective.location);
+    }
+
+    // Recreate the marker for a specific objective using its updated location
+    refreshObjectiveMarker(quest, objective) {
+        if (!window.mapEngine || !window.mapEngine.map) return;
+        const key = `${quest.id}_${objective.id}`;
+        const existing = this.questMarkers.get(key);
+        if (existing) {
+            try { existing.remove(); } catch (e) { /* ignore */ }
+            this.questMarkers.delete(key);
+        }
+        if (objective.location) {
+            const marker = this.createQuestObjectiveMarker(objective, objective.location);
+            if (marker) {
+                this.questMarkers.set(key, marker);
+                // Focus
+                try {
+                    window.mapEngine.map.setView([objective.location.lat, objective.location.lng], 18, { animate: true, duration: 1.0 });
+                    if (marker.openPopup) setTimeout(() => marker.openPopup(), 300);
+                } catch (e) { /* ignore */ }
+            }
+        }
+    }
+    
     // Clear all caches to ensure fresh start
     clearAllCaches() {
         console.log('🎭 Clearing all quest system caches...');
@@ -2392,6 +2444,16 @@ class UnifiedQuestSystem {
             this.progressQuestMarkers(quest, objective);
         } else {
             console.log(`🎭 Not completing objective: ${objective.id} (shouldCompleteObjective = false)`);
+            // Wrong-answer retargeting: move objective to a distinct nearby location and re-highlight
+            try {
+                this.retargetObjectiveLocation(quest, objective, 300, 150);
+                this.refreshObjectiveMarker(quest, objective);
+                if (window.eldritchApp && window.eldritchApp.showNotification) {
+                    window.eldritchApp.showNotification('🎯 Objective moved to a new location! Try again.', 'warning');
+                }
+            } catch (e) {
+                console.warn('🎭 Failed to retarget objective after wrong answer', e);
+            }
         }
         
         // Show feedback dialog
