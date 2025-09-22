@@ -892,6 +892,9 @@ class EldritchSanctuaryApp {
         this.updateInventoryStatus();
         this.updateLocateStatus();
         
+        // Initialize dev toggle
+        this.initializeDevToggle();
+        
         // Initialize step currency system
         this.initializeStepSystem();
         
@@ -900,9 +903,61 @@ class EldritchSanctuaryApp {
         
         // Initialize control panel
         this.initializeControlPanel();
+
+        // Enforce step gating for starting investigations
+        this.enforceStepGating();
         
         // Initialize debug panel
         // Debug functionality now integrated into side panel
+    }
+
+    enforceStepGating() {
+        // Guard the start investigation button to require 100 steps
+        const attach = () => {
+            const startBtn = document.getElementById('start-investigation');
+            if (!startBtn) return;
+            if (startBtn.__gated) return; // avoid duplicate
+            startBtn.__gated = true;
+            startBtn.addEventListener('click', (e) => {
+                const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
+                if (steps < 100) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (window.gruesomeNotifications) {
+                        window.gruesomeNotifications.showNotification({
+                            type: 'warning',
+                            title: 'Locked Quest',
+                            message: 'Reach 100 steps to unlock. Or pay 50 steps to open now.',
+                            duration: 3500
+                        });
+                    }
+                    // Simple payment prompt: deduct 50 steps if user confirms
+                    const confirmPay = confirm('Not enough steps. Pay 50 steps to unlock?');
+                    if (confirmPay && window.stepCurrencySystem) {
+                        const paid = window.stepCurrencySystem.subtractSteps(50);
+                        if (paid >= 50) {
+                            // Allow action by triggering a click again without blocking
+                            setTimeout(() => startBtn.click(), 0);
+                        } else if (window.gruesomeNotifications) {
+                            window.gruesomeNotifications.showNotification({
+                                type: 'error',
+                                title: 'Payment Failed',
+                                message: 'Not enough steps to pay 50.',
+                                duration: 2500
+                            });
+                        }
+                    }
+                }
+            }, true);
+        };
+        // Try now and retries, as modal may render later
+        attach();
+        setTimeout(attach, 1000);
+        document.addEventListener('click', (ev) => {
+            if (ev.target && ev.target.id === 'start-investigation') {
+                attach();
+            }
+        });
     }
     
     updateInventoryStatus() {
@@ -966,6 +1021,84 @@ class EldritchSanctuaryApp {
                 locateDetails.textContent = 'Click to enable';
                 locateDetails.style.color = '#ffa726';
             }
+        }
+    }
+    
+    initializeDevToggle() {
+        console.log('🔧 Initializing dev toggle...');
+        
+        // Check if we're in production mode
+        const isProduction = window.location.hostname !== 'localhost' && 
+                           window.location.hostname !== '127.0.0.1' && 
+                           !window.location.hostname.includes('dev');
+        
+        // Start with dev mode disabled in production
+        this.devModeEnabled = !isProduction;
+        
+        const devToggle = document.getElementById('dev-toggle');
+        if (devToggle) {
+            // Set initial state
+            this.updateDevToggleUI();
+            
+            // Add click handler
+            devToggle.addEventListener('click', () => {
+                this.toggleDevMode();
+            });
+            
+            console.log('🔧 Dev toggle initialized, production mode:', isProduction);
+        } else {
+            console.error('🔧 Dev toggle button not found');
+        }
+    }
+    
+    toggleDevMode() {
+        this.devModeEnabled = !this.devModeEnabled;
+        console.log('🔧 Dev mode toggled:', this.devModeEnabled ? 'ON' : 'OFF');
+        
+        this.updateDevToggleUI();
+        this.toggleDebugElements();
+    }
+    
+    updateDevToggleUI() {
+        const devToggle = document.getElementById('dev-toggle');
+        if (devToggle) {
+            if (this.devModeEnabled) {
+                devToggle.classList.add('active');
+                devToggle.title = 'Developer Mode: ON';
+            } else {
+                devToggle.classList.remove('active');
+                devToggle.title = 'Developer Mode: OFF';
+            }
+        }
+    }
+    
+    toggleDebugElements() {
+        // Toggle debug panel visibility
+        const debugPanel = document.getElementById('glassmorphic-side-panel');
+        if (debugPanel) {
+            if (this.devModeEnabled) {
+                debugPanel.style.display = 'block';
+            } else {
+                debugPanel.style.display = 'none';
+            }
+        }
+        
+        // Toggle debug buttons in footer
+        const debugButtons = document.querySelectorAll('[id*="debug"], .debug-btn');
+        debugButtons.forEach(btn => {
+            if (this.devModeEnabled) {
+                btn.style.display = 'block';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+        
+        // Toggle console logging
+        if (this.devModeEnabled) {
+            console.log('🔧 Debug mode enabled - console logging active');
+        } else {
+            console.log('🔧 Debug mode disabled - console logging reduced');
+            // Don't completely disable console, just reduce verbosity
         }
     }
 
@@ -1617,6 +1750,14 @@ class EldritchSanctuaryApp {
             this.loadPlayerBases();
             this.loadNPCs();
             this.createQuestMarkers();
+            
+            // Handle pending base if map wasn't ready when base was established
+            if (this.pendingBase) {
+                console.log('🏗️ Rendering pending base:', this.pendingBase);
+                this.systems.mapEngine.addPlayerBaseMarker(this.pendingBase);
+                this.showNotification(`🏗️ Base "${this.pendingBase.name}" rendered!`, 'success');
+                this.pendingBase = null;
+            }
         };
         console.log('🗺️ onMapReady callback set:', this.systems.mapEngine.onMapReady);
         
@@ -1709,8 +1850,15 @@ class EldritchSanctuaryApp {
 
         // Base System integration
         this.systems.baseSystem.onBaseEstablished = (base) => {
-            this.systems.mapEngine.addPlayerBaseMarker(base);
-            this.showNotification(`🏗️ Base "${base.name}" established!`, 'success');
+            console.log('🏗️ Base established callback triggered:', base);
+            if (this.systems.mapEngine && this.systems.mapEngine.map) {
+                this.systems.mapEngine.addPlayerBaseMarker(base);
+                this.showNotification(`🏗️ Base "${base.name}" established!`, 'success');
+            } else {
+                console.log('🏗️ Map engine not ready, storing base for later rendering');
+                // Store base for later rendering when map is ready
+                this.pendingBase = base;
+            }
         };
 
         this.systems.baseSystem.onBaseDeleted = () => {

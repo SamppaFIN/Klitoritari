@@ -345,6 +345,10 @@ class StepCurrencySystem {
                 <div class="step-number" id="step-number">${this.totalSteps}</div>
                 <div class="step-label">COSMIC STEPS</div>
                 <div class="step-session" id="step-session">+${this.sessionSteps}</div>
+                <div class="step-controls" id="step-controls">
+                    <button id="step-decrement" class="step-ctrl-btn" title="-1 step">−</button>
+                    <button id="step-increment" class="step-ctrl-btn" title="+1 step">+</button>
+                </div>
             </div>
         `;
 
@@ -353,9 +357,54 @@ class StepCurrencySystem {
         if (stepContainer) {
             stepContainer.appendChild(stepCounter);
             console.log('🚶‍♂️ Step counter created and added to control panel');
+            this.setupStepControls();
         } else {
             console.error('🚶‍♂️ Step counter container not found, cannot create step counter');
         }
+    }
+
+    setupStepControls() {
+        const incBtn = document.getElementById('step-increment');
+        const decBtn = document.getElementById('step-decrement');
+        if (!incBtn || !decBtn) return;
+
+        const startHold = (direction) => {
+            let amount = 1;
+            // Single tap immediate
+            if (direction > 0) this.addManualStep(); else this.subtractSteps(1);
+            // Hold acceleration
+            let active = true;
+            let intervalMs = 300;
+            const tick = () => {
+                if (!active) return;
+                const count = Math.max(1, Math.floor(amount));
+                if (direction > 0) {
+                    for (let i = 0; i < count; i++) this.addManualStep();
+                } else {
+                    this.subtractSteps(count);
+                }
+                amount *= 1.5; // exponential growth
+                setTimeout(tick, intervalMs);
+            };
+            // Start after short delay to differentiate click vs hold
+            const holdTimeout = setTimeout(() => {
+                if (!active) return;
+                tick();
+            }, 350);
+            return () => { active = false; clearTimeout(holdTimeout); };
+        };
+
+        const bindHold = (button, direction) => {
+            let stop;
+            const onDown = (e) => { e.preventDefault(); stop = startHold(direction); };
+            const onUp = () => { if (stop) stop(); };
+            button.addEventListener('mousedown', onDown);
+            button.addEventListener('touchstart', onDown, { passive: false });
+            ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => button.addEventListener(evt, onUp));
+        };
+
+        bindHold(incBtn, +1);
+        bindHold(decBtn, -1);
     }
     
     updateStepCounter() {
