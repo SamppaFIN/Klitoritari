@@ -1477,6 +1477,21 @@ class MapEngine {
             window.eldritchApp.systems.geolocation.pauseLocationUpdates();
         }
         
+        // Fail-safe: snap marker immediately so the user sees movement
+        try {
+            this.updatePlayerPosition({ lat, lng, accuracy: 1, timestamp: Date.now() });
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.showNotification({
+                    type: 'info',
+                    title: 'Moving...',
+                    message: 'Simulating path to destination',
+                    duration: 1500
+                });
+            }
+        } catch (e) {
+            console.warn('🎮 Immediate marker snap failed:', e);
+        }
+        
         // Get current player position
         const currentPos = this.getPlayerPosition();
         if (!currentPos) {
