@@ -1005,6 +1005,8 @@ class EldritchSanctuaryApp {
         
         // Initialize side panel
         this.initializeSidePanel();
+        // Apply current dev mode state after panel exists
+        this.toggleDebugElements();
         
         // Initialize control panel
         this.initializeControlPanel();
@@ -1254,33 +1256,26 @@ class EldritchSanctuaryApp {
     }
     
     toggleDebugElements() {
-        // Toggle debug panel visibility
+        // Toggle debug panel visibility using the 'open' class so it slides in
         const debugPanel = document.getElementById('glassmorphic-side-panel');
         if (debugPanel) {
             if (this.devModeEnabled) {
+                debugPanel.classList.add('open');
                 debugPanel.style.display = 'block';
             } else {
+                debugPanel.classList.remove('open');
                 debugPanel.style.display = 'none';
             }
         }
         
-        // Toggle debug buttons in footer
-        const debugButtons = document.querySelectorAll('[id*="debug"], .debug-btn');
-        debugButtons.forEach(btn => {
-            if (this.devModeEnabled) {
-                btn.style.display = 'block';
-            } else {
-                btn.style.display = 'none';
-            }
+        // Toggle debug elements
+        const debugElements = document.querySelectorAll('[data-dev-only], [id*="debug"], .debug-btn');
+        debugElements.forEach(el => {
+            el.style.display = this.devModeEnabled ? '' : 'none';
         });
         
-        // Toggle console logging
-        if (this.devModeEnabled) {
-            console.log('🔧 Debug mode enabled - console logging active');
-        } else {
-            console.log('🔧 Debug mode disabled - console logging reduced');
-            // Don't completely disable console, just reduce verbosity
-        }
+        // Light console cue
+        console.log(this.devModeEnabled ? '🔧 Dev mode: ON' : '🔧 Dev mode: OFF');
     }
 
     
