@@ -1413,6 +1413,21 @@ class UnifiedQuestSystem {
         console.log('🎭 Resuming quest system...');
         this.isPaused = false;
         
+        // Adventure mode gate: require selection once, then apply
+        const selectedMode = this.getAdventureMode();
+        if (!selectedMode) {
+            // Show lightweight selector and defer resume until chosen
+            this.showAdventureSelector();
+            console.log('🎭 Awaiting adventure mode selection before creating markers');
+            return;
+        }
+        
+        // If Game mode, randomize proximity objectives around player within radius
+        if (selectedMode === 'game') {
+            // Scatter within ~300m by default (tunable)
+            this.scatterObjectivesNearPlayer(300);
+        }
+        
         // Clear all caches first to ensure fresh start
         this.clearAllCaches();
         
@@ -1421,6 +1436,7 @@ class UnifiedQuestSystem {
         
         // Setup UI and create quest markers now that game has started
         this.setupUI();
+        this.clearQuestMarkers();
         this.createQuestMarkers();
         
         // Start position tracking now that game has begun
@@ -1438,6 +1454,119 @@ class UnifiedQuestSystem {
         }, 500);
         
         console.log('🎭 Quest system resumed successfully');
+    }
+
+    // Persisted adventure mode helpers
+    getAdventureMode() {
+        try {
+            return localStorage.getItem('adventureMode');
+        } catch (e) {
+            console.warn('🎭 localStorage unavailable for adventureMode');
+            return null;
+        }
+    }
+
+    setAdventureMode(mode) {
+        try {
+            localStorage.setItem('adventureMode', mode);
+        } catch (e) {
+            console.warn('🎭 Failed to persist adventureMode');
+        }
+    }
+
+    // Lightweight in-DOM selector (no HTML edits needed)
+    showAdventureSelector() {
+        // Avoid duplicates
+        if (document.getElementById('adventure-selector-modal')) return;
+        const modal = document.createElement('div');
+        modal.id = 'adventure-selector-modal';
+        modal.style.cssText = `
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.6); z-index: 10000;
+        `;
+        modal.innerHTML = `
+            <div style="background: rgba(10,10,14,0.95); border: 2px solid var(--cosmic-purple);
+                         border-radius: 12px; padding: 16px; width: 280px; color: var(--cosmic-light);
+                         box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <h3 style="margin: 0 0 8px; color: var(--cosmic-purple);">Choose Adventure</h3>
+                <p style="margin: 0 0 12px; font-size: 12px; opacity: .85;">Pick a mode to begin.</p>
+                <div style="display: grid; gap: 8px;">
+                    <button id="mode-demo-btn" class="sacred-button" style="padding: 8px;">Demo (fixed objectives)</button>
+                    <button id="mode-game-btn" class="sacred-button" style="padding: 8px; background: var(--cosmic-green);">Game (randomized nearby)</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const onPick = (mode) => {
+            this.onAdventureSelected(mode);
+            modal.remove();
+        };
+        modal.querySelector('#mode-demo-btn').addEventListener('click', () => onPick('demo'));
+        modal.querySelector('#mode-game-btn').addEventListener('click', () => onPick('game'));
+    }
+
+    onAdventureSelected(mode) {
+        this.setAdventureMode(mode);
+        // Apply mode immediately and continue resume flow
+        if (mode === 'game') {
+            this.scatterObjectivesNearPlayer(300);
+        }
+        this.setupUI();
+        this.clearQuestMarkers();
+        this.createQuestMarkers();
+        this.startPositionTracking();
+        this.startAuroraMovement();
+        this.resetQuestsForGameStart();
+        setTimeout(() => this.triggerTestQuestDialog(), 500);
+        console.log('🎭 Adventure mode selected:', mode);
+    }
+
+    // Remove existing quest markers safely
+    clearQuestMarkers() {
+        if (!this.questMarkers) return;
+        try {
+            this.questMarkers.forEach((marker) => {
+                if (marker && typeof marker.remove === 'function') {
+                    marker.remove();
+                } else if (marker && window.mapEngine && window.mapEngine.map && typeof marker.removeFrom === 'function') {
+                    marker.removeFrom(window.mapEngine.map);
+                }
+            });
+        } catch (e) {
+            console.warn('🎭 Error clearing quest markers', e);
+        }
+        this.questMarkers.clear();
+    }
+
+    // Randomize proximity objective locations around current player within radiusMeters
+    scatterObjectivesNearPlayer(radiusMeters = 300) {
+        const player = this.getPlayerPosition && this.getPlayerPosition();
+        if (!player || typeof player.lat !== 'number' || typeof player.lng !== 'number') {
+            console.log('🎭 Cannot scatter objectives: no player position');
+            return;
+        }
+        const radiusKm = Math.max(10, radiusMeters) / 1000; // ensure sensible minimum
+        const jitterBearing = () => Math.random() * 360;
+        const jitterDistanceKm = () => (Math.random() * radiusKm);
+        
+        this.availableQuests.forEach((quest) => {
+            if (!Array.isArray(quest.objectives)) return;
+            quest.objectives.forEach((obj, idx) => {
+                if (obj && obj.type === 'proximity') {
+                    const bearing = jitterBearing();
+                    const distanceKm = jitterDistanceKm();
+                    const dest = this.calculateDestination(player.lat, player.lng, bearing, distanceKm);
+                    // Apply scattered location
+                    obj.location = { lat: dest.lat, lng: dest.lng };
+                    // Optionally, slightly vary required distance
+                    if (typeof obj.distance === 'number') {
+                        const delta = Math.round((Math.random() - 0.5) * 10);
+                        obj.distance = Math.max(20, obj.distance + delta);
+                    }
+                }
+            });
+        });
+        console.log('🎭 Objectives scattered within', radiusMeters, 'meters of player');
     }
     
     // Clear all caches to ensure fresh start
