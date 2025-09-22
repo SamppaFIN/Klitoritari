@@ -59,6 +59,8 @@ class EnhancedPathPaintingSystem {
     }
 
     setupWebGLRenderer() {
+        console.log('🎨 Setting up WebGL renderer...');
+        
         // Create WebGL canvas for vector rendering
         this.webglCanvas = document.createElement('canvas');
         this.webglCanvas.id = 'vector-graphics-canvas';
@@ -72,6 +74,10 @@ class EnhancedPathPaintingSystem {
         const mapContainer = document.getElementById('map');
         if (mapContainer) {
             mapContainer.appendChild(this.webglCanvas);
+            console.log('🎨 WebGL canvas added to map container');
+        } else {
+            console.error('🎨 Map container not found!');
+            return;
         }
 
         // Get WebGL context
@@ -81,9 +87,17 @@ class EnhancedPathPaintingSystem {
             console.error('🎨 WebGL not supported for vector rendering');
             return;
         }
+        
+        console.log('🎨 WebGL context created successfully');
 
         // Initialize vector renderer
-        this.vectorRenderer = new WebGLVectorRenderer(this.webglContext, this.webglCanvas);
+        try {
+            this.vectorRenderer = new WebGLVectorRenderer(this.webglContext, this.webglCanvas);
+            console.log('🎨 Vector renderer initialized successfully');
+        } catch (e) {
+            console.error('🎨 Failed to initialize vector renderer:', e);
+            return;
+        }
         
         // Resize canvas to match map
         this.resizeCanvas();
@@ -92,8 +106,7 @@ class EnhancedPathPaintingSystem {
         if (this.mapEngine && this.mapEngine.map) {
             this.mapEngine.map.on('zoomend moveend', () => {
                 this.updateMapState();
-                // Disabled boundary rendering to prevent large blue overlays
-                // this.renderBoundaries();
+                this.renderBoundaries();
             });
         }
     }
@@ -119,6 +132,8 @@ class EnhancedPathPaintingSystem {
         const center = this.mapEngine.map.getCenter();
         const bounds = this.mapEngine.map.getBounds();
         
+        console.log('🎨 Updating map state:', { zoom, center, bounds });
+        
         this.vectorRenderer.updateMapState(zoom, center, bounds);
     }
 
@@ -130,10 +145,18 @@ class EnhancedPathPaintingSystem {
     }
 
     updatePlayerPath() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) return;
+        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) {
+            console.log('🎨 Path tracking: No geolocation system available');
+            return;
+        }
 
         const playerPos = window.eldritchApp.systems.geolocation.currentPosition;
-        if (!playerPos) return;
+        if (!playerPos) {
+            console.log('🎨 Path tracking: No player position available');
+            return;
+        }
+        
+        console.log('🎨 Path tracking: Player position:', playerPos);
 
         // Check if player has moved enough to add a new point
         if (this.lastPosition) {
@@ -187,9 +210,26 @@ class EnhancedPathPaintingSystem {
     }
 
     renderBoundaries() {
-        // Disabled to prevent large blue overlays
-        console.log('🎨 Boundary rendering disabled to prevent large blue overlays');
-        return;
+        if (!this.vectorRenderer || !this.mapEngine || !this.mapEngine.map) {
+            console.log('🎨 Boundary rendering: Missing dependencies');
+            return;
+        }
+        
+        console.log('🎨 Rendering boundaries with', this.boundaryPoints.length, 'points');
+        
+        // Ensure map state is up to date before rendering
+        this.updateMapState();
+        
+        // Clear previous boundaries
+        this.vectorRenderer.clear();
+        
+        // Render boundary with flags if we have enough points
+        if (this.boundaryPoints.length >= 2) {
+            this.vectorRenderer.renderFlagsAlongPath(this.boundaryPoints, this.flagSpacing, this.flagScale);
+        }
+        
+        // Render the accumulated vertices
+        this.vectorRenderer.render();
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {

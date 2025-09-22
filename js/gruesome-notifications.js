@@ -116,7 +116,31 @@ class GruesomeNotifications {
     }
 
     showNotification(message, level, type) {
-        const levelInfo = this.notificationLevels[type][level];
+        // Support object-style call: { type, title, message, duration }
+        let titleText = '';
+        let messageText = message;
+        let notifType = type || 'info';
+        let notifLevel = level;
+        let durationMs = 2500;
+
+        if (message && typeof message === 'object') {
+            const opts = message;
+            messageText = opts.message || '';
+            titleText = opts.title || '';
+            notifType = opts.type || 'info';
+            notifLevel = typeof opts.level === 'number' ? opts.level : 100; // default top level
+            durationMs = typeof opts.duration === 'number' ? opts.duration : 2500;
+        }
+
+        // Resolve level info safely
+        const typeLevels = this.notificationLevels[notifType] || {};
+        // Pick nearest defined level if exact not present
+        let levelKey = notifLevel;
+        if (!(levelKey in typeLevels)) {
+            const keys = Object.keys(typeLevels).map(Number).sort((a,b)=>b-a);
+            levelKey = keys.find(k => notifLevel >= k) ?? (keys[0] ?? 100);
+        }
+        const levelInfo = typeLevels[levelKey] || { name: 'Info', color: '#66ccff', icon: 'ℹ️' };
         
         const notification = document.createElement('div');
         notification.className = 'gruesome-notification';
@@ -136,64 +160,20 @@ class GruesomeNotifications {
             box-shadow: 0 0 20px ${levelInfo.color}40;
             z-index: 10000;
             animation: gruesomeSlideIn 0.5s ease-out;
-            max-width: 400px;
-            text-align: center;
         `;
-        
+
+        const titleHtml = titleText ? `<div style="font-size:18px;margin-bottom:6px;color:${levelInfo.color}">${levelInfo.icon} ${titleText}</div>` : '';
         notification.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <span style="font-size: 24px;">${levelInfo.icon}</span>
-                <div>
-                    <div style="font-size: 18px; margin-bottom: 5px;">${levelInfo.name}</div>
-                    <div style="font-size: 14px; opacity: 0.8;">${message}</div>
-                </div>
-            </div>
+            ${titleHtml}
+            <div>${messageText}</div>
         `;
-        
+
         document.body.appendChild(notification);
-        
-        // Add animation styles
-        if (!document.getElementById('gruesome-notification-styles')) {
-            const style = document.createElement('style');
-            style.id = 'gruesome-notification-styles';
-            style.textContent = `
-                @keyframes gruesomeSlideIn {
-                    0% { 
-                        transform: translate(-50%, -50%) scale(0.5); 
-                        opacity: 0; 
-                    }
-                    50% { 
-                        transform: translate(-50%, -50%) scale(1.1); 
-                        opacity: 0.8; 
-                    }
-                    100% { 
-                        transform: translate(-50%, -50%) scale(1); 
-                        opacity: 1; 
-                    }
-                }
-                @keyframes gruesomeSlideOut {
-                    0% { 
-                        transform: translate(-50%, -50%) scale(1); 
-                        opacity: 1; 
-                    }
-                    100% { 
-                        transform: translate(-50%, -50%) scale(0.5); 
-                        opacity: 0; 
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
-        // Auto-remove after delay
+
         setTimeout(() => {
-            notification.style.animation = 'gruesomeSlideOut 0.5s ease-in';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 500);
-        }, 3000);
+            notification.style.animation = 'gruesomeSlideOut 0.4s ease-in';
+            setTimeout(() => notification.remove(), 400);
+        }, durationMs);
     }
 
     // Special death notification

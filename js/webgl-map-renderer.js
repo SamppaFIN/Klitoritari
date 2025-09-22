@@ -291,6 +291,14 @@ class WebGLMapRenderer {
             reserved: this.gl.getAttribLocation(this.program, 'a_reserved')
         };
         
+        // Check for invalid attribute locations and disable WebGL if needed
+        const invalidAttribs = Object.entries(this.attribLocations).filter(([name, location]) => location === -1);
+        if (invalidAttribs.length > 0) {
+            console.warn('🌌 Invalid attribute locations detected:', invalidAttribs);
+            this.isEnabled = false;
+            return;
+        }
+        
         this.uniformLocations = {
             zoomLevel: this.gl.getUniformLocation(this.program, 'u_zoomLevel'),
             projectionMatrix: this.gl.getUniformLocation(this.program, 'u_projectionMatrix'),
@@ -448,44 +456,36 @@ class WebGLMapRenderer {
     }
     
     setupAttributes() {
+        if (!this.isEnabled) return;
+        
         const stride = this.objectStride * 4; // 4 bytes per float
         
+        // Safely enable vertex attributes with error checking
+        const enableAttribute = (location, size, offset) => {
+            if (location >= 0) {
+                this.gl.enableVertexAttribArray(location);
+                this.gl.vertexAttribPointer(location, size, this.gl.FLOAT, false, stride, offset);
+            }
+        };
+        
         // Position
-        this.gl.enableVertexAttribArray(this.attribLocations.position);
-        this.gl.vertexAttribPointer(this.attribLocations.position, 2, this.gl.FLOAT, false, stride, 0);
+        enableAttribute(this.attribLocations.position, 2, 0);
         
         // Min/Max zoom
-        this.gl.enableVertexAttribArray(this.attribLocations.minZoom);
-        this.gl.vertexAttribPointer(this.attribLocations.minZoom, 1, this.gl.FLOAT, false, stride, 8);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.maxZoom);
-        this.gl.vertexAttribPointer(this.attribLocations.maxZoom, 1, this.gl.FLOAT, false, stride, 12);
+        enableAttribute(this.attribLocations.minZoom, 1, 8);
+        enableAttribute(this.attribLocations.maxZoom, 1, 12);
         
         // LOD data
-        this.gl.enableVertexAttribArray(this.attribLocations.lodData1);
-        this.gl.vertexAttribPointer(this.attribLocations.lodData1, 4, this.gl.FLOAT, false, stride, 16);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.lodData2);
-        this.gl.vertexAttribPointer(this.attribLocations.lodData2, 4, this.gl.FLOAT, false, stride, 32);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.lodData3);
-        this.gl.vertexAttribPointer(this.attribLocations.lodData3, 4, this.gl.FLOAT, false, stride, 48);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.lodData4);
-        this.gl.vertexAttribPointer(this.attribLocations.lodData4, 4, this.gl.FLOAT, false, stride, 64);
+        enableAttribute(this.attribLocations.lodData1, 4, 16);
+        enableAttribute(this.attribLocations.lodData2, 4, 32);
+        enableAttribute(this.attribLocations.lodData3, 4, 48);
+        enableAttribute(this.attribLocations.lodData4, 4, 64);
         
         // Metadata
-        this.gl.enableVertexAttribArray(this.attribLocations.objectType);
-        this.gl.vertexAttribPointer(this.attribLocations.objectType, 1, this.gl.FLOAT, false, stride, 80);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.flags);
-        this.gl.vertexAttribPointer(this.attribLocations.flags, 1, this.gl.FLOAT, false, stride, 84);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.animation);
-        this.gl.vertexAttribPointer(this.attribLocations.animation, 1, this.gl.FLOAT, false, stride, 88);
-        
-        this.gl.enableVertexAttribArray(this.attribLocations.reserved);
-        this.gl.vertexAttribPointer(this.attribLocations.reserved, 1, this.gl.FLOAT, false, stride, 92);
+        enableAttribute(this.attribLocations.objectType, 1, 80);
+        enableAttribute(this.attribLocations.flags, 1, 84);
+        enableAttribute(this.attribLocations.animation, 1, 88);
+        enableAttribute(this.attribLocations.reserved, 1, 92);
     }
     
     setupUniforms() {

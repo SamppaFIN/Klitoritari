@@ -334,6 +334,10 @@ class UnifiedQuestSystem {
     
     createQuestMarkers() {
         // Create quest markers on the map
+        if (this.awaitingLocate || !this.startingPosition) {
+            console.log('🎭 Deferring quest marker creation until starting position is known');
+            return;
+        }
         if (!window.mapEngine || !window.mapEngine.map) {
             console.log('🎭 Map engine not ready, will create markers later');
             return;
@@ -355,6 +359,9 @@ class UnifiedQuestSystem {
         
         // Quest location markers
         this.createQuestLocationMarkers();
+        
+        // Create POI markers for proximity objectives
+        this.createProximityPOIMarkers();
         
         // Create the first quest objective marker if quest is available
         const corrodingLakeQuest = this.availableQuests.get('corroding_lake');
@@ -459,6 +466,93 @@ class UnifiedQuestSystem {
         console.log('🎭 Aurora marker created');
     }
     
+    createProximityPOIMarkers() {
+        // Create POI markers for proximity objectives that can be detected by encounter system
+        console.log('🎭 Creating proximity POI markers...');
+        
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.log('🎭 Map engine not ready for POI creation');
+            return;
+        }
+        
+        // Clear existing proximity POIs
+        if (window.mapEngine.proximityPOIs) {
+            window.mapEngine.proximityPOIs.forEach(poi => {
+                if (poi && typeof poi.remove === 'function') {
+                    poi.remove();
+                }
+            });
+        }
+        window.mapEngine.proximityPOIs = [];
+        
+        // Create POI markers for each proximity objective
+        this.availableQuests.forEach((quest, questId) => {
+            if (!Array.isArray(quest.objectives)) return;
+            
+            quest.objectives.forEach((objective, objIndex) => {
+                if (objective && objective.type === 'proximity' && objective.location) {
+                    const poi = L.marker([objective.location.lat, objective.location.lng], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: `<div style="
+                                background: ${objective.color || '#ff6b6b'};
+                                color: white;
+                                border: 2px solid white;
+                                border-radius: 50%;
+                                width: 30px;
+                                height: 30px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 16px;
+                                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                            ">${objective.icon || '🎯'}</div>`,
+                            iconSize: [30, 30],
+                            iconAnchor: [15, 15]
+                        })
+                    });
+                    
+                    // Add popup with objective info
+                    poi.bindPopup(`
+                        <div style="text-align: center; min-width: 200px;">
+                            <h3 style="margin: 0 0 10px 0; color: #333;">${objective.description}</h3>
+                            <p style="margin: 5px 0; color: #666;">Quest: ${quest.name}</p>
+                            <p style="margin: 5px 0; color: #666;">Distance: ${objective.distance}m</p>
+                            <button onclick="window.encounterSystem?.startPOIEncounter(this.closest('.leaflet-popup-content').poi)" 
+                                style="background: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                                🎭 Investigate
+                            </button>
+                        </div>
+                    `);
+                    
+                    // Store reference to the objective
+                    poi.objective = objective;
+                    poi.quest = quest;
+                    poi.encountered = false;
+                    
+                    // Add to map
+                    poi.addTo(window.mapEngine.map);
+                    
+                    // Add to map engine's POI list for encounter detection
+                    if (!window.mapEngine.pointsOfInterest) {
+                        window.mapEngine.pointsOfInterest = [];
+                    }
+                    window.mapEngine.pointsOfInterest.push(poi);
+                    
+                    // Also add to proximity POIs list
+                    if (!window.mapEngine.proximityPOIs) {
+                        window.mapEngine.proximityPOIs = [];
+                    }
+                    window.mapEngine.proximityPOIs.push(poi);
+                    
+                    console.log(`🎭 Created POI marker for ${objective.id} at ${objective.location.lat.toFixed(6)}, ${objective.location.lng.toFixed(6)}`);
+                }
+            });
+        });
+        
+        console.log('🎭 Created', window.mapEngine.proximityPOIs.length, 'proximity POI markers');
+    }
+
     createQuestLocationMarkers() {
         // Create markers for quest locations
         console.log('🎭 Creating quest location markers...');
@@ -1487,6 +1581,18 @@ class UnifiedQuestSystem {
                 return;
             }
             this.awaitingLocate = false;
+            // Capture the player's first known position as the fixed starting origin
+            try {
+                const pos = (this.getPlayerPosition && this.getPlayerPosition()) || null;
+                if (pos && typeof pos.lat === 'number' && typeof pos.lng === 'number') {
+                    this.startingPosition = { lat: pos.lat, lng: pos.lng };
+                    console.log('📍 Starting position captured for scattering:', this.startingPosition);
+                } else {
+                    console.warn('📍 No valid player position to capture as starting position');
+                }
+            } catch (e) {
+                console.warn('📍 Failed to capture starting position', e);
+            }
             // Update Aurora position to be ~100m away from latest player position
             this.updateAuroraPosition();
             // Now scatter and create markers
@@ -1517,12 +1623,31 @@ class UnifiedQuestSystem {
             console.warn('🎭 Error clearing quest markers', e);
         }
         this.questMarkers.clear();
+        
+        // Also clear proximity POIs
+        if (window.mapEngine && window.mapEngine.proximityPOIs) {
+            try {
+                window.mapEngine.proximityPOIs.forEach(poi => {
+                    if (poi && typeof poi.remove === 'function') {
+                        poi.remove();
+                    }
+                });
+                window.mapEngine.proximityPOIs = [];
+                console.log('🎭 Cleared proximity POI markers');
+            } catch (e) {
+                console.warn('Failed to clear proximity POIs:', e);
+            }
+        }
     }
 
     // Randomize proximity objective locations around current player within radiusMeters
     scatterObjectivesNearPlayer(radiusMeters = 300) {
         const player = this.getPlayerPosition && this.getPlayerPosition();
-        if (!player || typeof player.lat !== 'number' || typeof player.lng !== 'number') {
+        // Prefer the fixed starting position captured at Locate Me
+        const origin = (this.startingPosition && typeof this.startingPosition.lat === 'number' && typeof this.startingPosition.lng === 'number')
+            ? this.startingPosition
+            : player;
+        if (!origin || typeof origin.lat !== 'number' || typeof origin.lng !== 'number') {
             console.log('🎭 Cannot scatter objectives: no player position');
             return;
         }
@@ -1537,7 +1662,7 @@ class UnifiedQuestSystem {
                 if (obj && obj.type === 'proximity') {
                     const bearing = jitterBearing();
                     const distanceKm = jitterDistanceKm();
-                    const dest = this.calculateDestination(player.lat, player.lng, bearing, distanceKm);
+                    const dest = this.calculateDestination(origin.lat, origin.lng, bearing, distanceKm);
                     // Apply scattered location
                     obj.location = { lat: dest.lat, lng: dest.lng };
                     // Optionally, slightly vary required distance
@@ -1548,7 +1673,7 @@ class UnifiedQuestSystem {
                 }
             });
         });
-        console.log('🎭 Objectives scattered within', radiusMeters, 'meters of player');
+        console.log('🎭 Objectives scattered within', radiusMeters, 'meters of starting position:', origin);
     }
     
     // Move a specific objective to a new distinct nearby location
@@ -3268,6 +3393,98 @@ class UnifiedQuestSystem {
         };
     }
     
+    // Create quest markers for all available quests
+    createQuestMarkers() {
+        console.log('🎭 Creating quest markers...');
+        
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.warn('🎭 Cannot create quest markers - map engine not ready');
+            return;
+        }
+        
+        // Create Aurora marker (main quest giver)
+        this.createAuroraMarker();
+        
+        // Create markers for the first objective of each available quest
+        this.availableQuests.forEach((quest, questId) => {
+            if (quest.objectives && quest.objectives.length > 0) {
+                const firstObjective = quest.objectives[0];
+                if (firstObjective && firstObjective.location) {
+                    console.log('🎭 Creating marker for quest:', quest.name, 'objective:', firstObjective.id);
+                    const markerKey = `${questId}_${firstObjective.id}`;
+                    const marker = this.createQuestObjectiveMarker(firstObjective, firstObjective.location);
+                    if (marker) {
+                        this.questMarkers.set(markerKey, marker);
+                        console.log('🎭 Quest marker created and stored:', markerKey);
+                    }
+                }
+            }
+        });
+        
+        console.log('🎭 Quest markers creation complete. Total markers:', this.questMarkers.size);
+    }
+    
+    // Create Aurora marker
+    createAuroraMarker() {
+        console.log('🎭 Creating Aurora marker at:', this.aurora.lat, this.aurora.lng);
+        
+        const auroraIcon = L.divIcon({
+            className: 'aurora-marker',
+            html: `
+                <div style="position: relative; width: 50px; height: 50px;">
+                    <div style="position: absolute; top: -5px; left: -5px; width: 60px; height: 60px; background: radial-gradient(circle, #ffd70033 0%, transparent 70%); border-radius: 50%; animation: auroraPulse 3s infinite;"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: linear-gradient(45deg, #ffd700, #ffed4e); border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 25px #ffd700;"></div>
+                    <div style="position: absolute; top: 10px; left: 10px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">👑</div>
+                </div>
+            `,
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
+        });
+        
+        const auroraMarker = L.marker([this.aurora.lat, this.aurora.lng], { icon: auroraIcon }).addTo(window.mapEngine.map);
+        
+        auroraMarker.bindPopup(`
+            <div style="text-align: center;">
+                <h4>👑 Aurora - The Cosmic Entity</h4>
+                <p style="color: #ffffff; font-size: 0.9em;">A mysterious cosmic entity that offers quests and guidance</p>
+                <div style="margin: 10px 0; padding: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; border: 1px solid #ffd700;">
+                    <strong>Status:</strong> Available<br>
+                    <strong>Distance:</strong> <span id="aurora-distance">Calculating...</span>
+                </div>
+                <button onclick="window.unifiedQuestSystem.interactWithAurora()" 
+                        style="background: #ffd700; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 8px;">
+                    👑 Talk to Aurora
+                </button>
+            </div>
+        `);
+        
+        this.questMarkers.set('aurora', auroraMarker);
+        console.log('🎭 Aurora marker created and added to map');
+    }
+    
+    // Interact with Aurora
+    interactWithAurora() {
+        console.log('🎭 Interacting with Aurora');
+        
+        // Find the first available quest
+        const firstQuest = this.availableQuests.values().next().value;
+        if (firstQuest) {
+            // Start the quest
+            this.startQuest(firstQuest.id);
+            
+            // Show quest dialog
+            const firstObjective = firstQuest.objectives[0];
+            if (firstObjective) {
+                this.showQuestDialog(firstQuest, firstObjective);
+            }
+        } else {
+            console.log('🎭 No available quests to start');
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.show('🎭 No Quests Available', 'All quests have been completed!', 'info');
+            }
+        }
+    }
+
     // Create a quest objective marker
     createQuestObjectiveMarker(objective, position) {
         const objectiveIcons = {

@@ -528,6 +528,12 @@ class ItemSystem {
             item: this.getItem(randomItem)
         };
     }
+    
+    // Initialize the item system
+    init() {
+        console.log('🎒 Item system initialized');
+        this.isInitialized = true;
+    }
 }
 
 // Make it globally available

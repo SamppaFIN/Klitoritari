@@ -188,6 +188,10 @@ class MapEngine {
         // Map ready event
         this.map.whenReady(() => {
             console.log('🗺️ Map is ready');
+            
+            // Ensure player marker is visible immediately when map is ready
+            this.ensurePlayerMarkerVisible();
+            
             console.log('🗺️ onMapReady callback exists?', !!this.onMapReady);
             if (this.onMapReady) {
                 console.log('🗺️ Calling onMapReady callback');
@@ -241,6 +245,10 @@ class MapEngine {
             this.playerMarker.bindPopup('<b>Player Location</b><br>Your current position in the cosmic realm');
             
             console.log('📍 Multilayered player marker created at:', latlng);
+            
+            // Ensure player marker is visible
+            this.playerMarker.setOpacity(1);
+            this.playerMarker.setZIndexOffset(1000);
         } else {
             // Update existing marker position
             this.playerMarker.setLatLng(latlng);
@@ -261,6 +269,10 @@ class MapEngine {
                 console.log('📍 Player marker was removed, re-adding to map');
                 this.playerMarker.addTo(this.map);
             }
+            
+            // Ensure player marker is visible
+            this.playerMarker.setOpacity(1);
+            this.playerMarker.setZIndexOffset(1000);
         }
 
         // Update accuracy circle
@@ -808,7 +820,8 @@ class MapEngine {
         // 4. Generate legendary encounters
         this.generateLegendaryEncounters();
         
-        // 5. Marker showcase removed - using WebGL rendering instead
+        // 5. Add HEVY and other special markers
+        this.createSpecialMarkers();
         
         // 6. Quest markers handled by unified quest system
         
@@ -845,6 +858,60 @@ class MapEngine {
         }
         
         console.log('🎯 All markers recreated successfully');
+    }
+
+    // Initialize map with a specific position
+    initializeWithPosition(position) {
+        console.log('🗺️ Initializing map with position:', position);
+        
+        if (!this.map) {
+            console.error('🗺️ Map not initialized');
+            return;
+        }
+        
+        // Update player position immediately
+        this.updatePlayerPosition(position);
+        
+        // Center map on player
+        this.map.setView([position.lat, position.lng], 18);
+        
+        // Start proximity detection
+        this.startProximityDetection();
+        
+        console.log('🗺️ Map initialized with position');
+    }
+    
+    // Ensure player marker is visible immediately when map is ready
+    ensurePlayerMarkerVisible() {
+        if (!this.map) return;
+        
+        // If we have a current position, create the player marker
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
+            const position = window.eldritchApp.systems.geolocation.currentPosition;
+            console.log('📍 Ensuring player marker is visible at:', position);
+            this.updatePlayerPosition(position);
+        } else {
+            // Create a default player marker at a known location
+            const defaultPosition = { lat: 61.47184564562671, lng: 23.725938496942355, accuracy: 1, timestamp: Date.now() };
+            console.log('📍 Creating default player marker at:', defaultPosition);
+            this.updatePlayerPosition(defaultPosition);
+        }
+        
+        // Also create special markers (HEVY, shrines, items, monsters)
+        this.createSpecialMarkers();
+        
+        // Create NPCs (Aurora and Zephyr) if NPC system is available
+        if (window.npcSystem) {
+            console.log('👥 Creating NPCs on map ready...');
+            window.npcSystem.generateNPCs();
+            window.npcSystem.startSimulation();
+        }
+        
+        // Create quest markers if quest system is available
+        if (window.unifiedQuestSystem) {
+            console.log('🎭 Creating quest markers on map ready...');
+            window.unifiedQuestSystem.createQuestMarkers();
+        }
     }
 
     // Start proximity detection for encounters
@@ -1526,35 +1593,11 @@ class MapEngine {
             <button class="context-menu-btn" onclick="window.mapEngine.movePlayer(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
                 🚶 Move Here
             </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.centerOnLocation(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px;">
-                🎯 Center Map
-            </button>
             <button class="context-menu-btn" onclick="window.mapEngine.dropFlagHere(${latlng.lat}, ${latlng.lng})" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-green);">
                 🇫🇮 Drop Flag Here
             </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.cycleFlagTheme()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-pink);">
-                🌈 Flag Theme
-            </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.createTestDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-red);">
+            <button class="context-menu-btn" onclick="window.mapEngine.triggerRandomDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-red);">
                 👻 Test Effects
-            </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.togglePathLine()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-blue);">
-                🧭 Toggle Path Line
-            </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.clearPathLine()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-orange);">
-                🗑️ Clear Path
-            </button>
-            <button class="context-menu-btn" onclick="window.mapEngine.openBaseManagement()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-green);">
-                🏗️ Establish/Open Base
-            </button>
-            <button class="context-menu-btn" onclick="window.unifiedQuestSystem.showQuestLog()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-orange);">
-                📜 Quests
-            </button>
-            <button class="context-menu-btn" onclick="window.eldritchApp.toggleSidePanel()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-gray);">
-                ⚙️ Settings
-            </button>
-            <button class="context-menu-btn" onclick="window.eldritchApp.systems.inventory.showInventory()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-purple);">
-                🎒 Inventory
             </button>
             <button class="context-menu-btn" onclick="window.mapEngine.hideContextMenu()" style="width: 100%; background: var(--cosmic-red);">
                 ❌ Close
@@ -1606,13 +1649,38 @@ class MapEngine {
         // Fail-safe: snap marker immediately so the user sees movement
         try {
             this.updatePlayerPosition({ lat, lng, accuracy: 1, timestamp: Date.now() });
+            // Ensure geolocation reflects the moved position and prefers it
+            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                const geo = window.eldritchApp.systems.geolocation;
+                geo.deviceGPSEnabled = false;
+                geo.fixedPosition = { lat, lng };
+                geo.currentPosition = { lat, lng, accuracy: 1, timestamp: Date.now() };
+                geo.lastValidPosition = { lat, lng, accuracy: 1, timestamp: Date.now() };
+            }
+            
+            // If quest system awaits locate, treat this as first known position
+            if (window.unifiedQuestSystem) {
+                if (!window.unifiedQuestSystem.startingPosition) {
+                    window.unifiedQuestSystem.startingPosition = { lat, lng };
+                }
+            }
+            
+            // Immediately run a proximity check at the new position
+            if (window.encounterSystem && typeof window.encounterSystem.checkProximityEncountersWithPosition === 'function') {
+                window.encounterSystem.checkProximityEncountersWithPosition({ lat, lng });
+            } else if (window.encounterSystem && typeof window.encounterSystem.checkProximityEncounters === 'function') {
+                window.encounterSystem.checkProximityEncounters();
+            }
+            
             if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
-                window.gruesomeNotifications.showNotification({
-                    type: 'info',
-                    title: 'Moving...',
-                    message: 'Simulating path to destination',
-                    duration: 1500
-                });
+                try {
+                    window.gruesomeNotifications.showNotification({
+                        type: 'info',
+                        title: 'Moving...',
+                        message: 'Simulating path to destination',
+                        duration: 1500
+                    });
+                } catch (_) {}
             }
         } catch (e) {
             console.warn('🎮 Immediate marker snap failed:', e);
@@ -1624,11 +1692,13 @@ class MapEngine {
             console.warn('🎮 No current player position available, using fallback');
             // Use fallback position if no GPS position available
             const fallback = { lat: 61.472768, lng: 23.724032 }; // User's known location
+            
+            // Simulate movement from fallback to target
             this.simulatePlayerMovement(fallback, { lat, lng });
             return;
         }
         
-        // Start simulated movement with pathway painting
+        // Simulate movement from current position to target
         this.simulatePlayerMovement(currentPos, { lat, lng });
     }
     
@@ -1668,6 +1738,12 @@ class MapEngine {
                 if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
                     window.eldritchApp.systems.geolocation.resumeLocationUpdates();
                 }
+                // Final proximity check at the destination
+                if (window.encounterSystem && typeof window.encounterSystem.checkProximityEncountersWithPosition === 'function') {
+                    window.encounterSystem.checkProximityEncountersWithPosition({ lat: endPos.lat, lng: endPos.lng });
+                } else if (window.encounterSystem && typeof window.encounterSystem.checkProximityEncounters === 'function') {
+                    window.encounterSystem.checkProximityEncounters();
+                }
                 return;
             }
             
@@ -1688,6 +1764,11 @@ class MapEngine {
             
             // Paint pathway with Finnish flags
             this.paintPathwayStep(currentLat, currentLng, progress);
+            
+            // Proximity check for encounters at this simulated step
+            if (window.encounterSystem && typeof window.encounterSystem.checkProximityEncountersWithPosition === 'function') {
+                window.encounterSystem.checkProximityEncountersWithPosition({ lat: currentLat, lng: currentLng });
+            }
             
             currentStep++;
         }, stepDuration);
@@ -2392,6 +2473,299 @@ class MapEngine {
 
     togglePathLine() {
         this.setPathLineEnabled(!this.pathLineEnabled);
+    }
+
+    triggerRandomDistortionEffects() {
+        console.log('🎭 Triggering random distortion effects...');
+        
+        // Show notification
+        if (window.gruesomeNotifications) {
+            window.gruesomeNotifications.showNotification({
+                type: 'info',
+                title: 'Test Effects',
+                message: 'Random distortion effects triggered',
+                duration: 3000
+            });
+        }
+        
+        // Trigger enhanced random distortion effects
+        if (window.sanityDistortion) {
+            // Force trigger the 30s loop effects immediately with higher intensity
+            window.sanityDistortion.triggerDistortionEffects();
+            
+            // Add additional random effects for testing
+            const effects = ['addRandomGhostlyShadow', 'addRandomParticle', 'addRandomSlimeDrop', 'addRandomHallucination'];
+            const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+            if (window.sanityDistortion[randomEffect]) {
+                window.sanityDistortion[randomEffect]();
+            }
+        }
+    }
+    
+    // Create special markers (HEVY, shrines, items, etc.)
+    createSpecialMarkers() {
+        if (!this.map) return;
+        
+        console.log('🎯 Creating special markers...');
+        
+        // Get player position for marker placement
+        let baseLat = 61.47184564562671;
+        let baseLng = 23.725938496942355;
+        
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
+            baseLat = window.eldritchApp.systems.geolocation.currentPosition.lat;
+            baseLng = window.eldritchApp.systems.geolocation.currentPosition.lng;
+        }
+        
+        // Create HEVY marker
+        this.createHEVYMarker(baseLat, baseLng);
+        
+        // Create shrine markers
+        this.createShrineMarkers(baseLat, baseLng);
+        
+        // Create item markers
+        this.createItemMarkers(baseLat, baseLng);
+        
+        // Create monster markers
+        this.createMonsterMarkers(baseLat, baseLng);
+        
+        console.log('🎯 Special markers created');
+    }
+    
+    createHEVYMarker(baseLat, baseLng) {
+        // Place HEVY 200m away from player
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 0.002; // ~200m in degrees
+        const lat = baseLat + Math.cos(angle) * distance;
+        const lng = baseLng + Math.sin(angle) * distance;
+        
+        const hevyIcon = L.divIcon({
+            className: 'hevy-marker',
+            html: `
+                <div style="position: relative; width: 50px; height: 50px;">
+                    <!-- HEVY's energy field -->
+                    <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%); border-radius: 50%; animation: hevyPulse 2s infinite;"></div>
+                    <!-- HEVY's core -->
+                    <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: linear-gradient(45deg, #00ffff, #0080ff); border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 0 20px #00ffff;"></div>
+                    <!-- HEVY's symbol -->
+                    <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #ffffff; text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);">⚡</div>
+                </div>
+            `,
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
+        });
+        
+        const hevyMarker = L.marker([lat, lng], { icon: hevyIcon }).addTo(this.map);
+        hevyMarker.bindPopup(`
+            <div class="hevy-popup">
+                <h4>⚡ HEVY</h4>
+                <p><strong>Type:</strong> Cosmic Entity</p>
+                <p><strong>Status:</strong> Active</p>
+                <p><strong>Description:</strong> A mysterious cosmic entity that grants power to those who approach.</p>
+                <div class="popup-actions">
+                    <button onclick="window.mapEngine.interactWithHEVY()" class="interact-btn">⚡ Interact</button>
+                </div>
+            </div>
+        `);
+        
+        // Store HEVY position for proximity checks
+        window.hevyPosition = { lat, lng };
+        console.log('⚡ HEVY marker created at:', lat, lng);
+    }
+    
+    createShrineMarkers(baseLat, baseLng) {
+        const shrineTypes = [
+            { name: 'Health Shrine', emoji: '❤️', color: '#ff0000', effect: 'health' },
+            { name: 'Sanity Shrine', emoji: '🧠', color: '#8000ff', effect: 'sanity' },
+            { name: 'Power Shrine', emoji: '⚡', color: '#ffff00', effect: 'power' },
+            { name: 'Wisdom Shrine', emoji: '📚', color: '#00ff00', effect: 'wisdom' }
+        ];
+        
+        shrineTypes.forEach((shrine, index) => {
+            const angle = (Math.PI * 2 / shrineTypes.length) * index + Math.random() * 0.5;
+            const distance = 0.0015 + Math.random() * 0.001; // 150-250m
+            const lat = baseLat + Math.cos(angle) * distance;
+            const lng = baseLng + Math.sin(angle) * distance;
+            
+            const shrineIcon = L.divIcon({
+                className: 'shrine-marker',
+                html: `
+                    <div style="position: relative; width: 45px; height: 45px;">
+                        <!-- Shrine aura -->
+                        <div style="position: absolute; top: -6px; left: -6px; width: 57px; height: 57px; background: radial-gradient(circle, ${shrine.color}40 0%, transparent 70%); border-radius: 50%; animation: shrineGlow 3s infinite;"></div>
+                        <!-- Shrine base -->
+                        <div style="position: absolute; top: 3px; left: 3px; width: 39px; height: 39px; background: ${shrine.color}; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px ${shrine.color}80;"></div>
+                        <!-- Shrine symbol -->
+                        <div style="position: absolute; top: 10px; left: 10px; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 16px; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">${shrine.emoji}</div>
+                    </div>
+                `,
+                iconSize: [45, 45],
+                iconAnchor: [22, 22]
+            });
+            
+            const shrineMarker = L.marker([lat, lng], { icon: shrineIcon }).addTo(this.map);
+            shrineMarker.bindPopup(`
+                <div class="shrine-popup">
+                    <h4>${shrine.emoji} ${shrine.name}</h4>
+                    <p><strong>Effect:</strong> Restores ${shrine.effect}</p>
+                    <p><strong>Status:</strong> Active</p>
+                    <div class="popup-actions">
+                        <button onclick="window.mapEngine.interactWithShrine('${shrine.effect}')" class="interact-btn">${shrine.emoji} Use Shrine</button>
+                    </div>
+                </div>
+            `);
+        });
+    }
+    
+    createItemMarkers(baseLat, baseLng) {
+        const itemTypes = [
+            { name: 'Cosmic Crystal', emoji: '💎', color: '#ff00ff', rarity: 'rare' },
+            { name: 'Health Potion', emoji: '🧪', color: '#ff0000', rarity: 'common' },
+            { name: 'Sanity Elixir', emoji: '🧠', color: '#8000ff', rarity: 'uncommon' },
+            { name: 'Power Orb', emoji: '🔮', color: '#ffff00', rarity: 'rare' },
+            { name: 'Ancient Scroll', emoji: '📜', color: '#8b4513', rarity: 'legendary' }
+        ];
+        
+        itemTypes.forEach((item, index) => {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 0.001 + Math.random() * 0.002; // 100-300m
+            const lat = baseLat + Math.cos(angle) * distance;
+            const lng = baseLng + Math.sin(angle) * distance;
+            
+            const itemIcon = L.divIcon({
+                className: 'item-marker',
+                html: `
+                    <div style="position: relative; width: 35px; height: 35px;">
+                        <!-- Item glow -->
+                        <div style="position: absolute; top: -4px; left: -4px; width: 43px; height: 43px; background: radial-gradient(circle, ${item.color}60 0%, transparent 70%); border-radius: 50%; animation: itemGlow 2s infinite;"></div>
+                        <!-- Item container -->
+                        <div style="position: absolute; top: 2px; left: 2px; width: 31px; height: 31px; background: ${item.color}; border: 2px solid #ffffff; border-radius: 50%; box-shadow: 0 0 10px ${item.color}80;"></div>
+                        <!-- Item symbol -->
+                        <div style="position: absolute; top: 7px; left: 7px; width: 19px; height: 19px; display: flex; align-items: center; justify-content: center; font-size: 14px; text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">${item.emoji}</div>
+                    </div>
+                `,
+                iconSize: [35, 35],
+                iconAnchor: [17, 17]
+            });
+            
+            const itemMarker = L.marker([lat, lng], { icon: itemIcon }).addTo(this.map);
+            itemMarker.bindPopup(`
+                <div class="item-popup">
+                    <h4>${item.emoji} ${item.name}</h4>
+                    <p><strong>Rarity:</strong> ${item.rarity}</p>
+                    <p><strong>Status:</strong> Available</p>
+                    <div class="popup-actions">
+                        <button onclick="window.mapEngine.collectItem('${item.name}', '${item.rarity}')" class="interact-btn">${item.emoji} Collect</button>
+                    </div>
+                </div>
+            `);
+        });
+    }
+    
+    createMonsterMarkers(baseLat, baseLng) {
+        const monsterTypes = [
+            { name: 'Cosmic Horror', emoji: '👹', color: '#8b0000', difficulty: 'hard' },
+            { name: 'Reality Distortion', emoji: '🌀', color: '#4b0082', difficulty: 'medium' },
+            { name: 'Void Walker', emoji: '👻', color: '#2f4f4f', difficulty: 'easy' },
+            { name: 'Dimensional Beast', emoji: '🐉', color: '#ff4500', difficulty: 'hard' }
+        ];
+        
+        monsterTypes.forEach((monster, index) => {
+            const angle = (Math.PI * 2 / monsterTypes.length) * index + Math.random() * 0.3;
+            const distance = 0.002 + Math.random() * 0.001; // 200-300m
+            const lat = baseLat + Math.cos(angle) * distance;
+            const lng = baseLng + Math.sin(angle) * distance;
+            
+            const monsterIcon = L.divIcon({
+                className: 'monster-marker',
+                html: `
+                    <div style="position: relative; width: 50px; height: 50px;">
+                        <!-- Monster aura -->
+                        <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, ${monster.color}40 0%, transparent 70%); border-radius: 50%; animation: monsterPulse 1.5s infinite;"></div>
+                        <!-- Monster body -->
+                        <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: ${monster.color}; border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 0 15px ${monster.color}80;"></div>
+                        <!-- Monster symbol -->
+                        <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 18px; text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);">${monster.emoji}</div>
+                    </div>
+                `,
+                iconSize: [50, 50],
+                iconAnchor: [25, 25]
+            });
+            
+            const monsterMarker = L.marker([lat, lng], { icon: monsterIcon }).addTo(this.map);
+            monsterMarker.bindPopup(`
+                <div class="monster-popup">
+                    <h4>${monster.emoji} ${monster.name}</h4>
+                    <p><strong>Difficulty:</strong> ${monster.difficulty}</p>
+                    <p><strong>Status:</strong> Hostile</p>
+                    <div class="popup-actions">
+                        <button onclick="window.mapEngine.fightMonster('${monster.name}', '${monster.difficulty}')" class="interact-btn">⚔️ Fight</button>
+                    </div>
+                </div>
+            `);
+        });
+    }
+    
+    // Interaction methods for special markers
+    interactWithHEVY() {
+        console.log('⚡ Interacting with HEVY...');
+        if (window.encounterSystem) {
+            // Give player some cosmic power
+            window.encounterSystem.playerStats.attack += 5;
+            window.encounterSystem.playerStats.defense += 3;
+            window.encounterSystem.updateStatBars();
+            window.encounterSystem.showNotification('⚡ HEVY grants you cosmic power! +5 Attack, +3 Defense');
+        }
+    }
+    
+    interactWithShrine(effect) {
+        console.log(`🏛️ Using ${effect} shrine...`);
+        if (window.encounterSystem) {
+            const amount = 20;
+            switch(effect) {
+                case 'health':
+                    window.encounterSystem.playerStats.health = Math.min(100, window.encounterSystem.playerStats.health + amount);
+                    window.encounterSystem.showNotification(`❤️ Health restored by ${amount}!`);
+                    break;
+                case 'sanity':
+                    window.encounterSystem.playerStats.sanity = Math.min(100, window.encounterSystem.playerStats.sanity + amount);
+                    window.encounterSystem.showNotification(`🧠 Sanity restored by ${amount}!`);
+                    break;
+                case 'power':
+                    window.encounterSystem.playerStats.attack += 3;
+                    window.encounterSystem.showNotification(`⚡ Attack power increased by 3!`);
+                    break;
+                case 'wisdom':
+                    window.encounterSystem.playerStats.skills.investigation += 1;
+                    window.encounterSystem.showNotification(`📚 Investigation skill increased!`);
+                    break;
+            }
+            window.encounterSystem.updateStatBars();
+        }
+    }
+    
+    collectItem(itemName, rarity) {
+        console.log(`💎 Collecting ${itemName} (${rarity})...`);
+        if (window.encounterSystem) {
+            // Add to inventory
+            window.encounterSystem.playerStats.inventory.push({
+                name: itemName,
+                rarity: rarity,
+                collected: Date.now()
+            });
+            window.encounterSystem.showNotification(`💎 Collected ${itemName}!`);
+        }
+    }
+    
+    fightMonster(monsterName, difficulty) {
+        console.log(`⚔️ Fighting ${monsterName} (${difficulty})...`);
+        if (window.encounterSystem) {
+            const baseReward = difficulty === 'easy' ? 10 : difficulty === 'medium' ? 20 : 30;
+            window.encounterSystem.playerStats.experience += baseReward;
+            window.encounterSystem.playerStats.health -= difficulty === 'easy' ? 5 : difficulty === 'medium' ? 15 : 25;
+            window.encounterSystem.updateStatBars();
+            window.encounterSystem.showNotification(`⚔️ Defeated ${monsterName}! Gained ${baseReward} XP, lost some health.`);
+        }
     }
     
 }

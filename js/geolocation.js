@@ -20,6 +20,7 @@ class GeolocationManager {
         this.deviceLocationDisplay = null;
         this.targetQuestLocation = null;
         this.locationUpdatesPaused = false;
+        this.isFirstLocation = true; // Track first successful location
     }
 
     init() {
@@ -31,7 +32,8 @@ class GeolocationManager {
     }
 
     setupUI() {
-        const locateBtn = document.getElementById('locate-btn');
+        // Use a single Locate Me button in the footer
+        const locateBtn = document.getElementById('locate-me-btn');
         const accuracyDisplay = document.getElementById('accuracy-value');
         
         if (locateBtn) {
@@ -176,47 +178,52 @@ class GeolocationManager {
         };
 
         try {
-            // Try high accuracy first
             console.log('📍 Requesting high accuracy location...');
             this.updateDeviceLocationDisplay('Getting high accuracy...', '--');
-            
-            const position = await this.getHighAccuracyPosition();
+
+            // Use a resilient multi-attempt strategy
+            const position = await this.getPositionWithRetries();
             this.handlePositionUpdate(position);
-            
-            // Start watching position with high accuracy
+
+            // Start watching position with relaxed but generous timeouts
+            const watchOptions = {
+                enableHighAccuracy: true,
+                timeout: 60000,
+                maximumAge: 15000
+            };
+            console.log('📍 Starting watchPosition with options:', watchOptions);
             this.watchId = navigator.geolocation.watchPosition(
-                (position) => this.handlePositionUpdate(position),
-                (error) => this.handleError(error),
-                options
+                (position) => {
+                    console.log('📍 WatchPosition success:', position.coords);
+                    this.handlePositionUpdate(position);
+                },
+                (error) => {
+                    console.log('📍 WatchPosition error:', error.code, error.message);
+                    this.handleError(error);
+                },
+                watchOptions
             );
 
-            console.log('📍 Geolocation tracking started (high accuracy GPS)');
-            
-        } catch (error) {
-            console.log('📍 High accuracy failed, trying standard accuracy...');
-            this.updateDeviceLocationDisplay('Trying standard accuracy...', '--');
-            
-            try {
-                const position = await this.getCurrentPosition(options);
-                this.handlePositionUpdate(position);
-                
-                // Start watching position
-                this.watchId = navigator.geolocation.watchPosition(
-                    (position) => this.handlePositionUpdate(position),
-                    (error) => this.handleError(error),
-                    options
-                );
-                
-                console.log('📍 Geolocation tracking started (standard GPS)');
-            } catch (fallbackError) {
-                this.handleError(fallbackError);
-            }
+            console.log('📍 Geolocation tracking started (watching GPS)');
+        } catch (fallbackError) {
+            console.log('📍 getPositionWithRetries failed:', fallbackError);
+            this.handleError(fallbackError);
         }
     }
 
     getCurrentPosition(options) {
+        const defaultOptions = {
+            enableHighAccuracy: false,
+            timeout: 30000,  // 30 seconds default
+            maximumAge: 10000
+        };
+        const safeOptions = (options && typeof options === 'object') ? { ...defaultOptions, ...options } : defaultOptions;
         return new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, options);
+            try {
+                navigator.geolocation.getCurrentPosition(resolve, reject, safeOptions);
+            } catch (e) {
+                reject(e);
+            }
         });
     }
 
@@ -229,6 +236,34 @@ class GeolocationManager {
 
         return new Promise((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, options);
+        });
+    }
+
+    // Try multiple strategies before giving up
+    async getPositionWithRetries() {
+        // Attempt 1: high accuracy
+        try {
+            return await this.getHighAccuracyPosition();
+        } catch (e1) {
+            console.log('📍 High accuracy attempt failed:', e1?.message || e1);
+        }
+
+        // Attempt 2: standard accuracy, longer timeout
+        try {
+            return await this.getCurrentPosition({
+                enableHighAccuracy: false,
+                timeout: 45000,
+                maximumAge: 10000
+            });
+        } catch (e2) {
+            console.log('📍 Standard accuracy attempt failed:', e2?.message || e2);
+        }
+
+        // Attempt 3: very relaxed timeout, accept cached
+        return await this.getCurrentPosition({
+            enableHighAccuracy: false,
+            timeout: 60000,
+            maximumAge: 30000
         });
     }
 
@@ -303,8 +338,17 @@ class GeolocationManager {
             `${newPosition.lat.toFixed(6)}, ${newPosition.lng.toFixed(6)}`,
             newPosition.accuracy ? `${newPosition.accuracy.toFixed(1)}m` : 'unknown'
         );
+        
+        // Update header display
+        this.updateHeaderDisplay(newPosition);
 
         this.updateAccuracyDisplay();
+        
+        // Trigger map and quest initialization on first successful location
+        if (this.isFirstLocation) {
+            this.isFirstLocation = false;
+            this.initializeMapAndQuests(newPosition);
+        }
         
         if (this.onPositionUpdate) {
             this.onPositionUpdate(this.currentPosition);
@@ -345,7 +389,17 @@ class GeolocationManager {
         
         // Don't stop tracking on timeout errors - keep trying
         if (error.code === error.TIMEOUT) {
-            console.log('📍 Geolocation timeout - will retry...');
+            console.log('📍 Geolocation timeout - will retry in background...');
+            // Soft retry without blocking UI after a short delay
+            setTimeout(() => {
+                this.getCurrentPosition({
+                    enableHighAccuracy: false,
+                    timeout: 60000,
+                    maximumAge: 30000
+                }).then((pos) => this.handlePositionUpdate(pos)).catch((retryError) => {
+                    console.log('📍 Background retry also failed:', retryError.message);
+                });
+            }, 2000); // Wait 2 seconds before retry
             return;
         }
         
@@ -459,7 +513,7 @@ class GeolocationManager {
             return {
                 lat: this.fixedPosition.lat,
                 lng: this.fixedPosition.lng,
-                accuracy: 1,
+                accuracy: (this.lastValidPosition && this.lastValidPosition.accuracy) ? this.lastValidPosition.accuracy : null,
                 timestamp: Date.now()
             };
         }
@@ -665,6 +719,62 @@ class GeolocationManager {
 
     toRadians(degrees) {
         return degrees * (Math.PI / 180);
+    }
+
+    // Get current accuracy
+    getCurrentAccuracy() {
+        if (this.currentPosition && this.currentPosition.accuracy !== null) {
+            return this.currentPosition.accuracy;
+        }
+        return null;
+    }
+
+    // Check if device GPS is enabled
+    isDeviceGPSEnabled() {
+        return this.deviceGPSEnabled;
+    }
+    
+    // Update header display with current position
+    updateHeaderDisplay(position) {
+        const locationDisplay = document.getElementById('location-display-header');
+        const accuracyDisplay = document.getElementById('accuracy-display-header');
+        
+        if (locationDisplay) {
+            locationDisplay.textContent = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+        }
+        
+        if (accuracyDisplay) {
+            const accuracy = position.accuracy ? `${position.accuracy.toFixed(1)}m` : 'Unknown';
+            accuracyDisplay.textContent = `Accuracy: ${accuracy}`;
+        }
+    }
+    
+    // Initialize map and quest systems on first successful location
+    initializeMapAndQuests(position) {
+        console.log('📍 Initializing map and quest systems with position:', position);
+        
+        // Initialize quest system if available
+        if (window.unifiedQuestSystem) {
+            console.log('📍 Initializing quest system...');
+            window.unifiedQuestSystem.beginAfterLocate();
+        }
+        
+        // Initialize map engine if available
+        if (window.mapEngine) {
+            console.log('📍 Initializing map engine...');
+            if (typeof window.mapEngine.initializeWithPosition === 'function') {
+                window.mapEngine.initializeWithPosition(position);
+            } else {
+                console.log('📍 Map engine initializeWithPosition not available, using updatePlayerPosition');
+                window.mapEngine.updatePlayerPosition(position);
+            }
+        }
+        
+        // Initialize encounter system if available
+        if (window.encounterSystem) {
+            console.log('📍 Initializing encounter system...');
+            window.encounterSystem.checkProximityEncounters();
+        }
     }
 
     // Cleanup

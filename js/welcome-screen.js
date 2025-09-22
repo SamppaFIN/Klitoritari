@@ -279,32 +279,46 @@ class WelcomeScreen {
             console.error('🌌 Main app not found!');
             console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
         }
-        // Tutorials disabled for now
+        
+        // Show distortion animation for fresh adventures
+        if (resetEverything) {
+            // Small delay to ensure systems are initialized
+            setTimeout(() => {
+                this.showGameTips();
+            }, 1000);
+        }
     }
 
     showGameTips() {
-        // Tutorial/hint system disabled for now
-        return;
-        // Only show a single hint: Press LOCATE ME to begin
-        const msg = 'Press LOCATE ME to begin';
-        try {
-            if (window.eldritchApp?.showNotification) {
-                window.eldritchApp.showNotification(msg);
-            } else {
-                this.showTip(msg);
-            }
-        } catch (_) {
-            this.showTip(msg);
-        }
-        
-        // Trigger a brief distortion blur effect
+        // Start a new distortion animation instead of showing notification
         try {
             if (window.sanityDistortion) {
+                console.log('🧠 Starting distortion animation for fresh adventure');
                 window.sanityDistortion.makeCanvasVisible?.();
-                window.sanityDistortion.distortionEffects.blur = 0.6;
-                setTimeout(() => { window.sanityDistortion.distortionEffects.blur = 0; }, 1500);
+                
+                // Trigger a dramatic distortion sequence
+                window.sanityDistortion.distortionEffects.blur = 0.8;
+                window.sanityDistortion.distortionEffects.chromaticAberration = 0.6;
+                window.sanityDistortion.distortionEffects.vignette = 0.7;
+                window.sanityDistortion.distortionEffects.shake = 0.5;
+                window.sanityDistortion.distortionEffects.colorShift = 0.4;
+                
+                // Add some dynamic effects
+                window.sanityDistortion.addRandomGhostlyShadow();
+                window.sanityDistortion.addRandomParticle();
+                
+                // Gradually fade out the effects over 3 seconds
+                setTimeout(() => {
+                    window.sanityDistortion.distortionEffects.blur = 0;
+                    window.sanityDistortion.distortionEffects.chromaticAberration = 0;
+                    window.sanityDistortion.distortionEffects.vignette = 0;
+                    window.sanityDistortion.distortionEffects.shake = 0;
+                    window.sanityDistortion.distortionEffects.colorShift = 0;
+                }, 3000);
             }
-        } catch (_) {}
+        } catch (error) {
+            console.warn('Failed to start distortion animation:', error);
+        }
         
         // Play a scary scream-like sound if available
         try {

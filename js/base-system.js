@@ -16,6 +16,8 @@ class BaseSystem {
         this.buildings = [];
         this.territorySize = 100; // Base territory size in m²
         this.baseMarker = null;
+		// Disable inline base management panel; use the modal instead
+		this.enableInlineBasePanel = false;
     }
 
     init() {
@@ -29,8 +31,10 @@ class BaseSystem {
         // Add base establishment button to header
         this.addBaseEstablishmentButton();
         
-        // Create base management panel
-        this.createBaseManagementPanel();
+		// Optionally create inline base management panel (disabled by default)
+		if (this.enableInlineBasePanel) {
+			this.createBaseManagementPanel();
+		}
         
         // Setup event listeners
         this.setupEventListeners();

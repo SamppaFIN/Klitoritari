@@ -37,21 +37,9 @@ class EldritchSanctuaryApp {
     // Initialize mobile-optimized UI
     initMobileUI() {
         console.log('📱 Initializing mobile UI...');
-        
-        // Hide debug elements
-        this.hideDebugElements();
-        
-        // Create mobile header
-        this.createMobileHeader();
-        
-        // Create mobile controls
-        this.createMobileControls();
-        
-        // Optimize map for mobile
-        this.optimizeMapForMobile();
-        
-        // Disable console logging in production
-        this.disableConsoleLogging();
+        // Mobile-specific injected UI is disabled to prevent duplicate controls.
+        // Intentionally no-op to avoid creating dynamic mobile controls/header.
+        return;
     }
     
     // Hide all debug elements for mobile
@@ -704,8 +692,8 @@ class EldritchSanctuaryApp {
         // Request location with high accuracy
         const options = {
             enableHighAccuracy: true,
-            timeout: 8000, // 8 seconds for the actual request
-            maximumAge: 0 // Don't use cached location
+            timeout: 30000, // allow up to 30s for a fresh GPS fix
+            maximumAge: 10000 // accept positions up to 10s old
         };
         
         console.log('📍 Requesting location with options:', options);
@@ -925,7 +913,7 @@ class EldritchSanctuaryApp {
                 },
                 {
                     enableHighAccuracy: false,
-                    timeout: 5000,
+                    timeout: 15000,
                     maximumAge: 60000
                 }
             );
@@ -1536,11 +1524,21 @@ class EldritchSanctuaryApp {
         // Initialize dev toggle
         this.initializeDevToggle();
         
+        // Wire DEV button to open settings panel (dev mode toggling is wired in initializeDevToggle)
+        const devBtn = document.getElementById('dev-toggle');
+        if (devBtn) {
+            devBtn.addEventListener('click', () => {
+                this.toggleSidePanel();
+            });
+        }
+        
         // Initialize step currency system
         this.initializeStepSystem();
         
         // Initialize side panel
         this.initializeSidePanel();
+        // Setup side panel event listeners
+        this.setupSidePanelListeners();
         // Apply current dev mode state after panel exists
         this.toggleDebugElements();
         
@@ -1807,8 +1805,9 @@ class EldritchSanctuaryApp {
         if (debugPanel) {
             // Always keep panel hidden until explicitly opened by the user
             debugPanel.classList.remove('open');
-            debugPanel.style.display = 'none';
-            debugPanel.style.visibility = 'hidden';
+            // Remove inline styles to let CSS handle visibility
+            debugPanel.style.display = '';
+            debugPanel.style.visibility = '';
             debugPanel.removeAttribute('data-dev-forced-open');
         }
         
@@ -2056,219 +2055,16 @@ class EldritchSanctuaryApp {
         // Add a small delay to ensure DOM is fully loaded
         setTimeout(() => {
             const sidePanel = document.getElementById('glassmorphic-side-panel');
-            const toggleBtn = document.getElementById('unified-panel-toggle');
             
             console.log('⚙️ Side panel found:', !!sidePanel);
-            console.log('⚙️ Toggle button found:', !!toggleBtn);
-            console.log('⚙️ Button element:', toggleBtn);
             
-            if (sidePanel && toggleBtn) {
-                console.log('⚙️ Setting up settings button event listener...');
-                
-                // Fallback: if panel has no content, inject minimal content so it's visible
-                try {
-                    const hasContent = sidePanel.innerText && sidePanel.innerText.trim().length > 0;
-                    if (!hasContent) {
-                        sidePanel.innerHTML = `
-                            <button id="panel-close" class="close-btn" style="position:absolute; top:8px; right:8px; z-index:2">×</button>
-                            <h3>🌌 Game Stats</h3>
-                            <div class="stats-grid">
-                                <div class="stat-card"><div class="stat-icon">❤️</div><div class="stat-info"><div class="stat-label">Health</div><div class="stat-value" id="panel-health">100/100</div></div></div>
-                                <div class="stat-card"><div class="stat-icon">🧠</div><div class="stat-info"><div class="stat-label">Sanity</div><div class="stat-value" id="panel-sanity">100/100</div></div></div>
-                                <div class="stat-card"><div class="stat-icon">🚶‍♂️</div><div class="stat-info"><div class="stat-label">Steps</div><div class="stat-value" id="panel-total-steps">0</div></div></div>
-                            </div>
-                            <div class="debug-tools"><h4>🔧 Debug Tools</h4><div class="debug-buttons">
-                                <button id="debug-add-step" class="debug-btn small">+1 Step</button>
-                                <button id="debug-add-50-steps" class="debug-btn small">+50 Steps</button>
-                                <button id="debug-add-100-steps" class="debug-btn small">+100 Steps</button>
-                                <button id="debug-reset-steps" class="debug-btn small">Reset</button>
-                            </div></div>
-                            <div class="debug-tools"><h4>🎯 Player Marker</h4><div class="debug-buttons">
-                                <select id="marker-emoji" class="debug-btn small" style="background:#1b2a3a; color:#fff; min-width:120px;">
-                                    <option>👤</option>
-                                    <option>🚩</option>
-                                    <option>⭐</option>
-                                    <option>🛰️</option>
-                                    <option>🧭</option>
-                                </select>
-                                <input id="marker-color" type="color" class="debug-btn small" value="#00ff00" style="padding:4px 6px; min-width:60px;" />
-                                <button id="apply-marker" class="debug-btn small">Apply</button>
-                            </div></div>
-                        `;
-                    }
-                    // Ensure a close button exists even if content wasn't injected
-                    if (!sidePanel.querySelector('#panel-close')) {
-                        const closeBtn = document.createElement('button');
-                        closeBtn.id = 'panel-close';
-                        closeBtn.className = 'close-btn';
-                        closeBtn.textContent = '×';
-                        closeBtn.style.position = 'absolute';
-                        closeBtn.style.top = '8px';
-                        closeBtn.style.right = '8px';
-                        closeBtn.style.zIndex = '2';
-                        sidePanel.appendChild(closeBtn);
-                    }
-
-                    // Ensure player marker controls exist even if panel already had content
-                    if (!sidePanel.querySelector('#marker-emoji') || !sidePanel.querySelector('#marker-color')) {
-                        const tools = document.createElement('div');
-                        tools.className = 'debug-tools';
-                        tools.innerHTML = `
-                            <h4>🎯 Player Marker</h4>
-                            <div class="debug-buttons">
-                                <select id="marker-emoji" class="debug-btn small" style="background:#1b2a3a; color:#fff; min-width:120px;">
-                                    <option>👤</option>
-                                    <option>🚩</option>
-                                    <option>⭐</option>
-                                    <option>🛰️</option>
-                                    <option>🧭</option>
-                                </select>
-                                <input id="marker-color" type="color" class="debug-btn small" value="#00ff00" style="padding:4px 6px; min-width:60px;" />
-                                <button id="apply-marker" class="debug-btn small">Apply</button>
-                            </div>
-                        `;
-                        sidePanel.appendChild(tools);
-                    }
-                } catch (e) {
-                    console.warn('⚙️ Could not probe/inject side panel content:', e);
-                }
-
-                // Toggle side panel
-                toggleBtn.addEventListener('click', (e) => {
-                    console.log('⚙️ Settings button clicked!');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const isOpen = sidePanel.classList.contains('open');
-                    console.log('⚙️ Current panel state:', isOpen ? 'open' : 'closed');
-                    
-                    // If dev mode is forced open, don't allow manual toggle
-                    if (this.isDevModeForced()) {
-                        console.log('⚙️ Dev mode forced open - ignoring manual toggle');
-                        return;
-                    }
-                    
-                    sidePanel.classList.toggle('open');
-                    toggleBtn.classList.toggle('open');
-                    
-                    console.log('⚙️ New panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
-                });
-                
-                console.log('⚙️ Settings button event listener attached successfully');
-
-                // Close button inside panel
-                const panelCloseBtn = sidePanel.querySelector('#panel-close');
-                if (panelCloseBtn) {
-                    panelCloseBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        // If dev mode is forcing panel open, disable it so user can close
-                        if (this.isDevModeForced()) {
-                            this.devModeEnabled = false;
-                            this.updateDevToggleUI();
-                        }
-                        sidePanel.classList.remove('open');
-                        toggleBtn.classList.remove('open');
-                        // Also hide when explicitly closed
-                        sidePanel.style.display = 'none';
-                    });
-                }
-
-                // Marker customization handlers
-                const applyBtn = sidePanel.querySelector('#apply-marker');
-                const emojiSel = sidePanel.querySelector('#marker-emoji');
-                const colorInp = sidePanel.querySelector('#marker-color');
-                if (applyBtn && emojiSel && colorInp) {
-                    // Initialize controls from stored values
-                    try {
-                        const storedEmoji = localStorage.getItem('playerMarkerEmoji');
-                        const storedColor = localStorage.getItem('playerMarkerColor');
-                        if (storedEmoji) emojiSel.value = storedEmoji;
-                        if (storedColor) colorInp.value = storedColor;
-                    } catch (e) {}
-                    applyBtn.addEventListener('click', () => {
-                        const cfg = { emoji: emojiSel.value, color: colorInp.value };
-                        if (window.mapEngine && typeof window.mapEngine.setPlayerMarkerConfig === 'function') {
-                            window.mapEngine.setPlayerMarkerConfig(cfg);
-                        } else {
-                            localStorage.setItem('playerMarkerEmoji', cfg.emoji);
-                            localStorage.setItem('playerMarkerColor', cfg.color);
-                        }
-                    });
-                }
-            
-            // Close panel when clicking outside (unless dev mode is forced)
-            document.addEventListener('click', (e) => {
-                if (!sidePanel.contains(e.target) && !toggleBtn.contains(e.target)) {
-                    // Don't close if dev mode is forcing it open
-                    if (!this.isDevModeForced()) {
-                        sidePanel.classList.remove('open');
-                        toggleBtn.classList.remove('open');
-                    }
-                }
-            });
-            
-            // Initialize panel data
-            this.updateSidePanel();
-            
-            // Setup debug button functionality
-            this.setupDebugButtons();
-            
-            // Update debug status
-            this.updateDebugStatus();
-            
-            // Update panel every 2 seconds
-            setInterval(() => {
-                this.updateSidePanel();
-                this.updateDebugStatus();
-                this.updateLocationDisplay();
-                
-                // Ensure dev mode state is maintained
-                if (this.isDevModeForced()) {
-                    const debugPanel = document.getElementById('glassmorphic-side-panel');
-                    if (debugPanel && !debugPanel.classList.contains('open')) {
-                        console.log('🔧 Re-applying dev mode state to panel');
-                        this.toggleDebugElements();
-                    }
-                }
-            }, 2000);
-        }
-        }, 100); // Close the setTimeout
-        
-        // Also add a fallback event listener after a longer delay
-        setTimeout(() => {
-            const toggleBtn = document.getElementById('unified-panel-toggle');
-            const sidePanel = document.getElementById('glassmorphic-side-panel');
-            
-            console.log('⚙️ Fallback check - Button:', toggleBtn);
-            console.log('⚙️ Fallback check - Panel:', sidePanel);
-            
-            if (toggleBtn && sidePanel) {
-                console.log('⚙️ Adding fallback event listener to footer button...');
-                
-                // Add a simple onclick handler as backup
-                toggleBtn.onclick = function(e) {
-                    console.log('⚙️ ONCLICK settings button clicked!');
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // Test alert to confirm click is working
-                    alert('Settings button clicked! Panel should open now.');
-                    
-                    sidePanel.classList.toggle('open');
-                    toggleBtn.classList.toggle('open');
-                    
-                    console.log('⚙️ ONCLICK panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
-                };
-                
-                console.log('⚙️ ONCLICK event listener attached');
+            if (sidePanel) {
+                console.log('⚙️ Side panel initialized successfully');
+                // Side panel content is already in HTML, no need to inject
             } else {
-                console.log('⚙️ Footer button or panel not found:', {
-                    button: !!toggleBtn,
-                    panel: !!sidePanel
-                });
+                console.error('⚙️ Side panel not found!');
             }
-        }, 1000);
+        }, 100);
     }
     
     initializeControlPanel() {
@@ -2294,7 +2090,6 @@ class EldritchSanctuaryApp {
                     accuracyDisplayHeader.textContent = `Accuracy: ${position.accuracy ? position.accuracy.toFixed(1) + 'm' : 'Unknown'}`;
                 }
             } else {
-                // Show getting location message if no position available
                 if (locationDisplayHeader) {
                     locationDisplayHeader.textContent = 'Getting location...';
                 }
@@ -2304,22 +2099,127 @@ class EldritchSanctuaryApp {
             }
         }
     }
-
+    
     toggleSidePanel() {
         const sidePanel = document.getElementById('glassmorphic-side-panel');
-        const toggleBtn = document.getElementById('unified-panel-toggle');
+        const devBtn = document.getElementById('dev-toggle');
         
-        if (sidePanel && toggleBtn) {
+        if (sidePanel) {
             console.log('⚙️ Toggling side panel...');
             const isOpen = sidePanel.classList.contains('open');
             console.log('⚙️ Current panel state:', isOpen ? 'open' : 'closed');
             
             sidePanel.classList.toggle('open');
-            toggleBtn.classList.toggle('open');
+            if (devBtn) {
+                devBtn.classList.toggle('open');
+            }
             
             console.log('⚙️ New panel state:', sidePanel.classList.contains('open') ? 'open' : 'closed');
         } else {
-            console.error('⚙️ Side panel or toggle button not found');
+            console.error('⚙️ Side panel not found');
+        }
+    }
+    
+    // Setup side panel event listeners
+    setupSidePanelListeners() {
+        // Close button
+        const closeBtn = document.getElementById('close-side-panel');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.toggleSidePanel();
+            });
+        }
+        
+        // Debug buttons
+        const debugToggleBtn = document.getElementById('debug-toggle-btn');
+        if (debugToggleBtn) {
+            debugToggleBtn.addEventListener('click', () => {
+                this.toggleDebugPanel();
+            });
+        }
+        
+        const testQuestBtn = document.getElementById('test-quest-btn');
+        if (testQuestBtn) {
+            testQuestBtn.addEventListener('click', () => {
+                this.testQuestSystem();
+            });
+        }
+        
+        const testEncounterBtn = document.getElementById('test-encounter-btn');
+        if (testEncounterBtn) {
+            testEncounterBtn.addEventListener('click', () => {
+                this.testEncounterSystem();
+            });
+        }
+        
+        const resetGameBtn = document.getElementById('reset-game-btn');
+        if (resetGameBtn) {
+            resetGameBtn.addEventListener('click', () => {
+                this.resetGame();
+            });
+        }
+        
+        // Settings toggles
+        const soundToggle = document.getElementById('sound-toggle');
+        if (soundToggle) {
+            soundToggle.addEventListener('change', (e) => {
+                console.log('🔊 Sound effects:', e.target.checked ? 'enabled' : 'disabled');
+                // Add sound toggle logic here
+            });
+        }
+        
+        const particlesToggle = document.getElementById('particles-toggle');
+        if (particlesToggle) {
+            particlesToggle.addEventListener('change', (e) => {
+                console.log('✨ Particle effects:', e.target.checked ? 'enabled' : 'disabled');
+                // Add particle toggle logic here
+            });
+        }
+        
+        const autosaveToggle = document.getElementById('autosave-toggle');
+        if (autosaveToggle) {
+            autosaveToggle.addEventListener('change', (e) => {
+                console.log('💾 Auto-save:', e.target.checked ? 'enabled' : 'disabled');
+                // Add autosave toggle logic here
+            });
+        }
+    }
+    
+    // Test quest system
+    testQuestSystem() {
+        console.log('🎭 Testing quest system...');
+        if (window.unifiedQuestSystem) {
+            window.unifiedQuestSystem.forceShowAllMarkers();
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.show('🎭 Quest Test', 'Quest system test completed!', 'info');
+            }
+        } else {
+            console.error('🎭 Quest system not available');
+        }
+    }
+    
+    // Test encounter system
+    testEncounterSystem() {
+        console.log('⚔️ Testing encounter system...');
+        if (window.encounterSystem) {
+            // Trigger a test encounter
+            window.encounterSystem.triggerTestEncounter();
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.show('⚔️ Encounter Test', 'Encounter system test completed!', 'info');
+            }
+        } else {
+            console.error('⚔️ Encounter system not available');
+        }
+    }
+    
+    // Reset game
+    resetGame() {
+        console.log('🔄 Resetting game...');
+        if (confirm('Are you sure you want to reset the game? This will clear all progress.')) {
+            // Clear localStorage
+            localStorage.clear();
+            // Reload the page
+            window.location.reload();
         }
     }
     
@@ -2337,75 +2237,28 @@ class EldritchSanctuaryApp {
             if (coordsEl && position) {
                 coordsEl.textContent = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
             }
-            
             if (accuracyEl) {
                 accuracyEl.textContent = accuracy ? `${accuracy.toFixed(1)}m` : 'Unknown';
             }
-            
             if (gpsStatusEl) {
-                gpsStatusEl.textContent = isEnabled ? 'Active' : 'Off';
-                gpsStatusEl.className = `stat-value ${isEnabled ? 'accuracy' : ''}`;
-            }
-        }
-        
-        // Update player stats
-        const healthEl = document.getElementById('panel-health');
-        const sanityEl = document.getElementById('panel-sanity');
-        const inventoryEl = document.getElementById('panel-inventory');
-        
-        if (healthEl) {
-            const healthValue = document.getElementById('health-value');
-            if (healthValue) {
-                healthEl.textContent = healthValue.textContent;
-            }
-        }
-        
-        if (sanityEl) {
-            const sanityValue = document.getElementById('sanity-value');
-            if (sanityValue) {
-                sanityEl.textContent = sanityValue.textContent;
-            }
-        }
-        
-        if (inventoryEl) {
-            const inventoryStatus = document.getElementById('inventory-status');
-            if (inventoryStatus) {
-                inventoryEl.textContent = inventoryStatus.textContent;
+                gpsStatusEl.textContent = isEnabled ? 'Enabled' : 'Disabled';
             }
         }
         
         // Update step data
         if (window.stepCurrencySystem) {
-            const stats = window.stepCurrencySystem.getStepStats();
+            const totalSteps = window.stepCurrencySystem.totalSteps;
+            const sessionSteps = window.stepCurrencySystem.sessionSteps;
+            
             const totalStepsEl = document.getElementById('panel-total-steps');
             const sessionStepsEl = document.getElementById('panel-session-steps');
-            const nextFlagEl = document.getElementById('panel-next-flag');
             
             if (totalStepsEl) {
-                totalStepsEl.textContent = stats.totalSteps.toLocaleString();
+                totalStepsEl.textContent = totalSteps.toString();
             }
-            
             if (sessionStepsEl) {
-                sessionStepsEl.textContent = stats.sessionSteps.toLocaleString();
+                sessionStepsEl.textContent = sessionSteps.toString();
             }
-            
-            if (nextFlagEl) {
-                const stepsToNextFlag = 50 - (stats.sessionSteps % 50);
-                nextFlagEl.textContent = `${stepsToNextFlag} steps`;
-            }
-        }
-        
-        // Update connection status
-        const connectionEl = document.getElementById('panel-connection');
-        const playersEl = document.getElementById('panel-players');
-        
-        if (connectionEl) {
-            connectionEl.textContent = 'Connected';
-            connectionEl.className = 'stat-value accuracy';
-        }
-        
-        if (playersEl) {
-            playersEl.textContent = '1';
         }
     }
     
@@ -2421,41 +2274,19 @@ class EldritchSanctuaryApp {
         this.updateLocationButtonText();
     }
     
-    
-    
-    
-    updateLocationButtonText(isEnabled = null) {
-        const locateBtn = document.getElementById('locate-me-btn');
-        if (locateBtn) {
-            const textElement = locateBtn.querySelector('.locate-text');
-            if (textElement) {
-                if (isEnabled === null) {
-                    // Get current state from geolocation system
-                    isEnabled = this.systems.geolocation ? this.systems.geolocation.deviceGPSEnabled : true;
-                }
-                
-                if (isEnabled) {
-                    textElement.textContent = 'GPS';
-                } else {
-                    textElement.textContent = 'FIXED';
-                }
-            }
-        }
-    }
-
     showLoadingScreen() {
         this.loadingScreen = document.getElementById('loading-screen');
         if (this.loadingScreen) {
             this.loadingScreen.classList.remove('hidden');
         }
     }
-
+    
     hideLoadingScreen() {
         if (this.loadingScreen) {
             this.loadingScreen.classList.add('hidden');
         }
     }
-
+    
     showError(message) {
         console.error(message);
         
@@ -2463,36 +2294,31 @@ class EldritchSanctuaryApp {
         const errorDiv = document.createElement('div');
         errorDiv.className = 'error-notification';
         errorDiv.textContent = message;
-        errorDiv.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--cosmic-red);
-            color: var(--cosmic-light);
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-weight: 600;
-            z-index: 4000;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(255, 0, 64, 0.5);
-        `;
         
+        // Add to page
         document.body.appendChild(errorDiv);
         
+        // Remove after 5 seconds
         setTimeout(() => {
             if (errorDiv.parentNode) {
                 errorDiv.parentNode.removeChild(errorDiv);
             }
         }, 5000);
     }
-
+    
     async initCosmicEffects() {
+        try {
             this.systems.cosmicEffects = new CosmicEffects();
             this.systems.cosmicEffects.init();
-        return Promise.resolve();
+            return Promise.resolve();
+        } catch (e) {
+            console.warn('✨ Cosmic effects disabled (WebGL unavailable):', e?.message || e);
+            this.systems.cosmicEffects = null;
+            // Continue without blocking the rest of the initialization
+            return Promise.resolve();
+        }
     }
-
+    
     async initCoreSystems() {
         // Check if systems are already initialized
         if (this.systems.mapEngine && this.systems.mapEngine.isInitialized) {
@@ -2507,81 +2333,33 @@ class EldritchSanctuaryApp {
         // Start tracking automatically
         this.systems.geolocation.startTracking();
         
-        // Make geolocation manager globally available
-        window.geolocationManager = this.systems.geolocation;
+        // Initialize map engine
+        this.systems.mapEngine = new EnhancedMapEngine();
+        await this.systems.mapEngine.init();
         
-        // Connect geolocation to encounter system for step tracking
-        this.systems.geolocation.onPositionUpdate = (position) => {
-            if (this.systems.encounter) {
-                this.systems.encounter.handlePositionUpdate(position);
-            }
-            
-            // Update mobile UI
-            this.updateMobileLocationInfo();
-        };
-        
-        // Initialize investigation system first
-        this.systems.investigation = new InvestigationSystem();
-        this.systems.investigation.init();
-        
-        // Initialize base system
-        this.systems.baseSystem = new BaseSystem();
-        this.systems.baseSystem.init();
+        // Initialize quest system
+        this.systems.quest = new UnifiedQuestSystem();
+        this.systems.quest.init();
         
         // Initialize encounter system
         this.systems.encounter = new EncounterSystem();
         this.systems.encounter.init();
         
-        // Make encounter system globally available
-        window.encounterSystem = this.systems.encounter;
+        // Initialize NPC system
+        try {
+            this.systems.npc = new NPCSystem();
+            this.systems.npc.init();
+        } catch (e) {
+            console.warn('👥 NPC system failed to initialize:', e?.message || e);
+        }
+
+        // Initialize base system
+        this.systems.base = new BaseSystem();
+        this.systems.base.init();
         
         // Initialize item system
-        this.systems.itemSystem = new ItemSystem();
-        
-        // Initialize unified quest system (will create markers after map is ready)
-        this.systems.unifiedQuest = new UnifiedQuestSystem();
-        this.systems.unifiedQuest.init();
-        
-        // Make unified quest system globally available
-        window.unifiedQuestSystem = this.systems.unifiedQuest;
-        console.log('🎭 Unified quest system initialized');
-        
-        // Initialize NPC system
-        this.systems.npc = new NPCSystem();
-        this.systems.npc.init();
-        
-        // Make NPC system globally available
-        window.npcSystem = this.systems.npc;
-        
-        // Initialize enhanced path painting system with vector graphics
-        this.systems.pathPainting = new EnhancedPathPaintingSystem();
-        this.systems.pathPainting.init();
-        
-        // Make path painting system globally available
-        window.pathPaintingSystem = this.systems.pathPainting;
-        
-        // Initialize other player simulation
-        this.systems.otherPlayerSimulation = new OtherPlayerSimulation();
-        this.systems.otherPlayerSimulation.init();
-        
-        // Make other player simulation globally available
-        window.otherPlayerSimulation = this.systems.otherPlayerSimulation;
-        
-        // Initialize sanity distortion system
-        this.systems.sanityDistortion = new SanityDistortion();
-        window.sanityDistortion = this.systems.sanityDistortion;
-        console.log('🧠 Sanity distortion system initialized');
-        
-        // Initialize gruesome notifications
-        this.systems.gruesomeNotifications = new GruesomeNotifications();
-        window.gruesomeNotifications = this.systems.gruesomeNotifications;
-        console.log('💀 Gruesome notifications system initialized');
-        
-        // Initialize enhanced map engine with WebGL support
-        this.systems.mapEngine = new EnhancedMapEngine();
-        console.log('🗺️ Enhanced map engine created:', !!this.systems.mapEngine);
-        
-        // Debug functionality now integrated into side panel
+        this.systems.item = new ItemSystem();
+        this.systems.item.init();
         
         // Initialize inventory UI
         this.systems.inventoryUI = new InventoryUI();
@@ -2591,40 +2369,93 @@ class EldritchSanctuaryApp {
         this.systems.questLogUI = new QuestLogUI();
         this.systems.questLogUI.init();
         
-        // Make all systems globally available after map engine is initialized
-        this.exposeGlobalSystems();
+        // Initialize step currency system
+        this.systems.stepCurrency = new StepCurrencySystem();
+        this.systems.stepCurrency.init();
         
-        // Add global functions for easy console access
-        window.resetGameScreen = () => this.resetGameScreen();
-        window.centerOnCurrentLocation = () => this.centerOnCurrentLocation();
+        // Initialize session persistence
+        this.systems.sessionPersistence = new SessionPersistence();
+        this.systems.sessionPersistence.init();
         
-        // Set up map ready callback BEFORE initializing
-        this.systems.mapEngine.onMapReady = () => {
-            console.log('🗺️ onMapReady callback triggered!');
-            this.loadMysteryZones();
-            this.loadPlayerBases();
-            this.loadNPCs();
-            this.createQuestMarkers();
-            
-            // Handle pending base if map wasn't ready when base was established
-            if (this.pendingBase) {
-                console.log('🏗️ Rendering pending base:', this.pendingBase);
-                this.systems.mapEngine.addPlayerBaseMarker(this.pendingBase);
-                this.showNotification(`🏗️ Base "${this.pendingBase.name}" rendered!`, 'success');
-                this.pendingBase = null;
-            }
-        };
-        console.log('🗺️ onMapReady callback set:', this.systems.mapEngine.onMapReady);
+        // Initialize multiplayer manager
+        this.systems.multiplayer = new MultiplayerManager();
+        this.systems.multiplayer.init();
         
-        // Now initialize the map engine
-        this.systems.mapEngine.init();
-        console.log('🗺️ Map engine initialized:', !!this.systems.mapEngine);
+        // Initialize moral choice system
+        this.systems.moralChoice = new MoralChoiceSystem();
+        this.systems.moralChoice.init();
         
-        // Initialize WebSocket client
-        this.systems.websocket = new WebSocketClient();
-        this.systems.websocket.init();
+        // Initialize discord effects system
+        this.systems.discordEffects = new DiscordEffectsSystem();
+        this.systems.discordEffects.init();
+        
+        // Initialize microgames manager
+        this.systems.microgames = new MicrogamesManager();
+        this.systems.microgames.init();
+        
+        // Initialize statistics
+        this.systems.statistics = new Statistics();
+        this.systems.statistics.init();
+        
+        // Initialize NPC system
+        this.systems.npc = new NPCSystem();
+        this.systems.npc.init();
+        
+        // Initialize path painting system
+        this.systems.pathPainting = new PathPaintingSystem();
+        this.systems.pathPainting.init();
+        
+        // Initialize Finnish flag generator
+        this.systems.finnishFlagGenerator = new FinnishFlagGenerator();
+        this.systems.finnishFlagGenerator.init();
+        
+        // Initialize WebGL vector renderer
+        this.systems.webglVectorRenderer = new WebGLVectorRenderer();
+        this.systems.webglVectorRenderer.init();
+        
+        // Initialize enhanced path painting system
+        this.systems.enhancedPathPainting = new EnhancedPathPaintingSystem();
+        this.systems.enhancedPathPainting.init();
+        
+        // Initialize Finnish flag canvas layer
+        this.systems.finnishFlagCanvasLayer = new FinnishFlagCanvasLayer();
+        this.systems.finnishFlagCanvasLayer.init();
+        
+        // Initialize distortion effects canvas layer
+        this.systems.distortionEffectsCanvasLayer = new DistortionEffectsCanvasLayer();
+        this.systems.distortionEffectsCanvasLayer.init();
+        
+        // Initialize other player simulation
+        this.systems.otherPlayerSimulation = new OtherPlayerSimulation();
+        this.systems.otherPlayerSimulation.init();
+        
+        // Initialize sanity distortion
+        this.systems.sanityDistortion = new SanityDistortion();
+        this.systems.sanityDistortion.init();
+        
+        // Initialize gruesome notifications
+        this.systems.gruesomeNotifications = new GruesomeNotifications();
+        this.systems.gruesomeNotifications.init();
+        
+        // Initialize welcome screen
+        this.systems.welcomeScreen = new WelcomeScreen();
+        this.systems.welcomeScreen.init();
+        
+        // Initialize webgl map renderer
+        this.systems.webglMapRenderer = new WebGLMapRenderer();
+        this.systems.webglMapRenderer.init();
+        
+        // Initialize webgl map integration
+        this.systems.webglMapIntegration = new WebGLMapIntegration();
+        this.systems.webglMapIntegration.init();
+        
+        // Initialize webgl test
+        this.systems.webglTest = new WebGLTest();
+        this.systems.webglTest.init();
+        
+        console.log('🔧 Core systems initialized successfully');
     }
-
+    
     exposeGlobalSystems() {
         // Make all systems globally available for debugging and external access
         window.eldritchApp = this;
@@ -2635,19 +2466,11 @@ class EldritchSanctuaryApp {
         console.log('🌌 Map engine instance:', window.mapEngine);
         window.investigationSystem = this.systems.investigation;
         window.websocketClient = this.systems.websocket;
-        window.baseSystem = this.systems.baseSystem;
+        window.baseSystem = this.systems.base;
         window.encounterSystem = this.systems.encounter;
         window.npcSystem = this.systems.npc;
-        window.pathPaintingSystem = this.systems.pathPainting;
-        window.unifiedDebugPanel = this.systems.unifiedDebug;
-        window.inventoryUI = this.systems.inventoryUI;
-        window.questLogUI = this.systems.questLogUI;
-        window.questSimulation = this.systems.questSimulation;
-        window.otherPlayerSimulation = this.systems.otherPlayerSimulation;
-        
-        console.log('🌌 All systems exposed globally');
     }
-
+    
     setupSystemIntegration() {
         // Geolocation to Map Engine
         this.systems.geolocation.onPositionUpdate = (position) => {
@@ -2659,88 +2482,137 @@ class EldritchSanctuaryApp {
             if (this.systems.encounter) {
                 this.systems.encounter.updatePlayerPosition(position);
             }
-            
-            // Center map on first position update with better accuracy check
-            if (!this.hasCenteredOnLocation && position.accuracy && position.accuracy < 100) {
-                console.log('📍 Centering map on accurate GPS position:', position);
-                this.systems.mapEngine.centerOnPosition(position);
-                this.hasCenteredOnLocation = true;
-            } else if (!this.hasCenteredOnLocation && (!position.accuracy || position.accuracy >= 100)) {
-                // If accuracy is poor or unknown, center anyway immediately
-                        console.log('📍 Centering map on GPS position (poor accuracy):', position);
-                        this.systems.mapEngine.centerOnPosition(position);
-                        this.hasCenteredOnLocation = true;
-            }
         };
-
-        // Investigation System to WebSocket
-        this.systems.investigation.onInvestigationStart = (investigation) => {
-            this.systems.websocket.sendInvestigationStart(investigation);
-            this.showNotification(`🔍 Started investigation: ${investigation.name}`);
+        
+        // Map Engine to Quest System
+        this.systems.mapEngine.onPlayerMove = (position) => {
+            this.systems.quest.updatePlayerPosition(position);
+            this.systems.encounter.checkProximityEncounters(position);
         };
-
-        this.systems.investigation.onInvestigationComplete = (investigation) => {
-            this.systems.websocket.sendInvestigationComplete(investigation);
-            this.showNotification(`🎉 Investigation completed: ${investigation.name}`);
+        
+        // Quest System to Encounter System
+        this.systems.quest.onQuestComplete = (quest) => {
+            this.systems.encounter.onQuestComplete(quest);
         };
-
-        this.systems.investigation.onInvestigationAbandon = (investigation) => {
-            this.showNotification(`❌ Investigation abandoned: ${investigation.name}`);
+        
+        // Encounter System to Map Engine
+        this.systems.encounter.onEncounterStart = (encounter) => {
+            this.systems.mapEngine.showEncounterMarker(encounter);
         };
-
-        // WebSocket to Map Engine
-        this.systems.websocket.onPlayerUpdate = (player) => {
+        
+        // Base System to Map Engine
+        this.systems.base.onBaseEstablished = (base) => {
+            this.systems.mapEngine.addBaseMarker(base);
+        };
+        
+        // Item System to Inventory UI
+        this.systems.item.onItemAdded = (item) => {
+            this.systems.inventoryUI.addItem(item);
+        };
+        
+        // Step Currency System to Quest System
+        this.systems.stepCurrency.onStepsAdded = (steps) => {
+            this.systems.quest.updateStepCount(steps);
+        };
+        
+        // Multiplayer Manager to Map Engine
+        this.systems.multiplayer.onPlayerUpdate = (player) => {
             this.systems.mapEngine.updateOtherPlayer(player);
         };
-
-        this.systems.websocket.onConnectionChange = (connected) => {
-            if (connected) {
-                this.showNotification('🌐 Connected to cosmic network');
-            } else {
-                this.showNotification('🌐 Disconnected from cosmic network');
-            }
+        
+        // Moral Choice System to Quest System
+        this.systems.moralChoice.onChoiceMade = (choice) => {
+            this.systems.quest.updateAlignment(choice.alignment);
         };
-
-        // Map Engine ready callback is set in initCoreSystems()
-
-        // Base System integration
-        this.systems.baseSystem.onBaseEstablished = (base) => {
-            console.log('🏗️ Base established callback triggered:', base);
-            if (this.systems.mapEngine && this.systems.mapEngine.map) {
-                this.systems.mapEngine.addPlayerBaseMarker(base);
-                this.showNotification(`🏗️ Base "${base.name}" established!`, 'success');
-            } else {
-                console.log('🏗️ Map engine not ready, storing base for later rendering');
-                // Store base for later rendering when map is ready
-                this.pendingBase = base;
-            }
+        
+        // Discord Effects System to Map Engine
+        this.systems.discordEffects.onEffectTriggered = (effect) => {
+            this.systems.mapEngine.triggerEffect(effect);
         };
-
-        // Restore persisted map/quest state shortly after init
-        setTimeout(() => {
-            try {
-                // Restore path polyline if toggle is enabled later by user
-                const savedPath = window.sessionPersistence?.restorePath?.();
-                if (savedPath && this.systems.mapEngine) {
-                    // Defer drawing until user enables pathLine; we'll seed last position
-                    const last = savedPath[savedPath.length - 1];
-                    if (last) {
-                        this.systems.mapEngine.lastPlayerPosition = { lat: last[0], lng: last[1] };
-                    }
-                }
-            } catch (_) {}
-        }, 1500);
-
-        this.systems.baseSystem.onBaseDeleted = () => {
-            this.systems.mapEngine.removePlayerBaseMarker();
-            this.showNotification('🏗️ Base deleted. You can now establish a new one.', 'info');
+        
+        // Microgames Manager to Quest System
+        this.systems.microgames.onGameComplete = (game) => {
+            this.systems.quest.updateGameProgress(game);
         };
-
-        this.systems.baseSystem.onTerritoryUpdated = (territoryPoints) => {
-            this.systems.mapEngine.updateTerritoryVisualization(territoryPoints);
+        
+        // Statistics to Map Engine
+        this.systems.statistics.onStatUpdate = (stat) => {
+            this.systems.mapEngine.updateStatDisplay(stat);
         };
+        
+        // NPC System to Map Engine
+        this.systems.npc.onNPCCreate = (npc) => {
+            this.systems.mapEngine.addNPCMarker(npc);
+        };
+        
+        // Path Painting System to Map Engine
+        this.systems.pathPainting.onPathUpdate = (path) => {
+            this.systems.mapEngine.updatePathDisplay(path);
+        };
+        
+        // Finnish Flag Generator to Map Engine
+        this.systems.finnishFlagGenerator.onFlagCreate = (flag) => {
+            this.systems.mapEngine.addFlagMarker(flag);
+        };
+        
+        // WebGL Vector Renderer to Map Engine
+        this.systems.webglVectorRenderer.onRenderComplete = (data) => {
+            this.systems.mapEngine.updateWebGLDisplay(data);
+        };
+        
+        // Enhanced Path Painting System to Map Engine
+        this.systems.enhancedPathPainting.onPathUpdate = (path) => {
+            this.systems.mapEngine.updateEnhancedPathDisplay(path);
+        };
+        
+        // Finnish Flag Canvas Layer to Map Engine
+        this.systems.finnishFlagCanvasLayer.onLayerUpdate = (layer) => {
+            this.systems.mapEngine.updateFlagLayer(layer);
+        };
+        
+        // Distortion Effects Canvas Layer to Map Engine
+        this.systems.distortionEffectsCanvasLayer.onEffectUpdate = (effect) => {
+            this.systems.mapEngine.updateDistortionLayer(effect);
+        };
+        
+        // Other Player Simulation to Map Engine
+        this.systems.otherPlayerSimulation.onPlayerSimulate = (player) => {
+            this.systems.mapEngine.simulateOtherPlayer(player);
+        };
+        
+        // Sanity Distortion to Map Engine
+        this.systems.sanityDistortion.onDistortionTrigger = (distortion) => {
+            this.systems.mapEngine.triggerDistortion(distortion);
+        };
+        
+        // Gruesome Notifications to Map Engine
+        this.systems.gruesomeNotifications.onNotificationShow = (notification) => {
+            this.systems.mapEngine.showNotification(notification);
+        };
+        
+        // Welcome Screen to Map Engine
+        this.systems.welcomeScreen.onWelcomeComplete = () => {
+            this.systems.mapEngine.initializeMap();
+        };
+        
+        // WebGL Map Renderer to Map Engine
+        this.systems.webglMapRenderer.onRenderComplete = (data) => {
+            this.systems.mapEngine.updateWebGLMap(data);
+        };
+        
+        // WebGL Map Integration to Map Engine
+        this.systems.webglMapIntegration.onIntegrationComplete = (data) => {
+            this.systems.mapEngine.updateWebGLIntegration(data);
+        };
+        
+        // WebGL Test to Map Engine
+        this.systems.webglTest.onTestComplete = (data) => {
+            this.systems.mapEngine.updateWebGLTest(data);
+        };
+        
+        console.log('🔧 System integration setup complete');
     }
-
+    
     async loadInitialData() {
         // Load mystery zones
         this.loadMysteryZones();
@@ -2749,7 +2621,7 @@ class EldritchSanctuaryApp {
         console.log('📍 Starting geolocation tracking...');
         this.systems.geolocation.startTracking();
     }
-
+    
     loadMysteryZones() {
         const zones = this.systems.investigation.getMysteryZones();
         this.systems.mapEngine.addMysteryZoneMarkers(zones);
@@ -2760,7 +2632,7 @@ class EldritchSanctuaryApp {
             zoneCountElement.textContent = zones.length;
         }
     }
-
+    
     loadPlayerBases() {
         // Prevent duplicate loading
         if (this.playerBasesLoaded) {
@@ -2788,7 +2660,7 @@ class EldritchSanctuaryApp {
             this.playerBasesLoaded = true;
         }
     }
-
+    
     loadNPCs() {
         console.log('👥 Loading NPCs...');
         
@@ -2801,75 +2673,39 @@ class EldritchSanctuaryApp {
             
             // Generate NPCs (this will create markers on the map)
             this.systems.npc.generateNPCs();
-            console.log('👥 NPCs loaded successfully');
+            
+            // Start NPC movement simulation
+            this.systems.npc.startSimulation();
+            
+            console.log('👥 NPCs loaded and movement started successfully');
         } catch (error) {
             console.error('👥 Error loading NPCs:', error);
         }
     }
-
+    
     showNotification(message) {
+        console.log('📢 Notification:', message);
+        
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = 'cosmic-notification';
+        notification.className = 'notification';
         notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, var(--cosmic-darker), var(--cosmic-dark));
-            border: 2px solid var(--cosmic-purple);
-            color: var(--cosmic-light);
-            padding: 15px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            z-index: 3000;
-            box-shadow: 0 0 20px var(--cosmic-glow);
-            backdrop-filter: blur(10px);
-            animation: slideInCenter 0.3s ease-out;
-            max-width: 300px;
-            text-align: center;
-        `;
-
-        // Add animation keyframes
-        if (!document.getElementById('notification-styles')) {
-            const style = document.createElement('style');
-            style.id = 'notification-styles';
-            style.textContent = `
-                @keyframes slideInCenter {
-                    from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-                    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-                }
-                @keyframes slideOutCenter {
-                    from { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-                    to { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
+        
+        // Add to page
         document.body.appendChild(notification);
         
-        // Auto-remove after 3 seconds
+        // Remove after 3 seconds
         setTimeout(() => {
-            notification.style.animation = 'slideOutCenter 0.3s ease-in';
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
         }, 3000);
     }
-
-    // Public API methods
-    getSystem(systemName) {
-        return this.systems[systemName];
-    }
-
+    
     isReady() {
         return this.isInitialized;
     }
-
+    
     // Reset game screen and recreate all markers
     resetGameScreen() {
         console.log('🔄 Resetting game screen from main app...');
@@ -2881,7 +2717,7 @@ class EldritchSanctuaryApp {
             this.showError('Map engine not available for reset');
         }
     }
-
+    
     // Force center map on current location
     centerOnCurrentLocation() {
         console.log('📍 Forcing center on current location...');
@@ -2897,10 +2733,11 @@ class EldritchSanctuaryApp {
                 this.showNotification('📍 Requesting your location...', 'info');
             }
         } else {
-            this.showError('Geolocation not available');
+            console.error('📍 Geolocation system not available');
+            this.showError('Geolocation system not available');
         }
     }
-
+    
     // Cleanup
     destroy() {
         Object.values(this.systems).forEach(system => {
@@ -2913,6 +2750,24 @@ class EldritchSanctuaryApp {
         this.isInitialized = false;
     }
 }
+
+// Global app instance and bootstrap
+let app;
+
+document.addEventListener('DOMContentLoaded', () => {
+    app = new EldritchSanctuaryApp();
+    app.init();
+});
+
+window.addEventListener('beforeunload', () => {
+    if (app) {
+        try { app.destroy(); } catch (_) {}
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (!app || !app.isReady()) return;
+});
 
 // Lightweight docked/draggable panel manager
 class DockedPanelManager {
@@ -2938,318 +2793,185 @@ class DockedPanelManager {
         this.container = container;
     }
     
-    openPanel(id, { title = 'Panel', content = '', height = 320, draggable = true, dock = 'right' } = {}) {
-        this.ensureContainer();
-        // Close if exists
-        this.closePanel(id);
+    createPanel(id, title, content, options = {}) {
+        const { width = 320, height = 200, draggable = true, dockable = true } = options;
         
         const panel = document.createElement('div');
+        panel.id = `panel-${id}`;
         panel.className = 'docked-panel';
         panel.style.cssText = `
-            pointer-events: auto; background: rgba(12,12,18,0.95); border: 1px solid var(--cosmic-purple);
-            border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            overflow: hidden; user-select: none;
+            width: ${width}px; height: ${height}px; background: rgba(15, 15, 35, 0.95);
+            border: 1px solid rgba(0, 255, 255, 0.3); border-radius: 8px;
+            backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            pointer-events: auto; position: relative; overflow: hidden;
         `;
+        
         panel.innerHTML = `
-            <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-bottom:1px solid var(--cosmic-purple);cursor:move;">
-                <div style="font-weight:bold;color:var(--cosmic-purple);font-size:12px;">${title}</div>
-                <div>
-                    <button class="panel-close" style="background:var(--cosmic-red);color:#fff;border:none;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;">✕</button>
+            <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(0, 255, 255, 0.1); border-bottom:1px solid rgba(0, 255, 255, 0.2);">
+                <h4 style="margin:0; color:#00ffff; font-size:0.9rem;">${title}</h4>
+                <div style="display:flex; gap:4px;">
+                    ${dockable ? '<button class="dock-btn" style="background:none; border:none; color:#00ffff; cursor:pointer; font-size:0.8rem;">📌</button>' : ''}
+                    <button class="close-btn" style="background:none; border:none; color:#ff6b6b; cursor:pointer; font-size:0.8rem;">×</button>
                 </div>
             </div>
             <div class="panel-body" style="padding:10px; height:${height}px; overflow:auto;">${content}</div>
         `;
+        
         this.container.appendChild(panel);
-        if (window.soundManager) { try { window.soundManager.pauseAmbience('panel'); } catch (e) {} }
         this.panels.set(id, panel);
         
-        // Close
-        panel.querySelector('.panel-close').addEventListener('click', () => this.closePanel(id));
+        // Event listeners
+        const closeBtn = panel.querySelector('.close-btn');
+        closeBtn.addEventListener('click', () => this.removePanel(id));
         
-        // Draggable
-        if (draggable) this.makeDraggable(panel);
+        if (dockable) {
+            const dockBtn = panel.querySelector('.dock-btn');
+            dockBtn.addEventListener('click', () => this.toggleDock(id));
+        }
+        
+        if (draggable) {
+            this.makeDraggable(panel);
+        }
         
         return panel;
     }
     
-    updatePanelContent(id, { title, content }) {
-        const panel = this.panels.get(id);
-        if (!panel) return;
-        if (title) panel.querySelector('.panel-header div').textContent = title;
-        if (content !== undefined) panel.querySelector('.panel-body').innerHTML = content;
+    makeDraggable(panel) {
+        const header = panel.querySelector('.panel-header');
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+        
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseInt(panel.style.left) || 0;
+            startTop = parseInt(panel.style.top) || 0;
+            panel.style.position = 'fixed';
+            panel.style.zIndex = '2000';
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            panel.style.left = (startLeft + deltaX) + 'px';
+            panel.style.top = (startTop + deltaY) + 'px';
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
     }
     
-    closePanel(id) {
+    toggleDock(id) {
+        const panel = this.panels.get(id);
+        if (!panel) return;
+        
+        const isDocked = panel.style.position !== 'fixed';
+        if (isDocked) {
+            panel.style.position = 'fixed';
+            panel.style.left = '50%';
+            panel.style.top = '50%';
+            panel.style.transform = 'translate(-50%, -50%)';
+            panel.style.zIndex = '2000';
+        } else {
+            panel.style.position = 'relative';
+            panel.style.left = 'auto';
+            panel.style.top = 'auto';
+            panel.style.transform = 'none';
+            panel.style.zIndex = 'auto';
+        }
+    }
+    
+    removePanel(id) {
         const panel = this.panels.get(id);
         if (panel) {
             panel.remove();
             this.panels.delete(id);
-            if (this.panels.size === 0 && window.soundManager) { try { window.soundManager.resumeAmbience('panel'); } catch (e) {} }
         }
     }
     
-    makeDraggable(panel) {
-        const header = panel.querySelector('.panel-header');
-        if (!header) return;
-        let isDown = false; let startX = 0; let startY = 0; let startLeft = 0; let startTop = 0;
-        panel.style.position = 'fixed';
-        panel.style.right = '10px';
-        panel.style.top = `${this.container.getBoundingClientRect().top}px`;
-        
-        const onDown = (e) => {
-            isDown = true;
-            const rect = panel.getBoundingClientRect();
-            startLeft = rect.left; startTop = rect.top;
-            startX = (e.touches ? e.touches[0].clientX : e.clientX);
-            startY = (e.touches ? e.touches[0].clientY : e.clientY);
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('touchmove', onMove, { passive: false });
-            document.addEventListener('mouseup', onUp);
-            document.addEventListener('touchend', onUp);
-        };
-        const onMove = (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = (e.touches ? e.touches[0].clientX : e.clientX);
-            const y = (e.touches ? e.touches[0].clientY : e.clientY);
-            const dx = x - startX; const dy = y - startY;
-            panel.style.left = `${startLeft + dx}px`;
-            panel.style.top = `${startTop + dy}px`;
-            panel.style.right = 'auto';
-        };
-        const onUp = () => {
-            isDown = false;
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('touchmove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            document.removeEventListener('touchend', onUp);
-        };
-        header.addEventListener('mousedown', onDown);
-        header.addEventListener('touchstart', onDown, { passive: true });
+    getPanel(id) {
+        return this.panels.get(id);
     }
 }
 
 // Lightweight WebAudio sound manager (no external assets)
 class SoundManager {
-	constructor() {
-		this.audioCtx = null;
-		this.masterGain = null;
-		this.ambienceInterval = null;
-		this.ambiencePausedReasons = new Set();
-		this.init();
-	}
-	
-	init() {
-		try {
-			const AudioContextRef = window.AudioContext || window.webkitAudioContext;
-			this.audioCtx = new AudioContextRef();
-			this.masterGain = this.audioCtx.createGain();
-			this.masterGain.gain.value = 0.3;
-			this.masterGain.connect(this.audioCtx.destination);
-		} catch (e) {
-			console.warn('🔊 WebAudio not available', e);
-		}
-	}
-	
-	// Ensure context resumed on user gesture
-	resumeIfNeeded() {
-		if (this.audioCtx && this.audioCtx.state === 'suspended') {
-			this.audioCtx.resume();
-		}
-	}
-	
-	// Basic blip/bling using oscillator
-	playBling({ frequency = 880, duration = 0.15, type = 'sine' } = {}) {
-		if (!this.audioCtx) return;
-		this.resumeIfNeeded();
-		const now = this.audioCtx.currentTime;
-		const osc = this.audioCtx.createOscillator();
-		const gain = this.audioCtx.createGain();
-		osc.type = type;
-		osc.frequency.setValueAtTime(frequency, now);
-		gain.gain.setValueAtTime(0.0001, now);
-		gain.gain.exponentialRampToValueAtTime(0.6, now + 0.02);
-		gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-		osc.connect(gain).connect(this.masterGain);
-		osc.start(now);
-		osc.stop(now + duration + 0.02);
-	}
-	
-	// Terrifying bling: descending minor third with noise burst
-	playTerrifyingBling() {
-		if (!this.audioCtx) return;
-		this.resumeIfNeeded();
-		const now = this.audioCtx.currentTime;
-		// Tone sweep
-		const osc = this.audioCtx.createOscillator();
-		const gain = this.audioCtx.createGain();
-		osc.type = 'sawtooth';
-		osc.frequency.setValueAtTime(740, now);
-		osc.frequency.exponentialRampToValueAtTime(440, now + 0.4);
-		gain.gain.setValueAtTime(0.0001, now);
-		gain.gain.exponentialRampToValueAtTime(0.5, now + 0.05);
-		gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-		osc.connect(gain).connect(this.masterGain);
-		osc.start(now);
-		osc.stop(now + 0.5);
-		// Noise burst
-		const noiseDur = 0.2;
-		const noise = this.createNoiseBufferSource(noiseDur);
-		const nGain = this.audioCtx.createGain();
-		nGain.gain.setValueAtTime(0.0001, now + 0.15);
-		nGain.gain.exponentialRampToValueAtTime(0.4, now + 0.2);
-		nGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-		noise.connect(nGain).connect(this.masterGain);
-		noise.start(now + 0.15);
-	}
-	
-	// Eerie hum: layered detuned oscillators with slow tremolo
-	playEerieHum({ duration = 2.5 } = {}) {
-		if (!this.audioCtx) return;
-		this.resumeIfNeeded();
-		const now = this.audioCtx.currentTime;
-		const baseFreq = 110;
-		const voices = [0, -3, +7].map(semi => baseFreq * Math.pow(2, semi / 12));
-		const tremOsc = this.audioCtx.createOscillator();
-		const tremGain = this.audioCtx.createGain();
-		tremOsc.type = 'sine';
-		tremOsc.frequency.setValueAtTime(4.5, now);
-		tremGain.gain.value = 0.3;
-		tremOsc.connect(tremGain);
-		tremOsc.start(now);
-		const outGain = this.audioCtx.createGain();
-		outGain.gain.setValueAtTime(0.0001, now);
-		outGain.gain.exponentialRampToValueAtTime(0.4, now + 0.4);
-		outGain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-		voices.forEach((f, idx) => {
-			const osc = this.audioCtx.createOscillator();
-			const vGain = this.audioCtx.createGain();
-			osc.type = 'sine';
-			osc.frequency.setValueAtTime(f * (1 + (idx - 1) * 0.002), now);
-			// Apply tremolo
-			tremGain.connect(vGain.gain);
-			osc.connect(vGain).connect(outGain).connect(this.masterGain);
-			osc.start(now);
-			osc.stop(now + duration + 0.1);
-		});
-		setTimeout(() => tremOsc.stop(), (duration + 0.2) * 1000);
-	}
-	
-	// Short UI ok/cancel
-	playOk() { this.playBling({ frequency: 1200, duration: 0.09, type: 'triangle' }); }
-	playCancel() { this.playBling({ frequency: 300, duration: 0.12, type: 'square' }); }
-	playQuestOpen() { this.playBling({ frequency: 980, duration: 0.14, type: 'sine' }); }
-	playQuestComplete() { this.playBling({ frequency: 1560, duration: 0.18, type: 'triangle' }); }
-	playWarning() { this.playTerrifyingBling(); }
-	
-	// Subtle ambience pulse while exploring
-	startAmbiencePulse({ intervalMs = 12000 } = {}) {
-		if (!this.audioCtx) return;
-		this.resumeIfNeeded();
-		this.stopAmbiencePulse();
-		this.ambienceInterval = setInterval(() => {
-			if (this.ambiencePausedReasons.size > 0) return;
-			try { this.playEerieHum({ duration: 1.6 }); } catch (e) {}
-		}, intervalMs);
-	}
-	stopAmbiencePulse() {
-		if (this.ambienceInterval) {
-			clearInterval(this.ambienceInterval);
-			this.ambienceInterval = null;
-		}
-	}
-	pauseAmbience(reason = 'generic') {
-		this.ambiencePausedReasons.add(reason);
-	}
-	resumeAmbience(reason = 'generic') {
-		if (this.ambiencePausedReasons.has(reason)) this.ambiencePausedReasons.delete(reason);
-	}
-
-	// Helpers
-	createNoiseBufferSource(duration = 0.2) {
-		const sampleRate = this.audioCtx.sampleRate;
-		const frameCount = Math.floor(sampleRate * duration);
-		const buffer = this.audioCtx.createBuffer(1, frameCount, sampleRate);
-		const data = buffer.getChannelData(0);
-		for (let i = 0; i < frameCount; i++) {
-			data[i] = (Math.random() * 2 - 1) * (1 - i / frameCount); // quick decay
-		}
-		const source = this.audioCtx.createBufferSource();
-		source.buffer = buffer;
-		return source;
-	}
-	
-	/**
-	 * Play audio asset from AssetManager
-	 */
-	playAsset(assetId, options = {}) {
-		if (!window.assetManager) {
-			console.warn('📦 AssetManager not available, using fallback sound');
-			this.playBling();
-			return;
-		}
-		
-		try {
-			const source = window.assetManager.playAudio(assetId, {
-				volume: options.volume || 1.0
-			});
-			
-			if (source) {
-				// Add fade out effect
-				if (options.fadeOut) {
-					const gainNode = this.audioCtx.createGain();
-					source.connect(gainNode);
-					gainNode.connect(this.masterGain);
-					
-					const fadeTime = options.fadeOut || 0.5;
-					gainNode.gain.setValueAtTime(1, this.audioCtx.currentTime);
-					gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + fadeTime);
-					
-					setTimeout(() => {
-						try { source.stop(); } catch (e) {}
-					}, fadeTime * 1000);
-				}
-			}
-		} catch (error) {
-			console.warn(`📦 Failed to play audio asset ${assetId}:`, error);
-			this.playBling(); // Fallback to basic sound
-		}
-	}
-}
-
-// Global app instance
-let app;
-
-// Initialize app when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    app = new EldritchSanctuaryApp();
-    app.init();
-    
-    // Global systems are now exposed during initialization
-    
-    // Debug: Check what systems are available
-    console.log('🔍 Global systems check:');
-    console.log('  - geolocationManager:', !!window.geolocationManager);
-    console.log('  - databaseClient:', !!window.databaseClient);
-    console.log('  - app.systems:', Object.keys(app.systems));
-});
-
-// Handle page unload
-window.addEventListener('beforeunload', () => {
-    if (app) {
-        app.destroy();
+    constructor() {
+        this.audioContext = null;
+        this.sounds = new Map();
+        this.masterVolume = 0.3;
+        this.enabled = true;
     }
-});
-
-// Handle visibility change (pause/resume)
-document.addEventListener('visibilitychange', () => {
-    if (app && app.isReady()) {
-        if (document.hidden) {
-            // Page is hidden, pause non-essential systems
-            console.log('🌌 Pausing cosmic exploration...');
-        } else {
-            // Page is visible, resume systems
-            console.log('🌌 Resuming cosmic exploration...');
+    
+    init() {
+        if (this.audioContext) return;
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            console.log('🔊 Sound system initialized');
+        } catch (e) {
+            console.warn('🔊 WebAudio not supported:', e);
         }
     }
-});
+    
+    playTone(frequency, duration, type = 'sine', volume = 0.1) {
+        if (!this.enabled || !this.audioContext) return;
+        
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+        oscillator.type = type;
+        
+        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(volume * this.masterVolume, this.audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+        
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + duration);
+    }
+    
+    playNotification() {
+        this.playTone(800, 0.2, 'sine', 0.1);
+        setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.1), 100);
+    }
+    
+    playError() {
+        this.playTone(200, 0.5, 'sawtooth', 0.15);
+    }
+    
+    playSuccess() {
+        this.playTone(600, 0.1, 'sine', 0.1);
+        setTimeout(() => this.playTone(800, 0.1, 'sine', 0.1), 50);
+        setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.1), 100);
+    }
+
+    // Quest-related cues used by UnifiedQuestSystem
+    playQuestOpen() {
+        // rising triad
+        this.playTone(523.25, 0.08, 'sine', 0.12); // C5
+        setTimeout(() => this.playTone(659.25, 0.10, 'sine', 0.12), 60); // E5
+        setTimeout(() => this.playTone(783.99, 0.14, 'sine', 0.12), 120); // G5
+    }
+
+    playQuestComplete() {
+        // short success fanfare
+        this.playTone(880.0, 0.10, 'triangle', 0.15);
+        setTimeout(() => this.playTone(1174.66, 0.12, 'triangle', 0.15), 90);
+        setTimeout(() => this.playTone(1046.50, 0.20, 'triangle', 0.18), 180);
+    }
+    
+    setVolume(volume) {
+        this.masterVolume = Math.max(0, Math.min(1, volume));
+    }
+    
+    setEnabled(enabled) {
+        this.enabled = enabled;
+    }
+}

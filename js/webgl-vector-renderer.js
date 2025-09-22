@@ -126,15 +126,26 @@ class WebGLVectorRenderer {
             return { x: 0, y: 0 };
         }
 
-        const x = ((lng - this.mapBounds.getWest()) / (this.mapBounds.getEast() - this.mapBounds.getWest())) * 2 - 1;
-        const y = ((lat - this.mapBounds.getSouth()) / (this.mapBounds.getNorth() - this.mapBounds.getSouth())) * 2 - 1;
+        // Check if bounds are valid
+        const west = this.mapBounds.getWest();
+        const east = this.mapBounds.getEast();
+        const north = this.mapBounds.getNorth();
+        const south = this.mapBounds.getSouth();
         
-        // Clamp coordinates to prevent large overlays
-        const clampedX = Math.max(-1, Math.min(1, x));
-        const clampedY = Math.max(-1, Math.min(1, y));
+        if (west === east || north === south) {
+            console.warn('🎨 Invalid map bounds:', { west, east, north, south });
+            return { x: 0, y: 0 };
+        }
+
+        const x = ((lng - west) / (east - west)) * 2 - 1;
+        const y = ((lat - south) / (north - south)) * 2 - 1;
         
-        // Only log if coordinates are outside normal range
-        if (Math.abs(x) > 1 || Math.abs(y) > 1) {
+        // Clamp coordinates to prevent large overlays, but allow some range for off-screen elements
+        const clampedX = Math.max(-5, Math.min(5, x));
+        const clampedY = Math.max(-5, Math.min(5, y));
+        
+        // Only log if coordinates are significantly outside normal range
+        if (Math.abs(x) > 3 || Math.abs(y) > 3) {
             console.warn('🎨 Coordinates outside normal range:', { lat, lng }, '->', { x, y }, 'clamped to:', { clampedX, clampedY });
         }
         
@@ -145,9 +156,14 @@ class WebGLVectorRenderer {
      * Render Finnish flags along a path
      */
     renderFlagsAlongPath(pathPoints, flagSpacing = 15, scale = 1) {
-        if (!this.isInitialized || pathPoints.length < 2) return;
+        if (!this.isInitialized || pathPoints.length < 2) {
+            console.log('🎨 Cannot render flags: initialized:', this.isInitialized, 'points:', pathPoints.length);
+            return;
+        }
 
+        console.log('🎨 Generating flags for', pathPoints.length, 'path points');
         const flags = this.flagGenerator.generateFlagsAlongPath(pathPoints, flagSpacing, scale);
+        console.log('🎨 Generated', flags.length, 'flags');
         this.renderFlags(flags);
     }
 
@@ -232,7 +248,7 @@ class WebGLVectorRenderer {
         // Check if any coordinates are outside normal range (indicating invalid data)
         let hasInvalidCoordinates = false;
         for (let i = 0; i < this.vertexArray.length; i += 2) {
-            if (Math.abs(this.vertexArray[i]) > 2 || Math.abs(this.vertexArray[i + 1]) > 2) {
+            if (Math.abs(this.vertexArray[i]) > 10 || Math.abs(this.vertexArray[i + 1]) > 10) {
                 hasInvalidCoordinates = true;
                 break;
             }

@@ -51,7 +51,7 @@ html, body {
     position: relative;
     width: 100%;
     height: 100vh;
-    padding-top: 120px; /* Account for fixed header */
+    padding-top: 70px; /* Account for fixed header */
     padding-bottom: 80px; /* Account for fixed footer */
 }
 
@@ -86,13 +86,13 @@ html, body {
     background: linear-gradient(135deg, rgba(15, 15, 35, 0.95), rgba(25, 25, 55, 0.95));
     backdrop-filter: blur(10px);
     border-bottom: 2px solid rgba(0, 255, 255, 0.3);
-    padding: 10px 16px;
+    padding: 8px 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 8px;
     height: auto;
-    min-height: 80px;
+    min-height: 60px;
 }
 
 .header-top {
@@ -132,12 +132,25 @@ html, body {
     color: #00ffff;
 }
 
-.header-info {
+.header-info-compact {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    gap: 20px;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.location-info-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.8rem;
+    color: var(--cosmic-light);
+}
+
+.location-info-compact span {
+    white-space: nowrap;
 }
 
 /* Dev Toggle */
@@ -405,14 +418,7 @@ html, body {
 }
 
 /* Geolocation Panel */
-#locate-btn {
-    width: 100%;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
+#locate-btn { display: none; }
 
 .accuracy-info {
     font-size: 0.8rem;
@@ -542,6 +548,19 @@ html, body {
     max-height: 80vh;
     overflow-y: auto;
     box-shadow: 0 0 30px var(--cosmic-glow);
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Encounter modal specific overrides */
+.encounter-modal .modal-content {
+    max-width: 600px;
+    width: 95%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #00d4ff;
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
 }
 
 .modal-header {
@@ -687,23 +706,10 @@ html, body {
 /* Step Counter Styles - Enhanced */
 .step-counter-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #feca57 100%);
-    border: 2px solid #00ffff;
-    border-radius: 12px;
-    padding: 8px 16px;
-    margin: 0 auto;
-    box-shadow: 
-        0 0 20px rgba(0, 255, 255, 0.4),
-        0 0 40px rgba(255, 107, 107, 0.2),
-        inset 0 0 10px rgba(255, 255, 255, 0.1);
-    min-width: 200px;
-    max-width: 300px;
-    position: relative;
-    overflow: hidden;
-    animation: stepCounterGlow 3s ease-in-out infinite alternate;
-    align-self: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .step-counter-container::before {
@@ -719,21 +725,21 @@ html, body {
 }
 
 .step-icon {
-    font-size: 1.5rem;
-    margin-bottom: 4px;
+    font-size: 1.2rem;
+    margin-bottom: 0;
     animation: stepBounce 1.5s infinite;
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
     z-index: 2;
     position: relative;
 }
 
 .step-number {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 900;
     color: #ffffff;
     text-shadow: 
-        0 0 20px rgba(0, 255, 255, 0.8),
-        0 0 40px rgba(255, 255, 255, 0.6),
+        0 0 15px rgba(0, 255, 255, 0.8),
+        0 0 30px rgba(255, 255, 255, 0.6),
         2px 2px 4px rgba(0, 0, 0, 0.5);
     line-height: 0.9;
     z-index: 2;
@@ -741,46 +747,27 @@ html, body {
     font-family: 'Courier New', monospace;
 }
 
-.step-label {
-    font-size: 0.7rem;
-    color: #ffffff;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: 2px;
-    opacity: 0.95;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    z-index: 2;
-    position: relative;
-}
-
+.step-label,
 .step-session {
-    font-size: 0.8rem;
-    color: #4caf50;
-    font-weight: bold;
-    margin-top: 2px;
-    text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
-    z-index: 2;
-    position: relative;
+    display: none;
 }
 
 .step-controls {
-    display: flex;
-    gap: 8px;
-    margin-top: 8px;
-    justify-content: center;
+    margin-top: 0;
+    align-items: center;
 }
 
 .step-ctrl-btn {
-    width: 36px;
-    height: 32px;
-    border-radius: 6px;
-    border: 2px solid var(--cosic-purple, #8a2be2);
+    width: 28px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid var(--cosic-purple, #8a2be2);
     background: linear-gradient(135deg, var(--cosmic-dark, #0b0b1a), var(--cosmic-darker, #060612));
     color: var(--cosmic-light, #e6e6ff);
     font-weight: 800;
     cursor: pointer;
     transition: transform 0.1s ease, box-shadow 0.2s ease;
+    font-size: 0.7rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
@@ -1337,11 +1324,7 @@ html, body {
     }
 }
 
-/* Encounter Modal Content Styles */
-.encounter-modal .modal-content {
-    max-width: 600px;
-    width: 95%;
-}
+/* Encounter Modal Content Styles - Removed duplicate, using main .modal-content */
 
 .encounter-dialog {
     padding: 20px;
@@ -1897,23 +1880,15 @@ html, body {
     justify-content: center;
     z-index: 10000;
     backdrop-filter: blur(5px);
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .encounter-modal.hidden {
     display: none;
 }
 
-.encounter-content {
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border: 2px solid #00d4ff;
-    border-radius: 15px;
-    padding: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-}
+/* Removed duplicate .encounter-content - using main .modal-content */
 
 .encounter-header {
     display: flex;
@@ -6457,6 +6432,27 @@ input[type="range"]::-moz-range-thumb {
     }
 }
 
+/* New marker animations */
+@keyframes hevyPulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+@keyframes shrineGlow {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes itemGlow {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes monsterPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
 .debug-text {
     font-size: 0.85em;
     letter-spacing: 0.5px;
@@ -8074,6 +8070,148 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
 }
 
+/* Multiplayer status: hidden for now */
+#multiplayerStatus {
+    display: none !important;
+}
+
+/* Side Panel Styles */
+.side-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: linear-gradient(135deg, rgba(15, 15, 35, 0.95), rgba(25, 25, 55, 0.95));
+    backdrop-filter: blur(10px);
+    border-left: 2px solid rgba(0, 255, 255, 0.3);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+}
+
+.side-panel.open {
+    right: 0;
+}
+
+.side-panel-content {
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.side-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+}
+
+.side-panel-header h3 {
+    color: #00ffff;
+    margin: 0;
+    font-size: 1.2rem;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 107, 107, 0.2);
+    transform: scale(1.1);
+}
+
+.side-panel-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.debug-section, .settings-section {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+}
+
+.debug-section h4, .settings-section h4 {
+    color: #00ffff;
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+}
+
+.debug-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.debug-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.5);
+    background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+}
+
+.debug-btn:active {
+    transform: translateY(0);
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.setting-item label {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.setting-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #00ffff;
+    cursor: pointer;
+}
+
 /* Quest System Animations */
 @keyframes auroraPulse {
     0%, 100% { 
@@ -8214,17 +8352,7 @@ input[type="range"]::-moz-range-thumb {
     justify-content: center;
 }
 
-.modal-content {
-    background: var(--cosmic-dark);
-    border: 2px solid var(--cosmic-purple);
-    border-radius: 15px;
-    padding: 30px;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    color: var(--cosmic-light);
-    box-shadow: 0 0 30px rgba(106, 13, 173, 0.5);
-}
+/* Removed duplicate .modal-content - using main definition above */
 
 .modal-header {
     display: flex;
@@ -8382,21 +8510,24 @@ input[type="range"]::-moz-range-thumb {
 /* Moral Choice System Styles */
 .moral-choice-overlay {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    width: 320px;
-    max-width: 90vw;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 600px;
+    max-height: 80vh;
     background: linear-gradient(135deg, rgba(10,10,14,0.95), rgba(26,26,46,0.95));
     border: 2px solid var(--cosmic-purple);
     border-radius: 12px;
-    padding: 16px;
+    padding: 20px;
     color: var(--cosmic-light);
     font-family: 'Courier New', monospace;
     z-index: 10003;
     box-shadow: 0 10px 30px rgba(0,0,0,0.7);
     backdrop-filter: blur(10px);
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
+    overflow-y: auto;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .moral-choice-btn {
@@ -8406,6 +8537,10 @@ input[type="range"]::-moz-range-thumb {
 .moral-choice-btn:hover {
     transform: scale(1.02);
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+}
+
+.moral-choice-overlay.visible {
+    opacity: 1;
 }
 
 @keyframes moralEffect {
@@ -8421,4 +8556,29 @@ input[type="range"]::-moz-range-thumb {
         opacity: 0;
         transform: translate(-50%, -50%) scale(1.5);
     }
+}
+
+/* Hide duplicate mobile locate button */
+#mobile-locate {
+    display: none !important;
+}
+
+/* Apply mobile button styling to footer locate button */
+.footer-btn.locate-me-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.footer-btn.locate-me-btn:hover {
+    background: linear-gradient(135deg, #764ba2, #667eea);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
 }

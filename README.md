@@ -24,17 +24,28 @@ Eldritch Sanctuary is an immersive cosmic exploration platform that combines inf
 - **Base Management:** Complete base management system with statistics
 - **Community Networks:** Foundation for collaborative exploration
 
-### ⚔️ RPG Combat System
+### ⚔️ Enhanced Encounter System
+- **Quest Marker Encounters:** Interactive encounters triggered by proximity to quest markers
+- **5 Encounter Types:** Cosmic Shrine, Eldritch Horror, Wisdom Crystal, Cosmic Merchant, and HEVY
+- **Stat Adjustments:** All encounters provide meaningful stat changes (health, sanity, experience, skills)
 - **Dice-Based Combat:** D20 initiative rolls with strategic turn-based combat
-- **Rich Storytelling:** 5 unique monster types with detailed backstories
-- **Character Progression:** Health, attack, defense, luck stats with experience
-- **Immersive Narratives:** Each encounter tells a compelling story
+- **Rich Storytelling:** Detailed backstories and immersive narratives for each encounter
+- **Character Progression:** Health, attack, defense, luck stats with experience and skill development
 
-### 👥 NPC Interactions
-- **Deep Characters:** Aurora, Zephyr, and Sage with rich backstories
-- **Meaningful Dialogue:** Context-aware conversations and relationship building
-- **Cosmic Wisdom:** Each NPC offers unique insights and guidance
+### 👥 Dynamic NPC System
+- **Moving NPCs:** Aurora and Zephyr move around the map with distinct patterns
+- **Aurora (👑):** Cosmic entity with slow mystical movement and cosmic wisdom
+- **Zephyr (💨):** Energetic traveler with fast directional movement
+- **Proximity Triggers:** 20m radius for all NPC interactions
+- **Deep Characters:** Rich backstories and meaningful dialogue systems
 - **Community Building:** NPCs foster connections and shared experiences
+
+### ⚡ HEVY System
+- **Legendary Encounter:** HEVY appears as special marker on the map
+- **Cosmic Energy Effects:** Pulsing animation and energy field visualization
+- **Riddle System:** Interactive cosmic riddle with hints and massive rewards
+- **Position Tracking:** HEVY positioned 200m from player with dynamic placement
+- **Legendary Status:** Rare encounter with high-value rewards and cosmic wisdom
 
 ### 🎨 Path Painting System
 - **Journey Visualization:** Paint your exploration path with beautiful brush effects

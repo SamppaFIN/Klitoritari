@@ -348,6 +348,7 @@ class EncounterSystem {
 
     checkProximityEncounters() {
         if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine) {
+            console.log('🎭 No map engine available for proximity check');
             return;
         }
         
@@ -361,8 +362,19 @@ class EncounterSystem {
         const playerPos = window.eldritchApp.systems.mapEngine.getPlayerPosition();
         if (!playerPos) {
             console.log('🎯 No player position available for proximity check');
+            // Try to get position from geolocation system as fallback
+            if (window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
+                console.log('🎯 Using geolocation fallback position');
+                const fallbackPos = window.eldritchApp.systems.geolocation.currentPosition;
+                this.checkProximityEncountersWithPosition(fallbackPos);
+            }
             return;
         }
+        
+        this.checkProximityEncountersWithPosition(playerPos);
+    }
+    
+    checkProximityEncountersWithPosition(playerPos) {
 
         // Debug: Log player position and nearby markers
         this.debugProximityInfo(playerPos);
@@ -374,7 +386,7 @@ class EncounterSystem {
         this.checkMonsterProximity(playerPos);
         this.checkPOIProximity(playerPos);
         this.checkMysteryProximity(playerPos);
-        // Test quest proximity checking disabled as requested
+        this.checkQuestMarkerProximity(playerPos);
         
         // Check for legendary encounters
         this.checkLegendaryEncounters(playerPos);
@@ -428,6 +440,31 @@ class EncounterSystem {
         
         // Mystery encounters removed as requested
     }
+    
+    checkQuestMarkerProximity(playerPos) {
+        if (!window.unifiedQuestSystem || !window.unifiedQuestSystem.questMarkers) {
+            return;
+        }
+        
+        window.unifiedQuestSystem.questMarkers.forEach((questMarker, key) => {
+            if (questMarker.encountered) {
+                return; // Skip already encountered markers
+            }
+            
+            const questPos = questMarker.getLatLng();
+            const distance = this.calculateDistance(
+                playerPos.lat, playerPos.lng,
+                questPos.lat, questPos.lng
+            );
+            
+            // Use visual proximity - closer trigger area for better UX
+            if (distance < 30) { // 30m for quest marker interaction
+                console.log(`🎭 Quest marker encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                questMarker.encountered = true;
+                this.startQuestMarkerEncounter(questMarker, key);
+            }
+        });
+    }
 
     checkTestQuestProximity(playerPos) {
         if (!window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
@@ -462,6 +499,89 @@ class EncounterSystem {
                 this.startLegendaryEncounter(encounter);
             }
         });
+    }
+    
+    startLegendaryEncounter(encounter) {
+        console.log('🌟 Starting legendary encounter:', encounter.name);
+        
+        this.activeEncounter = {
+            type: 'legendary',
+            data: encounter,
+            startTime: Date.now()
+        };
+        
+        this.showEncounterModal();
+        this.showLegendaryEncounterCutscene(encounter);
+    }
+    
+    showLegendaryEncounterCutscene(encounter) {
+        const dialog = document.getElementById('dialog-text');
+        const actions = document.getElementById('encounter-actions');
+        const battle = document.getElementById('battle-interface');
+        
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>${encounter.emoji} ${encounter.name}</h3>
+                <p><strong>${encounter.title}</strong></p>
+                <p>${encounter.backstory}</p>
+                <p>${encounter.dialogue.greeting}</p>
+            </div>
+        `;
+        
+        // Different actions based on encounter type
+        if (encounter.name === "HEVY") {
+            actions.innerHTML = `
+                <button id="action-1" class="encounter-btn">Answer the Riddle</button>
+                <button id="action-2" class="encounter-btn">Ask for a Hint</button>
+                <button id="action-3" class="encounter-btn">Step Away</button>
+            `;
+            
+            document.getElementById('action-1').addEventListener('click', () => this.answerHEVYRiddle(encounter));
+            document.getElementById('action-2').addEventListener('click', () => this.askHEVYHint(encounter));
+            document.getElementById('action-3').addEventListener('click', () => this.leaveHEVY(encounter));
+        } else if (encounter.name === "Cosmic Shrine") {
+            actions.innerHTML = `
+                <button id="action-1" class="encounter-btn">Receive Blessing</button>
+                <button id="action-2" class="encounter-btn">Meditate</button>
+                <button id="action-3" class="encounter-btn">Leave</button>
+            `;
+            
+            document.getElementById('action-1').addEventListener('click', () => this.receiveShrineBlessing(encounter));
+            document.getElementById('action-2').addEventListener('click', () => this.meditateAtShrine(encounter));
+            document.getElementById('action-3').addEventListener('click', () => this.leaveShrine(encounter));
+        } else if (encounter.name === "Eldritch Horror") {
+            actions.innerHTML = `
+                <button id="action-1" class="encounter-btn">Fight</button>
+                <button id="action-2" class="encounter-btn">Try to Flee</button>
+                <button id="action-3" class="encounter-btn">Attempt Diplomacy</button>
+            `;
+            
+            document.getElementById('action-1').addEventListener('click', () => this.fightEldritchHorror(encounter));
+            document.getElementById('action-2').addEventListener('click', () => this.fleeFromHorror(encounter));
+            document.getElementById('action-3').addEventListener('click', () => this.diplomacyWithHorror(encounter));
+        } else if (encounter.name === "Wisdom Crystal") {
+            actions.innerHTML = `
+                <button id="action-1" class="encounter-btn">Touch Crystal</button>
+                <button id="action-2" class="encounter-btn">Study Crystal</button>
+                <button id="action-3" class="encounter-btn">Leave</button>
+            `;
+            
+            document.getElementById('action-1').addEventListener('click', () => this.touchWisdomCrystal(encounter));
+            document.getElementById('action-2').addEventListener('click', () => this.studyWisdomCrystal(encounter));
+            document.getElementById('action-3').addEventListener('click', () => this.leaveWisdomCrystal(encounter));
+        } else if (encounter.name === "Cosmic Merchant") {
+            actions.innerHTML = `
+                <button id="action-1" class="encounter-btn">Browse Wares</button>
+                <button id="action-2" class="encounter-btn">Ask About Items</button>
+                <button id="action-3" class="encounter-btn">Leave</button>
+            `;
+            
+            document.getElementById('action-1').addEventListener('click', () => this.browseMerchantWares(encounter));
+            document.getElementById('action-2').addEventListener('click', () => this.askMerchantAboutItems(encounter));
+            document.getElementById('action-3').addEventListener('click', () => this.leaveMerchant(encounter));
+        }
+        
+        battle.classList.add('hidden');
     }
 
     // Test function to trigger HEVY encounter (for testing purposes)
@@ -955,6 +1075,20 @@ class EncounterSystem {
         this.showEncounterModal();
         this.showTestQuestCutscene(questMarker);
     }
+    
+    startQuestMarkerEncounter(questMarker, markerKey) {
+        console.log('🎭 Quest marker encounter started:', markerKey);
+        
+        this.activeEncounter = {
+            type: 'questMarker',
+            data: questMarker,
+            markerKey: markerKey,
+            startTime: Date.now()
+        };
+        
+        this.showEncounterModal();
+        this.showQuestMarkerCutscene(questMarker, markerKey);
+    }
 
     showMonsterCutscene(monster) {
         const dialog = document.getElementById('dialog-text');
@@ -993,9 +1127,15 @@ class EncounterSystem {
     }
 
     showPOICutscene(poi) {
+        console.log('🎭 Showing POI cutscene for:', poi);
         const dialog = document.getElementById('dialog-text');
         const actions = document.getElementById('encounter-actions');
         const puzzle = document.getElementById('puzzle-interface');
+        
+        if (!dialog || !actions) {
+            console.error('🎭 Missing dialog elements:', { dialog: !!dialog, actions: !!actions });
+            return;
+        }
         
         // Extract POI info from popup content
         const poiName = poi.getPopup().getContent().match(/<b>(.*?)<\/b>/)?.[1] || 'Mysterious Location';
@@ -1058,6 +1198,112 @@ class EncounterSystem {
         document.getElementById('action-1').addEventListener('click', () => this.investigateTestQuest(questMarker));
         document.getElementById('action-2').addEventListener('click', () => this.studyTestQuest(questMarker));
         document.getElementById('action-3').addEventListener('click', () => this.leaveTestQuest(questMarker));
+    }
+    
+    showQuestMarkerCutscene(questMarker, markerKey) {
+        const dialog = document.getElementById('dialog-text');
+        const actions = document.getElementById('encounter-actions');
+        const battle = document.getElementById('battle-interface');
+        
+        // Determine marker type and content
+        let markerInfo = {
+            title: 'Quest Objective',
+            description: 'A quest marker awaits your interaction.',
+            symbol: '🎯',
+            color: '#ffd700'
+        };
+        
+        if (markerKey === 'aurora') {
+            markerInfo = {
+                title: '👑 Aurora - The Cosmic Entity',
+                description: 'A mysterious cosmic entity that offers quests and guidance.',
+                symbol: '👑',
+                color: '#ffd700'
+            };
+        } else if (questMarker.objective) {
+            markerInfo = {
+                title: questMarker.objective.name || 'Quest Objective',
+                description: questMarker.objective.description || 'Complete this quest objective.',
+                symbol: '🎯',
+                color: '#4ecdc4'
+            };
+        }
+        
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>${markerInfo.symbol} ${markerInfo.title}</h3>
+                <p>${markerInfo.description}</p>
+                <p>You've discovered a quest location! What will you do?</p>
+            </div>
+        `;
+        
+        actions.innerHTML = `
+            <button id="action-1" class="encounter-btn">Interact</button>
+            <button id="action-2" class="encounter-btn">Observe</button>
+            <button id="action-3" class="encounter-btn">Leave</button>
+        `;
+        
+        battle.classList.add('hidden');
+        
+        // Add event listeners
+        document.getElementById('action-1').addEventListener('click', () => this.interactWithQuestMarker(questMarker, markerKey));
+        document.getElementById('action-2').addEventListener('click', () => this.observeQuestMarker(questMarker, markerKey));
+        document.getElementById('action-3').addEventListener('click', () => this.leaveQuestMarker(questMarker, markerKey));
+    }
+    
+    interactWithQuestMarker(questMarker, markerKey) {
+        console.log('🎭 Interacting with quest marker:', markerKey);
+        
+        // Close encounter modal
+        this.closeEncounterModal();
+        
+        // Trigger quest system interaction
+        if (window.unifiedQuestSystem) {
+            if (markerKey === 'aurora') {
+                window.unifiedQuestSystem.interactWithAurora();
+            } else {
+                // Find the objective ID from the marker
+                const objectiveId = questMarker.objective?.id || markerKey.split('_').pop();
+                if (objectiveId) {
+                    window.unifiedQuestSystem.interactWithObjective(objectiveId);
+                }
+            }
+        }
+        
+        // Award experience for interaction
+        this.awardExperience(10);
+        this.updatePlayerStats({ experience: 10 });
+    }
+    
+    observeQuestMarker(questMarker, markerKey) {
+        console.log('🎭 Observing quest marker:', markerKey);
+        
+        // Show observation dialog
+        const dialog = document.getElementById('dialog-text');
+        dialog.innerHTML = `
+            <div class="cutscene-text">
+                <h3>🔍 Observation</h3>
+                <p>You carefully study the quest marker...</p>
+                <p>${markerKey === 'aurora' ? 
+                    'The cosmic entity seems to pulse with otherworldly energy. You sense great power and ancient wisdom.' :
+                    'The marker appears to be a point of interest for an ongoing quest. It radiates a faint magical aura.'}</p>
+                <p>You gain insight into the area's significance.</p>
+            </div>
+        `;
+        
+        // Award small experience for observation
+        this.awardExperience(5);
+        this.updatePlayerStats({ experience: 5 });
+        
+        // Close after a delay
+        setTimeout(() => {
+            this.closeEncounterModal();
+        }, 3000);
+    }
+    
+    leaveQuestMarker(questMarker, markerKey) {
+        console.log('🎭 Leaving quest marker:', markerKey);
+        this.closeEncounterModal();
     }
 
     startBattle(monster) {
@@ -1272,11 +1518,44 @@ class EncounterSystem {
     investigateTestQuest(questMarker) {
         this.giveReward('experience', 40);
         this.giveReward('discoveries', `${questMarker.questName} Knowledge`);
-        // Moral nudge: investigation increases wisdom
-        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +4, ethical: +1 }); } catch (_) {}
-        try { window.statistics?.logEvent?.('quest_investigate', { quest: questMarker.questName }); } catch (_) {}
-        this.showDialog(`You investigate ${questMarker.questName}. The knowledge burns like hot coals in your mind.`);
-        this.closeEncounter();
+        
+        // Show moral choice inline instead of overlay
+        this.showMoralChoiceInDialog({
+            title: "The Corroding Lake",
+            description: `"The air itself burns with toxic vapors!" You cough violently as you approach the fuming lake. The water shimmers with an unnatural green glow, and strange bubbles rise from its depths. The very ground around the lake is cracked and withered, as if life itself is being drained away. "You must choose quickly - the fumes are growing stronger!" Your vision begins to blur as the toxic air takes its toll.`,
+            choices: [
+                {
+                    text: "Swim Through the Toxins",
+                    description: "Dive into the lake and swim to safety. (Risk: -25 Health, -10 Sanity)",
+                    color: "#4b0082",
+                    color2: "#8a2be2",
+                    borderColor: "#ff00ff",
+                    textColor: "#ffffff",
+                    icon: "🏊"
+                },
+                {
+                    text: "Run Around the Lake", 
+                    description: "Take the long way around, but the fumes are spreading. (Risk: -15 Sanity)",
+                    color: "#ff8c00",
+                    color2: "#ff4500",
+                    borderColor: "#ffaa00",
+                    textColor: "#ffffff",
+                    icon: "🏃"
+                },
+                {
+                    text: "Accept Your Fate",
+                    description: "Stand still and let the toxins take you. (Instant Death)",
+                    color: "#8b0000",
+                    color2: "#dc143c",
+                    borderColor: "#ff0000",
+                    textColor: "#ffffff",
+                    icon: "💀"
+                }
+            ],
+            onChoice: (index, choice, alignment) => {
+                this.handleMoralChoice(index, choice, alignment, questMarker);
+            }
+        });
     }
 
     studyTestQuest(questMarker) {
@@ -1294,6 +1573,132 @@ class EncounterSystem {
         try { window.statistics?.logEvent?.('quest_leave', { quest: questMarker.questName }); } catch (_) {}
         this.showDialog(`You leave ${questMarker.questName}. Sometimes the greatest wisdom is knowing when to walk away.`);
         this.closeEncounter();
+    }
+
+    // Show moral choice inline within the encounter dialog
+    showMoralChoiceInDialog(choiceData) {
+        const dialog = document.getElementById('dialog-text');
+        const actions = document.getElementById('encounter-actions');
+        
+        const { title, description, choices } = choiceData;
+        
+        dialog.innerHTML = `
+            <div class="moral-choice-dialog">
+                <h3 style="color: var(--cosmic-purple); margin-bottom: 15px;">⚖️ ${title}</h3>
+                <div style="margin-bottom: 20px; line-height: 1.6; color: var(--cosmic-light);">
+                    ${description}
+                </div>
+                <div style="margin-bottom: 15px; font-weight: bold; color: var(--cosmic-purple);">
+                    Choose your response:
+                </div>
+            </div>
+        `;
+        
+        actions.innerHTML = choices.map((choice, index) => `
+            <button class="moral-choice-btn encounter-btn" data-choice-index="${index}" style="
+                background: linear-gradient(45deg, ${choice.color}, ${choice.color2});
+                border: 2px solid ${choice.borderColor};
+                color: ${choice.textColor};
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-bottom: 8px;
+                width: 100%;
+                text-align: left;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            ">
+                <span style="font-size: 18px;">${choice.icon}</span>
+                <div>
+                    <div style="font-size: 14px; font-weight: bold;">${choice.text}</div>
+                    <div style="font-size: 12px; opacity: 0.9; margin-top: 2px;">${choice.description}</div>
+                </div>
+            </button>
+        `).join('');
+        
+        // Add event listeners to moral choice buttons
+        actions.querySelectorAll('.moral-choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget || e.target.closest('.moral-choice-btn');
+                const choiceIndex = parseInt(target?.dataset?.choiceIndex);
+                if (!isNaN(choiceIndex) && choiceIndex >= 0 && choiceIndex < choices.length) {
+                    this.handleMoralChoice(choiceIndex, choices[choiceIndex], choiceData.onChoice, questMarker);
+                }
+            });
+            
+            // Hover effects
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'scale(1.02)';
+                btn.style.boxShadow = '0 0 15px rgba(255, 0, 255, 0.3)';
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+                btn.style.boxShadow = 'none';
+            });
+        });
+    }
+
+    // Handle moral choice selection
+    handleMoralChoice(choiceIndex, choice, onChoice, questMarker) {
+        console.log('⚖️ Moral choice selected:', choice.text);
+        
+        // Update alignment based on choice
+        let alignmentChanges = {};
+        switch(choiceIndex) {
+            case 0: // Swim Through Toxins
+                alignmentChanges = { cosmic: +5, ethical: -2, wisdom: -1 };
+                this.playerStats.health = Math.max(0, this.playerStats.health - 25);
+                this.playerStats.sanity = Math.max(0, this.playerStats.sanity - 10);
+                break;
+            case 1: // Run Around Lake
+                alignmentChanges = { cosmic: -1, ethical: +3, wisdom: +2 };
+                this.playerStats.sanity = Math.max(0, this.playerStats.sanity - 15);
+                break;
+            case 2: // Accept Fate
+                alignmentChanges = { cosmic: -10, ethical: -5, wisdom: -5 };
+                this.playerStats.health = 0;
+                this.playerStats.isDead = true;
+                this.playerStats.deathReason = "Toxic Lake";
+                break;
+        }
+        
+        // Apply alignment changes
+        if (window.moralChoiceSystem) {
+            window.moralChoiceSystem.updateAlignment(alignmentChanges);
+        }
+        
+        // Update stat bars
+        this.updateStatBars();
+        
+        // Show result
+        let resultText = '';
+        switch(choiceIndex) {
+            case 0:
+                resultText = `You dive into the toxic lake! The water burns your skin, but you emerge on the other side. Your health and sanity have been reduced, but you've gained cosmic knowledge.`;
+                break;
+            case 1:
+                resultText = `You wisely choose to go around the lake. The fumes still affect you, but you avoid the worst of the toxins. Your patience and wisdom have increased.`;
+                break;
+            case 2:
+                resultText = `You stand still and let the toxins take you. Your cosmic journey ends here...`;
+                break;
+        }
+        
+        this.showDialog(resultText);
+        
+        // Call the original choice callback if provided
+        if (onChoice) {
+            onChoice(choiceIndex, choice, alignmentChanges);
+        }
+        
+        // Close encounter after a delay
+        setTimeout(() => {
+            this.closeEncounter();
+        }, 3000);
     }
 
 
@@ -1849,7 +2254,12 @@ class EncounterSystem {
     // UI management
     showEncounterModal() {
         const modal = document.getElementById('encounter-modal');
-        modal.classList.remove('hidden');
+        if (modal) {
+            modal.classList.remove('hidden');
+            console.log('🎭 Encounter modal shown');
+        } else {
+            console.error('🎭 Encounter modal not found!');
+        }
     }
 
     closeEncounter() {
@@ -2306,6 +2716,101 @@ class EncounterSystem {
                     incorrect: "Your answer reveals much about your understanding of the cosmic order. Perhaps you need more time to contemplate the mysteries of existence...",
                     farewell: "Go forth with the cosmic wisdom you have gained. Remember, love is the key to unlocking all mysteries of the universe."
                 }
+            },
+            cosmicShrine: {
+                name: "Cosmic Shrine",
+                title: "Ancient Power Source",
+                emoji: "🏛️",
+                color: "#8A2BE2",
+                rarity: "rare",
+                spawnChance: 0.01, // 1% chance per position update
+                backstory: "An ancient shrine imbued with cosmic energy. It pulses with otherworldly power and offers blessings to those who approach with pure intentions.",
+                personality: "The shrine radiates a calming, mystical energy. It seems to respond to the thoughts and emotions of those who approach it.",
+                effects: {
+                    health: 20,
+                    sanity: 15,
+                    experience: 50
+                },
+                dialogue: {
+                    greeting: "The ancient shrine pulses with cosmic energy...",
+                    blessing: "You feel the shrine's power flowing through you, restoring your health and sanity!",
+                    farewell: "The shrine's energy fades as you step away, but you feel renewed."
+                }
+            },
+            eldritchMonster: {
+                name: "Eldritch Horror",
+                title: "Cosmic Terror",
+                emoji: "👹",
+                color: "#8B0000",
+                rarity: "epic",
+                spawnChance: 0.005, // 0.5% chance per position update
+                backstory: "A terrifying creature from the depths of cosmic space. It feeds on fear and chaos, but defeating it grants immense power.",
+                personality: "Malevolent and chaotic, this creature seeks to spread terror and destruction across the cosmic realm.",
+                combat: {
+                    health: 150,
+                    attack: 25,
+                    defense: 15
+                },
+                rewards: {
+                    experience: 200,
+                    items: ["Eldritch Essence", "Cosmic Terror Claw"],
+                    stats: {
+                        attack: 5,
+                        defense: 3
+                    }
+                },
+                dialogue: {
+                    greeting: "The eldritch horror emerges from the shadows, its many eyes fixed on you...",
+                    combat: "The creature attacks with otherworldly fury!",
+                    defeat: "The eldritch horror collapses, its essence dispersing into cosmic energy!",
+                    victory: "You have defeated the eldritch horror and gained its power!"
+                }
+            },
+            wisdomCrystal: {
+                name: "Wisdom Crystal",
+                title: "Fragment of Cosmic Knowledge",
+                emoji: "💎",
+                color: "#00BFFF",
+                rarity: "uncommon",
+                spawnChance: 0.02, // 2% chance per position update
+                backstory: "A crystal fragment containing ancient cosmic wisdom. Touching it grants insight and knowledge.",
+                personality: "The crystal hums softly with contained knowledge, waiting to share its secrets with a worthy seeker.",
+                effects: {
+                    experience: 100,
+                    sanity: 10,
+                    skills: {
+                        investigation: 2,
+                        survival: 1
+                    }
+                },
+                dialogue: {
+                    greeting: "The wisdom crystal glows softly, pulsing with contained knowledge...",
+                    blessing: "Ancient wisdom flows into your mind, enhancing your investigative and survival skills!",
+                    farewell: "The crystal's glow dims as you step away, but the knowledge remains."
+                }
+            },
+            cosmicMerchant: {
+                name: "Cosmic Merchant",
+                title: "Trader of Otherworldly Goods",
+                emoji: "🛒",
+                color: "#FFD700",
+                rarity: "rare",
+                spawnChance: 0.008, // 0.8% chance per position update
+                backstory: "A mysterious merchant who deals in cosmic artifacts and otherworldly goods. They appear randomly to offer their wares to travelers.",
+                personality: "Friendly but mysterious, the merchant speaks in riddles about their wares and seems to know more than they let on.",
+                shop: {
+                    items: [
+                        { name: "Cosmic Potion", price: 50, effect: "health" },
+                        { name: "Sanity Elixir", price: 75, effect: "sanity" },
+                        { name: "Power Crystal", price: 100, effect: "attack" },
+                        { name: "Wisdom Scroll", price: 150, effect: "experience" }
+                    ]
+                },
+                dialogue: {
+                    greeting: "Ah, a fellow traveler! I have some interesting wares that might interest you...",
+                    trade: "Excellent choice! This item will serve you well in your cosmic journey.",
+                    farewell: "Safe travels, and may the cosmic winds guide your path!"
+                }
             }
         };
     }
@@ -2740,6 +3245,169 @@ class EncounterSystem {
         };
         
         return abilities[ability];
+    }
+    
+    // HEVY encounter interactions
+    answerHEVYRiddle(encounter) {
+        const answer = prompt(encounter.quest.question + "\n\nYour answer:");
+        if (answer && answer.toLowerCase().includes(encounter.quest.correctAnswer)) {
+            this.showDialog(encounter.dialogue.correct);
+            this.applyEncounterRewards(encounter.quest.rewards);
+        } else {
+            this.showDialog(encounter.dialogue.incorrect);
+        }
+        this.closeEncounterModal();
+    }
+    
+    askHEVYHint(encounter) {
+        const hint = encounter.quest.hints[Math.floor(Math.random() * encounter.quest.hints.length)];
+        this.showDialog(`HEVY whispers: "${hint}"`);
+        setTimeout(() => this.closeEncounterModal(), 3000);
+    }
+    
+    leaveHEVY(encounter) {
+        this.showDialog(encounter.dialogue.farewell);
+        this.closeEncounterModal();
+    }
+    
+    // Cosmic Shrine interactions
+    receiveShrineBlessing(encounter) {
+        this.showDialog(encounter.dialogue.blessing);
+        this.applyEncounterEffects(encounter.effects);
+        this.closeEncounterModal();
+    }
+    
+    meditateAtShrine(encounter) {
+        this.showDialog("You meditate at the shrine, gaining deep insight and wisdom.");
+        this.applyEncounterEffects({
+            sanity: 25,
+            experience: 75,
+            skills: { investigation: 1, survival: 1 }
+        });
+        this.closeEncounterModal();
+    }
+    
+    leaveShrine(encounter) {
+        this.showDialog(encounter.dialogue.farewell);
+        this.closeEncounterModal();
+    }
+    
+    // Eldritch Horror interactions
+    fightEldritchHorror(encounter) {
+        this.showDialog(encounter.dialogue.combat);
+        // Start combat with the horror
+        this.startBattle({
+            type: encounter.name.toLowerCase().replace(' ', '_'),
+            name: encounter.name,
+            health: encounter.combat.health,
+            attack: encounter.combat.attack,
+            defense: encounter.combat.defense
+        });
+    }
+    
+    fleeFromHorror(encounter) {
+        const fleeChance = Math.random();
+        if (fleeChance < 0.3) { // 30% chance to flee
+            this.showDialog("You successfully flee from the eldritch horror!");
+            this.closeEncounterModal();
+        } else {
+            this.showDialog("The horror blocks your escape! You must fight!");
+            this.fightEldritchHorror(encounter);
+        }
+    }
+    
+    diplomacyWithHorror(encounter) {
+        this.showDialog("You attempt to communicate with the eldritch horror, but it only responds with otherworldly screeches. It seems diplomacy is not an option.");
+        setTimeout(() => this.fightEldritchHorror(encounter), 2000);
+    }
+    
+    // Wisdom Crystal interactions
+    touchWisdomCrystal(encounter) {
+        this.showDialog(encounter.dialogue.blessing);
+        this.applyEncounterEffects(encounter.effects);
+        this.closeEncounterModal();
+    }
+    
+    studyWisdomCrystal(encounter) {
+        this.showDialog("You carefully study the crystal, gaining deeper understanding of its cosmic properties.");
+        this.applyEncounterEffects({
+            experience: 150,
+            sanity: 15,
+            skills: { investigation: 3, survival: 2 }
+        });
+        this.closeEncounterModal();
+    }
+    
+    leaveWisdomCrystal(encounter) {
+        this.showDialog(encounter.dialogue.farewell);
+        this.closeEncounterModal();
+    }
+    
+    // Cosmic Merchant interactions
+    browseMerchantWares(encounter) {
+        this.showDialog("The merchant shows you their wares. (Shop system would be implemented here)");
+        // TODO: Implement shop system
+        this.closeEncounterModal();
+    }
+    
+    askMerchantAboutItems(encounter) {
+        this.showDialog("The merchant tells you about the cosmic properties of their items and their origins.");
+        this.applyEncounterEffects({ experience: 25, skills: { investigation: 1 } });
+        this.closeEncounterModal();
+    }
+    
+    leaveMerchant(encounter) {
+        this.showDialog(encounter.dialogue.farewell);
+        this.closeEncounterModal();
+    }
+    
+    // Helper methods for applying encounter effects
+    applyEncounterRewards(rewards) {
+        if (rewards.experience) {
+            this.playerStats.experience += rewards.experience;
+            this.updatePlayerStats({ experience: rewards.experience });
+        }
+        if (rewards.steps) {
+            // Add steps to step currency system
+            if (window.stepCurrencySystem) {
+                window.stepCurrencySystem.addSteps(rewards.steps);
+            }
+        }
+        if (rewards.items) {
+            rewards.items.forEach(item => {
+                // Add items to inventory
+                console.log('🎒 Received item:', item);
+            });
+        }
+        if (rewards.title) {
+            console.log('🏆 Earned title:', rewards.title);
+        }
+    }
+    
+    applyEncounterEffects(effects) {
+        if (effects.health) {
+            this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + effects.health);
+            this.updatePlayerStats({ health: effects.health });
+        }
+        if (effects.sanity) {
+            this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + effects.sanity);
+            this.updatePlayerStats({ sanity: effects.sanity });
+        }
+        if (effects.experience) {
+            this.playerStats.experience += effects.experience;
+            this.updatePlayerStats({ experience: effects.experience });
+        }
+        if (effects.skills) {
+            Object.entries(effects.skills).forEach(([skill, value]) => {
+                this.playerStats.skills[skill] = (this.playerStats.skills[skill] || 0) + value;
+            });
+        }
+        if (effects.stats) {
+            Object.entries(effects.stats).forEach(([stat, value]) => {
+                this.playerStats[stat] = (this.playerStats[stat] || 0) + value;
+            });
+        }
+        this.updateStatBars();
     }
 
     executeSpecialAbility(ability, monster, log) {

@@ -77,23 +77,10 @@ class MoralChoiceSystem {
 
         this.activeOverlay = document.createElement('div');
         this.activeOverlay.className = 'moral-choice-overlay';
+        // Use CSS classes instead of inline styles for better control
         this.activeOverlay.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 320px;
-            max-width: 90vw;
-            background: linear-gradient(135deg, rgba(10,10,14,0.95), rgba(26,26,46,0.95));
-            border: 2px solid var(--cosmic-purple);
-            border-radius: 12px;
-            padding: 16px;
-            color: var(--cosmic-light);
-            font-family: 'Courier New', monospace;
-            z-index: 10003;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            backdrop-filter: blur(10px);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         `;
 
         this.activeOverlay.innerHTML = `
@@ -135,7 +122,7 @@ class MoralChoiceSystem {
         // Animate in
         setTimeout(() => {
             if (this.activeOverlay) {
-                this.activeOverlay.style.transform = 'translateX(0)';
+                this.activeOverlay.classList.add('visible');
             }
         }, 10);
 
@@ -273,7 +260,7 @@ class MoralChoiceSystem {
 
     hideMoralChoice() {
         if (this.activeOverlay) {
-            this.activeOverlay.style.transform = 'translateX(100%)';
+            this.activeOverlay.classList.remove('visible');
             setTimeout(() => {
                 if (this.activeOverlay && this.activeOverlay.parentNode) {
                     this.activeOverlay.parentNode.removeChild(this.activeOverlay);
