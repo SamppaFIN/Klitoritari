@@ -1423,44 +1423,20 @@ class UnifiedQuestSystem {
         this.isPaused = false;
         
         // Adventure mode gate: require selection once, then apply
-        const selectedMode = this.getAdventureMode();
-        if (!selectedMode) {
-            // Show lightweight selector and defer resume until chosen
-            this.showAdventureSelector();
-            console.log('🎭 Awaiting adventure mode selection before creating markers');
-            return;
-        }
+        // Force single adventure mode: game (scatter nearby)
+        const selectedMode = 'game';
+        this.setAdventureMode(selectedMode);
         
-        // If Game mode, randomize proximity objectives around player within radius
-        if (selectedMode === 'game') {
-            // Scatter within ~300m by default (tunable)
-            this.scatterObjectivesNearPlayer(300);
-        }
+        // Defer scattering and quest start until user presses Locate Me
+        this.awaitingLocate = true;
         
-        // Clear all caches first to ensure fresh start
+        // Prepare UI and caches, but DO NOT place markers or start tracking yet
         this.clearAllCaches();
-        
-        // Update Aurora position to be 100m away from player
-        this.updateAuroraPosition();
-        
-        // Setup UI and create quest markers now that game has started
         this.setupUI();
-        this.clearQuestMarkers();
-        this.createQuestMarkers();
-        
-        // Start position tracking now that game has begun
-        this.startPositionTracking();
-        
-        // Start Aurora movement
-        this.startAuroraMovement();
-        
-        // Reset any quests that were triggered during start screen
         this.resetQuestsForGameStart();
-        
-        // Test: Trigger quest dialog immediately for testing
-        setTimeout(() => {
-            this.triggerTestQuestDialog();
-        }, 500);
+        try { window.encounterSystem?.resetEncounterFlags?.(); } catch (_) {}
+        try { window.stepCurrencySystem?.resetSessionSteps?.(); } catch (_) {}
+        console.log('🎭 Quest start deferred until Locate Me is pressed');
         
         console.log('🎭 Quest system resumed successfully');
     }
@@ -1487,49 +1463,43 @@ class UnifiedQuestSystem {
 
     // Lightweight in-DOM selector (no HTML edits needed)
     showAdventureSelector() {
-        // Avoid duplicates
-        if (document.getElementById('adventure-selector-modal')) return;
-        const modal = document.createElement('div');
-        modal.id = 'adventure-selector-modal';
-        modal.style.cssText = `
-            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.6); z-index: 10000;
-        `;
-        modal.innerHTML = `
-            <div style="background: rgba(10,10,14,0.95); border: 2px solid var(--cosmic-purple);
-                         border-radius: 12px; padding: 16px; width: 280px; color: var(--cosmic-light);
-                         box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                <h3 style="margin: 0 0 8px; color: var(--cosmic-purple);">Choose Adventure</h3>
-                <p style="margin: 0 0 12px; font-size: 12px; opacity: .85;">Pick a mode to begin.</p>
-                <div style="display: grid; gap: 8px;">
-                    <button id="mode-demo-btn" class="sacred-button" style="padding: 8px;">Demo (fixed objectives)</button>
-                    <button id="mode-game-btn" class="sacred-button" style="padding: 8px; background: var(--cosmic-green);">Game (randomized nearby)</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        const onPick = (mode) => {
-            this.onAdventureSelected(mode);
-            modal.remove();
-        };
-        modal.querySelector('#mode-demo-btn').addEventListener('click', () => onPick('demo'));
-        modal.querySelector('#mode-game-btn').addEventListener('click', () => onPick('game'));
+        // Selector disabled: single-mode flow enforced
+        this.onAdventureSelected('game');
     }
 
     onAdventureSelected(mode) {
+        // Force game mode, but defer quest start until Locate Me
+        mode = 'game';
         this.setAdventureMode(mode);
-        // Apply mode immediately and continue resume flow
-        if (mode === 'game') {
-            this.scatterObjectivesNearPlayer(300);
-        }
+        this.awaitingLocate = true;
         this.setupUI();
-        this.clearQuestMarkers();
-        this.createQuestMarkers();
-        this.startPositionTracking();
-        this.startAuroraMovement();
         this.resetQuestsForGameStart();
-        setTimeout(() => this.triggerTestQuestDialog(), 500);
-        console.log('🎭 Adventure mode selected:', mode);
+        try { window.encounterSystem?.resetEncounterFlags?.(); } catch (_) {}
+        try { window.stepCurrencySystem?.resetSessionSteps?.(); } catch (_) {}
+        console.log('🎭 Adventure mode selected and deferred until Locate Me:', mode);
+    }
+
+    // Begin the quest after the player has pressed Locate Me
+    beginAfterLocate() {
+        try {
+            if (!this.awaitingLocate) {
+                console.log('📍 beginAfterLocate called but not awaiting locate; ignoring');
+                return;
+            }
+            this.awaitingLocate = false;
+            // Update Aurora position to be ~100m away from latest player position
+            this.updateAuroraPosition();
+            // Now scatter and create markers
+            this.clearQuestMarkers();
+            this.scatterObjectivesNearPlayer(300);
+            this.createQuestMarkers();
+            // Start tracking and Aurora movement
+            this.startPositionTracking();
+            this.startAuroraMovement();
+            console.log('📍 Quest started after Locate Me');
+        } catch (e) {
+            console.warn('📍 Failed to start quests after locate', e);
+        }
     }
 
     // Remove existing quest markers safely
@@ -1557,8 +1527,9 @@ class UnifiedQuestSystem {
             return;
         }
         const radiusKm = Math.max(10, radiusMeters) / 1000; // ensure sensible minimum
+        const minDistanceKm = 0.1; // 100 meters minimum from player
         const jitterBearing = () => Math.random() * 360;
-        const jitterDistanceKm = () => (Math.random() * radiusKm);
+        const jitterDistanceKm = () => (minDistanceKm + Math.random() * (radiusKm - minDistanceKm));
         
         this.availableQuests.forEach((quest) => {
             if (!Array.isArray(quest.objectives)) return;

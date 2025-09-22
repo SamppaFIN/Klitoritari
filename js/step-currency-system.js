@@ -40,6 +40,7 @@ class StepCurrencySystem {
         this.setupGoogleFit();
         this.createStepCounter();
         this.startStepDetection();
+        this.optimizeForMobile();
     }
     
     loadStoredSteps() {
@@ -65,11 +66,244 @@ class StepCurrencySystem {
                     console.log('🚶‍♂️ Device motion permission denied, using fallback');
                     this.enableFallbackMode();
                 }
+            }).catch(error => {
+                console.warn('🚶‍♂️ Device motion permission error:', error);
+                this.enableFallbackMode();
             });
         } else {
             // Direct access (older browsers)
             this.enableDeviceMotion();
         }
+        
+        // Also try to access step counting if available
+        this.setupStepCountingAPI();
+    }
+    
+    setupStepCountingAPI() {
+        // Try to access native step counting APIs if available
+        if ('navigator' in window && 'permissions' in navigator) {
+            // Check for step counting permission
+            navigator.permissions.query({ name: 'accelerometer' }).then(result => {
+                if (result.state === 'granted') {
+                    console.log('🚶‍♂️ Accelerometer permission granted');
+                    this.setupAdvancedStepDetection();
+                }
+            }).catch(() => {
+                console.log('🚶‍♂️ Accelerometer permission not available');
+            });
+        }
+        
+        // Try to access health/fitness APIs if available
+        if ('navigator' in window && 'health' in navigator) {
+            this.setupHealthAPI();
+        }
+    }
+    
+    setupAdvancedStepDetection() {
+        console.log('🚶‍♂️ Setting up advanced step detection');
+        // Enhanced step detection using multiple sensors
+        let lastAcceleration = null;
+        let stepBuffer = [];
+        let lastStepTime = 0;
+        
+        window.addEventListener('devicemotion', (event) => {
+            if (!this.stepDetectionActive) return;
+            
+            const acceleration = {
+                x: event.accelerationIncludingGravity?.x || 0,
+                y: event.accelerationIncludingGravity?.y || 0,
+                z: event.accelerationIncludingGravity?.z || 0,
+                timestamp: Date.now()
+            };
+            
+            if (lastAcceleration) {
+                // Calculate acceleration magnitude
+                const deltaX = acceleration.x - lastAcceleration.x;
+                const deltaY = acceleration.y - lastAcceleration.y;
+                const deltaZ = acceleration.z - lastAcceleration.z;
+                const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+                
+                // Store acceleration data for pattern analysis
+                stepBuffer.push({
+                    magnitude: magnitude,
+                    timestamp: acceleration.timestamp
+                });
+                
+                // Keep only last 50 readings (about 5 seconds at 10Hz)
+                if (stepBuffer.length > 50) {
+                    stepBuffer.shift();
+                }
+                
+                // Detect step pattern: look for peaks in acceleration
+                if (stepBuffer.length >= 10) {
+                    const recent = stepBuffer.slice(-10);
+                    const avgMagnitude = recent.reduce((sum, reading) => sum + reading.magnitude, 0) / recent.length;
+                    const currentMagnitude = recent[recent.length - 1].magnitude;
+                    
+                    // Step detection: significant peak above average
+                    if (currentMagnitude > avgMagnitude * 1.5 && 
+                        currentMagnitude > this.stepThreshold &&
+                        acceleration.timestamp - lastStepTime > this.minStepInterval) {
+                        
+                        this.addStep();
+                        lastStepTime = acceleration.timestamp;
+                        stepBuffer = []; // Clear buffer after step detection
+                    }
+                }
+            }
+            
+            lastAcceleration = acceleration;
+        });
+    }
+    
+    setupHealthAPI() {
+        console.log('🚶‍♂️ Setting up health API integration');
+        // This would integrate with health APIs if available
+        // For now, we'll use the enhanced motion detection
+        try {
+            if (navigator.health && navigator.health.requestAccess) {
+                navigator.health.requestAccess(['steps']).then(granted => {
+                    if (granted) {
+                        console.log('🚶‍♂️ Health API access granted');
+                        this.enableHealthStepCounting();
+                    }
+                }).catch(error => {
+                    console.log('🚶‍♂️ Health API not available:', error);
+                });
+            }
+        } catch (error) {
+            console.log('🚶‍♂️ Health API setup failed:', error);
+        }
+    }
+    
+    enableHealthStepCounting() {
+        // Placeholder for health API step counting
+        // This would integrate with platform-specific health APIs
+        console.log('🚶‍♂️ Health API step counting enabled (placeholder)');
+    }
+    
+    detectDevicePosition() {
+        // Detect if device is in pocket, hand, or stationary
+        // This helps adjust step detection sensitivity
+        if (this.accelerationData.length < 10) return 'unknown';
+        
+        const recent = this.accelerationData.slice(-10);
+        const avgX = recent.reduce((sum, reading) => sum + reading.x, 0) / recent.length;
+        const avgY = recent.reduce((sum, reading) => sum + reading.y, 0) / recent.length;
+        const avgZ = recent.reduce((sum, reading) => sum + reading.z, 0) / recent.length;
+        
+        // Analyze gravity vector to determine device orientation
+        const gravityMagnitude = Math.sqrt(avgX * avgX + avgY * avgY + avgZ * avgZ);
+        
+        if (gravityMagnitude < 8) {
+            return 'pocket'; // Low gravity suggests device is in pocket
+        } else if (Math.abs(avgZ) > Math.abs(avgX) && Math.abs(avgZ) > Math.abs(avgY)) {
+            return 'hand'; // Z-axis dominant suggests device is in hand
+        } else {
+            return 'stationary'; // Balanced gravity suggests device is stationary
+        }
+    }
+    
+    adjustStepSensitivity() {
+        const position = this.detectDevicePosition();
+        
+        switch (position) {
+            case 'pocket':
+                this.stepThreshold = 2.0; // Lower threshold for pocket
+                this.minStepInterval = 800; // Faster detection
+                break;
+            case 'hand':
+                this.stepThreshold = 3.0; // Higher threshold for hand
+                this.minStepInterval = 1200; // Slower detection
+                break;
+            case 'stationary':
+                this.stepThreshold = 4.0; // Much higher threshold when stationary
+                this.minStepInterval = 2000; // Much slower detection
+                break;
+            default:
+                this.stepThreshold = 2.5; // Default threshold
+                this.minStepInterval = 1000; // Default interval
+        }
+        
+        console.log(`🚶‍♂️ Adjusted step sensitivity for ${position}: threshold=${this.stepThreshold}, interval=${this.minStepInterval}ms`);
+    }
+    
+    getStepCountingStatus() {
+        const position = this.detectDevicePosition();
+        const accuracy = this.calculateAccuracy();
+        
+        return {
+            position: position,
+            accuracy: accuracy,
+            threshold: this.stepThreshold,
+            interval: this.minStepInterval,
+            isActive: this.stepDetectionActive,
+            totalSteps: this.totalSteps,
+            sessionSteps: this.sessionSteps
+        };
+    }
+    
+    calculateAccuracy() {
+        // Calculate step counting accuracy based on recent data
+        if (this.accelerationData.length < 20) return 'unknown';
+        
+        const recent = this.accelerationData.slice(-20);
+        const magnitudes = recent.map(reading => reading.magnitude);
+        const avgMagnitude = magnitudes.reduce((sum, mag) => sum + mag, 0) / magnitudes.length;
+        const variance = magnitudes.reduce((sum, mag) => sum + Math.pow(mag - avgMagnitude, 2), 0) / magnitudes.length;
+        const stdDev = Math.sqrt(variance);
+        
+        // Higher variance suggests more movement, potentially more accurate
+        if (stdDev > 2.0) return 'high';
+        if (stdDev > 1.0) return 'medium';
+        return 'low';
+    }
+    
+    optimizeForMobile() {
+        // Mobile-specific optimizations
+        if (navigator.userAgent.match(/Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i)) {
+            console.log('🚶‍♂️ Mobile device detected, applying optimizations');
+            
+            // Reduce data collection frequency to save battery
+            this.accelerationData = this.accelerationData.filter((_, index) => index % 2 === 0);
+            
+            // Adjust thresholds for mobile
+            this.stepThreshold = Math.max(1.5, this.stepThreshold * 0.8);
+            this.minStepInterval = Math.max(500, this.minStepInterval * 0.8);
+            
+            // Enable background step counting
+            this.enableBackgroundStepCounting();
+        }
+    }
+    
+    enableBackgroundStepCounting() {
+        // Use Page Visibility API to continue step counting in background
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log('🚶‍♂️ Page hidden, reducing step detection frequency');
+                this.stepDetectionActive = false;
+                // Continue with reduced frequency
+                setTimeout(() => {
+                    this.stepDetectionActive = true;
+                }, 5000);
+            } else {
+                console.log('🚶‍♂️ Page visible, resuming full step detection');
+                this.stepDetectionActive = true;
+            }
+        });
+    }
+    
+    // Expose step counting status for debugging
+    getDebugInfo() {
+        const status = this.getStepCountingStatus();
+        return {
+            ...status,
+            accelerationDataLength: this.accelerationData.length,
+            lastStepTime: this.lastStepTime,
+            stepCooldown: this.stepCooldown,
+            milestones: this.milestones,
+            googleFitEnabled: this.googleFitEnabled
+        };
     }
     
     enableDeviceMotion() {
@@ -154,16 +388,16 @@ class StepCurrencySystem {
         const acceleration = event.accelerationIncludingGravity;
         if (!acceleration) return;
         
-        // Calculate total acceleration magnitude
-        const magnitude = Math.sqrt(
-            acceleration.x * acceleration.x +
-            acceleration.y * acceleration.y +
-            acceleration.z * acceleration.z
-        );
-        
-        // Store recent acceleration data
+        // Store acceleration data with individual components
         this.accelerationData.push({
-            magnitude: magnitude,
+            x: acceleration.x,
+            y: acceleration.y,
+            z: acceleration.z,
+            magnitude: Math.sqrt(
+                acceleration.x * acceleration.x +
+                acceleration.y * acceleration.y +
+                acceleration.z * acceleration.z
+            ),
             timestamp: Date.now()
         });
         
@@ -172,8 +406,11 @@ class StepCurrencySystem {
             this.accelerationData.shift();
         }
         
+        // Adjust sensitivity based on device position
+        this.adjustStepSensitivity();
+        
         // Detect step pattern
-        this.detectStep(magnitude);
+        this.detectStep(this.accelerationData[this.accelerationData.length - 1].magnitude);
     }
     
     detectStep(magnitude) {
@@ -246,6 +483,17 @@ class StepCurrencySystem {
         
         this.checkMilestones();
         this.saveSteps();
+    }
+
+    // Reset only the session step counter (used when starting a new adventure)
+    resetSessionSteps() {
+        this.sessionSteps = 0;
+        try {
+            this.updateStepCounter();
+        } catch (_) {}
+        // Persist total steps only; session is transient
+        try { this.saveSteps(); } catch (_) {}
+        console.log('🚶‍♂️ Session steps reset to 0 for new adventure');
     }
     
     checkMilestones() {

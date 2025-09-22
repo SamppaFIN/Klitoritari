@@ -856,6 +856,12 @@ class BaseSystem {
         
         // Show base management modal
         if (baseModal) {
+            // Do not show if player has no base yet
+            if (!this.playerBase) {
+                console.log('🏗️ No base established yet; not showing base management modal');
+                baseModal.classList.add('hidden');
+                return;
+            }
             baseModal.classList.remove('hidden');
             this.updateBaseModalInfo();
             

@@ -225,6 +225,7 @@ class MoralChoiceSystem {
         });
         this.saveAlignment();
         console.log('⚖️ Alignment updated:', this.playerAlignment);
+        try { window.statistics?.logMoralityChange?.(changes, 'moral_choice'); } catch (_) {}
     }
 
     showChoiceFeedback(choice) {
@@ -236,7 +237,9 @@ class MoralChoiceSystem {
             }).join(', ');
             
             const message = changes ? `Alignment: ${changes}` : 'Choice recorded';
-            window.gruesomeNotifications.show('⚖️ Choice Made', message, 'info');
+            const flavor = choice.flavor || (value => value > 0 ? 'A strange warmth floods your veins.' : 'Cold cosmic dread seeps into your bones.');
+            const flavorText = changes ? ` ${flavor(Object.values(alignment)[0] || 0)}` : '';
+            window.gruesomeNotifications.show('⚖️ Choice Made', message + flavorText, 'info');
         }
 
         // Visual effect

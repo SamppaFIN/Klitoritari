@@ -632,6 +632,12 @@ class EldritchSanctuaryApp {
     locateMe() {
         console.log('📍 Locate Me button clicked');
         this.requestLocationWithFallback();
+        // If quests are awaiting locate, begin them now
+        try {
+            if (window.unifiedQuestSystem?.awaitingLocate) {
+                window.unifiedQuestSystem.beginAfterLocate?.();
+            }
+        } catch (_) {}
     }
     
     requestLocationWithFallback() {
@@ -1796,21 +1802,14 @@ class EldritchSanctuaryApp {
     }
     
     toggleDebugElements() {
-        // Toggle debug panel visibility using the 'open' class so it slides in
+        // Do NOT auto-open the debug panel on startup; user must open it via toggle
         const debugPanel = document.getElementById('glassmorphic-side-panel');
         if (debugPanel) {
-            if (this.devModeEnabled) {
-                debugPanel.classList.add('open');
-                debugPanel.style.display = 'block';
-                debugPanel.style.visibility = 'visible';
-                // Force the panel to stay open by adding a data attribute
-                debugPanel.setAttribute('data-dev-forced-open', 'true');
-            } else {
-                debugPanel.classList.remove('open');
-                debugPanel.style.display = 'none';
-                debugPanel.style.visibility = 'hidden';
-                debugPanel.removeAttribute('data-dev-forced-open');
-            }
+            // Always keep panel hidden until explicitly opened by the user
+            debugPanel.classList.remove('open');
+            debugPanel.style.display = 'none';
+            debugPanel.style.visibility = 'hidden';
+            debugPanel.removeAttribute('data-dev-forced-open');
         }
         
         // Toggle debug elements

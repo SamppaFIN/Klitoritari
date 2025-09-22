@@ -1083,6 +1083,10 @@ class EncounterSystem {
                 battleState.monsterHealth -= damage;
                 document.getElementById('monster-health').textContent = `${battleState.monsterHealth}/100`;
                 
+                // Moral nudge: each attack has consequences
+                try { window.moralChoiceSystem?.updateAlignment?.({ ethical: -1, cosmic: +1 }); } catch (_) {}
+                try { window.statistics?.logEvent?.('battle_attack', { damage, monster: this.activeEncounter?.monster?.type?.name || 'Unknown' }); } catch (_) {}
+                
                 if (battleState.monsterHealth <= 0) {
                     this.winBattle();
                     return;
@@ -1094,7 +1098,10 @@ class EncounterSystem {
                 
             case 'defend':
                 battleState.playerDefending = true;
-                this.showDialog('You brace for impact!');
+                // Moral nudge: defense shows wisdom
+                try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +1, ethical: +1 }); } catch (_) {}
+                try { window.statistics?.logEvent?.('battle_defend', { monster: this.activeEncounter?.monster?.type?.name || 'Unknown' }); } catch (_) {}
+                this.showDialog('You brace for impact! The creature\'s eyes seem to respect your caution.');
                 break;
                 
             case 'flee':
@@ -1115,23 +1122,39 @@ class EncounterSystem {
         
         document.getElementById('player-health').textContent = `${battleState.playerHealth}/100`;
         
+        // Show different feedback based on defense
+        if (battleState.playerDefending) {
+            this.showDialog(`The creature strikes! Your defense reduces the damage to ${damage}.`);
+        } else {
+            this.showDialog(`The creature strikes for ${damage} damage! You feel the cosmic energy drain from your body.`);
+        }
+        
         if (battleState.playerHealth <= 0) {
             this.loseBattle();
         }
     }
 
     winBattle() {
-        this.showDialog(`Victory! You defeated the monster!`);
+        // Moral nudge: violence has consequences
+        try { window.moralChoiceSystem?.updateAlignment?.({ ethical: -5, cosmic: +3 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('battle_victory', { monster: this.activeEncounter?.monster?.type?.name || 'Unknown' }); } catch (_) {}
+        this.showDialog(`Victory! The creature's final breath sounds almost... human. You feel a strange emptiness.`);
         this.closeEncounter();
     }
 
     loseBattle() {
-        this.showDialog('You were defeated! The monster was too strong...');
+        // Moral nudge: defeat teaches humility
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +2, cosmic: -1 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('battle_defeat', { monster: this.activeEncounter?.monster?.type?.name || 'Unknown' }); } catch (_) {}
+        this.showDialog('Defeat! As darkness claims you, you hear a voice whisper: "Perhaps violence was not the answer..."');
         this.closeEncounter();
     }
 
     fleeBattle() {
-        this.showDialog('You successfully fled from the monster!');
+        // Moral nudge: flight can be wise
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +3, ethical: +1 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('battle_flee', { monster: this.activeEncounter?.monster?.type?.name || 'Unknown' }); } catch (_) {}
+        this.showDialog('You flee! Behind you, the creature makes a sound that might be laughter. Or relief.');
         this.closeEncounter();
     }
 
@@ -1170,20 +1193,29 @@ class EncounterSystem {
         const feedback = document.getElementById('puzzle-feedback');
         
         if (answer === this.puzzleAnswer) {
-            feedback.innerHTML = '<span style="color: green;">Correct! Well done!</span>';
+            feedback.innerHTML = '<span style="color: green;">Correct! The cosmic patterns align!</span>';
             this.giveReward('discoveries', 'Ancient Knowledge');
+            // Moral nudge: solving puzzles increases wisdom
+            try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +5, cosmic: +2 }); } catch (_) {}
+            try { window.statistics?.logEvent?.('puzzle_solve', { answer, correct: true }); } catch (_) {}
             
             setTimeout(() => {
-                this.showDialog(`Puzzle solved! You gained ancient knowledge!`);
+                this.showDialog(`Puzzle solved! Ancient knowledge floods your mind like starlight. You feel... different.`);
                 this.closeEncounter();
             }, 2000);
         } else {
-            feedback.innerHTML = '<span style="color: red;">Incorrect. Try again!</span>';
+            // Moral nudge: failure teaches patience
+            try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +1 }); } catch (_) {}
+            try { window.statistics?.logEvent?.('puzzle_fail', { answer, correct: false }); } catch (_) {}
+            feedback.innerHTML = '<span style="color: red;">Incorrect. The cosmic patterns mock your attempt. Try again!</span>';
         }
     }
 
     skipPuzzle() {
-        this.showDialog('You skipped the puzzle.');
+        // Moral nudge: skipping can be wise restraint
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +1, ethical: +1 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('puzzle_skip', {}); } catch (_) {}
+        this.showDialog('You skip the puzzle. Sometimes the greatest wisdom is knowing when not to know.');
         this.closeEncounter();
     }
 
@@ -1210,12 +1242,28 @@ class EncounterSystem {
 
     samplePOI(poi) {
         this.giveReward('items', 'Mysterious Sample');
-        this.showDialog(`You collected a sample!`);
+        // Moral nudge: harvesting samples might be ethically gray
+        try { window.moralChoiceSystem?.updateAlignment?.({ ethical: -2, wisdom: +1 }); } catch (_) {}
+        try {
+            const html = poi.getPopup().getContent();
+            const nameMatch = /<b>(.*?)<\/b>/.exec(html);
+            const name = nameMatch ? nameMatch[1] : 'Unknown';
+            window.statistics?.logEvent?.('poi_sample', { name });
+        } catch (_) {}
+        this.showDialog(`You collected a sample. The air tastes like copper.`);
         this.closeEncounter();
     }
 
     leavePOI(poi) {
-        this.showDialog('You leave the location without investigating.');
+        // Moral nudge: restraint can be wise
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +1 }); } catch (_) {}
+        try {
+            const html = poi.getPopup().getContent();
+            const nameMatch = /<b>(.*?)<\/b>/.exec(html);
+            const name = nameMatch ? nameMatch[1] : 'Unknown';
+            window.statistics?.logEvent?.('poi_leave', { name });
+        } catch (_) {}
+        this.showDialog('You leave the location untouched. Somewhere far away, something exhales.');
         this.closeEncounter();
     }
 
@@ -1224,18 +1272,27 @@ class EncounterSystem {
     investigateTestQuest(questMarker) {
         this.giveReward('experience', 40);
         this.giveReward('discoveries', `${questMarker.questName} Knowledge`);
-        this.showDialog(`You investigated ${questMarker.questName} and gained knowledge!`);
+        // Moral nudge: investigation increases wisdom
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +4, ethical: +1 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('quest_investigate', { quest: questMarker.questName }); } catch (_) {}
+        this.showDialog(`You investigate ${questMarker.questName}. The knowledge burns like hot coals in your mind.`);
         this.closeEncounter();
     }
 
     studyTestQuest(questMarker) {
         this.giveReward('experience', 25);
-        this.showDialog(`You studied ${questMarker.questName} and gained wisdom!`);
+        // Moral nudge: study is patient wisdom
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +6, cosmic: +1 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('quest_study', { quest: questMarker.questName }); } catch (_) {}
+        this.showDialog(`You study ${questMarker.questName}. The patterns reveal themselves slowly, like a cosmic dance.`);
         this.closeEncounter();
     }
 
     leaveTestQuest(questMarker) {
-        this.showDialog(`You leave ${questMarker.questName}.`);
+        // Moral nudge: leaving can be wise restraint
+        try { window.moralChoiceSystem?.updateAlignment?.({ wisdom: +2, ethical: +2 }); } catch (_) {}
+        try { window.statistics?.logEvent?.('quest_leave', { quest: questMarker.questName }); } catch (_) {}
+        this.showDialog(`You leave ${questMarker.questName}. Sometimes the greatest wisdom is knowing when to walk away.`);
         this.closeEncounter();
     }
 

@@ -36,19 +36,29 @@ class WelcomeScreen {
     }
 
     setupEventListeners() {
-        // Start adventure button
-        const startBtn = document.getElementById('start-adventure');
-        if (startBtn) {
-            console.log('🌟 Start adventure button found, adding event listener');
-            startBtn.addEventListener('click', () => {
-                console.log('🚀 Start adventure button clicked!');
-                this.startAdventure();
+        // Continue adventure button
+        const continueBtn = document.getElementById('continue-adventure');
+        if (continueBtn) {
+            console.log('🌟 Continue adventure button found, adding event listener');
+            continueBtn.addEventListener('click', () => {
+                console.log('🔄 Continue adventure button clicked!');
+                this.continueAdventure();
             });
         } else {
-            console.error('🌟 Start adventure button not found!');
+            console.error('🌟 Continue adventure button not found!');
         }
 
-        // Skip tutorial button removed - using single start button only
+        // Start fresh adventure button
+        const startFreshBtn = document.getElementById('start-fresh');
+        if (startFreshBtn) {
+            console.log('🌟 Start fresh adventure button found, adding event listener');
+            startFreshBtn.addEventListener('click', () => {
+                console.log('🚀 Start fresh adventure button clicked!');
+                this.startFreshAdventure();
+            });
+        } else {
+            console.error('🌟 Start fresh adventure button not found!');
+        }
 
         // Close welcome screen on escape key
         document.addEventListener('keydown', (e) => {
@@ -89,8 +99,8 @@ class WelcomeScreen {
         }
     }
 
-    startAdventure() {
-        console.log('🚀 Starting cosmic adventure!');
+    continueAdventure() {
+        console.log('🔄 Continuing existing adventure!');
         
         // Mark welcome as seen
         localStorage.setItem('eldritch_welcome_seen', 'true');
@@ -99,7 +109,7 @@ class WelcomeScreen {
         // Hide welcome screen immediately and start game
         console.log('🌟 Hiding welcome screen and initializing game...');
         this.hideWelcomeScreen();
-        this.initializeGame();
+        this.initializeGame(false); // false = don't reset
         
         // Start NPC simulation after welcome screen is dismissed
         if (window.eldritchApp) {
@@ -107,16 +117,134 @@ class WelcomeScreen {
         }
     }
 
-    skipTutorial() {
-        console.log('⏭️ Skipping tutorial');
+    startFreshAdventure() {
+        console.log('🚀 Starting fresh cosmic adventure!');
         
         // Mark welcome as seen
         localStorage.setItem('eldritch_welcome_seen', 'true');
         this.hasSeenWelcome = true;
         
-        // Hide welcome screen immediately
+        // Reset all game state
+        this.resetAllGameState();
+        
+        // Hide welcome screen immediately and start game
+        console.log('🌟 Hiding welcome screen and initializing fresh game...');
         this.hideWelcomeScreen();
-        this.initializeGame();
+        this.initializeGame(true); // true = reset everything
+        
+        // Start NPC simulation after welcome screen is dismissed
+        if (window.eldritchApp) {
+            window.eldritchApp.startNPCSimulation();
+        }
+    }
+
+    resetAllGameState() {
+        console.log('🔄 Resetting all game state for fresh start...');
+        
+        try {
+            // Clear any existing player base so fresh start has no base
+            try {
+                localStorage.removeItem('eldritch-player-base');
+            } catch (e) {
+                console.warn('Failed to clear player base storage:', e);
+            }
+
+            // Reset step currency system
+            if (window.stepCurrencySystem) {
+                window.stepCurrencySystem.totalSteps = 0;
+                window.stepCurrencySystem.sessionSteps = 0;
+                window.stepCurrencySystem.saveSteps();
+                window.stepCurrencySystem.updateStepCounter();
+                console.log('🚶‍♂️ Step currency reset');
+            }
+            
+            // Reset encounter system
+            if (window.encounterSystem) {
+                window.encounterSystem.resetEncounterFlags();
+                window.encounterSystem.playerSteps = 0;
+                window.encounterSystem.playerStats = {
+                    health: 100,
+                    maxHealth: 100,
+                    sanity: 100,
+                    maxSanity: 100,
+                    attack: 15,
+                    defense: 10,
+                    luck: 12,
+                    experience: 0,
+                    level: 1,
+                    inventory: [],
+                    equipment: {
+                        weapon: null,
+                        armor: null,
+                        accessory: null
+                    },
+                    skills: {
+                        combat: 1,
+                        diplomacy: 1,
+                        investigation: 1,
+                        survival: 1
+                    },
+                    traits: [],
+                    reputation: {},
+                    isDead: false,
+                    deathReason: null
+                };
+                window.encounterSystem.updateStatBars();
+                console.log('🎭 Encounter system reset');
+            }
+            
+            // Reset quest system
+            if (window.unifiedQuestSystem) {
+                window.unifiedQuestSystem.resetQuestsForGameStart();
+                window.unifiedQuestSystem.visitedQuests.clear();
+                window.unifiedQuestSystem.questCooldowns.clear();
+                console.log('📜 Quest system reset');
+            }
+            
+            // Clear session persistence
+            if (window.sessionPersistence) {
+                try {
+                    localStorage.removeItem(window.sessionPersistence.key('questState'));
+                    localStorage.removeItem(window.sessionPersistence.key('mapView'));
+                    localStorage.removeItem(window.sessionPersistence.key('path'));
+                } catch (e) {
+                    console.warn('Failed to clear session persistence:', e);
+                }
+                console.log('💾 Session persistence cleared');
+            }
+            
+            // Clear other game state
+            try {
+                localStorage.removeItem('eldritch-steps');
+                localStorage.removeItem('adventureMode');
+                localStorage.removeItem('eldritch_player_position');
+                localStorage.removeItem('eldritch_quest_progress');
+                localStorage.removeItem('eldritch_inventory');
+                localStorage.removeItem('eldritch_player_stats');
+                // Also ensure base modal is hidden if it was open
+                const baseModal = document.getElementById('base-management-modal');
+                if (baseModal) baseModal.classList.add('hidden');
+            } catch (e) {
+                console.warn('Failed to clear some localStorage items:', e);
+            }
+            
+            console.log('✅ All game state reset for fresh start');
+            
+        } catch (error) {
+            console.error('❌ Error resetting game state:', error);
+        }
+    }
+
+    skipTutorial() {
+        console.log('⏭️ Skipping tutorial - defaulting to continue adventure');
+        
+        // Mark welcome as seen
+        localStorage.setItem('eldritch_welcome_seen', 'true');
+        this.hasSeenWelcome = true;
+        
+        // Hide welcome screen immediately and continue existing adventure
+        this.hideWelcomeScreen();
+        this.initializeGame(false); // false = don't reset
         
         // Start NPC simulation after welcome screen is dismissed
         if (window.eldritchApp) {
@@ -140,8 +268,8 @@ class WelcomeScreen {
         }
     }
 
-    initializeGame() {
-        console.log('🎮 Initializing game systems...');
+    initializeGame(resetEverything = false) {
+        console.log('🎮 Initializing game systems...', resetEverything ? '(with reset)' : '(continuing)');
         
         // Initialize the main app
         if (window.eldritchApp) {
@@ -151,16 +279,46 @@ class WelcomeScreen {
             console.error('🌌 Main app not found!');
             console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
         }
-        
-        // Show game tips immediately
-        console.log('🌟 Showing game tips...');
-        this.showGameTips();
+        // Tutorials disabled for now
     }
 
     showGameTips() {
-        // Show some helpful tips after the game loads
-        this.showTip('💡 Welcome to Eldritch Sanctuary! Use the debug console (🔧) to test features and see your progress.');
-        this.showTip('🌟 Try clicking on the HEVY marker to start your first legendary encounter!');
+        // Tutorial/hint system disabled for now
+        return;
+        // Only show a single hint: Press LOCATE ME to begin
+        const msg = 'Press LOCATE ME to begin';
+        try {
+            if (window.eldritchApp?.showNotification) {
+                window.eldritchApp.showNotification(msg);
+            } else {
+                this.showTip(msg);
+            }
+        } catch (_) {
+            this.showTip(msg);
+        }
+        
+        // Trigger a brief distortion blur effect
+        try {
+            if (window.sanityDistortion) {
+                window.sanityDistortion.makeCanvasVisible?.();
+                window.sanityDistortion.distortionEffects.blur = 0.6;
+                setTimeout(() => { window.sanityDistortion.distortionEffects.blur = 0; }, 1500);
+            }
+        } catch (_) {}
+        
+        // Play a scary scream-like sound if available
+        try {
+            if (window.soundManager) {
+                // Use the most intense available effect as a "scream"
+                if (typeof window.soundManager.playTerrifyingBling === 'function') {
+                    window.soundManager.playTerrifyingBling();
+                } else if (typeof window.soundManager.playWarningSting === 'function') {
+                    window.soundManager.playWarningSting();
+                } else if (typeof window.soundManager.playEerieHum === 'function') {
+                    window.soundManager.playEerieHum({ duration: 1.2 });
+                }
+            }
+        } catch (_) {}
     }
 
     showTip(message) {

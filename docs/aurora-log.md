@@ -11,6 +11,39 @@ What changed (highlights):
 - Map movement simulation stabilized (NaN guards; no-op on zero distance).
 - Locate Me re-wired to recenter map and update player marker immediately.
 
+---
+
+## Session R12 — 2025-09-22 (Evening)
+Phase: Scatter-Mode Unification, Moral Feedback, Mobile Steps, Base UI polish
+
+Highlights (player experience):
+- Single adventure mode enforced: quests always scattered within 300m, never <100m from player.
+- New start flow: "Continue Old Adventure" or "Start Fresh Adventure". Fresh clears steps, encounters, quests, session state, and now any existing player base.
+- Quests now wait until the player presses "LOCATE ME"; no auto-pop dialogs on fresh start. Only one tip shows: "Press LOCATE ME to begin" with blur+scream effect.
+- Debug panel no longer auto-opens on startup.
+- Legacy tutorial system disabled to prevent clutter.
+
+Moral choices and feedback:
+- Punish/reward flavor added to encounters (battle, POI, quest actions, puzzles).
+- Each choice nudges alignment on three axes (cosmic, ethical, wisdom) with atmospheric copy.
+- New lightweight statistics logger persists `morality_change` and encounter events for later AI analysis.
+
+Mobile steps and accuracy:
+- Step system augmented with advanced motion heuristics, device-position sensitivity (pocket/hand/stationary), background-friendly behavior, accuracy estimation, and debug status export.
+
+Base system UX:
+- Base establishment/management modals now open centered above header and respect stacking (z-index).
+- Fixed unwanted auto-open at startup; base modal is hidden by default and only shown if a base exists.
+- Fresh start explicitly removes `eldritch-player-base` from storage.
+
+Why this serves sacred principles:
+- Clarity: reduced startup noise; a single, clear action begins play.
+- Agency: choices feel consequential and are later analyzable with compassion.
+- Accessibility: step detection and UI overlays tuned for mobile reality.
+
+Next:
+- Field-test pedometer on devices, tune thresholds; expand moral templates; add gentle onboarding quest post-locate.
+
 Reflections (spatial wisdom):
 - Clear feedback (sounds, toasts, vibration-ready hooks) deepens embodied presence in space.
 - Non-blocking overlays preserve flow; moral choices as gentle mirrors rather than walls.
