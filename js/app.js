@@ -402,6 +402,10 @@ class EldritchSanctuaryApp {
 
         // Initialize lightweight sound manager (no MP3s)
         this.initSoundManager();
+        if (this.sound) {
+            // Start subtle ambience pulse during exploration
+            try { this.sound.startAmbiencePulse({ intervalMs: 14000 }); } catch (e) {}
+        }
         
         // Load initial data
         await this.loadInitialData();
@@ -2435,6 +2439,7 @@ class DockedPanelManager {
             <div class="panel-body" style="padding:10px; height:${height}px; overflow:auto;">${content}</div>
         `;
         this.container.appendChild(panel);
+        if (window.soundManager) { try { window.soundManager.pauseAmbience('panel'); } catch (e) {} }
         this.panels.set(id, panel);
         
         // Close
@@ -2458,6 +2463,7 @@ class DockedPanelManager {
         if (panel) {
             panel.remove();
             this.panels.delete(id);
+            if (this.panels.size === 0 && window.soundManager) { try { window.soundManager.resumeAmbience('panel'); } catch (e) {} }
         }
     }
     
@@ -2507,6 +2513,8 @@ class SoundManager {
 	constructor() {
 		this.audioCtx = null;
 		this.masterGain = null;
+		this.ambienceInterval = null;
+		this.ambiencePausedReasons = new Set();
 		this.init();
 	}
 	
@@ -2613,6 +2621,29 @@ class SoundManager {
 	playQuestComplete() { this.playBling({ frequency: 1560, duration: 0.18, type: 'triangle' }); }
 	playWarning() { this.playTerrifyingBling(); }
 	
+	// Subtle ambience pulse while exploring
+	startAmbiencePulse({ intervalMs = 12000 } = {}) {
+		if (!this.audioCtx) return;
+		this.resumeIfNeeded();
+		this.stopAmbiencePulse();
+		this.ambienceInterval = setInterval(() => {
+			if (this.ambiencePausedReasons.size > 0) return;
+			try { this.playEerieHum({ duration: 1.6 }); } catch (e) {}
+		}, intervalMs);
+	}
+	stopAmbiencePulse() {
+		if (this.ambienceInterval) {
+			clearInterval(this.ambienceInterval);
+			this.ambienceInterval = null;
+		}
+	}
+	pauseAmbience(reason = 'generic') {
+		this.ambiencePausedReasons.add(reason);
+	}
+	resumeAmbience(reason = 'generic') {
+		if (this.ambiencePausedReasons.has(reason)) this.ambiencePausedReasons.delete(reason);
+	}
+
 	// Helpers
 	createNoiseBufferSource(duration = 0.2) {
 		const sampleRate = this.audioCtx.sampleRate;
