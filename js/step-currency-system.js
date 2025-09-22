@@ -250,20 +250,34 @@ class StepCurrencySystem {
     triggerFlagCreation() {
         console.log('🇫🇮 50 steps reached - creating flag!');
         
-        // Get current player position
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            const position = window.eldritchApp.systems.geolocation.getCurrentPosition();
-            if (position) {
-                console.log('🇫🇮 Player position:', position);
-                // Add flag to Finnish flag layer
+            const geo = window.eldritchApp.systems.geolocation;
+            // Prefer a synchronous, cached position
+            let position = null;
+            if (typeof geo.getCurrentPositionSafe === 'function') {
+                position = geo.getCurrentPositionSafe();
+            }
+            if (!position && geo.lastValidPosition) {
+                position = geo.lastValidPosition;
+            }
+            if (!position && geo.currentPosition) {
+                position = geo.currentPosition;
+            }
+            
+            if (position && typeof position.lat === 'number' && typeof position.lng === 'number') {
+                console.log('🇫🇮 Using position for flag:', position);
                 if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
-                    console.log('🇫🇮 Adding flag to layer');
-                    window.mapEngine.finnishFlagLayer.addFlagPin(position.lat, position.lng);
+                    const layer = window.mapEngine.finnishFlagLayer;
+                    // Ensure visible
+                    if (layer.canvas) {
+                        layer.isVisible = true;
+                        layer.canvas.style.opacity = layer.opacity || 1;
+                    }
+                    layer.addFlagPin(position.lat, position.lng);
                 } else {
                     console.warn('🇫🇮 Map engine or flag layer not available');
                 }
                 
-                // Show notification
                 if (window.gruesomeNotifications) {
                     window.gruesomeNotifications.showNotification({
                         type: 'success',
@@ -272,7 +286,11 @@ class StepCurrencySystem {
                         duration: 3000
                     });
                 }
+            } else {
+                console.warn('🇫🇮 No valid position available for flag creation');
             }
+        } else {
+            console.warn('🇫🇮 Geolocation system not available');
         }
     }
     
