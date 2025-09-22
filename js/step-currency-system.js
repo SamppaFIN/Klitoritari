@@ -245,9 +245,13 @@ class StepCurrencySystem {
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             const position = window.eldritchApp.systems.geolocation.getCurrentPosition();
             if (position) {
+                console.log('🇫🇮 Player position:', position);
                 // Add flag to Finnish flag layer
                 if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
+                    console.log('🇫🇮 Adding flag to layer');
                     window.mapEngine.finnishFlagLayer.addFlagPin(position.lat, position.lng);
+                } else {
+                    console.warn('🇫🇮 Map engine or flag layer not available');
                 }
                 
                 // Show notification

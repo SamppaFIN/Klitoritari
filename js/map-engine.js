@@ -1778,6 +1778,8 @@ class MapEngine {
         if (typeof FinnishFlagCanvasLayer !== 'undefined') {
             this.finnishFlagLayer = new FinnishFlagCanvasLayer(this);
             console.log('🇫🇮 Finnish flag canvas layer initialized');
+            // Make it globally accessible for step system
+            window.mapEngine = this;
         } else {
             console.warn('🇫🇮 FinnishFlagCanvasLayer not available');
         }

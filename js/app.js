@@ -859,6 +859,72 @@ class EldritchSanctuaryApp {
         // Quest debug buttons are now in the header - no need to create floating buttons
         console.log('🎭 Quest debug buttons moved to header');
     }
+    
+    addDebugButtons() {
+        // Add debug buttons to the side panel for testing
+        const sidePanel = document.getElementById('glassmorphic-side-panel');
+        if (sidePanel) {
+            const debugSection = document.createElement('div');
+            debugSection.className = 'debug-section';
+            debugSection.innerHTML = `
+                <h4>🧪 Debug Tests</h4>
+                <button id="test-flag-creation" class="debug-btn">Test Flag Creation</button>
+                <button id="test-movement" class="debug-btn">Test Movement</button>
+                <button id="add-50-steps" class="debug-btn">Add 50 Steps</button>
+            `;
+            sidePanel.appendChild(debugSection);
+            
+            // Add event listeners
+            document.getElementById('test-flag-creation').addEventListener('click', () => {
+                this.testFlagCreation();
+            });
+            
+            document.getElementById('test-movement').addEventListener('click', () => {
+                this.testMovement();
+            });
+            
+            document.getElementById('add-50-steps').addEventListener('click', () => {
+                this.addTestSteps();
+            });
+        }
+    }
+    
+    testFlagCreation() {
+        console.log('🧪 Testing flag creation...');
+        if (this.systems.stepCurrency) {
+            this.systems.stepCurrency.triggerFlagCreation();
+        } else {
+            console.warn('🧪 Step currency system not available');
+        }
+    }
+    
+    testMovement() {
+        console.log('🧪 Testing movement simulation...');
+        if (this.systems.mapEngine && this.systems.mapEngine.movePlayer) {
+            // Move to a nearby location
+            const currentPos = this.systems.geolocation.getCurrentPosition();
+            if (currentPos) {
+                const newLat = currentPos.lat + 0.001; // ~100m north
+                const newLng = currentPos.lng + 0.001; // ~100m east
+                this.systems.mapEngine.movePlayer(newLat, newLng);
+            } else {
+                console.warn('🧪 No current position available for movement test');
+            }
+        } else {
+            console.warn('🧪 Map engine or movePlayer not available');
+        }
+    }
+    
+    addTestSteps() {
+        console.log('🧪 Adding 50 test steps...');
+        if (this.systems.stepCurrency) {
+            for (let i = 0; i < 50; i++) {
+                this.systems.stepCurrency.addManualStep();
+            }
+        } else {
+            console.warn('🧪 Step currency system not available');
+        }
+    }
 
     showParticleLoadingScreen() {
         console.log('🌟 Showing particle loading screen...');
@@ -887,6 +953,9 @@ class EldritchSanctuaryApp {
         }
         
         // Quest debug buttons removed for mobile optimization
+        
+        // Add debug buttons for testing
+        this.addDebugButtons();
         
         // Initialize button status
         this.updateInventoryStatus();
