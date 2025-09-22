@@ -1,0 +1,118 @@
+/* Multiplayer System Styles */
+.other-player-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
+.other-player-marker {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+.player-emoji {
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+}
+
+.player-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: playerPulse 2s ease-in-out infinite;
+    opacity: 0.6;
+}
+
+.other-player-popup {
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    min-width: 150px;
+}
+
+.other-player-popup h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+.other-player-popup p {
+    margin: 4px 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.multiplayer-status {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.multiplayer-status.connected {
+    background: rgba(0, 150, 0, 0.8);
+}
+
+.multiplayer-status.disconnected {
+    background: rgba(150, 0, 0, 0.8);
+}
+
+.multiplayer-status .status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: statusBlink 1s ease-in-out infinite;
+}
+
+.multiplayer-status.connected .status-indicator {
+    background: #00ff00;
+    animation: none;
+}
+
+.multiplayer-status.disconnected .status-indicator {
+    background: #ff0000;
+}
+
+@keyframes playerPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.3;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes statusBlink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.3;
+    }
+}

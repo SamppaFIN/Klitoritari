@@ -23,6 +23,15 @@ class UnifiedQuestSystem {
         this.questCooldowns = new Map(); // Track quest cooldowns
         this.dialogCooldowns = new Map(); // Track dialog cooldowns
         this.currentDialog = null; // Track current dialog
+
+        // Restore adventure mode for session if present
+        try {
+            const qs = window.sessionPersistence?.restoreQuestState?.();
+            if (qs && qs.mode) {
+                this.adventureMode = qs.mode;
+                console.log('📜 Restored adventure mode from session:', this.adventureMode);
+            }
+        } catch (_) {}
         
         // Aurora as main quest giver - positioned 100m away from player
         this.aurora = {
@@ -1468,9 +1477,11 @@ class UnifiedQuestSystem {
 
     setAdventureMode(mode) {
         try {
-            localStorage.setItem('adventureMode', mode);
+            // Persist to session-scoped storage
+            window.sessionPersistence?.saveQuestState({ mode });
         } catch (e) {
-            console.warn('🎭 Failed to persist adventureMode');
+            // Fallback to legacy localStorage key
+            try { localStorage.setItem('adventureMode', mode); } catch (_) {}
         }
     }
 
@@ -1775,6 +1786,25 @@ class UnifiedQuestSystem {
     // Show Lovecraftian/Pratchett style quest dialog
     showQuestDialog(quest, objective) {
         console.log('🎭 Showing quest dialog for:', quest.name);
+        // Requirement gate: block dialog if requirements are not met
+        try {
+            if (!this.canOpenObjective(quest, objective)) {
+                console.log('🎭 Dialog blocked due to unmet requirements');
+                if (window.gruesomeNotifications) {
+                    const needed = objective?.requirements?.minSteps;
+                    const msg = needed ? `Walk at least ${needed} steps to unlock.` : 'Requirements not met yet.';
+                    window.gruesomeNotifications.show('🔒 Objective Locked', msg, 'warning');
+                } else {
+                    alert('Objective is locked. Meet the requirements first.');
+                }
+                if (window.soundManager && window.soundManager.playWarningSting) {
+                    try { window.soundManager.playWarningSting(); } catch (_) {}
+                }
+                return;
+            }
+        } catch (e) {
+            console.warn('🎭 Requirement gating check failed, allowing dialog as fallback', e);
+        }
         
         // If docked panel manager exists, render as docked panel and return
         if (window.panelManager) {
@@ -1920,6 +1950,44 @@ class UnifiedQuestSystem {
         
         // Store reference for cleanup
         this.currentDialog = dialogOverlay;
+    }
+
+    // Returns true if the objective can be opened; supports simple minSteps gating
+    canOpenObjective(quest, objective) {
+        // No gating if no objective or no requirements specified
+        if (!objective) return true;
+        const req = objective.requirements || objective.requires || quest?.requirements;
+        if (!req) return true;
+
+        // Steps requirement
+        const minSteps = req.minSteps || req.steps || req.min_steps;
+        if (typeof minSteps === 'number') {
+            const totalSteps = this.getCurrentTotalSteps();
+            if (typeof totalSteps === 'number' && totalSteps < minSteps) {
+                console.log(`🎭 Blocked by minSteps: have ${totalSteps}, need ${minSteps}`);
+                return false;
+            }
+        }
+
+        // Future: add item/flag/quest prerequisites here
+        return true;
+    }
+
+    getCurrentTotalSteps() {
+        try {
+            // Prefer app system if available
+            const stepsStats = window.eldritchApp?.systems?.stepCurrency?.getStepStats?.();
+            if (stepsStats && typeof stepsStats.totalSteps === 'number') return stepsStats.totalSteps;
+        } catch (_) {}
+        try {
+            // Fallback: stored steps
+            const stored = localStorage.getItem('eldritch-steps');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                if (typeof parsed.totalSteps === 'number') return parsed.totalSteps;
+            }
+        } catch (_) {}
+        return 0;
     }
     
     // Get quest dialog text based on quest and objective
@@ -2244,7 +2312,10 @@ class UnifiedQuestSystem {
             }
         }
         
-        return `
+        // Add microgame options for certain quest types
+        const microgameOptions = this.getMicrogameOptions(quest, objective);
+        
+        return microgameOptions + `
             <button class="quest-option" data-outcome="accept" style="
                 background: linear-gradient(45deg, #00ff00, #00cc00);
                 border: 2px solid #ffffff;
@@ -2260,6 +2331,27 @@ class UnifiedQuestSystem {
                 Accept Quest
             </button>
         `;
+    }
+
+    getMicrogameOptions(quest, objective) {
+        // Add microgame challenges for certain quest types
+        if (quest.category === 'combat' || quest.category === 'challenge' || quest.id === 'corroding_lake') {
+            return `
+                <div style="margin: 10px 0; padding: 10px; background: rgba(255, 170, 0, 0.1); border: 1px solid #ffaa00; border-radius: 8px;">
+                    <div style="font-weight: bold; color: #ffaa00; margin-bottom: 8px;">🎮 Microgame Challenges</div>
+                    <button class="microgame-btn" data-game="dice" style="width: 100%; padding: 8px; margin: 3px 0; background: linear-gradient(45deg, #00ffff, #0080ff); border: none; border-radius: 6px; color: #000; cursor: pointer; font-weight: bold; font-size: 12px;">
+                        🎲 Dice Challenge
+                    </button>
+                    <button class="microgame-btn" data-game="trivia" style="width: 100%; padding: 8px; margin: 3px 0; background: linear-gradient(45deg, #ff00ff, #ff0080); border: none; border-radius: 6px; color: #fff; cursor: pointer; font-weight: bold; font-size: 12px;">
+                        🧠 Cosmic Trivia
+                    </button>
+                    <button class="microgame-btn" data-game="tetris" style="width: 100%; padding: 8px; margin: 3px 0; background: linear-gradient(45deg, #ffaa00, #ff8800); border: none; border-radius: 6px; color: #000; cursor: pointer; font-weight: bold; font-size: 12px;">
+                        🧩 Tetris Stub
+                    </button>
+                </div>
+            `;
+        }
+        return '';
     }
     
     // Add click handlers for quest options
@@ -2283,11 +2375,191 @@ class UnifiedQuestSystem {
                 option.style.boxShadow = 'none';
             });
         });
+
+        // Add microgame button handlers
+        const microgameBtns = dialogOverlay.querySelectorAll('.microgame-btn');
+        microgameBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const gameType = btn.dataset.game;
+                this.startMicrogame(gameType, quest, objective);
+            });
+            
+            // Add hover effects
+            btn.addEventListener('mouseenter', () => {
+                btn.style.transform = 'scale(1.05)';
+                btn.style.boxShadow = '0 0 15px rgba(255, 170, 0, 0.5)';
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+                btn.style.boxShadow = 'none';
+            });
+        });
+    }
+
+    startMicrogame(gameType, quest, objective) {
+        console.log(`🎮 Starting microgame: ${gameType} for quest: ${quest.name}`);
+        
+        if (!window.microgamesManager) {
+            console.error('🎮 Microgames manager not available');
+            return;
+        }
+
+        const onComplete = (success, results) => {
+            console.log(`🎮 Microgame ${gameType} completed:`, success, results);
+            
+            if (success) {
+                // Microgame success - complete the objective
+                this.completeObjective(quest.id, objective.id);
+                if (window.gruesomeNotifications) {
+                    window.gruesomeNotifications.show('🎉 Microgame Victory!', 'You have proven your worth!', 'success');
+                }
+            } else {
+                // Microgame failure - retarget objective
+                this.retargetObjectiveLocation(quest.id, objective.id);
+                if (window.gruesomeNotifications) {
+                    window.gruesomeNotifications.show('💀 Microgame Defeat', 'The cosmic forces have moved the objective!', 'warning');
+                }
+            }
+        };
+
+        // Start the microgame with quest-specific parameters
+        const options = this.getMicrogameOptionsForQuest(quest, gameType);
+        window.microgamesManager.startGame(gameType, { ...options, onComplete });
+    }
+
+    getMicrogameOptionsForQuest(quest, gameType) {
+        // Quest-specific microgame parameters
+        switch (quest.id) {
+            case 'corroding_lake':
+                return {
+                    dice: { target: 15, rolls: 3 },
+                    trivia: { questions: 3 },
+                    tetris: {}
+                };
+            default:
+                return {
+                    dice: { target: 12, rolls: 3 },
+                    trivia: { questions: 2 },
+                    tetris: {}
+                };
+        }
+    }
+
+    triggerMoralChoiceForOutcome(quest, objective, outcome) {
+        // Trigger moral choices for specific quest outcomes
+        if (!window.moralChoiceSystem) return;
+
+        const moralChoices = {
+            'corroding_lake': {
+                'swim': {
+                    title: "Toxic Sacrifice",
+                    description: "You chose to swim through the toxic lake. This act of self-sacrifice has cosmic implications...",
+                    choices: [
+                        {
+                            text: "Accept the Pain",
+                            description: "Embrace the suffering for others",
+                            alignment: { ethical: 20, cosmic: -10 },
+                            color: "#00ff00",
+                            color2: "#00cc00"
+                        },
+                        {
+                            text: "Regret the Choice",
+                            description: "Wish you had taken the safer path",
+                            alignment: { ethical: -5, wisdom: 10 },
+                            color: "#ff6b6b",
+                            color2: "#ee5a24"
+                        }
+                    ]
+                },
+                'run': {
+                    title: "Strategic Retreat",
+                    description: "You chose to run around the lake. This tactical decision reveals your approach to cosmic challenges...",
+                    choices: [
+                        {
+                            text: "Trust Your Instincts",
+                            description: "Believe in your survival instincts",
+                            alignment: { wisdom: 15, cosmic: 5 },
+                            color: "#0080ff",
+                            color2: "#0066cc"
+                        },
+                        {
+                            text: "Feel Cowardly",
+                            description: "Question your courage",
+                            alignment: { ethical: -10, wisdom: 5 },
+                            color: "#800080",
+                            color2: "#660066"
+                        }
+                    ]
+                }
+            },
+            'face_troll_bridge': {
+                'staff': {
+                    title: "Weapon of Power",
+                    description: "You chose to use the ancient staff against the troll. This act of violence has cosmic consequences...",
+                    choices: [
+                        {
+                            text: "Embrace the Power",
+                            description: "Accept the responsibility of cosmic weapons",
+                            alignment: { cosmic: 25, ethical: -15 },
+                            color: "#ff00ff",
+                            color2: "#cc00cc"
+                        },
+                        {
+                            text: "Question the Violence",
+                            description: "Reflect on the necessity of force",
+                            alignment: { ethical: 10, wisdom: 15 },
+                            color: "#00ff88",
+                            color2: "#00cc66"
+                        }
+                    ]
+                },
+                'clever': {
+                    title: "Wisdom Over Force",
+                    description: "You chose to outwit the troll with words. This intellectual approach has cosmic significance...",
+                    choices: [
+                        {
+                            text: "Trust in Wisdom",
+                            description: "Believe in the power of intellect",
+                            alignment: { wisdom: 25, ethical: 10 },
+                            color: "#ffaa00",
+                            color2: "#ff8800"
+                        },
+                        {
+                            text: "Doubt Your Words",
+                            description: "Question if words are enough",
+                            alignment: { wisdom: -5, cosmic: 10 },
+                            color: "#ff6b6b",
+                            color2: "#ee5a24"
+                        }
+                    ]
+                }
+            }
+        };
+
+        const questChoices = moralChoices[quest.id];
+        if (questChoices && questChoices[outcome]) {
+            // Delay the moral choice slightly to let the quest outcome process
+            setTimeout(() => {
+                window.moralChoiceSystem.showMoralChoice({
+                    ...questChoices[outcome],
+                    onChoice: (index, choice, alignment) => {
+                        console.log('⚖️ Quest moral choice completed:', choice.text);
+                        if (window.gruesomeNotifications) {
+                            window.gruesomeNotifications.show('⚖️ Cosmic Alignment', 'Your choice has shifted the cosmic balance', 'info');
+                        }
+                    }
+                });
+            }, 1000);
+        }
     }
     
     // Handle quest option selection
     handleQuestOption(quest, objective, outcome) {
         console.log(`🎭 Quest option selected: ${outcome} for quest ${quest.name}`);
+        
+        // Trigger moral choice for certain quest outcomes
+        this.triggerMoralChoiceForOutcome(quest, objective, outcome);
         
         let effect = null;
         let feedbackText = '';
@@ -2463,6 +2735,14 @@ class UnifiedQuestSystem {
             console.log(`🎭 Completing objective: ${objective.id} for quest: ${quest.id}`);
             this.completeObjective(quest.id, objective.id);
             if (window.soundManager) window.soundManager.playQuestComplete();
+            
+            // Quest completion effects
+            if (window.discordEffects) {
+                try { 
+                    window.discordEffects.triggerParticleBurst(window.innerWidth/2, window.innerHeight/2, 30, '#00ffff');
+                    window.discordEffects.triggerEnergyWave(window.innerWidth/2, window.innerHeight/2, '#00ffff');
+                } catch (e) {}
+            }
             
             // Hide current quest marker and show next one
             console.log(`🎭 Progressing quest markers for quest: ${quest.id}, objective: ${objective.id}`);
@@ -3032,18 +3312,22 @@ class UnifiedQuestSystem {
         
         const iconData = objectiveIcons[objective.id] || { symbol: '❓', color: '#95a5a6', name: 'Quest Objective' };
         
-        const objectiveIcon = L.divIcon({
-            className: 'quest-objective-marker new-marker',
-            html: `
-                <div style="position: relative; width: 40px; height: 40px;">
-                    <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, ${iconData.color}33 0%, transparent 70%); border-radius: 50%; animation: questObjectivePulse 2s infinite;"></div>
-                    <div style="position: absolute; top: 0; left: 0; width: 40px; height: 40px; background: ${iconData.color}; border: 2px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 15px ${iconData.color};"></div>
-                    <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">${iconData.symbol}</div>
-                </div>
-            `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        });
+        // Try to use AssetManager for quest marker icon
+        let objectiveIcon;
+        if (window.mapEngine && window.mapEngine.createAssetIcon) {
+            try {
+                objectiveIcon = window.mapEngine.createAssetIcon('quest_marker', {
+                    size: [40, 40],
+                    className: 'quest-objective-marker new-marker',
+                    color: iconData.color
+                });
+            } catch (error) {
+                console.warn('📦 Failed to create asset icon, using fallback:', error);
+                objectiveIcon = this.createFallbackQuestIcon(iconData);
+            }
+        } else {
+            objectiveIcon = this.createFallbackQuestIcon(iconData);
+        }
         
         const marker = L.marker([position.lat, position.lng], { icon: objectiveIcon }).addTo(window.mapEngine.map);
         
@@ -3078,6 +3362,24 @@ class UnifiedQuestSystem {
         console.log('🎭 Quest objective marker created and added to map:', objective.id, 'at', position);
         
         return marker;
+    }
+    
+    /**
+     * Create fallback quest icon when AssetManager is not available
+     */
+    createFallbackQuestIcon(iconData) {
+        return L.divIcon({
+            className: 'quest-objective-marker new-marker',
+            html: `
+                <div style="position: relative; width: 40px; height: 40px;">
+                    <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, ${iconData.color}33 0%, transparent 70%); border-radius: 50%; animation: questObjectivePulse 2s infinite;"></div>
+                    <div style="position: absolute; top: 0; left: 0; width: 40px; height: 40px; background: ${iconData.color}; border: 2px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 15px ${iconData.color};"></div>
+                    <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">${iconData.symbol}</div>
+                </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
     }
     
     // Interact with a quest objective

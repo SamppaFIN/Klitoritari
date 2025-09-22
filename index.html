@@ -15,6 +15,13 @@
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="multiplayer-styles.css">
+    
+    <!-- Asset Manager -->
+    <script src="js/asset-manager.js"></script>
+    
+    <!-- Device Testing Suite -->
+    <script src="js/device-testing-suite.js"></script>
     
     <!-- GLMatrix for WebGL math operations (load first) -->
     <script src="https://unpkg.com/gl-matrix@3.4.3/gl-matrix-min.js"></script>
@@ -66,6 +73,12 @@
                             <span class="dev-icon">🔧</span>
                             <span class="dev-text">DEV</span>
                         </button>
+                    </div>
+                    
+                    <!-- Multiplayer Status -->
+                    <div id="multiplayerStatus" class="multiplayer-status disconnected">
+                        <div class="status-indicator"></div>
+                        <span id="multiplayerStatusText">Disconnected</span>
                     </div>
                 </div>
             </header>
@@ -237,29 +250,50 @@
                         <div class="tutorial-step">
                             <div class="step-icon">📍</div>
                             <div class="step-content">
-                                <h3>Explore the Cosmos</h3>
-                                <p>Walk around in real life to explore the cosmic map. Your movement creates a painted trail.</p>
+                                <h3>Locate & Explore</h3>
+                                <p>Use <strong>LOCATE ME</strong> to center on your position. Walk IRL to explore; your trail and flags mark your path.</p>
                             </div>
                         </div>
                         <div class="tutorial-step">
-                            <div class="step-icon">🎭</div>
+                            <div class="step-icon">🇫🇮</div>
                             <div class="step-content">
-                                <h3>Complete Quests</h3>
-                                <p>Discover the Corroding Lake quest and face cosmic horrors. Make choices that affect your sanity and health.</p>
+                                <h3>Steps & Flags</h3>
+                                <p>Every 50 steps drops a Finnish flag. Use the footer <strong>FLAGS</strong> button to cycle flag themes.</p>
                             </div>
                         </div>
                         <div class="tutorial-step">
-                            <div class="step-icon">👑</div>
+                            <div class="step-icon">📜</div>
                             <div class="step-content">
-                                <h3>Meet Aurora</h3>
-                                <p>Find Aurora, the cosmic quest giver, who will guide you through the mysteries of the realm.</p>
+                                <h3>Quests & Gating</h3>
+                                <p>Intro quest unlocks after 100 steps. Objectives retarget on wrong answers; panels are docked & draggable.</p>
                             </div>
                         </div>
                         <div class="tutorial-step">
-                            <div class="step-icon">⛩️</div>
+                            <div class="step-icon">🎲</div>
                             <div class="step-content">
-                                <h3>Find the Shrine</h3>
-                                <p>Locate the Revive Shrine to restore your health and sanity when needed.</p>
+                                <h3>Microgames & Combat</h3>
+                                <p>Play dice, trivia, and full <strong>Tetris</strong>. Combat is simplified to dice rolls.</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="step-icon">⚖️</div>
+                            <div class="step-content">
+                                <h3>Moral Choices</h3>
+                                <p>Non‑blocking overlays influence your alignment. Random moral now triggers correctly.</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="step-icon">🔊</div>
+                            <div class="step-content">
+                                <h3>Audio & Effects</h3>
+                                <p>Built‑in demo sounds (no MP3s needed) and Discord‑style effects enhance feedback.</p>
+                            </div>
+                        </div>
+                        <div class="tutorial-step">
+                            <div class="step-icon">🔧</div>
+                            <div class="step-content">
+                                <h3>Dev Console</h3>
+                                <p>Use the header <strong>debug toggle</strong> to open tools. It’s now always clickable.</p>
                             </div>
                         </div>
                     </div>
@@ -291,7 +325,8 @@
                     </button>
                 </div>
                 <div class="welcome-tips">
-                    <p>💡 <strong>Tip:</strong> Keep the debug console open to test features and see your progress!</p>
+                    <p>💡 Tip: Use <strong>LOCATE ME</strong>, then long‑press on map for context actions.</p>
+                    <p>💡 Tip: Try <strong>FLAGS</strong> to cycle themes. Play <strong>Tetris</strong> from debug panel.</p>
                 </div>
             </div>
         </div>
@@ -468,6 +503,11 @@
     <script src="js/quest-log-ui.js"></script>
     <script src="js/unified-quest-system.js"></script>
     <script src="js/simple-dice-combat.js"></script>
+    <script src="js/session-persistence.js"></script>
+    <script src="js/multiplayer-manager.js"></script>
+    <script src="js/moral-choice-system.js"></script>
+    <script src="js/discord-effects-system.js"></script>
+    <script src="js/microgames-manager.js"></script>
     <script src="js/encounter-system.js"></script>
     <script src="js/npc-system.js"></script>
     <script src="js/path-painting-system.js"></script>
@@ -587,6 +627,11 @@
             <button id="unified-panel-toggle" class="footer-btn settings-btn" title="Settings">
                 <span class="btn-icon">⚙️</span>
                 <span class="btn-text">SETTINGS</span>
+            </button>
+            <button id="flag-theme-btn" class="footer-btn" title="Cycle Flag Theme">
+                <span class="btn-icon">🌈</span>
+                <span class="btn-text">FLAGS</span>
+                <span class="btn-status" id="flag-theme-status">Theme</span>
             </button>
         </div>
     </footer>

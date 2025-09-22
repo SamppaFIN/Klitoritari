@@ -27,6 +27,8 @@ class MapEngine {
         this.distortionEffectsVisible = false; // Start with effects hidden by default
         this.lastPlayerPosition = null; // Track last position for path line
         this.pathLine = null; // Leaflet polyline for path visualization
+        this.pathLineEnabled = false; // Toggleable path rendering
+        this.otherPlayerMarkers = new Map(); // playerId -> marker
         this.flagDropDistance = 10; // Drop flag every 10 meters
     }
 
@@ -85,6 +87,15 @@ class MapEngine {
             maxBounds: [[-90, -180], [90, 180]], // Prevent infinite panning
             maxBoundsViscosity: 1.0
         });
+        // Try restore map view from session
+        try {
+            if (window.sessionPersistence) {
+                const restored = window.sessionPersistence.restoreMapView(this.map);
+                if (restored) {
+                    console.log('🗺️ Restored map view from session');
+                }
+            }
+        } catch (_) {}
         if (window.soundManager) { try { window.soundManager.playBling({ frequency: 880, duration: 0.1, type: 'sine' }); } catch (e) {} }
 
         // Add cosmic-styled tile layer
@@ -197,9 +208,14 @@ class MapEngine {
             this.showContextMenu(e.latlng, e.containerPoint);
         });
 
-        // Map move events for investigation updates
+        // Map move events for investigation updates and persistence
         this.map.on('moveend', () => {
             this.updateInvestigationProximity();
+            try { window.sessionPersistence?.saveMapView(this.map); } catch (_) {}
+        });
+
+        this.map.on('zoomend', () => {
+            try { window.sessionPersistence?.saveMapView(this.map); } catch (_) {}
         });
     }
 
@@ -307,6 +323,59 @@ class MapEngine {
                 <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; background: linear-gradient(45deg, ${ringColor}, ${ringColor}); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">${emoji}</div>
             </div>
         `;
+    }
+    
+    /**
+     * Create Leaflet icon from SVG asset using AssetManager
+     */
+    createAssetIcon(assetId, options = {}) {
+        if (!window.assetManager) {
+            console.warn('📦 AssetManager not available, using fallback icon');
+            return this.createFallbackIcon(options);
+        }
+        
+        try {
+            const icon = window.assetManager.createLeafletIcon(assetId, options);
+            if (icon) {
+                return icon;
+            }
+        } catch (error) {
+            console.warn(`📦 Failed to create icon from asset ${assetId}:`, error);
+        }
+        
+        return this.createFallbackIcon(options);
+    }
+    
+    /**
+     * Create fallback icon when AssetManager is not available
+     */
+    createFallbackIcon(options = {}) {
+        const size = options.size || [24, 24];
+        const color = options.color || '#666666';
+        const text = options.text || '?';
+        
+        return L.divIcon({
+            html: `
+                <div style="
+                    width: ${size[0]}px; 
+                    height: ${size[1]}px; 
+                    background: ${color}; 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    color: white; 
+                    font-weight: bold;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                ">
+                    ${text}
+                </div>
+            `,
+            className: 'fallback-icon',
+            iconSize: size,
+            iconAnchor: [size[0]/2, size[1]/2]
+        });
     }
 
     animatePlayerMarker() {
@@ -1469,6 +1538,9 @@ class MapEngine {
             <button class="context-menu-btn" onclick="window.mapEngine.createTestDistortionEffects()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-red);">
                 👻 Test Effects
             </button>
+            <button class="context-menu-btn" onclick="window.mapEngine.togglePathLine()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-blue);">
+                🧭 Toggle Path Line
+            </button>
             <button class="context-menu-btn" onclick="window.mapEngine.clearPathLine()" style="width: 100%; margin-bottom: 5px; background: var(--cosmic-orange);">
                 🗑️ Clear Path
             </button>
@@ -1534,7 +1606,7 @@ class MapEngine {
         // Fail-safe: snap marker immediately so the user sees movement
         try {
             this.updatePlayerPosition({ lat, lng, accuracy: 1, timestamp: Date.now() });
-            if (window.gruesomeNotifications) {
+            if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
                 window.gruesomeNotifications.showNotification({
                     type: 'info',
                     title: 'Moving...',
@@ -1570,6 +1642,14 @@ class MapEngine {
         
         // Calculate movement parameters
         const totalDistance = this.calculateDistance(startPos.lat, startPos.lng, endPos.lat, endPos.lng);
+        if (!isFinite(totalDistance) || isNaN(totalDistance)) {
+            console.warn('🎮 Movement distance invalid, aborting simulation');
+            return;
+        }
+        if (totalDistance === 0) {
+            console.log('🎮 Already at destination');
+            return;
+        }
         const steps = Math.max(10, Math.floor(totalDistance / 5)); // 5m per step
         const stepDuration = 100; // 100ms per step
         
@@ -1893,7 +1973,7 @@ class MapEngine {
             console.log('🇫🇮 Flag theme cycled to:', currentTheme);
             
             // Show notification of theme change
-            if (window.gruesomeNotifications) {
+            if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
                 window.gruesomeNotifications.showNotification({
                     type: 'info',
                     title: 'Flag Theme Changed',
@@ -1913,7 +1993,7 @@ class MapEngine {
         }
         console.log(`🇫🇮 Dropping flag at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         this.finnishFlagLayer.addFlagPin(lat, lng);
-        if (window.gruesomeNotifications) {
+        if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
             window.gruesomeNotifications.showNotification({
                 type: 'success',
                 title: 'Flag Dropped',
@@ -2197,7 +2277,7 @@ class MapEngine {
     
     // Update path line between current and last position
     updatePathLine(position) {
-        if (!this.map) return;
+        if (!this.map || !this.pathLineEnabled) return;
         
         if (this.lastPlayerPosition) {
             // Create or update path line
@@ -2206,6 +2286,11 @@ class MapEngine {
                 const currentPath = this.pathLine.getLatLngs();
                 currentPath.push([position.lat, position.lng]);
                 this.pathLine.setLatLngs(currentPath);
+                // Persist path points
+                try {
+                    const pts = this.pathLine.getLatLngs().map(ll => [ll.lat, ll.lng]);
+                    window.sessionPersistence?.savePath(pts);
+                } catch (_) {}
             } else {
                 // Create new path line
                 this.pathLine = L.polyline([
@@ -2217,6 +2302,11 @@ class MapEngine {
                     opacity: 0.8,
                     dashArray: '5, 10'
                 }).addTo(this.map);
+                // Seed persistence
+                try {
+                    const pts = this.pathLine.getLatLngs().map(ll => [ll.lat, ll.lng]);
+                    window.sessionPersistence?.savePath(pts);
+                } catch (_) {}
             }
         }
     }
@@ -2228,6 +2318,80 @@ class MapEngine {
             this.pathLine = null;
             console.log('🗺️ Path line cleared');
         }
+    }
+    
+    // Multiplayer methods
+    addOtherPlayerMarker(playerId, playerData) {
+        if (!this.map || !playerData.position) return;
+        
+        const { position, markerConfig } = playerData;
+        const marker = L.marker([position.lat, position.lng], {
+            icon: this.createOtherPlayerIcon(markerConfig, playerId)
+        }).addTo(this.map);
+        
+        // Store reference for cleanup
+        this.otherPlayerMarkers.set(playerId, marker);
+        
+        // Add popup with player info
+        marker.bindPopup(`
+            <div class="other-player-popup">
+                <h4>${markerConfig.emoji || '👤'} Player</h4>
+                <p>Steps: ${playerData.steps || 0}</p>
+                <p>Distance: ${Math.round(this.calculateDistance(this.playerPosition, position))}m</p>
+            </div>
+        `);
+        
+        console.log('🌐 Other player marker added:', playerId);
+    }
+    
+    removeOtherPlayerMarker(playerId) {
+        const marker = this.otherPlayerMarkers.get(playerId);
+        if (marker) {
+            this.map.removeLayer(marker);
+            this.otherPlayerMarkers.delete(playerId);
+            console.log('🌐 Other player marker removed:', playerId);
+        }
+    }
+    
+    createOtherPlayerIcon(markerConfig, playerId) {
+        const color = markerConfig.color || '#666666';
+        const emoji = markerConfig.emoji || '👤';
+        
+        return L.divIcon({
+            html: `
+                <div class="other-player-marker" style="color: ${color};">
+                    <div class="player-emoji">${emoji}</div>
+                    <div class="player-pulse"></div>
+                </div>
+            `,
+            className: 'other-player-icon',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+    }
+    
+    calculateDistance(pos1, pos2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (pos2.lat - pos1.lat) * Math.PI / 180;
+        const dLng = (pos2.lng - pos1.lng) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(pos1.lat * Math.PI / 180) * Math.cos(pos2.lat * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // Toggle path line on/off
+    setPathLineEnabled(enabled) {
+        this.pathLineEnabled = !!enabled;
+        if (!this.pathLineEnabled) {
+            this.clearPathLine();
+        }
+        console.log('🗺️ Path line enabled:', this.pathLineEnabled);
+    }
+
+    togglePathLine() {
+        this.setPathLineEnabled(!this.pathLineEnabled);
     }
     
 }

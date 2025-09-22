@@ -234,6 +234,16 @@ class StepCurrencySystem {
             } catch (e) {}
         }
         
+        // Step milestone effects
+        if (this.totalSteps % 50 === 0 && this.totalSteps > 0) {
+            if (window.discordEffects) {
+                try { 
+                    window.discordEffects.triggerGlowPulse(window.innerWidth/2, window.innerHeight/2, '#ffaa00', 100);
+                    window.discordEffects.triggerNotificationPop(`${this.totalSteps} Steps!`, '#ffaa00');
+                } catch (e) {}
+            }
+        }
+        
         this.checkMilestones();
         this.saveSteps();
     }
@@ -291,7 +301,7 @@ class StepCurrencySystem {
                     console.warn('🇫🇮 Map engine or flag layer not available');
                 }
                 
-                if (window.gruesomeNotifications) {
+                if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
                     window.gruesomeNotifications.showNotification({
                         type: 'success',
                         title: 'Path Marked!',
@@ -315,7 +325,7 @@ class StepCurrencySystem {
         if (window.soundManager) window.soundManager.playEerieHum({ duration: 1.8 });
         
         // Show notification
-        if (window.gruesomeNotifications) {
+        if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
             window.gruesomeNotifications.showNotification({
                 type: 'celebration',
                 title: 'Cosmic Steps!',

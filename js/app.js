@@ -12,6 +12,7 @@ class EldritchSanctuaryApp {
         this.isMobile = this.detectMobile();
         this.panelManager = null;
         this.sound = null;
+        this.assetManager = null;
         this.systems = {
             cosmicEffects: null,
             geolocation: null,
@@ -385,9 +386,13 @@ class EldritchSanctuaryApp {
         this.showParticleLoadingScreen();
         
         try {
+            // Initialize sound and assets early so hooks are available to systems
+            this.initSoundManager();
+            await this.initAssetManager();
+
             // Initialize cosmic effects first
             await this.initCosmicEffects();
-            
+
             // Initialize core systems
             await this.initCoreSystems();
             
@@ -399,13 +404,17 @@ class EldritchSanctuaryApp {
 
         // Initialize docked/draggable panels (non-blocking)
         this.initDockedPanels();
-
-        // Initialize lightweight sound manager (no MP3s)
-        this.initSoundManager();
+        
         if (this.sound) {
             // Start subtle ambience pulse during exploration
             try { this.sound.startAmbiencePulse({ intervalMs: 14000 }); } catch (e) {}
         }
+        
+        // Initialize multiplayer manager
+        this.initMultiplayerManager();
+        
+        // Set up multiplayer status updates
+        this.setupMultiplayerStatusUpdates();
         
         // Load initial data
         await this.loadInitialData();
@@ -424,6 +433,43 @@ class EldritchSanctuaryApp {
             this.hideParticleLoadingScreen();
             this.showError('Failed to initialize the cosmic map. Please refresh the page.');
         }
+    }
+
+    // Initialize multiplayer manager
+    initMultiplayerManager() {
+        if (window.MultiplayerManager) {
+            window.multiplayerManager = new MultiplayerManager();
+            window.multiplayerManager.initialize().catch(error => {
+                console.warn('🌐 Multiplayer initialization failed, continuing in single-player mode:', error);
+            });
+            console.log('🌐 Multiplayer manager initialized');
+        } else {
+            console.warn('🌐 MultiplayerManager not available');
+        }
+    }
+    
+    // Set up multiplayer status updates
+    setupMultiplayerStatusUpdates() {
+        const statusElement = document.getElementById('multiplayerStatus');
+        const statusText = document.getElementById('multiplayerStatusText');
+        
+        if (!statusElement || !statusText) return;
+        
+        // Update status every 2 seconds
+        setInterval(() => {
+            if (window.multiplayerManager) {
+                const isConnected = window.multiplayerManager.isConnected;
+                const nearbyCount = window.multiplayerManager.getNearbyPlayersCount();
+                
+                statusElement.className = `multiplayer-status ${isConnected ? 'connected' : 'disconnected'}`;
+                statusText.textContent = isConnected ? 
+                    `Connected (${nearbyCount} nearby)` : 
+                    'Disconnected';
+            } else {
+                statusElement.className = 'multiplayer-status disconnected';
+                statusText.textContent = 'Unavailable';
+            }
+        }, 2000);
     }
 
     // Initialize a minimal docked/draggable panel manager
@@ -447,6 +493,18 @@ class EldritchSanctuaryApp {
             console.log('🔊 Sound manager initialized');
         } catch (e) {
             console.warn('🔊 Failed to initialize sound manager', e);
+        }
+    }
+    
+    async initAssetManager() {
+        if (this.assetManager) return;
+        try {
+            this.assetManager = new AssetManager();
+            window.assetManager = this.assetManager;
+            await this.assetManager.initialize();
+            console.log('📦 Asset manager initialized');
+        } catch (e) {
+            console.warn('📦 Failed to initialize asset manager', e);
         }
     }
 
@@ -578,7 +636,7 @@ class EldritchSanctuaryApp {
     
     requestLocationWithFallback() {
         const locateBtn = document.getElementById('locate-me-btn');
-        const locateText = locateBtn?.querySelector('.locate-text');
+        const locateText = locateBtn?.querySelector('.btn-text');
         
         // Set loading state
         if (locateBtn) {
@@ -664,14 +722,18 @@ class EldritchSanctuaryApp {
                 console.log(`📍 Speed: ${speed ? speed.toFixed(1) + 'm/s' : 'N/A'}`);
                 
                 // Update player position
-                if (this.systems.mapEngine) {
-                    this.systems.mapEngine.updatePlayerPosition({
-                        lat: lat,
-                        lng: lng,
-                        accuracy: accuracy,
-                        timestamp: Date.now()
-                    });
-                }
+        if (this.systems.mapEngine) {
+            this.systems.mapEngine.updatePlayerPosition({
+                lat: lat,
+                lng: lng,
+                accuracy: accuracy,
+                timestamp: Date.now()
+            });
+            try {
+                // Also re-center map view for immediate feedback
+                this.systems.mapEngine.map.setView([lat, lng], Math.max(this.systems.mapEngine.map.getZoom(), 16), { animate: true, duration: 0.8 });
+            } catch (_) {}
+        }
                 
                 // Note: Geolocation system handles position updates internally
                 // No need to manually update it here
@@ -740,7 +802,7 @@ class EldritchSanctuaryApp {
     
     resetLocateButton() {
         const locateBtn = document.getElementById('locate-me-btn');
-        const locateText = locateBtn?.querySelector('.locate-text');
+        const locateText = locateBtn?.querySelector('.btn-text');
         
         if (locateBtn) {
             locateBtn.classList.remove('loading');
@@ -908,6 +970,26 @@ class EldritchSanctuaryApp {
                 <button id="test-movement" class="debug-btn">Test Movement</button>
                 <button id="add-50-steps" class="debug-btn">Add 50 Steps</button>
                 <button id="test-dice-combat" class="debug-btn">Test Dice Combat</button>
+                <button id="test-dice-game" class="debug-btn">Test Dice Game</button>
+                <button id="test-trivia" class="debug-btn">Test Trivia</button>
+                <button id="test-tetris" class="debug-btn">Test Tetris</button>
+                <button id="test-moral-choice" class="debug-btn">Test Moral Choice</button>
+                <button id="test-random-moral" class="debug-btn">Random Moral</button>
+                <button id="test-screen-shake" class="debug-btn">Screen Shake</button>
+                <button id="test-particle-burst" class="debug-btn">Particle Burst</button>
+                <button id="test-cosmic-rift" class="debug-btn">Cosmic Rift</button>
+                <div style="margin-top:10px; display:flex; gap:8px;">
+                    <button id="steps-minus" class="debug-btn" style="flex:1;">− Steps</button>
+                    <button id="steps-plus" class="debug-btn" style="flex:1;">+ Steps</button>
+                </div>
+                <div id="steps-readout" style="margin-top:6px; font-size:12px; opacity:0.8;"></div>
+                
+                <h4 style="margin-top:20px; margin-bottom:10px;">🔬 Device Testing</h4>
+                <button id="run-device-tests" class="debug-btn" style="width:100%; margin-bottom:8px;">Run All Tests</button>
+                <button id="run-core-tests" class="debug-btn" style="width:100%; margin-bottom:8px;">Core Tests Only</button>
+                <button id="run-performance-tests" class="debug-btn" style="width:100%; margin-bottom:8px;">Performance Tests</button>
+                <button id="export-test-results" class="debug-btn" style="width:100%; margin-bottom:8px;">Export Results</button>
+                <div id="test-results" style="margin-top:10px; font-size:11px; opacity:0.8; max-height:200px; overflow-y:auto;"></div>
             `;
             sidePanel.appendChild(debugSection);
             
@@ -926,6 +1008,130 @@ class EldritchSanctuaryApp {
             
             document.getElementById('test-dice-combat').addEventListener('click', () => {
                 this.testDiceCombat();
+            });
+            
+            document.getElementById('test-dice-game').addEventListener('click', () => {
+                this.testDiceGame();
+            });
+            
+            document.getElementById('test-trivia').addEventListener('click', () => {
+                this.testTrivia();
+            });
+            
+            document.getElementById('test-tetris').addEventListener('click', () => {
+                this.testTetris();
+            });
+            
+            document.getElementById('test-moral-choice').addEventListener('click', () => {
+                this.testMoralChoice();
+            });
+            
+            document.getElementById('test-random-moral').addEventListener('click', () => {
+                this.testRandomMoralChoice();
+            });
+            
+            document.getElementById('test-screen-shake').addEventListener('click', () => {
+                this.testScreenShake();
+            });
+            
+            document.getElementById('test-particle-burst').addEventListener('click', () => {
+                this.testParticleBurst();
+            });
+            
+            document.getElementById('test-cosmic-rift').addEventListener('click', () => {
+                this.testCosmicRift();
+            });
+            
+            // Device testing event listeners
+            document.getElementById('run-device-tests').addEventListener('click', () => {
+                this.runDeviceTests();
+            });
+            
+            document.getElementById('run-core-tests').addEventListener('click', () => {
+                this.runCoreTests();
+            });
+            
+            document.getElementById('run-performance-tests').addEventListener('click', () => {
+                this.runPerformanceTests();
+            });
+            
+            document.getElementById('export-test-results').addEventListener('click', () => {
+                this.exportTestResults();
+            });
+            
+            // Multiplayer test buttons
+            const testMultiplayerBtn = document.createElement('button');
+            testMultiplayerBtn.textContent = 'Test Multiplayer';
+            testMultiplayerBtn.className = 'sacred-button';
+            testMultiplayerBtn.onclick = () => this.testMultiplayer();
+            sidePanel.appendChild(testMultiplayerBtn);
+            
+            const simulatePlayerBtn = document.createElement('button');
+            simulatePlayerBtn.textContent = 'Simulate Other Player';
+            simulatePlayerBtn.className = 'sacred-button';
+            simulatePlayerBtn.onclick = () => this.simulateOtherPlayer();
+            sidePanel.appendChild(simulatePlayerBtn);
+
+            // Hold-to-repeat with acceleration for steps +/-
+            const readout = sidePanel.querySelector('#steps-readout');
+            const updateReadout = () => {
+                try {
+                    const stats = this.systems.stepCurrency?.getStepStats?.();
+                    if (stats && readout) {
+                        readout.textContent = `Total: ${stats.totalSteps} | Session: ${stats.sessionSteps}`;
+                    }
+                } catch (_) {}
+            };
+            updateReadout();
+
+            const makeHoldRepeater = (el, onTick) => {
+                if (!el) return;
+                let intervalId = null;
+                let timeoutId = null;
+                let tickIntervalMs = 220; // start slower
+                const minIntervalMs = 40;  // max speed
+                const accelStep = 30;      // accelerate by this many ms per step
+
+                const tick = () => {
+                    onTick();
+                    updateReadout();
+                    tickIntervalMs = Math.max(minIntervalMs, tickIntervalMs - accelStep);
+                    intervalId = setTimeout(tick, tickIntervalMs);
+                };
+
+                const start = () => {
+                    clear();
+                    tickIntervalMs = 220;
+                    timeoutId = setTimeout(tick, 120); // slight delay before repeating
+                    onTick();
+                    updateReadout();
+                };
+
+                const clear = () => {
+                    if (timeoutId) { clearTimeout(timeoutId); timeoutId = null; }
+                    if (intervalId) { clearTimeout(intervalId); intervalId = null; }
+                };
+
+                el.addEventListener('mousedown', start);
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); start(); }, { passive: false });
+                ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => {
+                    el.addEventListener(evt, clear);
+                });
+            };
+
+            const minusBtn = sidePanel.querySelector('#steps-minus');
+            const plusBtn = sidePanel.querySelector('#steps-plus');
+
+            makeHoldRepeater(minusBtn, () => {
+                if (this.systems.stepCurrency) {
+                    this.systems.stepCurrency.subtractSteps(1);
+                }
+            });
+
+            makeHoldRepeater(plusBtn, () => {
+                if (this.systems.stepCurrency) {
+                    this.systems.stepCurrency.addManualStep();
+                }
             });
         }
     }
@@ -997,6 +1203,294 @@ class EldritchSanctuaryApp {
             console.error('Simple dice combat system not available!');
         }
     }
+    
+    testDiceGame() {
+        console.log('🧪 Testing dice game...');
+        if (window.microgamesManager) {
+            window.microgamesManager.startGame('dice');
+        } else {
+            console.warn('🧪 Microgames manager not available');
+        }
+    }
+    
+    testTrivia() {
+        console.log('🧪 Testing trivia...');
+        if (window.microgamesManager) {
+            window.microgamesManager.startGame('trivia');
+        } else {
+            console.warn('🧪 Microgames manager not available');
+        }
+    }
+    
+    testTetris() {
+        console.log('🧪 Testing tetris...');
+        if (window.microgamesManager) {
+            window.microgamesManager.startGame('tetris');
+        } else {
+            console.warn('🧪 Microgames manager not available');
+        }
+    }
+    
+    testMoralChoice() {
+        console.log('🧪 Testing moral choice...');
+        if (window.moralChoiceSystem) {
+            window.moralChoiceSystem.showMoralChoice({
+                title: "Test Cosmic Choice",
+                description: "This is a test of the moral choice system. Choose wisely...",
+                choices: [
+                    {
+                        text: "Embrace Chaos",
+                        description: "Accept the cosmic chaos",
+                        consequences: "Cosmic +20, Ethical -10",
+                        alignment: { cosmic: 20, ethical: -10 },
+                        color: "#ff00ff",
+                        color2: "#cc00cc",
+                        borderColor: "#ff0080"
+                    },
+                    {
+                        text: "Seek Order",
+                        description: "Strive for cosmic balance",
+                        consequences: "Cosmic -10, Ethical +15",
+                        alignment: { cosmic: -10, ethical: 15 },
+                        color: "#00ff00",
+                        color2: "#00cc00",
+                        borderColor: "#ffffff"
+                    },
+                    {
+                        text: "Remain Neutral",
+                        description: "Avoid taking sides",
+                        consequences: "No change",
+                        alignment: {},
+                        color: "#0080ff",
+                        color2: "#0066cc",
+                        borderColor: "#00ffff"
+                    }
+                ],
+                onChoice: (index, choice, alignment) => {
+                    console.log('⚖️ Test choice completed:', choice.text);
+                    if (window.gruesomeNotifications) {
+                        window.gruesomeNotifications.show('⚖️ Test Choice', `You chose: ${choice.text}`, 'info');
+                    }
+                }
+            });
+        } else {
+            console.warn('🧪 Moral choice system not available');
+        }
+    }
+    
+    testRandomMoralChoice() {
+        console.log('🧪 Testing random moral choice...');
+        if (window.moralChoiceSystem) {
+            window.moralChoiceSystem.triggerRandomChoice();
+        } else {
+            console.warn('🧪 Moral choice system not available');
+        }
+    }
+    
+    testScreenShake() {
+        console.log('🧪 Testing screen shake...');
+        if (window.discordEffects) {
+            window.discordEffects.triggerScreenShake(15, 800);
+        } else {
+            console.warn('🧪 Discord effects system not available');
+        }
+    }
+    
+    testParticleBurst() {
+        console.log('🧪 Testing particle burst...');
+        if (window.discordEffects) {
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            window.discordEffects.triggerParticleBurst(x, y, 30, '#ff00ff');
+        } else {
+            console.warn('🧪 Discord effects system not available');
+        }
+    }
+    
+    testCosmicRift() {
+        console.log('🧪 Testing cosmic rift...');
+        if (window.discordEffects) {
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            window.discordEffects.triggerCosmicRift(x, y, 300, 200);
+        } else {
+            console.warn('🧪 Discord effects system not available');
+        }
+    }
+    
+    // Device Testing Methods
+    async runDeviceTests() {
+        console.log('🧪 Starting comprehensive device testing...');
+        this.updateTestResults('Running all tests...');
+        
+        if (!window.DeviceTestingSuite) {
+            this.updateTestResults('❌ Device testing suite not available');
+            return;
+        }
+        
+        try {
+            const testSuite = new DeviceTestingSuite();
+            await testSuite.runAllTests();
+            this.displayTestResults(testSuite.testResults);
+        } catch (error) {
+            console.error('🧪 Device testing failed:', error);
+            this.updateTestResults(`❌ Testing failed: ${error.message}`);
+        }
+    }
+    
+    async runCoreTests() {
+        console.log('🧪 Running core tests only...');
+        this.updateTestResults('Running core tests...');
+        
+        if (!window.DeviceTestingSuite) {
+            this.updateTestResults('❌ Device testing suite not available');
+            return;
+        }
+        
+        try {
+            const testSuite = new DeviceTestingSuite();
+            await testSuite.runCoreTests();
+            this.displayTestResults(testSuite.testResults);
+        } catch (error) {
+            console.error('🧪 Core testing failed:', error);
+            this.updateTestResults(`❌ Core testing failed: ${error.message}`);
+        }
+    }
+    
+    async runPerformanceTests() {
+        console.log('🧪 Running performance tests...');
+        this.updateTestResults('Running performance tests...');
+        
+        if (!window.DeviceTestingSuite) {
+            this.updateTestResults('❌ Device testing suite not available');
+            return;
+        }
+        
+        try {
+            const testSuite = new DeviceTestingSuite();
+            await testSuite.runPerformanceTests();
+            this.displayTestResults(testSuite.testResults);
+        } catch (error) {
+            console.error('🧪 Performance testing failed:', error);
+            this.updateTestResults(`❌ Performance testing failed: ${error.message}`);
+        }
+    }
+    
+    exportTestResults() {
+        console.log('🧪 Exporting test results...');
+        
+        if (!window.deviceTestReport) {
+            this.updateTestResults('❌ No test results to export');
+            return;
+        }
+        
+        try {
+            const testSuite = new DeviceTestingSuite();
+            testSuite.exportResults();
+            this.updateTestResults('✅ Test results exported');
+        } catch (error) {
+            console.error('🧪 Export failed:', error);
+            this.updateTestResults(`❌ Export failed: ${error.message}`);
+        }
+    }
+    
+    updateTestResults(message) {
+        const resultsDiv = document.getElementById('test-results');
+        if (resultsDiv) {
+            resultsDiv.innerHTML = `<div style="color: #ffd700;">${message}</div>`;
+        }
+    }
+    
+    displayTestResults(testResults) {
+        const resultsDiv = document.getElementById('test-results');
+        if (!resultsDiv) return;
+        
+        const results = Array.from(testResults.entries());
+        const passed = results.filter(([_, r]) => r.status === 'passed').length;
+        const failed = results.filter(([_, r]) => r.status === 'failed').length;
+        const warnings = results.filter(([_, r]) => r.status === 'warning').length;
+        const skipped = results.filter(([_, r]) => r.status === 'skipped').length;
+        
+        let html = `
+            <div style="margin-bottom: 8px; font-weight: bold;">
+                📊 Results: ✅ ${passed} | ❌ ${failed} | ⚠️ ${warnings} | ⏭️ ${skipped}
+            </div>
+        `;
+        
+        results.forEach(([testName, result]) => {
+            const statusIcon = {
+                'passed': '✅',
+                'failed': '❌',
+                'warning': '⚠️',
+                'skipped': '⏭️'
+            }[result.status] || '❓';
+            
+            const duration = result.duration ? ` (${result.duration}ms)` : '';
+            html += `<div style="margin: 2px 0; font-size: 10px;">
+                ${statusIcon} ${testName}${duration}
+            </div>`;
+        });
+        
+        resultsDiv.innerHTML = html;
+    }
+    
+    testMultiplayer() {
+        console.log('🧪 Testing multiplayer connection...');
+        if (window.multiplayerManager) {
+            console.log('🌐 Multiplayer status:', {
+                connected: window.multiplayerManager.isConnected,
+                players: window.multiplayerManager.players.size,
+                nearby: window.multiplayerManager.getNearbyPlayersCount()
+            });
+            
+            if (window.gruesomeNotifications) {
+                window.gruesomeNotifications.showNotification(
+                    `Multiplayer: ${window.multiplayerManager.isConnected ? 'Connected' : 'Disconnected'} (${window.multiplayerManager.players.size} players)`,
+                    window.multiplayerManager.isConnected ? 'success' : 'warning'
+                );
+            }
+        } else {
+            console.warn('🧪 Multiplayer manager not available');
+        }
+    }
+    
+    simulateOtherPlayer() {
+        console.log('🧪 Simulating other player...');
+        if (window.multiplayerManager && window.mapEngine) {
+            // Create a simulated player at a random nearby location
+            const playerPos = window.mapEngine.playerPosition;
+            if (playerPos) {
+                const offsetLat = (Math.random() - 0.5) * 0.01; // ~500m offset
+                const offsetLng = (Math.random() - 0.5) * 0.01;
+                
+                const simulatedPlayerData = {
+                    position: {
+                        lat: playerPos.lat + offsetLat,
+                        lng: playerPos.lng + offsetLng
+                    },
+                    markerConfig: {
+                        emoji: ['👤', '🧙', '🧝', '🧚', '🧛'][Math.floor(Math.random() * 5)],
+                        color: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'][Math.floor(Math.random() * 5)]
+                    },
+                    steps: Math.floor(Math.random() * 1000),
+                    timestamp: Date.now()
+                };
+                
+                const simulatedPlayerId = 'sim_' + Date.now();
+                window.multiplayerManager.addPlayer(simulatedPlayerId, simulatedPlayerData);
+                
+                console.log('🧪 Simulated player added:', simulatedPlayerId);
+                
+                // Remove after 10 seconds
+                setTimeout(() => {
+                    window.multiplayerManager.removePlayer(simulatedPlayerId);
+                    console.log('🧪 Simulated player removed');
+                }, 10000);
+            }
+        } else {
+            console.warn('🧪 Multiplayer manager or map engine not available');
+        }
+    }
 
     showParticleLoadingScreen() {
         console.log('🌟 Showing particle loading screen...');
@@ -1020,7 +1514,7 @@ class EldritchSanctuaryApp {
         const locateBtn = document.getElementById('locate-me-btn');
         if (locateBtn) {
             locateBtn.addEventListener('click', () => {
-                this.cycleLocationMode();
+                this.locateMe();
             });
         }
         
@@ -1046,6 +1540,16 @@ class EldritchSanctuaryApp {
         
         // Initialize control panel
         this.initializeControlPanel();
+
+        // Wire footer flag theme button
+        const flagBtn = document.getElementById('flag-theme-btn');
+        if (flagBtn) {
+            flagBtn.addEventListener('click', () => {
+                if (window.mapEngine && typeof window.mapEngine.cycleFlagTheme === 'function') {
+                    window.mapEngine.cycleFlagTheme();
+                }
+            });
+        }
 
         // Enforce step gating for starting investigations
         this.enforceStepGating();
@@ -1406,8 +1910,11 @@ class EldritchSanctuaryApp {
     updateStepDetectionMode() {
         // Update step detection mode based on GPS tracking status
         if (window.stepCurrencySystem && this.systems.geolocation) {
-            const isGPSTracking = this.systems.geolocation.isDeviceGPSEnabled();
-            window.stepCurrencySystem.setStepDetectionMode(isGPSTracking);
+            const geo = this.systems.geolocation;
+            const isGPSTracking = typeof geo.isDeviceGPSEnabled === 'function' ? geo.isDeviceGPSEnabled() : !!geo.deviceGPSEnabled;
+            if (typeof window.stepCurrencySystem.setStepDetectionMode === 'function') {
+                window.stepCurrencySystem.setStepDetectionMode(isGPSTracking);
+            }
         }
     }
     
@@ -2210,6 +2717,21 @@ class EldritchSanctuaryApp {
             }
         };
 
+        // Restore persisted map/quest state shortly after init
+        setTimeout(() => {
+            try {
+                // Restore path polyline if toggle is enabled later by user
+                const savedPath = window.sessionPersistence?.restorePath?.();
+                if (savedPath && this.systems.mapEngine) {
+                    // Defer drawing until user enables pathLine; we'll seed last position
+                    const last = savedPath[savedPath.length - 1];
+                    if (last) {
+                        this.systems.mapEngine.lastPlayerPosition = { lat: last[0], lng: last[1] };
+                    }
+                }
+            } catch (_) {}
+        }, 1500);
+
         this.systems.baseSystem.onBaseDeleted = () => {
             this.systems.mapEngine.removePlayerBaseMarker();
             this.showNotification('🏗️ Base deleted. You can now establish a new one.', 'info');
@@ -2656,6 +3178,43 @@ class SoundManager {
 		const source = this.audioCtx.createBufferSource();
 		source.buffer = buffer;
 		return source;
+	}
+	
+	/**
+	 * Play audio asset from AssetManager
+	 */
+	playAsset(assetId, options = {}) {
+		if (!window.assetManager) {
+			console.warn('📦 AssetManager not available, using fallback sound');
+			this.playBling();
+			return;
+		}
+		
+		try {
+			const source = window.assetManager.playAudio(assetId, {
+				volume: options.volume || 1.0
+			});
+			
+			if (source) {
+				// Add fade out effect
+				if (options.fadeOut) {
+					const gainNode = this.audioCtx.createGain();
+					source.connect(gainNode);
+					gainNode.connect(this.masterGain);
+					
+					const fadeTime = options.fadeOut || 0.5;
+					gainNode.gain.setValueAtTime(1, this.audioCtx.currentTime);
+					gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + fadeTime);
+					
+					setTimeout(() => {
+						try { source.stop(); } catch (e) {}
+					}, fadeTime * 1000);
+				}
+			}
+		} catch (error) {
+			console.warn(`📦 Failed to play audio asset ${assetId}:`, error);
+			this.playBling(); // Fallback to basic sound
+		}
 	}
 }
 

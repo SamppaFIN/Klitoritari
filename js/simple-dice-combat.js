@@ -95,6 +95,11 @@ class SimpleDiceCombat {
             try { window.soundManager.playEerieHum({ duration: 2.0 }); } catch (e) {}
         }
         
+        // Visual effects
+        if (window.discordEffects) {
+            try { window.discordEffects.triggerScreenShake(8, 500); } catch (e) {}
+        }
+        
         // Start the dice rolling animation
         this.animateDiceRoll();
     }
@@ -219,6 +224,14 @@ class SimpleDiceCombat {
             try { window.soundManager.playBling({ frequency: 1700, duration: 0.22, type: 'triangle' }); } catch (e) {}
         }
         
+        // Victory effects
+        if (window.discordEffects) {
+            try { 
+                window.discordEffects.triggerParticleBurst(window.innerWidth/2, window.innerHeight/2, 25, '#00ff00');
+                window.discordEffects.triggerGlowPulse(window.innerWidth/2, window.innerHeight/2, '#00ff00', 150);
+            } catch (e) {}
+        }
+        
         // Call win callback
         if (this.combatData.onWin) {
             this.combatData.onWin(this.combatData.enemy);
@@ -238,6 +251,14 @@ class SimpleDiceCombat {
         this.addLogEntry('💀 Defeat! Your opponent has bested you!', 'danger');
         if (window.soundManager) {
             try { window.soundManager.playTerrifyingBling(); } catch (e) {}
+        }
+        
+        // Defeat effects
+        if (window.discordEffects) {
+            try { 
+                window.discordEffects.triggerScreenFlash('#ff0000', 300);
+                window.discordEffects.triggerParticleBurst(window.innerWidth/2, window.innerHeight/2, 20, '#ff0000');
+            } catch (e) {}
         }
         
         // Call lose callback
