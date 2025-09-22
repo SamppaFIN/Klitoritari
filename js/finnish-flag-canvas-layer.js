@@ -135,6 +135,9 @@ class FinnishFlagCanvasLayer {
         this.render();
         // Evaluate capture around the new pin
         this.evaluateCapture(lat, lng);
+        if (window.soundManager) {
+            try { window.soundManager.playBling({ frequency: 980, duration: 0.1, type: 'sine' }); } catch (e) {}
+        }
     }
     
     findNearbyFlag(lat, lng, maxDistance = 10) {
@@ -191,6 +194,9 @@ class FinnishFlagCanvasLayer {
                 // Fallback notification
                 console.log('🎉 TERRITORY CAPTURED! Cleared overlapping flags in a', radiusMeters, 'm radius');
                 alert('🎉 Territory Captured!\nCleared overlapping flags in a ' + radiusMeters + 'm radius');
+            }
+            if (window.soundManager) {
+                try { window.soundManager.playEerieHum({ duration: 2.2 }); } catch (e) {}
             }
         }
     }

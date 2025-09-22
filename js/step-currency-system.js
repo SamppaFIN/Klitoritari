@@ -221,6 +221,19 @@ class StepCurrencySystem {
             this.onStepUpdate();
         }
         
+        // Sound feedback
+        if (window.soundManager) {
+            try {
+                if (this.sessionSteps % this.milestones.celebration === 0) {
+                    window.soundManager.playBling({ frequency: 1400, duration: 0.12, type: 'triangle' });
+                } else if (this.sessionSteps % this.milestones.flag === 0) {
+                    window.soundManager.playBling({ frequency: 1100, duration: 0.1, type: 'sine' });
+                } else {
+                    window.soundManager.playBling({ frequency: 740, duration: 0.05, type: 'sine' });
+                }
+            } catch (e) {}
+        }
+        
         this.checkMilestones();
         this.saveSteps();
     }
@@ -299,6 +312,7 @@ class StepCurrencySystem {
         
         // Show celebration animation
         this.showStepCelebration();
+        if (window.soundManager) window.soundManager.playEerieHum({ duration: 1.8 });
         
         // Show notification
         if (window.gruesomeNotifications) {
@@ -352,11 +366,13 @@ class StepCurrencySystem {
     triggerQuestUnlock() {
         console.log('🎭 500 steps reached - quest unlocked!');
         // Implementation for quest unlocking
+        if (window.soundManager) window.soundManager.playBling({ frequency: 1600, duration: 0.2, type: 'triangle' });
     }
     
     triggerAreaUnlock() {
         console.log('🌍 1000 steps reached - new area unlocked!');
         // Implementation for area unlocking
+        if (window.soundManager) window.soundManager.playTerrifyingBling();
     }
     
     createStepCounter() {
