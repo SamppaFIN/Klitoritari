@@ -871,6 +871,7 @@ class EldritchSanctuaryApp {
                 <button id="test-flag-creation" class="debug-btn">Test Flag Creation</button>
                 <button id="test-movement" class="debug-btn">Test Movement</button>
                 <button id="add-50-steps" class="debug-btn">Add 50 Steps</button>
+                <button id="test-dice-combat" class="debug-btn">Test Dice Combat</button>
             `;
             sidePanel.appendChild(debugSection);
             
@@ -885,6 +886,10 @@ class EldritchSanctuaryApp {
             
             document.getElementById('add-50-steps').addEventListener('click', () => {
                 this.addTestSteps();
+            });
+            
+            document.getElementById('test-dice-combat').addEventListener('click', () => {
+                this.testDiceCombat();
             });
         }
     }
@@ -923,6 +928,37 @@ class EldritchSanctuaryApp {
             }
         } else {
             console.warn('🧪 Step currency system not available');
+        }
+    }
+    
+    testDiceCombat() {
+        console.log('🧪 Testing dice combat...');
+        if (window.simpleDiceCombat) {
+            // Create a test enemy
+            const testEnemy = {
+                name: 'Test Shadow Stalker',
+                type: 'shadowStalker',
+                id: 'test_enemy'
+            };
+            
+            // Start combat with win/lose callbacks
+            window.simpleDiceCombat.startCombat(
+                testEnemy,
+                (enemy) => {
+                    console.log('🎉 Test combat victory!', enemy);
+                    if (window.gruesomeNotifications) {
+                        window.gruesomeNotifications.show('🎉 Test Victory!', 'You defeated the test enemy!');
+                    }
+                },
+                (enemy) => {
+                    console.log('💀 Test combat defeat!', enemy);
+                    if (window.gruesomeNotifications) {
+                        window.gruesomeNotifications.show('💀 Test Defeat!', 'The test enemy defeated you!');
+                    }
+                }
+            );
+        } else {
+            console.error('Simple dice combat system not available!');
         }
     }
 

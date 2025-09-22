@@ -2276,101 +2276,108 @@ class EncounterSystem {
         }
     }
 
-    // Enhanced combat system with dice
+    // Simplified dice combat system
     startDiceCombat(monster) {
         const monsterData = this.stories.monster[monster.type] || this.stories.monster.shadowStalker;
         
-        this.showModal();
-        this.encounterType = 'battle';
+        console.log('🎲 Starting simplified dice combat with:', monsterData.name);
         
-        const modal = document.getElementById('encounter-modal');
-        modal.innerHTML = `
-            <div class="encounter-content">
-                <div class="encounter-header">
-                    <h3>⚔️ ${monsterData.name}</h3>
-                    <button class="close-btn" onclick="window.encounterSystem.hideModal()">×</button>
-                </div>
-                <div class="encounter-dialog">
-                    <div class="story-text">${monsterData.combatIntro}</div>
-                </div>
-                <div class="battle-interface">
-                    <div class="battle-stats">
-                        <div class="player-stats">
-                            <h4>Your Stats</h4>
-                            <div class="stat-bar">
-                                <span class="stat-label">Health:</span>
-                                <div class="health-bar">
-                                    <div class="health-fill" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
-                                </div>
-                                <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
-                            </div>
-                            <div class="stat-bar">
-                                <span class="stat-label">Sanity:</span>
-                                <div class="sanity-bar">
-                                    <div class="sanity-fill" style="width: ${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%"></div>
-                                </div>
-                                <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Attack:</span>
-                                <span class="stat-value">${this.playerStats.attack}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Defense:</span>
-                                <span class="stat-value">${this.playerStats.defense}</span>
-                            </div>
-                        </div>
-                        <div class="monster-stats">
-                            <h4>${monsterData.name}</h4>
-                            <div class="stat-bar">
-                                <span class="stat-label">Health:</span>
-                                <div class="health-bar">
-                                    <div class="monster-health-fill" style="width: ${(monster.health / monster.maxHealth) * 100}%"></div>
-                                </div>
-                                <span class="stat-value">${monster.health}/${monster.maxHealth}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Attack:</span>
-                                <span class="stat-value">${monster.attack}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Defense:</span>
-                                <span class="stat-value">${monster.defense}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="battle-actions">
-                        <div class="combat-stance">
-                            <label for="stance-select">Combat Stance:</label>
-                            <select id="stance-select" onchange="window.encounterSystem.changeStance(this.value)">
-                                <option value="balanced">⚖️ Balanced</option>
-                                <option value="aggressive">⚔️ Aggressive</option>
-                                <option value="defensive">🛡️ Defensive</option>
-                                <option value="tactical">🎯 Tactical</option>
-                            </select>
-                        </div>
-                        <div class="basic-actions">
-                        <button class="battle-btn" onclick="window.encounterSystem.playerAttack('${monster.id}')">⚔️ Attack</button>
-                        <button class="battle-btn" onclick="window.encounterSystem.playerDefend('${monster.id}')">🛡️ Defend</button>
-                        <button class="battle-btn" onclick="window.encounterSystem.playerFlee('${monster.id}')">🏃 Flee</button>
-                        <button class="battle-btn" onclick="window.encounterSystem.useItem('${monster.id}')">🧪 Use Item</button>
-                        </div>
-                        <div class="special-abilities">
-                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'cosmic_strike')" id="cosmic-strike-btn">🌟 Cosmic Strike</button>
-                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'reality_anchor')" id="reality-anchor-btn">⚓ Reality Anchor</button>
-                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'sanity_blast')" id="sanity-blast-btn">🧠 Sanity Blast</button>
-                            <button class="ability-btn" onclick="window.encounterSystem.useSpecialAbility('${monster.id}', 'void_dodge')" id="void-dodge-btn">🌀 Void Dodge</button>
-                        </div>
-                    </div>
-                    <div class="battle-log" id="battle-log">
-                        <div class="log-entry">Battle begins! Roll for initiative...</div>
-                    </div>
-                </div>
-            </div>
-        `;
+        // Use the simple dice combat system
+        if (window.simpleDiceCombat) {
+            window.simpleDiceCombat.startCombat(
+                {
+                    name: monsterData.name,
+                    type: monster.type,
+                    id: monster.id
+                },
+                (enemy) => this.handleCombatWin(enemy),
+                (enemy) => this.handleCombatLose(enemy)
+            );
+        } else {
+            console.error('Simple dice combat system not available!');
+            this.showDialog('Combat system not available!');
+        }
+    }
+
+    /**
+     * Handle combat victory
+     */
+    handleCombatWin(enemy) {
+        console.log('🎉 Combat victory!');
         
-        // Roll for initiative
-        this.rollInitiative(monster);
+        // Award experience and items
+        const experience = enemy.type === 'shadowStalker' ? 25 : 15;
+        this.playerStats.experience += experience;
+        
+        // Show victory message
+        this.showDialog(`🎉 Victory! You defeated ${enemy.name} and gained ${experience} experience!`);
+        
+        // Check for level up
+        this.checkLevelUp();
+        
+        // Add some random items
+        this.addRandomRewards();
+        
+        // Update mobile stats
+        this.updateMobileStats();
+    }
+
+    /**
+     * Handle combat defeat
+     */
+    handleCombatLose(enemy) {
+        console.log('💀 Combat defeat!');
+        
+        // Lose some health and sanity
+        const healthLoss = Math.floor(Math.random() * 20) + 10;
+        const sanityLoss = Math.floor(Math.random() * 15) + 5;
+        
+        this.playerStats.health = Math.max(0, this.playerStats.health - healthLoss);
+        this.playerStats.sanity = Math.max(0, this.playerStats.sanity - sanityLoss);
+        
+        // Show defeat message
+        this.showDialog(`💀 Defeat! You lost ${healthLoss} health and ${sanityLoss} sanity!`);
+        
+        // Check if player is dead
+        if (this.playerStats.health <= 0) {
+            this.playerStats.isDead = true;
+            this.playerStats.deathReason = `Defeated by ${enemy.name}`;
+            this.showDialog('💀 You have died! The cosmic horror has consumed you...');
+        }
+        
+        // Update mobile stats
+        this.updateMobileStats();
+    }
+
+    /**
+     * Add random rewards after victory
+     */
+    addRandomRewards() {
+        const rewards = [
+            { type: 'health', amount: 10, message: 'Found a healing potion! +10 Health' },
+            { type: 'sanity', amount: 5, message: 'Ancient wisdom flows through you! +5 Sanity' },
+            { type: 'attack', amount: 1, message: 'Your combat prowess increases! +1 Attack' },
+            { type: 'defense', amount: 1, message: 'Your defensive skills improve! +1 Defense' }
+        ];
+        
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        
+        switch (reward.type) {
+            case 'health':
+                this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + reward.amount);
+                break;
+            case 'sanity':
+                this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + reward.amount);
+                break;
+            case 'attack':
+                this.playerStats.attack += reward.amount;
+                break;
+            case 'defense':
+                this.playerStats.defense += reward.amount;
+                break;
+        }
+        
+        console.log('🎁 Reward:', reward.message);
     }
 
     rollInitiative(monster) {

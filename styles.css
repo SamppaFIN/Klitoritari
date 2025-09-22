@@ -4065,6 +4065,282 @@ input[type="range"]::-moz-range-thumb {
     font-size: 10px;
 }
 
+/* Simple Dice Combat Styles */
+.simple-combat-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2500;
+    font-family: 'Courier New', monospace;
+}
+
+.combat-content {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #4a9eff;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 0 30px rgba(74, 158, 255, 0.3);
+    position: relative;
+}
+
+.combat-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #4a9eff;
+}
+
+.combat-header h3 {
+    margin: 0 0 10px 0;
+    font-size: 2em;
+    text-shadow: 0 0 10px rgba(74, 158, 255, 0.5);
+}
+
+.combat-header p {
+    margin: 0;
+    font-size: 1.2em;
+    color: #b8d4ff;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    font-size: 2em;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 107, 107, 0.2);
+    transform: scale(1.1);
+}
+
+.dice-interface {
+    text-align: center;
+}
+
+.dice-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.dice-section {
+    flex: 1;
+    min-width: 150px;
+    text-align: center;
+}
+
+.dice-section h4 {
+    margin: 0 0 15px 0;
+    color: #4a9eff;
+    font-size: 1.3em;
+}
+
+.dice {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(145deg, #ffffff, #e0e0e0);
+    border: 3px solid #4a9eff;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dice.rolling {
+    animation: diceRoll 0.1s infinite;
+    box-shadow: 0 0 20px rgba(74, 158, 255, 0.8);
+}
+
+@keyframes diceRoll {
+    0% { transform: rotateX(0deg) rotateY(0deg); }
+    25% { transform: rotateX(90deg) rotateY(90deg); }
+    50% { transform: rotateX(180deg) rotateY(180deg); }
+    75% { transform: rotateX(270deg) rotateY(270deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg); }
+}
+
+.dice-face {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #1a1a2e;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dice-result {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #4a9eff;
+    text-shadow: 0 0 5px rgba(74, 158, 255, 0.5);
+}
+
+.vs-divider {
+    font-size: 2em;
+    font-weight: bold;
+    color: #ff6b6b;
+    text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+    margin: 0 20px;
+    align-self: center;
+}
+
+.combat-actions {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.roll-btn, .flee-btn {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 150px;
+}
+
+.roll-btn {
+    background: linear-gradient(145deg, #4a9eff, #357abd);
+    color: white;
+    box-shadow: 0 5px 15px rgba(74, 158, 255, 0.3);
+}
+
+.roll-btn:hover:not(:disabled) {
+    background: linear-gradient(145deg, #357abd, #2a5f8f);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(74, 158, 255, 0.4);
+}
+
+.roll-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.flee-btn {
+    background: linear-gradient(145deg, #ff6b6b, #e55555);
+    color: white;
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.flee-btn:hover {
+    background: linear-gradient(145deg, #e55555, #cc4444);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(255, 107, 107, 0.4);
+}
+
+.combat-log {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid #4a9eff;
+    border-radius: 10px;
+    padding: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.log-entry {
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.log-entry.success {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border-left: 3px solid #2ecc71;
+}
+
+.log-entry.danger {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border-left: 3px solid #e74c3c;
+}
+
+.log-entry.warning {
+    background: rgba(241, 196, 15, 0.2);
+    color: #f1c40f;
+    border-left: 3px solid #f1c40f;
+}
+
+.log-entry.info {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border-left: 3px solid #3498db;
+}
+
+/* Mobile responsiveness for dice combat */
+@media (max-width: 768px) {
+    .combat-content {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .dice-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .vs-divider {
+        transform: rotate(90deg);
+        margin: 10px 0;
+    }
+    
+    .dice {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .dice-face {
+        font-size: 2em;
+    }
+    
+    .combat-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .roll-btn, .flee-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+
 /* Quest Log Modal Styles */
 .quest-log-modal {
     max-width: 900px;
