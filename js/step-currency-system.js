@@ -27,6 +27,9 @@ class StepCurrencySystem {
         this.googleFitEnabled = false;
         this.googleFitClient = null;
         
+        // Callback for step updates
+        this.onStepUpdate = null;
+        
         this.init();
     }
     
@@ -212,6 +215,12 @@ class StepCurrencySystem {
         console.log(`🚶‍♂️ Step added! Total: ${this.totalSteps}, Session: ${this.sessionSteps}`);
         
         this.updateStepCounter();
+        
+        // Trigger step update callback
+        if (this.onStepUpdate) {
+            this.onStepUpdate();
+        }
+        
         this.checkMilestones();
         this.saveSteps();
     }

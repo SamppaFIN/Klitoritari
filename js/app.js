@@ -981,52 +981,128 @@ class EldritchSanctuaryApp {
     }
 
     enforceStepGating() {
-        // Guard the start investigation button to require 100 steps
-        const attach = () => {
-            const startBtn = document.getElementById('start-investigation');
-            if (!startBtn) return;
-            if (startBtn.__gated) return; // avoid duplicate
-            startBtn.__gated = true;
-            startBtn.addEventListener('click', (e) => {
+        // Guard quest buttons to require 100 steps
+        const questButtonIds = ['start-investigation', 'begin-quest', 'start-quest'];
+        
+        const attachGating = (buttonId) => {
+            const btn = document.getElementById(buttonId);
+            if (!btn) return;
+            if (btn.__gated) return; // avoid duplicate
+            btn.__gated = true;
+            
+            // Add visual lock indicator
+            this.updateQuestButtonLockState(btn);
+            
+            btn.addEventListener('click', (e) => {
                 const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
                 if (steps < 100) {
                     e.preventDefault();
                     e.stopPropagation();
-                    if (window.gruesomeNotifications) {
-                        window.gruesomeNotifications.showNotification({
-                            type: 'warning',
-                            title: 'Locked Quest',
-                            message: 'Reach 100 steps to unlock. Or pay 50 steps to open now.',
-                            duration: 3500
-                        });
-                    }
-                    // Simple payment prompt: deduct 50 steps if user confirms
-                    const confirmPay = confirm('Not enough steps. Pay 50 steps to unlock?');
-                    if (confirmPay && window.stepCurrencySystem) {
-                        const paid = window.stepCurrencySystem.subtractSteps(50);
-                        if (paid >= 50) {
-                            // Allow action by triggering a click again without blocking
-                            setTimeout(() => startBtn.click(), 0);
-                        } else if (window.gruesomeNotifications) {
-                            window.gruesomeNotifications.showNotification({
-                                type: 'error',
-                                title: 'Payment Failed',
-                                message: 'Not enough steps to pay 50.',
-                                duration: 2500
-                            });
+                    
+                    // Show enhanced notification with payment option
+                    this.showQuestLockNotification(steps, () => {
+                        // Payment callback
+                        if (window.stepCurrencySystem) {
+                            const paid = window.stepCurrencySystem.subtractSteps(50);
+                            if (paid >= 50) {
+                                // Allow action by triggering a click again without blocking
+                                setTimeout(() => btn.click(), 0);
+                                return true;
+                            } else {
+                                this.showPaymentFailedNotification();
+                                return false;
+                            }
                         }
-                    }
+                        return false;
+                    });
                 }
             }, true);
         };
-        // Try now and retries, as modal may render later
-        attach();
-        setTimeout(attach, 1000);
+        
+        // Attach gating to all quest buttons
+        questButtonIds.forEach(attachGating);
+        
+        // Retry attachment for dynamically created buttons
+        setTimeout(() => questButtonIds.forEach(attachGating), 1000);
+        
+        // Listen for new quest buttons
         document.addEventListener('click', (ev) => {
-            if (ev.target && ev.target.id === 'start-investigation') {
-                attach();
+            if (ev.target && questButtonIds.includes(ev.target.id)) {
+                attachGating(ev.target.id);
             }
         });
+        
+        // Update button states when steps change
+        if (window.stepCurrencySystem) {
+            window.stepCurrencySystem.onStepUpdate = () => {
+                questButtonIds.forEach(id => {
+                    const btn = document.getElementById(id);
+                    if (btn) this.updateQuestButtonLockState(btn);
+                });
+            };
+        }
+    }
+    
+    updateQuestButtonLockState(btn) {
+        const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
+        const isLocked = steps < 100;
+        
+        if (isLocked) {
+            btn.classList.add('quest-locked');
+            btn.title = `Locked - Need 100 steps (${steps}/100) or pay 50 to unlock`;
+            // Add lock icon
+            if (!btn.querySelector('.lock-icon')) {
+                const lockIcon = document.createElement('span');
+                lockIcon.className = 'lock-icon';
+                lockIcon.textContent = '🔒';
+                lockIcon.style.marginRight = '5px';
+                btn.insertBefore(lockIcon, btn.firstChild);
+            }
+        } else {
+            btn.classList.remove('quest-locked');
+            btn.title = 'Quest unlocked - Begin your investigation';
+            const lockIcon = btn.querySelector('.lock-icon');
+            if (lockIcon) lockIcon.remove();
+        }
+    }
+    
+    showQuestLockNotification(currentSteps, paymentCallback) {
+        const stepsNeeded = 100 - currentSteps;
+        const message = `Need ${stepsNeeded} more steps to unlock quest. Or pay 50 steps to open now?`;
+        
+        if (window.gruesomeNotifications) {
+            window.gruesomeNotifications.showNotification({
+                type: 'warning',
+                title: '🔒 Quest Locked',
+                message: message,
+                duration: 4000,
+                actions: [
+                    {
+                        text: 'Pay 50 Steps',
+                        action: paymentCallback
+                    }
+                ]
+            });
+        } else {
+            // Fallback to confirm dialog
+            const confirmPay = confirm(`🔒 Quest Locked\n\n${message}`);
+            if (confirmPay) {
+                paymentCallback();
+            }
+        }
+    }
+    
+    showPaymentFailedNotification() {
+        if (window.gruesomeNotifications) {
+            window.gruesomeNotifications.showNotification({
+                type: 'error',
+                title: '❌ Payment Failed',
+                message: 'Not enough steps to pay 50. Keep walking!',
+                duration: 3000
+            });
+        } else {
+            alert('❌ Payment Failed\nNot enough steps to pay 50. Keep walking!');
+        }
     }
     
     updateInventoryStatus() {

@@ -379,6 +379,31 @@ html, body {
     background: linear-gradient(45deg, var(--cosmic-red), var(--cosmic-purple));
 }
 
+/* Quest Locked State */
+.sacred-button.quest-locked {
+    background: linear-gradient(45deg, var(--cosmic-dark), #333);
+    border: 2px solid var(--cosmic-red);
+    color: var(--cosmic-red);
+    cursor: not-allowed;
+    opacity: 0.7;
+    position: relative;
+}
+
+.sacred-button.quest-locked:hover {
+    background: linear-gradient(45deg, #333, var(--cosmic-dark));
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+    transform: none;
+}
+
+.sacred-button.quest-locked .lock-icon {
+    animation: lockPulse 2s infinite;
+}
+
+@keyframes lockPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
 /* Geolocation Panel */
 #locate-btn {
     width: 100%;
