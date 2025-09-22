@@ -181,6 +181,10 @@ class FinnishFlagCanvasLayer {
                     message: `Cleared overlapping flags in a ${radiusMeters}m radius`,
                     duration: 2500
                 });
+            } else {
+                // Fallback notification
+                console.log('🎉 TERRITORY CAPTURED! Cleared overlapping flags in a', radiusMeters, 'm radius');
+                alert('🎉 Territory Captured!\nCleared overlapping flags in a ' + radiusMeters + 'm radius');
             }
         }
     }
