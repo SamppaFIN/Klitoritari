@@ -1541,6 +1541,17 @@ class EldritchSanctuaryApp {
                                 <button id="debug-add-100-steps" class="debug-btn small">+100 Steps</button>
                                 <button id="debug-reset-steps" class="debug-btn small">Reset</button>
                             </div></div>
+                            <div class="debug-tools"><h4>🎯 Player Marker</h4><div class="debug-buttons">
+                                <select id="marker-emoji" class="debug-btn small" style="background:#1b2a3a; color:#fff; min-width:120px;">
+                                    <option>👤</option>
+                                    <option>🚩</option>
+                                    <option>⭐</option>
+                                    <option>🛰️</option>
+                                    <option>🧭</option>
+                                </select>
+                                <input id="marker-color" type="color" class="debug-btn small" value="#00ff00" style="padding:4px 6px; min-width:60px;" />
+                                <button id="apply-marker" class="debug-btn small">Apply</button>
+                            </div></div>
                         `;
                     }
                     // Ensure a close button exists even if content wasn't injected
@@ -1597,6 +1608,29 @@ class EldritchSanctuaryApp {
                         toggleBtn.classList.remove('open');
                         // Also hide when explicitly closed
                         sidePanel.style.display = 'none';
+                    });
+                }
+
+                // Marker customization handlers
+                const applyBtn = sidePanel.querySelector('#apply-marker');
+                const emojiSel = sidePanel.querySelector('#marker-emoji');
+                const colorInp = sidePanel.querySelector('#marker-color');
+                if (applyBtn && emojiSel && colorInp) {
+                    // Initialize controls from stored values
+                    try {
+                        const storedEmoji = localStorage.getItem('playerMarkerEmoji');
+                        const storedColor = localStorage.getItem('playerMarkerColor');
+                        if (storedEmoji) emojiSel.value = storedEmoji;
+                        if (storedColor) colorInp.value = storedColor;
+                    } catch (e) {}
+                    applyBtn.addEventListener('click', () => {
+                        const cfg = { emoji: emojiSel.value, color: colorInp.value };
+                        if (window.mapEngine && typeof window.mapEngine.setPlayerMarkerConfig === 'function') {
+                            window.mapEngine.setPlayerMarkerConfig(cfg);
+                        } else {
+                            localStorage.setItem('playerMarkerEmoji', cfg.emoji);
+                            localStorage.setItem('playerMarkerColor', cfg.color);
+                        }
                     });
                 }
             

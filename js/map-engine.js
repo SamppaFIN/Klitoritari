@@ -208,20 +208,14 @@ class MapEngine {
 
         const latlng = [position.lat, position.lng];
         
+        const cfg = this.getPlayerMarkerConfig();
+        const iconHtml = this.buildPlayerIconHTML(cfg);
+        
         if (!this.playerMarker) {
             // Create multilayered player marker
             const playerIcon = L.divIcon({
                 className: 'player-marker multilayered',
-                html: `
-                    <div style="position: relative; width: 40px; height: 40px;">
-                        <!-- Outer glow ring -->
-                        <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, rgba(0, 255, 0, 0.3) 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
-                        <!-- Middle ring -->
-                        <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #00ff00; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.8; box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);"></div>
-                        <!-- Inner core -->
-                        <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; background: linear-gradient(45deg, #00ff00, #00cc00); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">👤</div>
-                    </div>
-                `,
+                html: iconHtml,
                 iconSize: [40, 40],
                 iconAnchor: [20, 20]
             });
@@ -233,6 +227,17 @@ class MapEngine {
         } else {
             // Update existing marker position
             this.playerMarker.setLatLng(latlng);
+            // Also refresh icon if config changed recently
+            if (this._lastMarkerConfigKey !== JSON.stringify(cfg)) {
+                this._lastMarkerConfigKey = JSON.stringify(cfg);
+                const refreshedIcon = L.divIcon({
+                    className: 'player-marker multilayered',
+                    html: iconHtml,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+                this.playerMarker.setIcon(refreshedIcon);
+            }
             
             // Ensure marker is still on the map
             if (!this.map.hasLayer(this.playerMarker)) {
@@ -265,6 +270,42 @@ class MapEngine {
             
             console.log('📍 Updated geolocation system with new position:', position);
         }
+    }
+
+    getPlayerMarkerConfig() {
+        // Read from localStorage with defaults
+        let emoji = localStorage.getItem('playerMarkerEmoji') || '👤';
+        let color = localStorage.getItem('playerMarkerColor') || '#00ff00';
+        return { emoji, color };
+    }
+
+    setPlayerMarkerConfig(config) {
+        if (config.emoji) localStorage.setItem('playerMarkerEmoji', config.emoji);
+        if (config.color) localStorage.setItem('playerMarkerColor', config.color);
+        // Force refresh on next position update
+        this._lastMarkerConfigKey = null;
+        if (this.playerMarker) {
+            const iconHtml = this.buildPlayerIconHTML(this.getPlayerMarkerConfig());
+            const refreshedIcon = L.divIcon({
+                className: 'player-marker multilayered',
+                html: iconHtml,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+            this.playerMarker.setIcon(refreshedIcon);
+        }
+    }
+
+    buildPlayerIconHTML(cfg) {
+        const ringColor = cfg.color || '#00ff00';
+        const emoji = cfg.emoji || '👤';
+        return `
+            <div style="position: relative; width: 40px; height: 40px;">
+                <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, ${ringColor}4D 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
+                <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: ${ringColor}; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 15px ${ringColor};"></div>
+                <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; background: linear-gradient(45deg, ${ringColor}, ${ringColor}); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #ffffff; text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);">${emoji}</div>
+            </div>
+        `;
     }
 
     animatePlayerMarker() {
