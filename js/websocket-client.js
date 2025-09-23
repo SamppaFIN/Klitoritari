@@ -36,6 +36,7 @@ class WebSocketClient {
         const host = window.location.hostname;
         const port = window.location.port || (protocol === 'wss:' ? '443' : '80');
         const wsUrl = `${protocol}//${host}:${port}/ws`;
+        console.log('🌐 WebSocketClient connecting to:', wsUrl);
 
         try {
             this.socket = new WebSocket(wsUrl);
@@ -56,8 +57,11 @@ class WebSocketClient {
             this.reconnectDelay = 1000;
             this.updateConnectionStatus('connected');
             
-            // Send initial player data
-            this.sendPlayerJoin();
+            // Hand off to MultiplayerManager if present to avoid double-announcements
+            if (!window.multiplayerManager) {
+                // Send initial player data (legacy schema)
+                this.sendPlayerJoin();
+            }
             
             if (this.onConnectionChange) {
                 this.onConnectionChange(true);
@@ -95,7 +99,22 @@ class WebSocketClient {
     }
 
     handleMessage(message) {
+        // If the authoritative MultiplayerManager exists, delegate and avoid duplicate UI/state
+        try {
+            if (window.multiplayerManager && typeof window.multiplayerManager.handleMessage === 'function') {
+                window.multiplayerManager.handleMessage(message);
+                return;
+            }
+        } catch (_) {}
         switch (message.type) {
+            case 'players_snapshot': {
+                try {
+                    const arr = Array.isArray(message.payload) ? message.payload : [];
+                    arr.forEach(p => this.handlePlayerJoin({ playerId: p.playerId, name: p.playerData?.profile?.name || 'Explorer', position: p.playerData?.position }));
+                    // Do not self-adjust count here; authoritative count handled elsewhere
+                } catch (_) {}
+                break;
+            }
             case 'playerCount':
                 this.updatePlayerCount(message.payload.count);
                 break;
@@ -103,6 +122,21 @@ class WebSocketClient {
             case 'playerJoin':
                 this.handlePlayerJoin(message.payload);
                 break;
+
+            case 'player_join': {
+                // Alternate schema used by server broadcast
+                const playerId = message.playerId || message.payload?.playerId;
+                const playerData = message.playerData || message.payload?.playerData || {};
+                this.handlePlayerJoin({ playerId, name: playerData?.profile?.name || 'Explorer', position: playerData?.position });
+                // Subtle notification
+                try {
+                    if (window.gruesomeNotifications) {
+                        const name = playerData?.profile?.name || 'Explorer';
+                        window.gruesomeNotifications.showNotification(`${name} connected`, 'info');
+                    }
+                } catch (_) {}
+                break;
+            }
                 
             case 'playerLeave':
                 this.handlePlayerLeave(message.payload.playerId);
@@ -112,6 +146,39 @@ class WebSocketClient {
                 this.handlePositionUpdate(message.payload);
                 break;
                 
+            case 'flag_update': {
+                try {
+                    const d = message.flagData || {};
+                    if (window.mapEngine && window.mapEngine.finnishFlagLayer && d.lat && d.lng) {
+                        window.mapEngine.finnishFlagLayer.addFlagPin(d.lat, d.lng, d.size, d.rotation, d.symbol, d.ownerId, true, d.timestamp);
+                    }
+                } catch (_) {}
+                break;
+            }
+
+            case 'request_flags': {
+                try {
+                    // Re-broadcast our flags to requester
+                    if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
+                        const pins = window.mapEngine.finnishFlagLayer.flagPins || [];
+                        pins.forEach(pin => this.send({
+                            type: 'flag_update',
+                            flagId: `${pin.lat.toFixed(6)}_${pin.lng.toFixed(6)}_${pin.timestamp}`,
+                            flagData: {
+                                lat: pin.lat,
+                                lng: pin.lng,
+                                size: pin.size,
+                                rotation: pin.rotation,
+                                symbol: pin.symbol,
+                                ownerId: pin.ownerId || this.playerId,
+                                timestamp: pin.timestamp
+                            }
+                        }));
+                    }
+                } catch (_) {}
+                break;
+            }
+
             case 'investigationStart':
                 this.handleInvestigationStart(message.payload);
                 break;
@@ -130,6 +197,16 @@ class WebSocketClient {
     }
 
     handlePlayerJoin(payload) {
+        if (!payload || payload.playerId === this.playerId) {
+            return;
+        }
+        try {
+            if (window.gruesomeNotifications) {
+                const name = payload.name || 'Explorer';
+                window.gruesomeNotifications.showNotification(`${name} connected`, 'info');
+            }
+        } catch (_) {}
+
         if (payload.playerId !== this.playerId) {
             this.otherPlayers.set(payload.playerId, {
                 id: payload.playerId,
@@ -140,6 +217,8 @@ class WebSocketClient {
             });
             
             console.log(`👤 Player joined: ${payload.name || payload.playerId}`);
+
+            // UI/list rendering handled by MultiplayerManager; do not mutate DOM here
         }
     }
 
@@ -226,6 +305,10 @@ class WebSocketClient {
                     break;
             }
         }
+    }
+
+    updatePlayerCountDisplay(totalCount) {
+        // No-op: authoritative display handled by MultiplayerManager
     }
 
     attemptReconnect() {
