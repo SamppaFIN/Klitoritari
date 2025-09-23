@@ -39,21 +39,15 @@ class EldritchSanctuaryApp {
         console.log('📱 Initializing mobile UI...');
         
         if (this.isMobile) {
-            // Show mobile footer
-            const mobileFooter = document.getElementById('mobile-footer');
-            if (mobileFooter) {
-                mobileFooter.style.display = 'block';
-                console.log('📱 Mobile footer enabled');
-            }
-            
-            // Wire mobile footer buttons
-            this.wireMobileFooterButtons();
+            // Mobile footer removed - using tablist instead
+            console.log('📱 Mobile footer removed - using tablist instead');
         }
     }
     
-    // Wire mobile footer button event listeners
+    // Wire mobile footer button event listeners - REMOVED (using tablist instead)
     wireMobileFooterButtons() {
-        console.log('📱 Wiring mobile footer buttons...');
+        console.log('📱 Mobile footer buttons removed - using tablist instead');
+        return;
         
         // Define all mobile buttons with their actions
         const mobileButtons = [
