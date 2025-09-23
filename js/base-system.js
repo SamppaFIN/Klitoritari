@@ -227,6 +227,34 @@ class BaseSystem {
                 this.expandTerritory(cost);
             }
         });
+
+        // Establish base inside modal when user has no base
+        const establishNowBtn = document.getElementById('establish-base-now-btn');
+        if (establishNowBtn) {
+            establishNowBtn.addEventListener('click', () => {
+                const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
+                const cost = 1000;
+                if (steps < cost) {
+                    this.showNotification(`Not enough steps to establish a base (need ${cost})`, 'error');
+                    return;
+                }
+                // Deduct steps
+                if (window.stepCurrencySystem) {
+                    window.stepCurrencySystem.subtractSteps(cost);
+                }
+                // Use current position from geolocation manager
+                const pos = window.geolocationManager?.getCurrentPositionData?.() || window.geolocationManager?.currentPosition;
+                if (!pos) {
+                    this.showNotification('Location required to establish base. Please press LOCATE first.', 'error');
+                    return;
+                }
+                const name = 'Cosmic Sanctuary';
+                this.establishBase(name, pos);
+                // Hide the no-base section after establishing
+                const noBase = document.getElementById('no-base-section');
+                if (noBase) noBase.classList.add('hidden');
+            });
+        }
     }
 
     showBaseEstablishmentModal() {
@@ -860,11 +888,12 @@ class BaseSystem {
         
         // Show base management modal
         if (baseModal) {
-            // Do not show if player has no base yet
+            // If no base, show establish section
+            const noBase = baseModal.querySelector('#no-base-section');
             if (!this.playerBase) {
-                console.log('🏗️ No base established yet; not showing base management modal');
-                baseModal.classList.add('hidden');
-                return;
+                if (noBase) noBase.classList.remove('hidden');
+            } else if (noBase) {
+                noBase.classList.add('hidden');
             }
             baseModal.classList.remove('hidden');
             this.updateBaseModalInfo();
