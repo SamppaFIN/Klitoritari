@@ -667,6 +667,37 @@ html, body {
     background: var(--cosmic-red);
 }
 
+/* Symbol Selection Styles */
+.symbol-options-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.symbol-option {
+    padding: 12px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
+
+.symbol-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #00ff88;
+    transform: scale(1.05);
+}
+
+.symbol-option.selected {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
 .modal-body {
     padding: 20px;
 }

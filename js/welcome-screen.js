@@ -172,14 +172,136 @@ class WelcomeScreen {
         localStorage.setItem('eldritch_welcome_seen', 'true');
         // Ensure tutorial/onboarding will be shown after map init
         localStorage.setItem('eldritch_show_tutorial', 'true');
+        // Start tutorial encounter system
+        localStorage.setItem('eldritch_start_tutorial_encounter', 'true');
         this.hasSeenWelcome = true;
         
         // Reset all game state
         this.resetAllGameState();
         
-        // Hide welcome screen immediately and start game
-        console.log('🌟 Hiding welcome screen and initializing fresh game...');
+        // Show player identity setup dialog first
+        this.showPlayerIdentityDialog();
+    }
+
+    showPlayerIdentityDialog() {
+        console.log('🎭 Showing player identity setup dialog');
+        
+        // Hide welcome screen
         this.hideWelcomeScreen();
+        
+        // Show user settings modal
+        const modal = document.getElementById('user-settings-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            
+            // Populate the form with defaults
+            this.populateIdentityForm();
+            
+            // Set up event listeners for the form
+            this.setupIdentityFormListeners();
+        } else {
+            console.warn('🎭 User settings modal not found, proceeding without identity setup');
+            this.proceedWithGameStart();
+        }
+    }
+
+    populateIdentityForm() {
+        const nameInput = document.getElementById('player-name-input');
+        const colorInput = document.getElementById('path-color-input');
+        const symbolGrid = document.getElementById('symbol-options');
+        
+        // Set default name
+        if (nameInput) {
+            nameInput.value = 'Cosmic Wanderer';
+        }
+        
+        // Set default color
+        if (colorInput) {
+            colorInput.value = '#00ff88';
+        }
+        
+        // Generate symbol options
+        if (symbolGrid) {
+            const symbols = ['🌟', '⭐', '✨', '💫', '🌙', '☀️', '🔮', '💎', '🌌', '🎭'];
+            symbolGrid.innerHTML = symbols.map(symbol => 
+                `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
+            ).join('');
+        }
+    }
+
+    setupIdentityFormListeners() {
+        const modal = document.getElementById('user-settings-modal');
+        const saveBtn = document.getElementById('save-user-settings');
+        const cancelBtn = document.getElementById('cancel-user-settings');
+        
+        if (saveBtn) {
+            saveBtn.onclick = () => this.saveIdentityAndStart();
+        }
+        
+        if (cancelBtn) {
+            cancelBtn.onclick = () => this.cancelIdentitySetup();
+        }
+        
+        // Symbol selection
+        const symbolGrid = document.getElementById('symbol-options');
+        if (symbolGrid) {
+            symbolGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('symbol-option')) {
+                    // Remove previous selection
+                    symbolGrid.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
+                    // Add selection to clicked option
+                    e.target.classList.add('selected');
+                }
+            });
+        }
+    }
+
+    saveIdentityAndStart() {
+        console.log('🎭 Saving player identity and starting game');
+        
+        const nameInput = document.getElementById('player-name-input');
+        const colorInput = document.getElementById('path-color-input');
+        const symbolGrid = document.getElementById('symbol-options');
+        
+        const name = (nameInput?.value || '').trim() || 'Cosmic Wanderer';
+        const color = colorInput?.value || '#00ff88';
+        const selectedSymbol = symbolGrid?.querySelector('.symbol-option.selected');
+        const symbol = selectedSymbol?.dataset.symbol || '🌟';
+        
+        // Save to localStorage
+        localStorage.setItem('eldritch_player_name', name);
+        localStorage.setItem('eldritch_player_color', color);
+        localStorage.setItem('eldritch_player_symbol', symbol);
+        
+        // Update multiplayer profile if available
+        if (window.multiplayerManager) {
+            window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color });
+        }
+        
+        // Hide modal and start game
+        const modal = document.getElementById('user-settings-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        
+        this.proceedWithGameStart();
+    }
+
+    cancelIdentitySetup() {
+        console.log('🎭 Canceling identity setup, returning to welcome screen');
+        
+        // Hide modal
+        const modal = document.getElementById('user-settings-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        
+        // Show welcome screen again
+        this.showWelcomeScreen();
+    }
+
+    proceedWithGameStart() {
+        console.log('🌟 Starting game after identity setup...');
         this.initializeGame(true); // true = reset everything
         
         // Start NPC simulation after welcome screen is dismissed
