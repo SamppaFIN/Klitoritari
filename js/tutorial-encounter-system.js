@@ -548,7 +548,11 @@ class TutorialEncounterSystem {
     }
 
     createItemMarker(position, itemDef) {
-        if (!window.mapEngine || !window.mapEngine.map) return null;
+        console.log('🧪 createItemMarker called with:', { position, itemDef, mapEngine: !!window.mapEngine, map: !!(window.mapEngine && window.mapEngine.map) });
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.warn('🧪 Map engine or map not available');
+            return null;
+        }
 
         const icon = L.divIcon({
             className: 'tutorial-item-marker',
@@ -589,6 +593,13 @@ class TutorialEncounterSystem {
                 tutorialItem: true
             });
             console.log('🧪 Added tutorial item to map engine itemMarkers array, total items:', window.mapEngine.itemMarkers.length);
+            
+            // Trigger WebGL conversion for the new item
+            if (window.webglMapIntegration && window.webglMapIntegration.convertItemMarker) {
+                const index = window.mapEngine.itemMarkers.length - 1;
+                window.webglMapIntegration.convertItemMarker(window.mapEngine.itemMarkers[index], index);
+                console.log('🧪 Triggered WebGL conversion for tutorial item');
+            }
         } else {
             console.warn('🧪 Map engine not available for item marker registration');
         }
