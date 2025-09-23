@@ -2366,6 +2366,28 @@ class EldritchSanctuaryApp {
         
         // Initialize map engine
         this.systems.mapEngine = new EnhancedMapEngine();
+        
+        // Set up tutorial start callback immediately after map engine creation
+        try {
+            const previousOnMapReady = this.systems.mapEngine.onMapReady;
+            this.systems.mapEngine.onMapReady = () => {
+                if (typeof previousOnMapReady === 'function') {
+                    try { previousOnMapReady(); } catch (_) {}
+                }
+                try {
+                    const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
+                    if (shouldStartTutorial && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
+                        console.log('🎓 Starting tutorial from onMapReady callback');
+                        window.tutorialEncounterSystem.startTutorial();
+                        localStorage.removeItem('eldritch_start_tutorial_encounter');
+                    }
+                } catch (error) {
+                    console.warn('🎓 Failed to start tutorial:', error);
+                }
+            };
+        } catch (error) {
+            console.warn('🎓 Failed to set up tutorial callback:', error);
+        }
         await this.systems.mapEngine.init();
         
         // Initialize raw WebSocket client (presence/positions) only once
@@ -2521,22 +2543,7 @@ class EldritchSanctuaryApp {
             this.systems.webglMapIntegration = null;
         }
 
-        // Chain tutorial start after map is ready
-        try {
-            const previousOnMapReady = this.systems.mapEngine.onMapReady;
-            this.systems.mapEngine.onMapReady = () => {
-                if (typeof previousOnMapReady === 'function') {
-                    try { previousOnMapReady(); } catch (_) {}
-                }
-                try {
-                    const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
-                    if (shouldStartTutorial && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
-                        window.tutorialEncounterSystem.startTutorial();
-                        localStorage.removeItem('eldritch_start_tutorial_encounter');
-                    }
-                } catch (_) {}
-            };
-        } catch (_) {}
+        // Tutorial callback already set up earlier after map engine creation
         
         // Initialize webgl test (if available)
         try {

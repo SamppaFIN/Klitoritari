@@ -220,12 +220,17 @@ class WelcomeScreen {
             colorInput.value = '#00ff88';
         }
         
-        // Generate symbol options
+        // Generate symbol options using tutorial system
         if (symbolGrid) {
-            const symbols = ['🌟', '⭐', '✨', '💫', '🌙', '☀️', '🔮', '💎', '🌌', '🎭'];
-            symbolGrid.innerHTML = symbols.map(symbol => 
-                `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
-            ).join('');
+            if (window.tutorialSystem && window.tutorialSystem.getSymbolOptionsHTML) {
+                symbolGrid.innerHTML = window.tutorialSystem.getSymbolOptionsHTML();
+            } else {
+                // Fallback to simple symbols if tutorial system not available
+                const symbols = ['🌟', '⭐', '✨', '💫', '🌙', '☀️', '🔮', '💎', '🌌', '🎭'];
+                symbolGrid.innerHTML = symbols.map(symbol => 
+                    `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
+                ).join('');
+            }
         }
     }
 

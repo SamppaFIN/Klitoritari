@@ -684,6 +684,10 @@ html, body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
 }
 
 .symbol-option:hover {
