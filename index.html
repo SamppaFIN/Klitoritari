@@ -594,6 +594,7 @@
     <script src="js/gruesome-notifications.js"></script>
     <script src="js/welcome-screen.js"></script>
     <script src="js/tutorial-system.js"></script>
+    <script src="js/tutorial-encounter-system.js"></script>
     <script src="js/map-engine.js"></script>
     <script src="js/webgl-map-renderer.js"></script>
     <script src="js/webgl-map-integration.js"></script>
@@ -648,11 +649,35 @@
             <div class="modal-body">
                 <div class="setting-row">
                     <label for="player-name-input">Player Name</label>
-                    <input id="player-name-input" type="text" placeholder="Enter your name" maxlength="24">
+                    <div class="input-group">
+                        <input id="player-name-input" type="text" placeholder="Enter your cosmic name" maxlength="24" class="cosmic-input">
+                    </div>
                 </div>
                 <div class="setting-row">
-                    <label for="path-color-input">Path Color</label>
-                    <input id="path-color-input" type="color" value="#6c5ce7">
+                    <label>Path Color</label>
+                    <div class="color-input-group">
+                        <div class="rgb-inputs">
+                            <div class="rgb-input">
+                                <label for="color-r">R</label>
+                                <input id="color-r" type="range" min="0" max="255" value="0" class="color-slider">
+                                <span id="color-r-value">0</span>
+                            </div>
+                            <div class="rgb-input">
+                                <label for="color-g">G</label>
+                                <input id="color-g" type="range" min="0" max="255" value="255" class="color-slider">
+                                <span id="color-g-value">255</span>
+                            </div>
+                            <div class="rgb-input">
+                                <label for="color-b">B</label>
+                                <input id="color-b" type="range" min="0" max="255" value="136" class="color-slider">
+                                <span id="color-b-value">136</span>
+                            </div>
+                        </div>
+                        <div class="color-preview">
+                            <input id="path-color-input" type="color" value="#00ff88" class="color-picker">
+                            <div id="color-preview" class="color-swatch"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="setting-row">
                     <label>Symbol</label>

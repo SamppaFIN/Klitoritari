@@ -189,6 +189,9 @@ class WelcomeScreen {
         // Hide welcome screen
         this.hideWelcomeScreen();
         
+        // Show notification
+        this.showNotification('🌟 Hello Cosmic Explorer! What is your name?');
+        
         // Show user settings modal
         const modal = document.getElementById('user-settings-modal');
         if (modal) {
@@ -199,6 +202,15 @@ class WelcomeScreen {
             
             // Set up event listeners for the form
             this.setupIdentityFormListeners();
+            
+            // Auto-focus and select the name input
+            setTimeout(() => {
+                const nameInput = document.getElementById('player-name-input');
+                if (nameInput) {
+                    nameInput.focus();
+                    nameInput.select();
+                }
+            }, 100);
         } else {
             console.warn('🎭 User settings modal not found, proceeding without identity setup');
             this.proceedWithGameStart();
@@ -215,10 +227,8 @@ class WelcomeScreen {
             nameInput.value = 'Cosmic Wanderer';
         }
         
-        // Set default color
-        if (colorInput) {
-            colorInput.value = '#00ff88';
-        }
+        // Set default RGB values (0, 255, 136 = #00ff88)
+        this.setRGBValues(0, 255, 136);
         
         // Generate symbol options using tutorial system
         if (symbolGrid) {
@@ -234,6 +244,41 @@ class WelcomeScreen {
         }
     }
 
+    setRGBValues(r, g, b) {
+        const colorR = document.getElementById('color-r');
+        const colorG = document.getElementById('color-g');
+        const colorB = document.getElementById('color-b');
+        const colorRValue = document.getElementById('color-r-value');
+        const colorGValue = document.getElementById('color-g-value');
+        const colorBValue = document.getElementById('color-b-value');
+        const colorPreview = document.getElementById('color-preview');
+        const colorPicker = document.getElementById('path-color-input');
+        
+        if (colorR) colorR.value = r;
+        if (colorG) colorG.value = g;
+        if (colorB) colorB.value = b;
+        if (colorRValue) colorRValue.textContent = r;
+        if (colorGValue) colorGValue.textContent = g;
+        if (colorBValue) colorBValue.textContent = b;
+        
+        const hexColor = this.rgbToHex(r, g, b);
+        if (colorPreview) colorPreview.style.background = hexColor;
+        if (colorPicker) colorPicker.value = hexColor;
+    }
+
+    rgbToHex(r, g, b) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
     setupIdentityFormListeners() {
         const modal = document.getElementById('user-settings-modal');
         const saveBtn = document.getElementById('save-user-settings');
@@ -247,6 +292,22 @@ class WelcomeScreen {
             cancelBtn.onclick = () => this.cancelIdentitySetup();
         }
         
+        // RGB color slider listeners
+        const colorR = document.getElementById('color-r');
+        const colorG = document.getElementById('color-g');
+        const colorB = document.getElementById('color-b');
+        const colorPicker = document.getElementById('path-color-input');
+        
+        [colorR, colorG, colorB].forEach(slider => {
+            if (slider) {
+                slider.addEventListener('input', () => this.updateColorFromSliders());
+            }
+        });
+        
+        if (colorPicker) {
+            colorPicker.addEventListener('change', () => this.updateColorFromPicker());
+        }
+        
         // Symbol selection
         const symbolGrid = document.getElementById('symbol-options');
         if (symbolGrid) {
@@ -258,6 +319,30 @@ class WelcomeScreen {
                     e.target.classList.add('selected');
                 }
             });
+        }
+    }
+
+    updateColorFromSliders() {
+        const colorR = document.getElementById('color-r');
+        const colorG = document.getElementById('color-g');
+        const colorB = document.getElementById('color-b');
+        
+        if (colorR && colorG && colorB) {
+            const r = parseInt(colorR.value);
+            const g = parseInt(colorG.value);
+            const b = parseInt(colorB.value);
+            
+            this.setRGBValues(r, g, b);
+        }
+    }
+
+    updateColorFromPicker() {
+        const colorPicker = document.getElementById('path-color-input');
+        if (colorPicker) {
+            const rgb = this.hexToRgb(colorPicker.value);
+            if (rgb) {
+                this.setRGBValues(rgb.r, rgb.g, rgb.b);
+            }
         }
     }
 

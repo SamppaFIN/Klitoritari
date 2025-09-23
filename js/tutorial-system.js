@@ -284,7 +284,15 @@ class TutorialSystem {
             { id: 'triangle', label: 'Sacred Triangle', svg: this.svgTriangle(36) },
             { id: 'hex', label: 'Hexagon', svg: this.svgHexagon(36) },
             { id: 'spiral', label: 'Cosmic Spiral', svg: this.svgSpiral(36) },
-            { id: 'star', label: 'Star', svg: this.svgStar(36) }
+            { id: 'star', label: 'Star', svg: this.svgStar(36) },
+            { id: 'circle', label: 'Sacred Circle', svg: this.svgCircle(36) },
+            { id: 'diamond', label: 'Cosmic Diamond', svg: this.svgDiamond(36) },
+            { id: 'pentagram', label: 'Pentagram', svg: this.svgPentagram(36) },
+            { id: 'infinity', label: 'Infinity Symbol', svg: this.svgInfinity(36) },
+            { id: 'yin-yang', label: 'Yin Yang', svg: this.svgYinYang(36) },
+            { id: 'cross', label: 'Celtic Cross', svg: this.svgCross(36) },
+            { id: 'moon', label: 'Crescent Moon', svg: this.svgMoon(36) },
+            { id: 'sun', label: 'Solar Disc', svg: this.svgSun(36) }
         ];
         return options.map(opt => `
             <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}" style="
@@ -350,6 +358,68 @@ class TutorialSystem {
         const r = 14; const c = (dx,dy)=>`<circle cx="${dx}" cy="${dy}" r="${r}" fill="none" stroke="#9b59b6" stroke-width="3"/>`;
         return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
             ${c(50,50)}${c(50,50-r)}${c(50,50+r)}${c(50-r*0.866,50-r*0.5)}${c(50+r*0.866,50-r*0.5)}${c(50-r*0.866,50+r*0.5)}${c(50+r*0.866,50+r*0.5)}
+        </svg>`;
+    }
+
+    svgCircle(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#00ff88" stroke-width="6"/>
+        </svg>`;
+    }
+
+    svgDiamond(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <polygon points="50,10 90,50 50,90 10,50" fill="none" stroke="#ff6b6b" stroke-width="6"/>
+        </svg>`;
+    }
+
+    svgPentagram(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <polygon points="50,5 61,35 95,35 68,57 79,87 50,65 21,87 32,57 5,35 39,35" fill="none" stroke="#ffd700" stroke-width="4"/>
+        </svg>`;
+    }
+
+    svgInfinity(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <path d="M20 50 a30,20 0 1,1 60,0 a30,20 0 1,1 -60,0" fill="none" stroke="#4ecdc4" stroke-width="6"/>
+        </svg>`;
+    }
+
+    svgYinYang(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#000" stroke-width="2"/>
+            <path d="M50,5 a45,45 0 0,1 0,90" fill="#000"/>
+            <path d="M50,5 a45,45 0 0,0 0,90" fill="#fff"/>
+            <circle cx="50" cy="25" r="15" fill="#000"/>
+            <circle cx="50" cy="75" r="15" fill="#fff"/>
+        </svg>`;
+    }
+
+    svgCross(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <rect x="40" y="20" width="20" height="60" fill="none" stroke="#8b4513" stroke-width="6"/>
+            <rect x="20" y="40" width="60" height="20" fill="none" stroke="#8b4513" stroke-width="6"/>
+            <circle cx="50" cy="50" r="8" fill="none" stroke="#8b4513" stroke-width="4"/>
+        </svg>`;
+    }
+
+    svgMoon(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <path d="M50,20 a30,30 0 0,1 0,60 a20,20 0 0,0 0,-60" fill="none" stroke="#c0c0c0" stroke-width="6"/>
+        </svg>`;
+    }
+
+    svgSun(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="25" fill="none" stroke="#ffd700" stroke-width="6"/>
+            <line x1="50" y1="5" x2="50" y2="15" stroke="#ffd700" stroke-width="4"/>
+            <line x1="50" y1="85" x2="50" y2="95" stroke="#ffd700" stroke-width="4"/>
+            <line x1="5" y1="50" x2="15" y2="50" stroke="#ffd700" stroke-width="4"/>
+            <line x1="85" y1="50" x2="95" y2="50" stroke="#ffd700" stroke-width="4"/>
+            <line x1="15" y1="15" x2="22" y2="22" stroke="#ffd700" stroke-width="4"/>
+            <line x1="78" y1="78" x2="85" y2="85" stroke="#ffd700" stroke-width="4"/>
+            <line x1="85" y1="15" x2="78" y2="22" stroke="#ffd700" stroke-width="4"/>
+            <line x1="15" y1="85" x2="22" y2="78" stroke="#ffd700" stroke-width="4"/>
         </svg>`;
     }
 
