@@ -232,28 +232,50 @@
         
         // Special handling for inventory panel with responsive design
         if (panelId === 'inventory-panel') {
+            console.log('🎒 togglePanel called for inventory-panel');
+            console.log('🎒 Panel element:', panel);
+            console.log('🎒 Panel classes before:', panel.className);
+            
             const isExpanded = panel.classList.contains('expanded');
+            console.log('🎒 Is currently expanded:', isExpanded);
             
             if (isExpanded) {
                 // Collapse to 1/5 width
+                console.log('🎒 Collapsing inventory panel');
                 panel.classList.remove('expanded');
                 panel.classList.add('collapsed');
-                panel.querySelector('.inventory-content').style.display = 'none';
+                const content = panel.querySelector('.inventory-content');
+                if (content) {
+                    content.style.display = 'none';
+                    console.log('🎒 Content hidden');
+                } else {
+                    console.warn('🎒 Content element not found');
+                }
                 // Update toggle button
                 const toggleBtn = panel.querySelector('.toggle-btn');
                 if (toggleBtn) toggleBtn.textContent = '⚡';
             } else {
                 // Expand to full width
+                console.log('🎒 Expanding inventory panel');
                 panel.classList.remove('collapsed');
                 panel.classList.add('expanded');
-                panel.querySelector('.inventory-content').style.display = 'block';
+                const content = panel.querySelector('.inventory-content');
+                if (content) {
+                    content.style.display = 'block';
+                    console.log('🎒 Content shown');
+                } else {
+                    console.warn('🎒 Content element not found');
+                }
                 // Update toggle button
                 const toggleBtn = panel.querySelector('.toggle-btn');
                 if (toggleBtn) toggleBtn.textContent = '⚡';
                 
                 // Populate content when expanding
+                console.log('🎒 Populating inventory content');
                 populateInventoryPanel();
             }
+            
+            console.log('🎒 Panel classes after:', panel.className);
             return;
         }
         

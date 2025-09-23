@@ -28,7 +28,72 @@ class GeolocationManager {
         this.checkGeolocationSupport();
         this.createDeviceLocationDisplay();
         this.startPeriodicUpdates();
+        this.setupBackgroundTracking();
         console.log('📍 Geolocation manager initialized');
+    }
+
+    setupBackgroundTracking() {
+        // Request high accuracy location for better background tracking
+        this.requestHighAccuracyLocation();
+        
+        // Set up visibility change handler to resume tracking when app becomes visible
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.isTracking) {
+                console.log('📍 App became visible, resuming location tracking');
+                this.startTracking();
+            }
+        });
+
+        // Set up page focus handler
+        window.addEventListener('focus', () => {
+            if (this.isTracking) {
+                console.log('📍 Page focused, resuming location tracking');
+                this.startTracking();
+            }
+        });
+
+        // Set up beforeunload handler to save position
+        window.addEventListener('beforeunload', () => {
+            if (this.currentPosition) {
+                localStorage.setItem('eldritch_last_position', JSON.stringify({
+                    lat: this.currentPosition.coords.latitude,
+                    lng: this.currentPosition.coords.longitude,
+                    timestamp: Date.now()
+                }));
+            }
+        });
+    }
+
+    async requestHighAccuracyLocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                console.warn('📍 Geolocation not supported');
+                resolve(false);
+                return;
+            }
+
+            console.log('📍 Requesting high accuracy location for background tracking...');
+            
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    console.log('📍 High accuracy location granted');
+                    this.currentPosition = position;
+                    this.lastValidPosition = position;
+                    resolve(true);
+                },
+                (error) => {
+                    console.warn('📍 High accuracy location denied:', error.message);
+                    resolve(false);
+                },
+                options
+            );
+        });
     }
 
     setupUI() {
@@ -185,11 +250,11 @@ class GeolocationManager {
             const position = await this.getPositionWithRetries();
             this.handlePositionUpdate(position);
 
-            // Start watching position with relaxed but generous timeouts
+            // Start watching position with optimized settings for background tracking
             const watchOptions = {
                 enableHighAccuracy: true,
-                timeout: 60000,
-                maximumAge: 15000
+                timeout: 30000, // 30 seconds timeout
+                maximumAge: 5000 // 5 seconds max age for fresher data
             };
             console.log('📍 Starting watchPosition with options:', watchOptions);
             this.watchId = navigator.geolocation.watchPosition(

@@ -58,12 +58,38 @@ class EldritchSanctuaryApp {
         // Inventory button
         const inventoryBtn = document.getElementById('mobile-inventory-btn');
         if (inventoryBtn) {
-            inventoryBtn.addEventListener('click', () => {
-                console.log('📱 Mobile inventory button clicked');
-                if (window.UIPanels && window.UIPanels.togglePanel) {
-                    window.UIPanels.togglePanel('inventory-panel');
-                }
+            console.log('📱 Found mobile inventory button, adding listeners...');
+            
+            // Add multiple event types for better mobile compatibility
+            ['click', 'touchend'].forEach(eventType => {
+                inventoryBtn.addEventListener(eventType, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`📱 Mobile inventory button ${eventType} triggered`);
+                    
+                    if (window.UIPanels && window.UIPanels.togglePanel) {
+                        console.log('📱 Calling togglePanel for inventory-panel');
+                        window.UIPanels.togglePanel('inventory-panel');
+                    } else {
+                        console.warn('📱 UIPanels or togglePanel not available');
+                    }
+                }, { passive: false });
             });
+            
+            // Add visual feedback for mobile
+            inventoryBtn.addEventListener('touchstart', (e) => {
+                inventoryBtn.style.transform = 'scale(0.95)';
+                inventoryBtn.style.opacity = '0.8';
+            });
+            
+            inventoryBtn.addEventListener('touchend', (e) => {
+                setTimeout(() => {
+                    inventoryBtn.style.transform = 'scale(1)';
+                    inventoryBtn.style.opacity = '1';
+                }, 100);
+            });
+        } else {
+            console.warn('📱 Mobile inventory button not found!');
         }
         
         // Locate button
