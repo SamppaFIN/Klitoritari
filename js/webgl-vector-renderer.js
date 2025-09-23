@@ -22,7 +22,12 @@ class WebGLVectorRenderer {
         this.mapCenter = { lat: 0, lng: 0 };
         this.mapBounds = null;
         
-        this.init();
+        // Check if WebGL context is valid before initializing
+        if (this.gl && this.gl.VERTEX_SHADER) {
+            this.init();
+        } else {
+            console.warn('🎨 WebGL context not available, skipping vector renderer initialization');
+        }
     }
 
     init() {

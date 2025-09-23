@@ -118,7 +118,13 @@ class DistortionEffectsCanvasLayer {
         this.canvas.style.opacity = this.opacity;
         this.canvas.style.transition = 'opacity 0.5s ease-in-out';
         
-        this.mapEngine.map.getPane('overlayPane').appendChild(this.canvas);
+        // Check if map engine and map are available
+        if (this.mapEngine && this.mapEngine.map && this.mapEngine.map.getPane) {
+            this.mapEngine.map.getPane('overlayPane').appendChild(this.canvas);
+        } else {
+            console.warn('🌀 Map engine not available, skipping distortion effects initialization');
+            return;
+        }
         this.ctx = this.canvas.getContext('2d');
         
         this.mapEngine.map.on('moveend zoomend resize', this.updateCanvasPositionAndSize.bind(this));
