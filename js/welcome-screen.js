@@ -926,8 +926,11 @@ class WelcomeScreen {
         }
 
         if (gpsBtn) {
-            if (status === 'success' || status === 'warning') {
+            if (status === 'success') {
                 gpsBtn.textContent = '✅ GPS Ready';
+                gpsBtn.disabled = true;
+            } else if (status === 'warning') {
+                gpsBtn.textContent = '⚠️ GPS Fallback Ready';
                 gpsBtn.disabled = true;
             } else if (status === 'loading') {
                 gpsBtn.textContent = '⏳ Requesting...';
@@ -953,7 +956,7 @@ class WelcomeScreen {
             startBtn.disabled = false;
         }
 
-        console.log('🎮 Game buttons enabled - GPS permission granted');
+        console.log('🎮 Game buttons enabled');
     }
 }
 
