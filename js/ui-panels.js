@@ -279,6 +279,43 @@
             return;
         }
         
+        // Enhanced handling for other panels (Quest Log, Base, Settings)
+        if (['quest-log-panel', 'base-management-panel', 'user-settings-panel'].includes(panelId)) {
+            console.log(`📋 togglePanel called for ${panelId}`);
+            
+            const isVisible = panel.style.display !== 'none';
+            console.log(`📋 Panel ${panelId} currently visible:`, isVisible);
+            
+            if (isVisible) {
+                // Hide panel
+                console.log(`📋 Hiding ${panelId}`);
+                panel.style.display = 'none';
+                panel.style.transform = 'translateY(100px)';
+                panel.style.opacity = '0';
+            } else {
+                // Show panel
+                console.log(`📋 Showing ${panelId}`);
+                panel.style.display = 'block';
+                panel.style.transform = 'translateY(0)';
+                panel.style.opacity = '1';
+                panel.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                
+                // Populate content based on panel type
+                switch (panelId) {
+                    case 'quest-log-panel':
+                        populateQuestLogPanel();
+                        break;
+                    case 'base-management-panel':
+                        populateBaseManagementPanel();
+                        break;
+                    case 'user-settings-panel':
+                        populateUserSettingsPanel();
+                        break;
+                }
+            }
+            return;
+        }
+        
         // Standard toggle for other panels
         const contentArea = panel.querySelector('div[id$="-list"]');
         if (!contentArea) return;
@@ -745,15 +782,43 @@
                 console.log(`🧪 Successfully used ${itemId}`);
                 // Refresh inventory display
                 populateInventoryPanel();
-                // Show notification
-                if (window.encounterSystem && window.encounterSystem.showNotification) {
-                    const item = window.itemSystem.getItem(itemId);
-                    window.encounterSystem.showNotification(`Used ${item.name}!`, 'success');
-                }
+                // Show visual feedback instead of notification
+                const item = window.itemSystem.getItem(itemId);
+                showItemUseFeedback(item);
             } else {
                 console.warn(`🧪 Failed to use ${itemId}`);
             }
         }
+    }
+    
+    function showItemUseFeedback(item) {
+        // Create a temporary visual feedback element
+        const feedback = document.createElement('div');
+        feedback.className = 'item-use-feedback';
+        feedback.innerHTML = `
+            <div class="feedback-content">
+                <span class="feedback-icon">${item.emoji || '💠'}</span>
+                <span class="feedback-text">Used ${item.name}!</span>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(feedback);
+        
+        // Animate in
+        setTimeout(() => {
+            feedback.classList.add('show');
+        }, 10);
+        
+        // Remove after animation
+        setTimeout(() => {
+            feedback.classList.add('hide');
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.parentNode.removeChild(feedback);
+                }
+            }, 300);
+        }, 2000);
     }
     
     function equipItem(itemId) {
@@ -767,10 +832,119 @@
     
     function showItemInfo(item) {
         console.log(`ℹ️ Showing info for: ${item.name}`);
-        // TODO: Implement item info modal
-        if (window.encounterSystem && window.encounterSystem.showNotification) {
-            window.encounterSystem.showNotification(`${item.name}: ${item.description}`, 'info');
-        }
+        
+        // Create item info modal
+        const modal = document.createElement('div');
+        modal.className = 'item-info-modal';
+        modal.innerHTML = `
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${item.name}</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="item-info-image">
+                        <span class="item-emoji-large">${item.emoji || '💠'}</span>
+                    </div>
+                    <div class="item-info-details">
+                        <p class="item-description">${item.description}</p>
+                        ${item.lore ? `<div class="item-lore"><p>${item.lore}</p></div>` : ''}
+                        ${item.stats ? `
+                            <div class="item-stats">
+                                <h4>Properties</h4>
+                                ${Object.entries(item.stats).map(([stat, value]) => `
+                                    <div class="stat-row">
+                                        <span class="stat-name">${stat}:</span>
+                                        <span class="stat-value">${value}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add to body
+        document.body.appendChild(modal);
+        
+        // Show modal
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+        
+        // Close modal handlers
+        modal.querySelector('.modal-close').addEventListener('click', () => {
+            modal.classList.add('hide');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 300);
+        });
+        
+        modal.querySelector('.modal-backdrop').addEventListener('click', () => {
+            modal.classList.add('hide');
+            setTimeout(() => {
+                if (modal.parentNode) {
+                    modal.parentNode.removeChild(modal);
+                }
+            }, 300);
+        });
+    }
+
+    function populateQuestLogPanel() {
+        const questList = document.getElementById('quest-log-list');
+        if (!questList) return;
+        
+        questList.innerHTML = `
+            <div class="quest-log-content">
+                <h3>Active Quests</h3>
+                <div class="quest-item">
+                    <h4>🌌 The Cosmic Awakening</h4>
+                    <p>Discover the mysteries of the cosmic convergence in Härmälä.</p>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%"></div>
+                        </div>
+                        <span class="progress-text">25% Complete</span>
+                    </div>
+                </div>
+                <div class="quest-item">
+                    <h4>🧪 First Steps</h4>
+                    <p>Collect your first health potion and learn the basics.</p>
+                    <div class="quest-status completed">✅ Completed</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function populateBaseManagementPanel() {
+        const baseList = document.getElementById('base-management-list');
+        if (!baseList) return;
+        
+        baseList.innerHTML = `
+            <div class="base-management-content">
+                <h3>🏠 Base Management</h3>
+                <div class="base-info">
+                    <h4>Current Base</h4>
+                    <p>No base established yet.</p>
+                    <button class="establish-base-btn">Establish Base</button>
+                </div>
+                <div class="base-stats">
+                    <h4>Base Statistics</h4>
+                    <div class="stat-item">
+                        <span class="stat-label">Territory Size:</span>
+                        <span class="stat-value">0 m²</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Connected Bases:</span>
+                        <span class="stat-value">0</span>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     function populateUserSettingsPanel() {

@@ -1973,8 +1973,8 @@ class EncounterSystem {
             this.applyItemEffects(item);
         }
         
-        // Show collection feedback
-        this.showNotification(`💎 Collected ${item.name}!`);
+        // Item collected silently (no notification needed)
+        console.log(`🎒 Collected ${item.name} silently`);
     }
 
     examineItem(item) {
@@ -2052,7 +2052,7 @@ class EncounterSystem {
                 }
                 break;
             default:
-                this.showNotification(`💎 Collected ${item.name}!`);
+                console.log(`🎒 Collected ${item.name} silently`);
         }
     }
 
