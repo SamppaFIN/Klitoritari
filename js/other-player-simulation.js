@@ -19,7 +19,8 @@ class OtherPlayerSimulation {
         console.log('👥 Other player simulation initialized');
         this.isInitialized = true;
         this.createDebugControls();
-        this.generateTestPlayers();
+        // Temporarily disabled for tutorial-first approach
+        // this.generateTestPlayers();
         this.startPlayerMovement();
         this.startEncounterDetection();
     }
@@ -313,6 +314,10 @@ class OtherPlayerSimulation {
     }
 
     testPvPEncounter() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('👥 PvP encounter testing disabled for tutorial-first approach');
+        return;
+        
         if (this.otherPlayers.length === 0) {
             this.addRandomPlayer();
         }
