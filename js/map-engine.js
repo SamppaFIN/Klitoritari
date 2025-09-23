@@ -2509,6 +2509,12 @@ class MapEngine {
         
         console.log('🎯 Creating special markers...');
         
+        // Check if markers already exist to prevent duplicates
+        if (this.specialMarkersCreated) {
+            console.log('🎯 Special markers already created, skipping');
+            return;
+        }
+        
         // Get player position for marker placement
         let baseLat = 61.47184564562671;
         let baseLng = 23.725938496942355;
@@ -2530,7 +2536,17 @@ class MapEngine {
         // Create monster markers
         this.createMonsterMarkers(baseLat, baseLng);
         
+        // Mark as created to prevent duplicates
+        this.specialMarkersCreated = true;
+        
         console.log('🎯 Special markers created');
+        
+        // Show tutorial after markers are created
+        if (window.tutorialSystem && !window.tutorialSystem.tutorialShown) {
+            setTimeout(() => {
+                window.tutorialSystem.showEncounterTutorial();
+            }, 1000);
+        }
     }
     
     createHEVYMarker(baseLat, baseLng) {

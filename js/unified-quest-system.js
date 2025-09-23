@@ -1303,124 +1303,7 @@ class UnifiedQuestSystem {
         return feedbackData[shrineId] || feedbackData.revive;
     }
 
-    // Create shrine markers on the map
-    createShrineMarkers() {
-        console.log('⛩️ Creating shrine markers...');
-        
-        if (!window.mapEngine || !window.mapEngine.map) {
-            console.warn('⛩️ Cannot create shrine markers - map engine not ready');
-            return;
-        }
-
-        // Initialize shrine markers storage if not exists
-        if (!this.shrineMarkers) {
-            this.shrineMarkers = new Map();
-        }
-
-        // Define shrine locations
-        const shrines = [
-            {
-                id: 'revive',
-                lat: 61.472843139814955,
-                lng: 23.72582986453225,
-                type: 'healing',
-                name: 'Revive Shrine',
-                emoji: '⛩️',
-                color: '#00ff00'
-            },
-            {
-                id: 'power',
-                lat: 61.473200000000000,
-                lng: 23.726000000000000,
-                type: 'power',
-                name: 'Power Shrine',
-                emoji: '⚡',
-                color: '#ff6b00'
-            },
-            {
-                id: 'wisdom',
-                lat: 61.472500000000000,
-                lng: 23.725000000000000,
-                type: 'wisdom',
-                name: 'Wisdom Shrine',
-                emoji: '🧠',
-                color: '#8b5cf6'
-            },
-            {
-                id: 'luck',
-                lat: 61.473000000000000,
-                lng: 23.724500000000000,
-                type: 'luck',
-                name: 'Luck Shrine',
-                emoji: '🍀',
-                color: '#10b981'
-            }
-        ];
-
-        shrines.forEach(shrine => {
-            // Check if shrine has already been used
-            if (this.usedShrines && this.usedShrines.has(shrine.id)) {
-                console.log(`⛩️ Shrine ${shrine.name} already used, skipping marker creation`);
-                return;
-            }
-
-            // Create shrine marker
-            const marker = L.marker([shrine.lat, shrine.lng], {
-                icon: L.divIcon({
-                    className: 'shrine-marker',
-                    html: `
-                        <div style="
-                            background: ${shrine.color};
-                            color: white;
-                            border: 2px solid white;
-                            border-radius: 50%;
-                            width: 30px;
-                            height: 30px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 16px;
-                            box-shadow: 0 0 10px ${shrine.color}80;
-                            animation: shrinePulse 2s infinite;
-                        ">
-                            ${shrine.emoji}
-                        </div>
-                        <style>
-                            @keyframes shrinePulse {
-                                0% { transform: scale(1); box-shadow: 0 0 10px ${shrine.color}80; }
-                                50% { transform: scale(1.1); box-shadow: 0 0 20px ${shrine.color}; }
-                                100% { transform: scale(1); box-shadow: 0 0 10px ${shrine.color}80; }
-                            }
-                        </style>
-                    `,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                })
-            });
-
-            // Add popup with shrine info
-            marker.bindPopup(`
-                <div style="text-align: center; font-family: 'Courier New', monospace;">
-                    <h3 style="color: ${shrine.color}; margin: 0 0 10px 0;">
-                        ${shrine.emoji} ${shrine.name} ${shrine.emoji}
-                    </h3>
-                    <p style="margin: 0; color: #666;">
-                        ${this.getShrineData(shrine).description}
-                    </p>
-                </div>
-            `);
-
-            // Add to map
-            marker.addTo(window.mapEngine.map);
-            
-            // Store marker reference
-            this.shrineMarkers.set(shrine.id, marker);
-            
-            console.log(`⛩️ Created ${shrine.name} marker at [${shrine.lat}, ${shrine.lng}]`);
-        });
-
-        console.log('⛩️ Shrine markers created successfully');
-    }
+    // Note: Shrine markers are now created by map engine to prevent duplicates
 
     // Remove shrine from map after use
     removeShrineFromMap(shrineId) {
@@ -3692,8 +3575,7 @@ class UnifiedQuestSystem {
         // Create Aurora marker (main quest giver)
         this.createAuroraMarker();
         
-        // Create shrine markers
-        this.createShrineMarkers();
+        // Note: Shrine markers are now created by map engine to prevent duplicates
         
         // Create markers for the first objective of each available quest
         this.availableQuests.forEach((quest, questId) => {

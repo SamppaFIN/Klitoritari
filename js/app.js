@@ -2439,6 +2439,10 @@ class EldritchSanctuaryApp {
         this.systems.distortionEffectsCanvasLayer = new DistortionEffectsCanvasLayer();
         this.systems.distortionEffectsCanvasLayer.init();
         
+        // Initialize tutorial system
+        this.systems.tutorial = new TutorialSystem();
+        this.systems.tutorial.init();
+        
         // Initialize other player simulation
         this.systems.otherPlayerSimulation = new OtherPlayerSimulation();
         this.systems.otherPlayerSimulation.init();
