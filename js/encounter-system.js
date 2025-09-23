@@ -52,6 +52,38 @@ class EncounterSystem {
             deathReason: null
         };
 
+        // Restore persisted stats
+        try {
+            const saved = window.sessionPersistence?.restoreStats?.();
+            if (saved) {
+                Object.assign(this.playerStats, saved);
+                console.log('💾 Restored player stats from session');
+            }
+        } catch (_) {}
+
+        // Restore inventory from session
+        try {
+            const inv = window.sessionPersistence?.restoreInventory?.();
+            if (Array.isArray(inv) && inv.length) {
+                this.playerStats.inventory = inv;
+                console.log('🎒 Restored inventory items:', inv.length);
+            }
+        } catch (_) {}
+
+        // Encounter state tracking
+        this.encounterState = {
+            monsters: new Set(),
+            items: new Set(),
+            pois: new Set(),
+            quests: new Set()
+        };
+        try {
+            const restored = window.sessionPersistence?.restoreEncounterState?.();
+            if (restored) {
+                this.encounterState = restored;
+                console.log('💾 Restored encounter state');
+            }
+        } catch (_) {}
         // Restore inventory from session
         try {
             const inv = window.sessionPersistence?.restoreInventory?.();
@@ -699,7 +731,23 @@ class EncounterSystem {
         }, 2000); // Check every 2 seconds
     }
 
+    // Returns true if welcome screen or tutorial is visible and gameplay should pause encounters
+    isUIBlockingGameplay() {
+        try {
+            const welcomeEl = document.getElementById('welcome-screen');
+            const welcomeVisible = !!(welcomeEl && welcomeEl.style.display !== 'none' && welcomeEl.style.display !== '');
+            const tutorialVisible = !!document.getElementById('tutorial-overlay');
+            // Also check welcome screen object if present
+            const welcomeFlag = (window.welcomeScreen && typeof window.welcomeScreen.isVisible === 'boolean') ? window.welcomeScreen.isVisible : false;
+            return welcomeVisible || tutorialVisible || welcomeFlag;
+        } catch (_) { return false; }
+    }
+
     checkAllEncounters() {
+        // Disable encounter checks while welcome/tutorial UI is active
+        if (this.isUIBlockingGameplay()) {
+            return;
+        }
         // Prevent duplicate dialogs
         if (this.isDialogOpen) {
             return;
@@ -753,6 +801,10 @@ class EncounterSystem {
     }
     
     checkProximityEncountersWithPosition(playerPos) {
+        // Skip proximity checks if welcome/tutorial is active
+        if (this.isUIBlockingGameplay()) {
+            return;
+        }
         console.log('🎭 Encounter system checking proximity at:', playerPos);
 
         // Debug: Log player position and nearby markers
@@ -768,8 +820,8 @@ class EncounterSystem {
         this.checkMysteryProximity(playerPos);
         this.checkQuestMarkerProximity(playerPos);
         
-        // Check for legendary encounters
-        this.checkLegendaryEncounters(playerPos);
+        // Legendary random spawns disabled for now
+        // this.checkLegendaryEncounters(playerPos);
         
         // Check for proximity warnings (within 100m)
         this.checkProximityWarnings(playerPos);
@@ -969,13 +1021,8 @@ class EncounterSystem {
     }
 
     checkLegendaryEncounters(playerPos) {
-        // Check for legendary encounters based on spawn chance
-        Object.values(this.legendaryEncounters).forEach(encounter => {
-            if (Math.random() < encounter.spawnChance) {
-                console.log('⚡ Legendary encounter chance triggered!');
-                this.startLegendaryEncounter(encounter);
-            }
-        });
+        // Random legendary encounters disabled
+        return;
     }
     
     startLegendaryEncounter(encounter) {
@@ -2136,7 +2183,7 @@ class EncounterSystem {
         const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
         
         // Simulate combat with dice rolls
-        const playerRoll = Math.random();
+        let playerRoll = Math.random();
         const monsterRoll = Math.random();
         
         // Calculate combat chances based on monster difficulty
@@ -2162,6 +2209,12 @@ class EncounterSystem {
         const playerLevel = Math.floor(this.playerStats.experience / 100) || 1;
         const levelBonus = Math.min(playerLevel * 0.05, 0.2); // Up to 20% bonus
         playerWinChance += levelBonus;
+
+        // Add moral bonus
+        try {
+            const moralBonus = window.eldritchApp?.systems?.moralChoice?.getCombatModifier?.() || 0;
+            playerWinChance += moralBonus;
+        } catch (_) {}
         
         this.showDialog(`You engage in combat with the ${monsterName}!`);
         
