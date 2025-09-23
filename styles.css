@@ -8999,7 +8999,7 @@ input[type="range"]::-moz-range-thumb {
     letter-spacing: 0.5px;
 }
 
-/* Enhanced Footer Panels - All panels get consistent styling */
+/* Enhanced Footer Panels - Tablist Behavior */
 .inventory-panel,
 .quest-log-panel,
 .base-management-panel,
@@ -9012,7 +9012,7 @@ input[type="range"]::-moz-range-thumb {
     border: 2px solid rgba(74, 158, 255, 0.4);
     border-radius: 12px;
     color: rgb(184, 212, 240);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
     overflow: hidden;
@@ -9020,19 +9020,34 @@ input[type="range"]::-moz-range-thumb {
     max-height: 70vh;
     width: 400px;
     min-width: 300px;
+    /* Tablist behavior - hidden by default */
+    display: none;
+    transform: translateY(100px);
+    opacity: 0;
 }
 
-/* Specific panel positioning */
-.quest-log-panel {
-    left: 440px; /* Next to inventory */
+/* Active panel state */
+.inventory-panel.active,
+.quest-log-panel.active,
+.base-management-panel.active,
+.user-settings-panel.active {
+    display: block;
+    transform: translateY(0);
+    opacity: 1;
+    border-color: rgba(74, 158, 255, 0.6);
+    box-shadow: 0 12px 40px rgba(74, 158, 255, 0.2);
 }
 
-.base-management-panel {
-    left: 860px; /* Next to quest log */
+/* Button active states */
+.toggle-btn.active {
+    background: rgba(74, 158, 255, 0.3);
+    border-color: rgba(74, 158, 255, 0.6);
+    color: #4a9eff;
 }
 
-.user-settings-panel {
-    left: 1280px; /* Next to base management */
+.toggle-btn.active .toggle-text {
+    color: #4a9eff;
+    text-shadow: 0 0 8px #4a9eff;
 }
 
 /* Collapsed state - 1/5 of screen width */

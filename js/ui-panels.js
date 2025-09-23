@@ -125,23 +125,34 @@
     }
 
     function wireButtons() {
-        // Individual panel toggle buttons
-        const inventoryToggle = document.getElementById('inventory-toggle');
-        const inventoryRefresh = document.getElementById('inventory-refresh');
-        const questToggle = document.getElementById('quest-log-toggle');
-        const baseToggle = document.getElementById('base-management-toggle');
-        const settingsToggle = document.getElementById('user-settings-toggle');
-        const debugFooterToggle = document.getElementById('debug-footer-toggle');
-
-        if (inventoryToggle) inventoryToggle.addEventListener('click', () => togglePanel('inventory-panel'));
-        if (inventoryRefresh) inventoryRefresh.addEventListener('click', () => {
-            console.log('🔄 Manual inventory refresh clicked');
-            populateInventoryPanel();
+        // Wire all toggle buttons using data-panel attributes (tablist behavior)
+        document.querySelectorAll('[data-panel]').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const panelId = button.getAttribute('data-panel');
+                console.log(`🎛️ Toggle button clicked for panel: ${panelId}`);
+                togglePanel(panelId);
+            });
         });
-        if (questToggle) questToggle.addEventListener('click', () => togglePanel('quest-log-panel'));
-        if (baseToggle) baseToggle.addEventListener('click', () => togglePanel('base-management-panel'));
-        if (settingsToggle) settingsToggle.addEventListener('click', () => togglePanel('user-settings-panel'));
-        if (debugFooterToggle) debugFooterToggle.addEventListener('click', () => togglePanel('debug-footer-panel'));
+        
+        // Inventory refresh button
+        const inventoryRefresh = document.getElementById('inventory-refresh');
+        if (inventoryRefresh) {
+            inventoryRefresh.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🔄 Manual inventory refresh clicked');
+                populateInventoryPanel();
+            });
+        }
+        
+        // Debug footer toggle (separate from tablist)
+        const debugFooterToggle = document.getElementById('debug-footer-toggle');
+        if (debugFooterToggle) {
+            debugFooterToggle.addEventListener('click', () => togglePanel('debug-footer-panel'));
+        }
 
         // Event delegation for debug footer buttons
         document.addEventListener('click', (e) => {
@@ -227,130 +238,77 @@
     }
 
     function togglePanel(panelId) {
-        const panel = document.getElementById(panelId);
-        if (!panel) return;
+        console.log(`🎛️ Tablist toggle called for: ${panelId}`);
         
-        // Special handling for inventory panel with responsive design
-        if (panelId === 'inventory-panel') {
-            console.log('🎒 togglePanel called for inventory-panel');
-            console.log('🎒 Panel element:', panel);
-            console.log('🎒 Panel classes before:', panel.className);
-            
-            const isExpanded = panel.classList.contains('expanded');
-            console.log('🎒 Is currently expanded:', isExpanded);
-            
-            if (isExpanded) {
-                // Collapse to 1/5 width
-                console.log('🎒 Collapsing inventory panel');
-                panel.classList.remove('expanded');
-                panel.classList.add('collapsed');
-                const content = panel.querySelector('.inventory-content');
-                if (content) {
-                    content.style.display = 'none';
-                    console.log('🎒 Content hidden');
-                } else {
-                    console.warn('🎒 Content element not found');
-                }
-                // Update toggle button
-                const toggleBtn = panel.querySelector('.toggle-btn');
-                if (toggleBtn) toggleBtn.textContent = '⚡';
-            } else {
-                // Expand to full width
-                console.log('🎒 Expanding inventory panel');
-                panel.classList.remove('collapsed');
-                panel.classList.add('expanded');
-                const content = panel.querySelector('.inventory-content');
-                if (content) {
-                    content.style.display = 'block';
-                    console.log('🎒 Content shown');
-                } else {
-                    console.warn('🎒 Content element not found');
-                }
-                // Update toggle button
-                const toggleBtn = panel.querySelector('.toggle-btn');
-                if (toggleBtn) toggleBtn.textContent = '⚡';
-                
-                // Populate content when expanding
-                console.log('🎒 Populating inventory content');
-                populateInventoryPanel();
-            }
-            
-            console.log('🎒 Panel classes after:', panel.className);
-            return;
-        }
+        // Get all footer panels
+        const allPanels = [
+            'inventory-panel',
+            'quest-log-panel', 
+            'base-management-panel',
+            'user-settings-panel'
+        ];
         
-        // Enhanced handling for other panels (Quest Log, Base, Settings)
-        if (['quest-log-panel', 'base-management-panel', 'user-settings-panel'].includes(panelId)) {
-            console.log(`📋 togglePanel called for ${panelId}`);
-            
-            const isVisible = panel.style.display !== 'none';
-            console.log(`📋 Panel ${panelId} currently visible:`, isVisible);
-            
-            if (isVisible) {
-                // Hide panel
-                console.log(`📋 Hiding ${panelId}`);
+        // Check if this panel is currently active
+        const targetPanel = document.getElementById(panelId);
+        const isCurrentlyActive = targetPanel && targetPanel.classList.contains('active');
+        
+        console.log(`🎛️ Panel ${panelId} currently active:`, isCurrentlyActive);
+        
+        // Close all panels first
+        allPanels.forEach(pid => {
+            const panel = document.getElementById(pid);
+            if (panel) {
+                panel.classList.remove('active');
                 panel.style.display = 'none';
                 panel.style.transform = 'translateY(100px)';
                 panel.style.opacity = '0';
-            } else {
-                // Show panel
-                console.log(`📋 Showing ${panelId}`);
-                panel.style.display = 'block';
-                panel.style.transform = 'translateY(0)';
-                panel.style.opacity = '1';
-                panel.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                 
-                // Populate content based on panel type
-                switch (panelId) {
-                    case 'quest-log-panel':
-                        populateQuestLogPanel();
-                        break;
-                    case 'base-management-panel':
-                        populateBaseManagementPanel();
-                        break;
-                    case 'user-settings-panel':
-                        populateUserSettingsPanel();
-                        break;
+                // Update button states
+                const button = document.querySelector(`[data-panel="${pid}"]`);
+                if (button) {
+                    button.classList.remove('active');
+                    const toggleText = button.querySelector('.toggle-text');
+                    if (toggleText) toggleText.textContent = '⚡';
                 }
             }
-            return;
-        }
+        });
         
-        // Standard toggle for other panels
-        const contentArea = panel.querySelector('div[id$="-list"]');
-        if (!contentArea) return;
-        
-        const isHidden = contentArea.style.display === 'none';
-        
-        // Handle different display types based on panel
-        contentArea.style.display = isHidden ? 'block' : 'none';
-        
-        // Update button text
-        const toggleBtn = panel.querySelector('button');
-        if (toggleBtn) {
-            toggleBtn.textContent = isHidden ? 'Hide' : 'Toggle';
-        }
-        
-        // Add visual feedback for expanded state
-        if (isHidden) {
-            panel.style.borderColor = 'rgba(74, 158, 255, 0.6)';
-            panel.style.boxShadow = '0 0 15px rgba(74, 158, 255, 0.3)';
-        } else {
-            panel.style.borderColor = 'rgba(74, 158, 255, 0.3)';
-            panel.style.boxShadow = 'none';
-        }
-        
-        // Populate panel content when opening
-        if (isHidden) {
-            if (panelId === 'quest-log-panel') {
-                populateQuestLogPanel();
-            } else if (panelId === 'base-management-panel') {
-                populateBaseManagementPanel();
-            } else if (panelId === 'user-settings-panel') {
-                populateUserSettingsPanel();
-            } else if (panelId === 'debug-footer-panel') {
-                populateDebugFooterPanel();
+        // If the clicked panel wasn't active, open it
+        if (!isCurrentlyActive && targetPanel) {
+            console.log(`🎛️ Opening panel: ${panelId}`);
+            
+            // Show the target panel
+            targetPanel.classList.add('active');
+            targetPanel.style.display = 'block';
+            targetPanel.style.transform = 'translateY(0)';
+            targetPanel.style.opacity = '1';
+            targetPanel.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Update button state
+            const button = document.querySelector(`[data-panel="${panelId}"]`);
+            if (button) {
+                button.classList.add('active');
+                const toggleText = button.querySelector('.toggle-text');
+                if (toggleText) toggleText.textContent = '⚡';
             }
+            
+            // Populate content based on panel type
+            switch (panelId) {
+                case 'inventory-panel':
+                    populateInventoryPanel();
+                    break;
+                case 'quest-log-panel':
+                    populateQuestLogPanel();
+                    break;
+                case 'base-management-panel':
+                    populateBaseManagementPanel();
+                    break;
+                case 'user-settings-panel':
+                    populateUserSettingsPanel();
+                    break;
+            }
+        } else {
+            console.log(`🎛️ Panel ${panelId} closed (tablist behavior)`);
         }
     }
 

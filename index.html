@@ -241,7 +241,9 @@
             </div>
             <div class="inventory-controls">
                 <button id="inventory-refresh" class="inventory-btn refresh-btn" title="Refresh">🔄</button>
-                <button id="inventory-toggle" class="inventory-btn toggle-btn" title="Toggle Panel">⚡</button>
+                <button id="inventory-toggle" class="inventory-btn toggle-btn" data-panel="inventory-panel" title="Toggle Panel">
+                    <span class="toggle-text">⚡</span>
+                </button>
             </div>
         </div>
         <div id="inventory-list" class="inventory-content">
@@ -253,7 +255,9 @@
     <div id="quest-log-panel" style="position: fixed; bottom: 20px; left: 200px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">📜 Quest Log</div>
-            <button id="quest-log-toggle" class="debug-btn" style="padding:4px 8px;">Toggle</button>
+            <button id="quest-log-toggle" class="debug-btn" data-panel="quest-log-panel" style="padding:4px 8px;">
+                <span class="toggle-text">⚡</span>
+            </button>
         </div>
         <div id="quest-log-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">No active quests</div></div>
     </div>
@@ -262,7 +266,9 @@
     <div id="base-management-panel" style="position: fixed; bottom: 20px; left: 380px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">🏗️ Base</div>
-            <button id="base-management-toggle" class="debug-btn" style="padding:4px 8px;">Toggle</button>
+            <button id="base-management-toggle" class="debug-btn" data-panel="base-management-panel" style="padding:4px 8px;">
+                <span class="toggle-text">⚡</span>
+            </button>
         </div>
         <div id="base-management-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">No base established</div></div>
     </div>
@@ -271,7 +277,9 @@
     <div id="user-settings-panel" style="position: fixed; bottom: 20px; left: 560px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">⚙️ Settings</div>
-            <button id="user-settings-toggle" class="debug-btn" style="padding:4px 8px;">Toggle</button>
+            <button id="user-settings-toggle" class="debug-btn" data-panel="user-settings-panel" style="padding:4px 8px;">
+                <span class="toggle-text">⚡</span>
+            </button>
         </div>
         <div id="user-settings-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">Profile settings</div></div>
     </div>
