@@ -232,67 +232,109 @@
         </div>
     </div>
     
-    <!-- Inventory Panel (floating) -->
-    <div id="inventory-panel" class="inventory-panel">
-        <div class="inventory-header">
-            <div class="inventory-title">
-                <span class="inventory-icon">🎒</span>
-                <span class="inventory-text">Inventory</span>
+    <!-- Footer Tablist -->
+    <div class="footer-tablist" role="tablist" aria-orientation="horizontal">
+        <button class="tab-button active" role="tab" aria-selected="true" aria-controls="panel-inventory" id="tab-inventory" tabindex="0">
+            <span class="tab-icon">🎒</span>
+            <span class="tab-label">Inventory</span>
+        </button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="panel-quest" id="tab-quest" tabindex="-1">
+            <span class="tab-icon">📜</span>
+            <span class="tab-label">Quest Log</span>
+        </button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="panel-base" id="tab-base" tabindex="-1">
+            <span class="tab-icon">🏗️</span>
+            <span class="tab-label">Base</span>
+        </button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="panel-settings" id="tab-settings" tabindex="-1">
+            <span class="tab-icon">⚙️</span>
+            <span class="tab-label">Settings</span>
+        </button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="panel-debug" id="tab-debug" tabindex="-1">
+            <span class="tab-icon">🔧</span>
+            <span class="tab-label">Debug</span>
+        </button>
+    </div>
+
+    <!-- Tab Panels -->
+    <div class="tab-panels">
+        <!-- Inventory Panel -->
+        <div class="tab-panel active" role="tabpanel" aria-labelledby="tab-inventory" id="panel-inventory">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">🎒</span>
+                    <span class="panel-text">Inventory</span>
+                </div>
+                <div class="panel-controls">
+                    <button id="inventory-refresh" class="panel-btn refresh-btn" title="Refresh">🔄</button>
+                </div>
             </div>
-            <div class="inventory-controls">
-                <button id="inventory-refresh" class="inventory-btn refresh-btn" title="Refresh">🔄</button>
-                <button id="inventory-toggle" class="inventory-btn toggle-btn" data-panel="inventory-panel" title="Toggle Panel">
-                    <span class="toggle-text">⚡</span>
-                </button>
+            <div class="panel-content">
+                <div class="inventory-items" id="inventory-list">
+                    <div class="inventory-empty">No items</div>
+                </div>
             </div>
         </div>
-        <div id="inventory-list" class="inventory-content">
-            <div class="inventory-empty">No items</div>
-        </div>
-    </div>
 
-    <!-- Quest Log Panel (floating) -->
-    <div id="quest-log-panel" style="position: fixed; bottom: 20px; left: 200px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">📜 Quest Log</div>
-            <button id="quest-log-toggle" class="debug-btn" data-panel="quest-log-panel" style="padding:4px 8px;">
-                <span class="toggle-text">⚡</span>
-            </button>
+        <!-- Quest Log Panel -->
+        <div class="tab-panel" role="tabpanel" aria-labelledby="tab-quest" id="panel-quest" aria-hidden="true">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">📜</span>
+                    <span class="panel-text">Quest Log</span>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div id="quest-log-list">
+                    <div class="quest-empty">No active quests</div>
+                </div>
+            </div>
         </div>
-        <div id="quest-log-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">No active quests</div></div>
-    </div>
 
-    <!-- Base Management Panel (floating) -->
-    <div id="base-management-panel" style="position: fixed; bottom: 20px; left: 380px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">🏗️ Base</div>
-            <button id="base-management-toggle" class="debug-btn" data-panel="base-management-panel" style="padding:4px 8px;">
-                <span class="toggle-text">⚡</span>
-            </button>
+        <!-- Base Management Panel -->
+        <div class="tab-panel" role="tabpanel" aria-labelledby="tab-base" id="panel-base" aria-hidden="true">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">🏗️</span>
+                    <span class="panel-text">Base Management</span>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div id="base-management-list">
+                    <div class="base-empty">No base established</div>
+                </div>
+            </div>
         </div>
-        <div id="base-management-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">No base established</div></div>
-    </div>
 
-    <!-- User Settings Panel (floating) -->
-    <div id="user-settings-panel" style="position: fixed; bottom: 20px; left: 560px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">⚙️ Settings</div>
-            <button id="user-settings-toggle" class="debug-btn" data-panel="user-settings-panel" style="padding:4px 8px;">
-                <span class="toggle-text">⚡</span>
-            </button>
+        <!-- Settings Panel -->
+        <div class="tab-panel" role="tabpanel" aria-labelledby="tab-settings" id="panel-settings" aria-hidden="true">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">⚙️</span>
+                    <span class="panel-text">Settings</span>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div id="user-settings-list">
+                    <div class="settings-empty">Profile settings</div>
+                </div>
+            </div>
         </div>
-        <div id="user-settings-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">Profile settings</div></div>
-    </div>
 
-    <!-- Debug Panel (floating) -->
-    <div id="debug-footer-panel" style="position: fixed; bottom: 20px; left: 740px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">🔧 Debug</div>
-            <button id="debug-footer-toggle" class="debug-btn" data-panel="debug-footer-panel" style="padding:4px 8px;">
-                <span class="toggle-text">⚡</span>
-            </button>
+        <!-- Debug Panel -->
+        <div class="tab-panel" role="tabpanel" aria-labelledby="tab-debug" id="panel-debug" aria-hidden="true">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span class="panel-icon">🔧</span>
+                    <span class="panel-text">Debug</span>
+                </div>
+            </div>
+            <div class="panel-content">
+                <div id="debug-footer-list">
+                    <div class="debug-empty">Debug tools available</div>
+                </div>
+            </div>
         </div>
-        <div id="debug-footer-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none;"><div style="opacity:0.7;">Debug tools available</div></div>
     </div>
     
 
@@ -621,6 +663,7 @@
     <script src="js/webgl-test.js"></script>
     <script src="js/app.js"></script>
     <script src="js/step-currency-system.js"></script>
+    <script src="js/tablist.js"></script>
     <script src="js/ui-panels.js"></script>
     
     

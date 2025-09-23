@@ -125,6 +125,10 @@
     }
 
     function wireButtons() {
+        // DISABLED - Using new tablist.js instead
+        console.log('🎛️ Old UI panels disabled - using tablist.js');
+        return;
+        
         // Wire all toggle buttons using data-panel attributes (tablist behavior)
         document.querySelectorAll('[data-panel]').forEach(button => {
             button.addEventListener('click', (e) => {
