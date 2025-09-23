@@ -322,14 +322,18 @@ class TutorialEncounterSystem {
             window.mapEngine.clearAllSpecialMarkers();
         }
 
-        // Clear quest markers
-        if (window.unifiedQuestSystem) {
+        // Clear quest markers (only if API exists)
+        if (window.unifiedQuestSystem && typeof window.unifiedQuestSystem.clearAllQuestMarkers === 'function') {
             window.unifiedQuestSystem.clearAllQuestMarkers();
+        } else {
+            console.log('🎓 Skipping quest marker clear (API unavailable)');
         }
 
-        // Clear NPC markers
-        if (window.npcSystem) {
+        // Clear NPC markers (only if API exists)
+        if (window.npcSystem && typeof window.npcSystem.clearAllNPCs === 'function') {
             window.npcSystem.clearAllNPCs();
+        } else {
+            console.log('🎓 Skipping NPC clear (API unavailable)');
         }
 
         // Clear any spawned tutorial objects
