@@ -1958,7 +1958,7 @@ class EncounterSystem {
                 // Direct DOM update as fallback
                 const healthEl = document.getElementById('health-value');
                 if (healthEl) {
-                    healthEl.textContent = newHealth;
+                    healthEl.textContent = `${newHealth}/${maxHealth}`;
                 }
                 
                 this.showNotification(`🧪 Health restored by 20! Now ${newHealth}/${maxHealth}`);
@@ -1978,7 +1978,7 @@ class EncounterSystem {
                 // Direct DOM update as fallback
                 const sanityEl = document.getElementById('sanity-value');
                 if (sanityEl) {
-                    sanityEl.textContent = newSanity;
+                    sanityEl.textContent = `${newSanity}/${maxSanity}`;
                 }
                 
                 this.showNotification(`🧠 Sanity restored by 15! Now ${newSanity}/${maxSanity}`);
