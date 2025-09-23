@@ -190,11 +190,7 @@ class WelcomeScreen {
         this.hideWelcomeScreen();
         
         // Show notification
-        if (window.app && window.app.showNotification) {
-            window.app.showNotification('🌟 Hello Cosmic Explorer! What is your name?');
-        } else {
-            console.log('🌟 Hello Cosmic Explorer! What is your name?');
-        }
+        this.showWelcomeNotification('🌟 Hello Cosmic Explorer! What is your name?');
         
         // Show user settings modal
         const modal = document.getElementById('user-settings-modal');
@@ -379,6 +375,88 @@ class WelcomeScreen {
         }
         
         this.proceedWithGameStart();
+    }
+
+    showWelcomeNotification(message) {
+        // Create a beautiful notification overlay
+        const notification = document.createElement('div');
+        notification.id = 'welcome-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.8) 100%);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 20px 30px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            animation: welcomeNotificationSlideIn 0.5s ease-out;
+            max-width: 400px;
+            word-wrap: break-word;
+        `;
+        
+        notification.innerHTML = `
+            <div style="margin-bottom: 10px; font-size: 24px;">${message}</div>
+            <div style="font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-top: 10px;">
+                Choose your cosmic identity below
+            </div>
+        `;
+        
+        // Add CSS animation
+        if (!document.getElementById('welcome-notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'welcome-notification-styles';
+            style.textContent = `
+                @keyframes welcomeNotificationSlideIn {
+                    from {
+                        opacity: 0;
+                        transform: translate(-50%, -60%);
+                        scale: 0.8;
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate(-50%, -50%);
+                        scale: 1;
+                    }
+                }
+                @keyframes welcomeNotificationSlideOut {
+                    from {
+                        opacity: 1;
+                        transform: translate(-50%, -50%);
+                        scale: 1;
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translate(-50%, -40%);
+                        scale: 0.8;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            if (notification && notification.parentNode) {
+                notification.style.animation = 'welcomeNotificationSlideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification && notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 4000);
+        
+        // Also log to console for debugging
+        console.log('🌟 Welcome notification:', message);
     }
 
     cancelIdentitySetup() {
