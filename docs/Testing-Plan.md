@@ -1,5 +1,7 @@
 # Testing Plan — Cosmic Map Engine
 
+> Status banner: All features below are currently marked as Untested pending full QA pass on 2025-09-23. Execute the manual/integration plan in order and update statuses after verification.
+
 ## Feature List — Eldritch Sanctuary Platform
 
 ### **Core Map Features**
@@ -57,7 +59,7 @@
 ### **UI/UX Features**
 - **Debug Panel**: Unified draggable interface with tabbed organization
 - **Settings Panel**: Player marker customization and system configuration
-- **Notification System**: Centered notifications with smooth animations
+- **Notification System**: Centered notifications with smooth animations (Untested for join/leave)
 - **Tutorial System**: Contextual help and guidance messages
 - **Mobile Optimization**: Touch-friendly interface with responsive design
 - **Accessibility**: Screen reader support and keyboard navigation
@@ -72,9 +74,11 @@
 ### **Multiplayer Features**
 - **WebSocket Communication**: Real-time position sharing and collaboration
 - **Other Player Simulation**: AI-driven NPC players for testing
-- **Position Sharing**: Live player positions and movement tracking
-- **Multiplayer Status**: Connection status and player count display
-- **Session Management**: Isolated sessions with proper cleanup
+- **Position Sharing**: Live player positions and movement tracking (Untested)
+- **Multiplayer Status**: Connection status, player count, and connected names (Untested)
+- **Session Management**: Isolated sessions with proper cleanup (Untested)
+- **Flag Replication**: Persisted remote pins, ownerId, rebroadcast on connect (Untested)
+- **Manual Reload**: Trigger request_flags to pull all remote pins (Untested)
 
 ### **PWA Features**
 - **Mobile Installation**: "Add to Home Screen" functionality
@@ -196,7 +200,9 @@
 - **Marker Customization**:
   - Side panel emoji/color controls update player marker immediately and persist across reloads.
 - **Multiplayer Hooks**:
-  - Multiplayer status text updates every 2s; simulated players render markers and are removable.
+  - Multiplayer status text updates every 2s; simulated players render markers and are removable. (Untested)
+  - Joining another tab shows a join notification and adds name to the green pill. (Untested)
+  - Remote flags appear within ~2s and persist after reload. (Untested)
 - **Direct Map Interactions**:
   - Walking within 50m of monster markers triggers combat encounters automatically.
   - Walking within 50m of item markers triggers collection dialogs automatically.

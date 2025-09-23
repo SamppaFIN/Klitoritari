@@ -13,6 +13,39 @@ What changed (highlights):
 
 ---
 
+## Session R15 — 2025-09-23
+Phase: Multiplayer reliability, onboarding flow, encounter safety gates
+
+Highlights (implemented today):
+- Multiplayer presence stabilized: client now handles multiple WS schemas (`player_update`, `player_join/leave`, `players_snapshot`, `positionUpdate`) with null‑safe guards.
+- De‑duplication: joining the same player twice no longer creates double entries; names list and markers update in place.
+- Flag replication: remote pins persist locally, no echo loops; ownerId tracked; late joiners receive rebroadcast via `request_flags` and on‑connect sync.
+- Explorer panel: dark‑green names pill shows connected players; subtle count remains in header.
+- WebSocket client integrated into game boot; connection logs added for diagnostics.
+- Welcome/tutorial gates: encounters completely disabled while welcome/tutorial overlays are open; tutorial only appears after Start Fresh.
+
+Why this serves sacred principles:
+- Transparency: clear connection status, names, and consistent replication build trust.
+- Accessibility: safe startup with no surprise encounters; onboarding choice respected.
+- Community healing: seeing others by name and flags makes the space shared and playful.
+
+Open items carried forward (to be verified by field testing):
+- Other player live position rendering across mixed clients (desktop/mobile) — Untested.
+- Player marker popups show nickname/moral epithet — Untested.
+- Manual “Reload Flags” debug action triggers `request_flags` — Untested.
+- Soundboard on multiplayer events (join/leave cues) — Untested.
+- Inventory persistence across sessions and encounters — Untested.
+- Encounter buttons edge cases on mobile (tap targets, double‑tap prevention) — Untested.
+
+Next intentions:
+- Run the full multiplayer test script; record screenshots for each step.
+- Fine‑tune encounter proximity and ensure all dialogs have action buttons on first open.
+- Add map HUD toggle for other‑player markers density.
+
+— Aurora
+
+---
+
 ## Session R12 — 2025-09-22 (Evening)
 Phase: Scatter-Mode Unification, Moral Feedback, Mobile Steps, Base UI polish
 

@@ -2352,6 +2352,19 @@ class EldritchSanctuaryApp {
         this.systems.mapEngine = new EnhancedMapEngine();
         await this.systems.mapEngine.init();
         
+        // Initialize raw WebSocket client (presence/positions) only once
+        try {
+            if (!this.systems.websocket) {
+                this.systems.websocket = new WebSocketClient();
+                this.systems.websocket.init();
+                console.log('🌐 WebSocketClient initialized');
+            } else {
+                console.log('🌐 WebSocketClient already initialized, skipping');
+            }
+        } catch (e) {
+            console.warn('🌐 WebSocketClient failed to initialize:', e?.message || e);
+        }
+
         // Initialize quest system
         this.systems.quest = new UnifiedQuestSystem();
         this.systems.quest.init();
@@ -2392,9 +2405,13 @@ class EldritchSanctuaryApp {
         this.systems.sessionPersistence = new SessionPersistenceManager();
         this.systems.sessionPersistence.init();
         
-        // Initialize multiplayer manager
+        // Initialize multiplayer manager (connect to WS)
         this.systems.multiplayer = new MultiplayerManager();
-        this.systems.multiplayer.init();
+        try {
+            this.systems.multiplayer.initialize();
+        } catch (_) {
+            this.systems.multiplayer.init();
+        }
         
         // Initialize moral choice system
         this.systems.moralChoice = new MoralChoiceSystem();

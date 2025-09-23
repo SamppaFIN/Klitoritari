@@ -26,7 +26,7 @@ class MultiplayerManager {
             this.serverUrl = window.ELDRITCH_WS_URL;
         }
         
-        console.log('🌐 MultiplayerManager initialized');
+        console.log('🌐 MultiplayerManager initialized, WS URL:', this.serverUrl);
     }
 
     init() {
@@ -64,6 +64,7 @@ class MultiplayerManager {
     connect() {
         return new Promise((resolve, reject) => {
             try {
+                console.log('🌐 Attempting WebSocket connect to:', this.serverUrl);
                 this.websocket = new WebSocket(this.serverUrl);
                 
                 this.websocket.onopen = () => {
@@ -73,11 +74,15 @@ class MultiplayerManager {
                     
                     // Send initial player data using both schemas for compatibility
                     this.sendPlayerData();
-                    this.sendMessage({
-                        type: 'player_join',
-                        playerId: this.playerId,
-                        playerData: this.getCurrentPlayerData() || {}
-                    });
+                    // Avoid double-join: only send player_join if we have not yet announced
+                    if (!this._announcedJoin) {
+                        this._announcedJoin = true;
+                        this.sendMessage({
+                            type: 'player_join',
+                            playerId: this.playerId,
+                            playerData: this.getCurrentPlayerData() || {}
+                        });
+                    }
                     // After connecting, broadcast our existing flags so late joiners see them
                     setTimeout(() => this.sendExistingFlags(), 300);
                     resolve();
@@ -87,14 +92,14 @@ class MultiplayerManager {
                     this.handleMessage(JSON.parse(event.data));
                 };
                 
-                this.websocket.onclose = () => {
-                    console.log('🌐 WebSocket disconnected');
+                this.websocket.onclose = (ev) => {
+                    console.log('🌐 WebSocket disconnected', { code: ev.code, reason: ev.reason });
                     this.isConnected = false;
                     this.attemptReconnect();
                 };
                 
                 this.websocket.onerror = (error) => {
-                    console.error('🌐 WebSocket error:', error);
+                    console.error('🌐 WebSocket error (verify server reachable and WS path /ws):', error);
                     reject(error);
                 };
                 
@@ -157,7 +162,9 @@ class MultiplayerManager {
     handleMessage(data) {
         switch (data.type) {
             case 'player_update':
-                this.updatePlayer(data.playerId, data.playerData);
+                if (data && data.playerId && data.playerData) {
+                    this.updatePlayer(data.playerId, data.playerData);
+                }
                 break;
             case 'playerCount':
                 // Server broadcast with total players online
@@ -176,6 +183,21 @@ class MultiplayerManager {
                 break;
             case 'player_leave':
                 this.removePlayer(data.playerId);
+                break;
+            case 'playerJoin':
+                if (data.payload) {
+                    this.addPlayer(data.payload.playerId, data.payload.playerData || {});
+                }
+                break;
+            case 'playerLeave':
+                if (data.payload && data.payload.playerId) {
+                    this.removePlayer(data.payload.playerId);
+                }
+                break;
+            case 'positionUpdate':
+                if (data.payload && data.payload.playerId && data.payload.position) {
+                    this.updatePlayer(data.payload.playerId, { position: data.payload.position, profile: {} });
+                }
                 break;
             case 'players_snapshot':
                 if (Array.isArray(data.payload)) {
@@ -279,6 +301,7 @@ class MultiplayerManager {
      */
     updatePlayer(playerId, playerData) {
         if (playerId === this.playerId) return; // Don't update self
+        if (!playerData || !playerData.position) return;
         
         this.players.set(playerId, {
             ...playerData,
@@ -286,17 +309,26 @@ class MultiplayerManager {
         });
         
         this.renderOtherPlayer(playerId, playerData);
+
+        // Update player names list
+        this.updatePlayerNamesDisplay();
     }
     
     /**
      * Add new player
      */
     addPlayer(playerId, playerData) {
+        if (playerId === this.playerId) return;
+        // De-duplicate: if already known, just update position/profile
+        if (this.players.has(playerId)) {
+            const prev = this.players.get(playerId) || {};
+            this.players.set(playerId, { ...prev, ...playerData, lastSeen: Date.now() });
+            this.renderOtherPlayer(playerId, this.players.get(playerId));
+            this.updatePlayerNamesDisplay();
+            return;
+        }
         console.log('🌐 Player joined:', playerId);
-        this.players.set(playerId, {
-            ...playerData,
-            lastSeen: Date.now()
-        });
+        this.players.set(playerId, { ...playerData, lastSeen: Date.now() });
         
         this.renderOtherPlayer(playerId, playerData);
         
@@ -310,6 +342,7 @@ class MultiplayerManager {
 
         // Update subtle player count (self + others we know)
         this.updatePlayerCountDisplay(this.players.size + 1);
+        this.updatePlayerNamesDisplay();
     }
     
     /**
@@ -322,6 +355,7 @@ class MultiplayerManager {
 
         // Update subtle player count (self + others we know)
         this.updatePlayerCountDisplay(this.players.size + 1);
+        this.updatePlayerNamesDisplay();
     }
     
     /**
@@ -330,8 +364,10 @@ class MultiplayerManager {
     renderOtherPlayer(playerId, playerData) {
         if (!window.mapEngine) return;
         
-        const { position, markerConfig, profile } = playerData;
-        if (!position || !markerConfig) return;
+        const position = playerData?.position;
+        if (!position) return;
+        const markerConfig = playerData?.markerConfig || (window.mapEngine.getPlayerMarkerConfig ? window.mapEngine.getPlayerMarkerConfig() : {});
+        const profile = playerData?.profile || {};
         
         // Check if player is within sync radius
         const distance = this.calculateDistance(
@@ -494,6 +530,34 @@ class MultiplayerManager {
         } catch (_) {
             // no-op
         }
+    }
+
+    /**
+     * Update the list of connected player names beneath the count
+     */
+    updatePlayerNamesDisplay() {
+        try {
+            const namesEl = document.getElementById('player-names');
+            if (!namesEl) return;
+
+            // Current player name
+            let myName = 'You';
+            try {
+                const prof = window.sessionPersistence?.restoreProfile?.();
+                if (prof?.name) myName = prof.name;
+            } catch (_) {}
+
+            const names = [myName];
+            for (const [pid, pdata] of this.players.entries()) {
+                const n = pdata?.profile?.name || 'Explorer';
+                names.push(n);
+            }
+            // Limit length; show first few then +N
+            const maxShown = 4;
+            const shown = names.slice(0, maxShown);
+            const extra = names.length - shown.length;
+            namesEl.textContent = extra > 0 ? `${shown.join(', ')} +${extra}` : shown.join(', ');
+        } catch (_) {}
     }
 }
 
