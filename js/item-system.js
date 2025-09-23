@@ -416,10 +416,17 @@ class ItemSystem {
         
         // Update UI inventory panel
         try {
+            console.log('🎒 Attempting to update UI inventory panel...');
             if (window.UIPanels && window.UIPanels.populateInventoryPanel) {
+                console.log('🎒 Calling populateInventoryPanel...');
                 window.UIPanels.populateInventoryPanel();
+                console.log('🎒 populateInventoryPanel called successfully');
+            } else {
+                console.warn('🎒 UIPanels or populateInventoryPanel not available');
             }
-        } catch (_) {}
+        } catch (e) {
+            console.error('🎒 Error updating UI inventory panel:', e);
+        }
         
         return true;
     }

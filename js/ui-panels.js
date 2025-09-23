@@ -127,12 +127,17 @@
     function wireButtons() {
         // Individual panel toggle buttons
         const inventoryToggle = document.getElementById('inventory-toggle');
+        const inventoryRefresh = document.getElementById('inventory-refresh');
         const questToggle = document.getElementById('quest-log-toggle');
         const baseToggle = document.getElementById('base-management-toggle');
         const settingsToggle = document.getElementById('user-settings-toggle');
         const debugFooterToggle = document.getElementById('debug-footer-toggle');
 
         if (inventoryToggle) inventoryToggle.addEventListener('click', () => togglePanel('inventory-panel'));
+        if (inventoryRefresh) inventoryRefresh.addEventListener('click', () => {
+            console.log('🔄 Manual inventory refresh clicked');
+            populateInventoryPanel();
+        });
         if (questToggle) questToggle.addEventListener('click', () => togglePanel('quest-log-panel'));
         if (baseToggle) baseToggle.addEventListener('click', () => togglePanel('base-management-panel'));
         if (settingsToggle) settingsToggle.addEventListener('click', () => togglePanel('user-settings-panel'));
@@ -318,18 +323,28 @@
     }
 
     function populateInventoryPanel() {
+        console.log('🎒 populateInventoryPanel called');
         const inventoryList = document.getElementById('inventory-list');
-        if (!inventoryList) return;
+        if (!inventoryList) {
+            console.warn('🎒 inventory-list element not found');
+            return;
+        }
         
         try {
             // Try to get inventory from encounter system first
             let items = [];
+            console.log('🎒 Checking encounter system inventory:', !!window.encounterSystem?.playerStats?.inventory);
+            console.log('🎒 Checking item system inventory:', !!window.itemSystem?.playerInventory);
+            
             if (window.encounterSystem && window.encounterSystem.playerStats && window.encounterSystem.playerStats.inventory) {
                 items = window.encounterSystem.playerStats.inventory;
+                console.log('🎒 Using encounter system inventory:', items.length, 'items');
             } else if (window.itemSystem && window.itemSystem.playerInventory) {
+                console.log('🎒 Item system inventory raw:', window.itemSystem.playerInventory);
                 // Convert item system inventory to display format
                 items = window.itemSystem.playerInventory.map(invItem => {
                     const itemDef = window.itemSystem.getItem(invItem.id);
+                    console.log('🎒 Converting item:', invItem.id, '->', itemDef);
                     return {
                         emoji: itemDef?.emoji || '💠',
                         name: itemDef?.name || 'Unknown Item',
@@ -338,7 +353,10 @@
                         equipped: invItem.equipped
                     };
                 });
+                console.log('🎒 Converted items:', items);
             }
+            
+            console.log('🎒 Final items to display:', items.length, items);
             
             if (items && items.length > 0) {
                 inventoryList.innerHTML = items.map(item => `
@@ -350,11 +368,13 @@
                         </div>
                     </div>
                 `).join('');
+                console.log('🎒 Inventory panel updated with', items.length, 'items');
             } else {
                 inventoryList.innerHTML = '<div style="opacity:0.7;">No items</div>';
+                console.log('🎒 Inventory panel shows "No items"');
             }
         } catch (e) {
-            console.error('Error populating inventory panel:', e);
+            console.error('🎒 Error populating inventory panel:', e);
             inventoryList.innerHTML = '<div style="opacity:0.7;">Error loading inventory</div>';
         }
     }
