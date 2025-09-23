@@ -423,6 +423,10 @@ class UnifiedQuestSystem {
     }
 
     createAuroraMarker() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('🎭 Aurora marker creation disabled for tutorial-first approach');
+        return;
+        
         if (!window.mapEngine || !window.mapEngine.map) {
             console.log('🎭 Aurora marker: Map engine not ready');
             return;
@@ -3717,6 +3721,10 @@ class UnifiedQuestSystem {
     
     // Create quest markers for all available quests
     createQuestMarkers() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('🎭 Quest marker creation disabled for tutorial-first approach');
+        return;
+        
         console.log('🎭 Creating quest markers...');
         
         if (!window.mapEngine || !window.mapEngine.map) {
@@ -3751,6 +3759,10 @@ class UnifiedQuestSystem {
     
     // Create Aurora marker
     createAuroraMarker() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('🎭 Aurora marker creation disabled for tutorial-first approach');
+        return;
+        
         console.log('🎭 Creating Aurora marker at:', this.aurora.lat, this.aurora.lng);
         
         const auroraIcon = L.divIcon({
@@ -3812,6 +3824,9 @@ class UnifiedQuestSystem {
 
     // Create a quest objective marker
     createQuestObjectiveMarker(objective, position) {
+        // Temporarily disabled for tutorial-first approach
+        console.log('🎭 Quest objective marker creation disabled for tutorial-first approach');
+        return null;
         const objectiveIcons = {
             'escape_corroding_lake': { symbol: '🌊', color: '#00bfff', name: 'Corroding Lake' },
             'find_ancient_staff': { symbol: '🌿', color: '#8b4513', name: 'Ancient Staff' },
