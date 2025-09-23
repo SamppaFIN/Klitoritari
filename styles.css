@@ -8921,3 +8921,60 @@ input[type="range"]::-moz-range-thumb {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
 }
+
+/* Tutorial System Styles */
+.tutorial-popup {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    padding: 10px;
+}
+
+.tutorial-popup h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.tutorial-popup p {
+    margin: 0 0 15px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.popup-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.interact-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.interact-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Tutorial Item Marker Animation */
+@keyframes itemPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}

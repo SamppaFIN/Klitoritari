@@ -568,6 +568,17 @@ class TutorialEncounterSystem {
             </div>
         `);
 
+        // Add to map engine's itemMarkers array for WebGL integration
+        if (window.mapEngine.itemMarkers) {
+            window.mapEngine.itemMarkers.push({
+                marker: marker,
+                position: position,
+                itemDef: itemDef,
+                tutorialItem: true
+            });
+            console.log('🧪 Added tutorial item to map engine itemMarkers array');
+        }
+
         return marker;
     }
 
