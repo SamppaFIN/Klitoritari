@@ -151,6 +151,23 @@ class EldritchSanctuaryServer {
             case 'playerJoin':
                 this.handlePlayerJoin(ws, message.payload);
                 break;
+            case 'player_join': {
+                // Normalize to legacy handler and broadcast
+                const data = message.playerData || {};
+                const player = this.players.get(ws.playerId);
+                if (player) {
+                    player.name = (data.profile && data.profile.name) || player.name;
+                    player.position = data.position || player.position;
+                    player.lastSeen = Date.now();
+                }
+                this.broadcastToOthers(ws.playerId, {
+                    type: 'player_join',
+                    playerId: ws.playerId,
+                    playerData: data
+                });
+                this.broadcastToAll({ type: 'playerCount', payload: { count: this.players.size } });
+                break;
+            }
             case 'player_update': {
                 // Relay player state to others
                 this.broadcastToOthers(ws.playerId, {

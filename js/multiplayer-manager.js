@@ -71,8 +71,13 @@ class MultiplayerManager {
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
                     
-                    // Send initial player data
+                    // Send initial player data using both schemas for compatibility
                     this.sendPlayerData();
+                    this.sendMessage({
+                        type: 'player_join',
+                        playerId: this.playerId,
+                        playerData: this.getCurrentPlayerData() || {}
+                    });
                     // After connecting, broadcast our existing flags so late joiners see them
                     setTimeout(() => this.sendExistingFlags(), 300);
                     resolve();
