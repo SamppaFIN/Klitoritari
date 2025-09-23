@@ -233,15 +233,20 @@
     </div>
     
     <!-- Inventory Panel (floating) -->
-    <div id="inventory-panel" style="position: fixed; bottom: 20px; left: 20px; z-index: 10000; background: rgba(10, 10, 26, 0.8); border: 1px solid rgba(74, 158, 255, 0.3); border-radius: 10px; padding: 10px; color: rgb(184, 212, 240); width: 160px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-            <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">🎒 Inventory</div>
-            <div style="display:flex; gap:4px;">
-                <button id="inventory-refresh" class="debug-btn" style="padding:2px 4px; font-size:10px;">🔄</button>
-                <button id="inventory-toggle" class="debug-btn" style="padding:4px 8px;">Toggle</button>
+    <div id="inventory-panel" class="inventory-panel">
+        <div class="inventory-header">
+            <div class="inventory-title">
+                <span class="inventory-icon">🎒</span>
+                <span class="inventory-text">Inventory</span>
+            </div>
+            <div class="inventory-controls">
+                <button id="inventory-refresh" class="inventory-btn refresh-btn" title="Refresh">🔄</button>
+                <button id="inventory-toggle" class="inventory-btn toggle-btn" title="Toggle Panel">⚡</button>
             </div>
         </div>
-        <div id="inventory-list" style="margin-top:8px; max-height:160px; overflow:auto; display:none; grid-template-columns: repeat(2,1fr); gap:6px;"><div style="grid-column:1 / -1; opacity:0.7;">No items</div></div>
+        <div id="inventory-list" class="inventory-content">
+            <div class="inventory-empty">No items</div>
+        </div>
     </div>
 
     <!-- Quest Log Panel (floating) -->

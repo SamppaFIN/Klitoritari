@@ -230,18 +230,41 @@
         const panel = document.getElementById(panelId);
         if (!panel) return;
         
-        // Find the content area (the div after the header)
+        // Special handling for inventory panel with responsive design
+        if (panelId === 'inventory-panel') {
+            const isExpanded = panel.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse to 1/5 width
+                panel.classList.remove('expanded');
+                panel.classList.add('collapsed');
+                panel.querySelector('.inventory-content').style.display = 'none';
+                // Update toggle button
+                const toggleBtn = panel.querySelector('.toggle-btn');
+                if (toggleBtn) toggleBtn.textContent = '⚡';
+            } else {
+                // Expand to full width
+                panel.classList.remove('collapsed');
+                panel.classList.add('expanded');
+                panel.querySelector('.inventory-content').style.display = 'block';
+                // Update toggle button
+                const toggleBtn = panel.querySelector('.toggle-btn');
+                if (toggleBtn) toggleBtn.textContent = '⚡';
+                
+                // Populate content when expanding
+                populateInventoryPanel();
+            }
+            return;
+        }
+        
+        // Standard toggle for other panels
         const contentArea = panel.querySelector('div[id$="-list"]');
         if (!contentArea) return;
         
         const isHidden = contentArea.style.display === 'none';
         
         // Handle different display types based on panel
-        if (panelId === 'inventory-panel') {
-            contentArea.style.display = isHidden ? 'grid' : 'none';
-        } else {
-            contentArea.style.display = isHidden ? 'block' : 'none';
-        }
+        contentArea.style.display = isHidden ? 'block' : 'none';
         
         // Update button text
         const toggleBtn = panel.querySelector('button');
@@ -256,6 +279,19 @@
         } else {
             panel.style.borderColor = 'rgba(74, 158, 255, 0.3)';
             panel.style.boxShadow = 'none';
+        }
+        
+        // Populate panel content when opening
+        if (isHidden) {
+            if (panelId === 'quest-log-panel') {
+                populateQuestLogPanel();
+            } else if (panelId === 'base-management-panel') {
+                populateBaseManagementPanel();
+            } else if (panelId === 'user-settings-panel') {
+                populateUserSettingsPanel();
+            } else if (panelId === 'debug-footer-panel') {
+                populateDebugFooterPanel();
+            }
         }
     }
 
@@ -346,9 +382,11 @@
                     const itemDef = window.itemSystem.getItem(invItem.id);
                     console.log('🎒 Converting item:', invItem.id, '->', itemDef);
                     return {
+                        id: invItem.id,
                         emoji: itemDef?.emoji || '💠',
                         name: itemDef?.name || 'Unknown Item',
                         description: itemDef?.description || 'Mysterious item',
+                        type: itemDef?.type || 'item',
                         quantity: invItem.quantity,
                         equipped: invItem.equipped
                     };
@@ -359,23 +397,145 @@
             console.log('🎒 Final items to display:', items.length, items);
             
             if (items && items.length > 0) {
-                inventoryList.innerHTML = items.map(item => `
-                    <div style="display:flex; align-items:center; gap:6px; background:rgba(74,158,255,0.08); border:1px solid rgba(74,158,255,0.2); padding:6px; border-radius:8px;">
-                        <span style="font-size:18px;">${item.emoji || '💠'}</span>
-                        <div style="flex:1; min-width:0;">
-                            <div style="font-weight:bold; font-size:0.8em;">${item.name || 'Unknown Item'}${item.quantity > 1 ? ` x${item.quantity}` : ''}</div>
-                            <div style="font-size:0.7em; opacity:0.8;">${item.description || 'Mysterious item'}</div>
-                        </div>
+                inventoryList.innerHTML = `
+                    <div class="inventory-items">
+                        ${items.map(item => createInventoryItemHTML(item)).join('')}
                     </div>
-                `).join('');
+                `;
                 console.log('🎒 Inventory panel updated with', items.length, 'items');
+                
+                // Add click handlers for items
+                addInventoryItemHandlers();
             } else {
-                inventoryList.innerHTML = '<div style="opacity:0.7;">No items</div>';
+                inventoryList.innerHTML = '<div class="inventory-empty">No items</div>';
                 console.log('🎒 Inventory panel shows "No items"');
             }
         } catch (e) {
             console.error('🎒 Error populating inventory panel:', e);
-            inventoryList.innerHTML = '<div style="opacity:0.7;">Error loading inventory</div>';
+            inventoryList.innerHTML = '<div class="inventory-empty">Error loading inventory</div>';
+        }
+    }
+    
+    function createInventoryItemHTML(item) {
+        const isConsumable = item.type === 'consumable';
+        const quantityText = item.quantity > 1 ? ` x${item.quantity}` : '';
+        
+        return `
+            <div class="inventory-item ${isConsumable ? 'consumable' : ''}" data-item-id="${item.id}">
+                <div class="inventory-item-header">
+                    <span class="inventory-item-icon">${item.emoji || '💠'}</span>
+                    <span class="inventory-item-name">${item.name || 'Unknown Item'}</span>
+                    ${quantityText ? `<span class="inventory-item-quantity">${item.quantity}</span>` : ''}
+                </div>
+                <div class="inventory-item-description">${item.description || 'Mysterious item'}</div>
+                ${isConsumable ? `
+                    <div class="inventory-item-actions">
+                        <button class="inventory-action-btn primary" data-action="use">Use</button>
+                        <button class="inventory-action-btn" data-action="info">Info</button>
+                    </div>
+                ` : `
+                    <div class="inventory-item-actions">
+                        <button class="inventory-action-btn" data-action="equip">Equip</button>
+                        <button class="inventory-action-btn" data-action="info">Info</button>
+                    </div>
+                `}
+            </div>
+        `;
+    }
+    
+    function addInventoryItemHandlers() {
+        // Remove existing handlers
+        document.querySelectorAll('.inventory-item').forEach(item => {
+            item.replaceWith(item.cloneNode(true));
+        });
+        
+        // Add new handlers
+        document.querySelectorAll('.inventory-item').forEach(item => {
+            const itemId = item.dataset.itemId;
+            
+            // Click on item to use/equip
+            item.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('inventory-action-btn')) {
+                    handleItemAction(itemId, 'use');
+                }
+            });
+            
+            // Action buttons
+            item.querySelectorAll('.inventory-action-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const action = btn.dataset.action;
+                    handleItemAction(itemId, action);
+                });
+            });
+        });
+    }
+    
+    function handleItemAction(itemId, action) {
+        console.log(`🎒 Item action: ${action} on ${itemId}`);
+        
+        if (!window.itemSystem) {
+            console.warn('🎒 Item system not available');
+            return;
+        }
+        
+        const item = window.itemSystem.getItem(itemId);
+        if (!item) {
+            console.warn(`🎒 Item ${itemId} not found`);
+            return;
+        }
+        
+        switch (action) {
+            case 'use':
+                if (item.type === 'consumable') {
+                    useConsumableItem(itemId);
+                } else {
+                    equipItem(itemId);
+                }
+                break;
+            case 'equip':
+                equipItem(itemId);
+                break;
+            case 'info':
+                showItemInfo(item);
+                break;
+        }
+    }
+    
+    function useConsumableItem(itemId) {
+        console.log(`🧪 Using consumable: ${itemId}`);
+        
+        if (window.itemSystem && window.itemSystem.useConsumable) {
+            const success = window.itemSystem.useConsumable(itemId);
+            if (success) {
+                console.log(`🧪 Successfully used ${itemId}`);
+                // Refresh inventory display
+                populateInventoryPanel();
+                // Show notification
+                if (window.encounterSystem && window.encounterSystem.showNotification) {
+                    const item = window.itemSystem.getItem(itemId);
+                    window.encounterSystem.showNotification(`Used ${item.name}!`, 'success');
+                }
+            } else {
+                console.warn(`🧪 Failed to use ${itemId}`);
+            }
+        }
+    }
+    
+    function equipItem(itemId) {
+        console.log(`⚔️ Equipping item: ${itemId}`);
+        // TODO: Implement equipment system
+        if (window.encounterSystem && window.encounterSystem.showNotification) {
+            const item = window.itemSystem.getItem(itemId);
+            window.encounterSystem.showNotification(`Equipped ${item.name}!`, 'info');
+        }
+    }
+    
+    function showItemInfo(item) {
+        console.log(`ℹ️ Showing info for: ${item.name}`);
+        // TODO: Implement item info modal
+        if (window.encounterSystem && window.encounterSystem.showNotification) {
+            window.encounterSystem.showNotification(`${item.name}: ${item.description}`, 'info');
         }
     }
 
@@ -423,6 +583,13 @@
 
     // Initialize panel content
     function initializePanels() {
+        // Initialize inventory panel with collapsed state
+        const inventoryPanel = document.getElementById('inventory-panel');
+        if (inventoryPanel) {
+            inventoryPanel.classList.add('collapsed');
+            inventoryPanel.classList.remove('expanded');
+        }
+        
         populateInventoryPanel();
         populateQuestLogPanel();
         populateBaseManagementPanel();
