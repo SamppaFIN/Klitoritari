@@ -35,6 +35,10 @@ class OtherPlayerSimulation {
     }
 
     generateTestPlayers() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('👥 Other player generation disabled for tutorial-first approach');
+        return;
+        
         // Create 2-3 test players
         const playerCount = 2;
         for (let i = 0; i < playerCount; i++) {
@@ -43,6 +47,10 @@ class OtherPlayerSimulation {
     }
 
     addRandomPlayer() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('👥 Random player creation disabled for tutorial-first approach');
+        return;
+        
         if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine || !window.eldritchApp.systems.mapEngine.map) {
             console.log('👥 Map not ready for player generation');
             return;
