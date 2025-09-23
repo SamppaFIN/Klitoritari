@@ -14,6 +14,7 @@ class ItemSystem {
             armor: null,
             accessory: null
         };
+        this.consumableHandlers = this.buildConsumableHandlers();
         
         this.initializeItems();
         this.loadPlayerInventory();
@@ -22,6 +23,61 @@ class ItemSystem {
     // Initialize all available items in the cosmic realm
     initializeItems() {
         // Melee Weapons - Because sometimes you need to hit things with cosmic force
+        this.addItem({
+            id: 'health_potion',
+            name: 'Health Potion',
+            type: 'consumable',
+            category: 'potion',
+            rarity: 'common',
+            description: 'Restores a modest amount of health.',
+            stats: { heal: 20 },
+            effects: ['restore_health'],
+            value: 25,
+            weight: 0.1,
+            lore: 'A reassuringly red liquid of unknown provenance.'
+        });
+
+        this.addItem({
+            id: 'sanity_elixir',
+            name: 'Sanity Elixir',
+            type: 'consumable',
+            category: 'elixir',
+            rarity: 'uncommon',
+            description: 'Soothes the mind and clears the fog.',
+            stats: { sanity: 15 },
+            effects: ['restore_sanity'],
+            value: 45,
+            weight: 0.1,
+            lore: 'Brewed by the Lunatic Sage, allegedly.'
+        });
+
+        this.addItem({
+            id: 'power_orb',
+            name: 'Power Orb',
+            type: 'consumable',
+            category: 'orb',
+            rarity: 'rare',
+            description: 'Vibrates with latent potential. Grants experience.',
+            stats: { xp: 50 },
+            effects: ['grant_experience'],
+            value: 120,
+            weight: 0.2,
+            lore: 'A fragment of a collapsed star, probably.'
+        });
+
+        this.addItem({
+            id: 'ancient_scroll',
+            name: 'Ancient Scroll',
+            type: 'consumable',
+            category: 'scroll',
+            rarity: 'uncommon',
+            description: 'Teaches a small permanent trick of survival.',
+            stats: { defense: 1 },
+            effects: ['permanent_defense'],
+            value: 80,
+            weight: 0.1,
+            lore: 'Illegible to most, useful to the persistent.'
+        });
         this.addItem({
             id: 'rusty_sword',
             name: 'Rusty Cosmic Sword',
@@ -279,6 +335,48 @@ class ItemSystem {
         });
     }
 
+    buildConsumableHandlers() {
+        return {
+            health_potion: (item) => {
+                const ps = window.encounterSystem?.playerStats;
+                if (!ps) return false;
+                const before = ps.health;
+                ps.health = Math.min(ps.maxHealth, ps.health + (item.stats?.heal || 0));
+                this.feedback(`+${ps.health - before} health`, 'success', 'playSuccess');
+                return true;
+            },
+            sanity_elixir: (item) => {
+                const ps = window.encounterSystem?.playerStats;
+                if (!ps) return false;
+                const before = ps.sanity;
+                ps.sanity = Math.min(ps.maxSanity, ps.sanity + (item.stats?.sanity || 0));
+                this.feedback(`+${ps.sanity - before} sanity`, 'info', 'playNotification');
+                return true;
+            },
+            power_orb: (item) => {
+                const ps = window.encounterSystem?.playerStats;
+                if (!ps) return false;
+                ps.experience = (ps.experience || 0) + (item.stats?.xp || 0);
+                this.feedback(`+${item.stats?.xp || 0} XP`, 'success', 'playSuccess');
+                return true;
+            },
+            ancient_scroll: (item) => {
+                const ps = window.encounterSystem?.playerStats;
+                if (!ps) return false;
+                ps.defense = (ps.defense || 0) + (item.stats?.defense || 0);
+                this.feedback(`Defense +${item.stats?.defense || 0} (permanent)`, 'success', 'playNotification');
+                return true;
+            }
+        };
+    }
+
+    feedback(message, type, soundMethod) {
+        try { window.inventoryUI?.showNotification?.(message, type); } catch (_) {}
+        try { if (window.soundManager && typeof window.soundManager[soundMethod] === 'function') window.soundManager[soundMethod](); } catch (_) {}
+        try { window.encounterSystem?.updateSimpleStatsDisplay?.(); } catch (_) {}
+        this.savePlayerInventory();
+    }
+
     // Add an item to the system
     addItem(item) {
         this.items.set(item.id, item);
@@ -461,6 +559,20 @@ class ItemSystem {
     // Get items by rarity
     getItemsByRarity(rarity) {
         return Array.from(this.items.values()).filter(item => item.rarity === rarity);
+    }
+
+    // Use a consumable item by ID
+    useConsumable(itemId) {
+        const item = this.getItem(itemId);
+        if (!item || item.type !== 'consumable') return false;
+        const inv = this.playerInventory.find(i => i.id === itemId);
+        if (!inv || inv.quantity <= 0) return false;
+        const handler = this.consumableHandlers[itemId];
+        const applied = handler ? handler(item) : false;
+        if (applied) {
+            this.removeFromInventory(itemId, 1);
+        }
+        return applied;
     }
 
     // Search items by name or description

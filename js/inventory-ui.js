@@ -199,8 +199,18 @@ class InventoryUI {
                 this.equipItem(item);
             }
         } else {
-            // For consumables or other items, show info
-            this.showItemInfo(item);
+            // Consumables: use immediately
+            if (item.type === 'consumable' && window.encounterSystem?.itemSystem) {
+                const ok = window.encounterSystem.itemSystem.useConsumable(item.id);
+                if (ok) {
+                    this.updateInventory();
+                    this.updateStats();
+                } else {
+                    this.showNotification(`Cannot use ${item.name}`, 'error');
+                }
+            } else {
+                this.showItemInfo(item);
+            }
         }
     }
 
