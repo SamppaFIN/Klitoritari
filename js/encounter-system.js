@@ -16,6 +16,12 @@ class EncounterSystem {
         this.proximityCheckInterval = null;
         // Step calculation now based on distance moved
         this.lastPosition = null;
+        // Debounce/cooldown controls to prevent burst encounters
+        this.lastProximityCheckAt = 0;
+        this.minProximityCheckIntervalMs = 1500; // throttle checks
+        this.lastProximityCheckPos = null;
+        this.minMovementMetersForCheck = 8; // require small movement before rechecking
+        this.globalCooldownUntil = 0; // millis timestamp; while active, no encounters
         
         // Initialize item system
         this.itemSystem = new ItemSystem();
@@ -885,6 +891,42 @@ class EncounterSystem {
         if (this.isUIBlockingGameplay()) {
             return;
         }
+
+        // Global cooldown prevents rapid-fire encounters even if UI closes quickly
+        const now = Date.now();
+        if (now < this.globalCooldownUntil) {
+            return;
+        }
+
+        // Skip encounter checks when GPS accuracy is poor to avoid random pops
+        try {
+            const acc = window.eldritchApp?.systems?.geolocation?.currentPosition?.accuracy;
+            if (typeof acc === 'number' && isFinite(acc) && acc > 100) {
+                // Require reasonably accurate position (<= 100m)
+                return;
+            }
+        } catch (_) {}
+
+        // Time-based throttle
+        if (now - this.lastProximityCheckAt < this.minProximityCheckIntervalMs) {
+            return;
+        }
+
+        // Movement-based throttle
+        if (this.lastProximityCheckPos) {
+            const moved = this.calculateDistance(
+                this.lastProximityCheckPos.lat, this.lastProximityCheckPos.lng,
+                playerPos.lat, playerPos.lng
+            );
+            if (moved < this.minMovementMetersForCheck) {
+                return;
+            }
+        }
+
+        // Update debounce trackers
+        this.lastProximityCheckAt = now;
+        this.lastProximityCheckPos = { lat: playerPos.lat, lng: playerPos.lng };
+
         console.log('🎭 Encounter system checking proximity at:', playerPos);
 
         // Debug: Log player position and nearby markers
@@ -942,11 +984,13 @@ class EncounterSystem {
                 console.log(`🎭 Monster ${monster.name || monster.type?.name} distance: ${distance.toFixed(2)}m`);
             }
             
-            if (distance < 50 && !monster.encountered) { // 50m for closer interaction
+            if (distance < 35 && !monster.encountered) { // tighten to 35m
                 console.log(`🎭 Monster encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 monster.encountered = true;
                 try { this.hideMonsterMarker(monster); } catch (_) {}
                 this.startMonsterEncounter(monster);
+                // Set short global cooldown after a trigger
+                this.globalCooldownUntil = Date.now() + 4000;
             }
         });
     }
@@ -979,11 +1023,13 @@ class EncounterSystem {
                 console.log(`🎭 Item ${item.name} distance: ${distance.toFixed(2)}m`);
             }
             
-            if (distance < 50 && !item.collected) { // 50m for closer interaction
+            if (distance < 35 && !item.collected) { // tighten to 35m
                 console.log(`🎭 Item encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 item.collected = true;
                 try { this.hideItemMarker(item); } catch (_) {}
                 this.startItemEncounter(item);
+                // Set short global cooldown after a trigger
+                this.globalCooldownUntil = Date.now() + 4000;
             }
         });
     }
@@ -999,11 +1045,12 @@ class EncounterSystem {
                 poi.getLatLng().lat, poi.getLatLng().lng
             );
             
-            if (distance < 30 && !poi.encountered) { // 30m for closer interaction
+            if (distance < 25 && !poi.encountered) { // tighten to 25m
                 console.log(`🎭 POI encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 poi.encountered = true;
                 try { if (window.mapEngine?.map) window.mapEngine.map.removeLayer(poi); } catch (_) {}
                 this.startPOIEncounter(poi);
+                this.globalCooldownUntil = Date.now() + 4000;
             }
         });
     }
@@ -1033,12 +1080,13 @@ class EncounterSystem {
             );
             
             // Use visual proximity - closer trigger area for better UX
-            if (distance < 30) { // 30m for quest marker interaction
+            if (distance < 25) { // tighten to 25m
                 console.log(`🎭 Quest marker encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 questMarker.encountered = true;
                 try { if (window.eldritchApp?.systems?.mapEngine?.map) window.eldritchApp.systems.mapEngine.map.removeLayer(questMarker); } catch (_) {}
                 try { window.unifiedQuestSystem?.questMarkers?.delete?.(key); } catch (_) {}
                 this.startQuestMarkerEncounter(questMarker, key);
+                this.globalCooldownUntil = Date.now() + 4000;
             }
         });
     }

@@ -39,9 +39,19 @@ class MobileWakeLockManager {
     initNoSleepFallback() {
         // Create NoSleep instance for fallback
         try {
-            // NoSleep.js creates a hidden video element that plays silently
-            this.noSleepInstance = this.createNoSleepFallback();
-            console.log('📱 NoSleep fallback initialized');
+            const init = () => {
+                try {
+                    this.noSleepInstance = this.createNoSleepFallback();
+                    console.log('📱 NoSleep fallback initialized');
+                } catch (err) {
+                    console.warn('📱 Failed to initialize NoSleep fallback:', err);
+                }
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init, { once: true });
+            } else {
+                init();
+            }
         } catch (error) {
             console.warn('📱 Failed to initialize NoSleep fallback:', error);
         }
@@ -73,7 +83,17 @@ class MobileWakeLockManager {
         const videoData = this.createMinimalVideoData();
         video.src = videoData;
         
-        document.body.appendChild(video);
+        // Ensure body exists before appending
+        const append = () => {
+            if (document.body) {
+                document.body.appendChild(video);
+            }
+        };
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', append, { once: true });
+        } else {
+            append();
+        }
         
         return {
             video: video,

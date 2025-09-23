@@ -698,7 +698,11 @@ class UnifiedQuestSystem {
         this.checkQuestObjectiveProximity(playerPosition);
         
         // Check shrine proximity
-        this.checkShrineProximity(playerPosition);
+        // Shrines: disable auto-trigger by default to avoid surprise dialogs
+        // Enable by setting localStorage.setItem('enable_shrine_autotrigger','true')
+        if (this.isShrineAutoEnabled && this.isShrineAutoEnabled()) {
+            this.checkShrineProximity(playerPosition);
+        }
         
         // Check for monster and other encounters
         if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.encounter) {
@@ -726,6 +730,13 @@ class UnifiedQuestSystem {
         }
         
         return null;
+    }
+
+    // Returns true if shrine auto-triggering is enabled via localStorage
+    isShrineAutoEnabled() {
+        try {
+            return localStorage.getItem('enable_shrine_autotrigger') === 'true';
+        } catch (_) { return false; }
     }
     
     checkAuroraProximity(playerPosition) {
@@ -1872,6 +1883,11 @@ class UnifiedQuestSystem {
         this.resetQuestsForGameStart();
         try { window.encounterSystem?.resetEncounterFlags?.(); } catch (_) {}
         try { window.stepCurrencySystem?.resetSessionSteps?.(); } catch (_) {}
+        // Clear path and flags for a fresh adventure
+        try { window.sessionPersistence?.clearPath?.(); } catch (_) {}
+        try { window.sessionPersistence?.clearFlags?.(); } catch (_) {}
+        try { if (window.mapEngine?.finnishFlagLayer) window.mapEngine.finnishFlagLayer.clearFlags(); } catch (_) {}
+        try { if (window.mapEngine) window.mapEngine.clearPathLine?.(); } catch (_) {}
         console.log('🎭 Adventure mode selected and deferred until Locate Me:', mode);
     }
 
