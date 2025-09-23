@@ -1395,11 +1395,144 @@ class UnifiedQuestSystem {
         
         console.log('🎭 Completed quest:', quest.name);
         
+        // Show quest completion celebration
+        this.showQuestCompletionCelebration(quest);
+        
         // Show completion notification
         this.showQuestNotification(`Quest Completed: ${quest.name}`);
         
         // Unlock next quests
         this.unlockNextQuests(questId);
+    }
+    
+    showQuestCompletionCelebration(quest) {
+        // Create celebration overlay
+        const celebrationOverlay = document.createElement('div');
+        celebrationOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 15000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            animation: celebrationAppear 0.5s ease-out;
+        `;
+        
+        // Create celebration modal
+        const celebrationModal = document.createElement('div');
+        celebrationModal.style.cssText = `
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 25%, #2a2a4a 50%, #1a1a3a 75%, #0a0a1a 100%);
+            border: 3px solid #4a9eff;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(74, 158, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: celebrationModalAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        `;
+        
+        celebrationModal.innerHTML = `
+            <div style="margin-bottom: 25px;">
+                <div style="font-size: 60px; margin-bottom: 15px; animation: celebrationBounce 1s ease-in-out infinite;">🎉</div>
+                <h2 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 32px; text-shadow: 0 0 15px #4a9eff;">
+                    Quest Completed!
+                </h2>
+                <h3 style="color: #ffd700; margin: 0 0 20px 0; font-size: 24px; text-shadow: 0 0 10px #ffd700;">
+                    ${quest.name}
+                </h3>
+            </div>
+            
+            <div style="background: rgba(74, 158, 255, 0.1); border-radius: 15px; padding: 20px; margin-bottom: 25px;">
+                <p style="color: #b8d4f0; margin: 0; font-size: 16px; line-height: 1.5;">
+                    ${quest.description || 'You have successfully completed this cosmic quest!'}
+                </p>
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="celebration-close" style="
+                    background: linear-gradient(135deg, #4a9eff 0%, #357abd 50%, #4a9eff 100%);
+                    border: 2px solid rgba(74, 158, 255, 0.6);
+                    color: white;
+                    padding: 12px 30px;
+                    border-radius: 25px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 6px 20px rgba(74, 158, 255, 0.4);
+                ">
+                    Continue Journey
+                </button>
+            </div>
+        `;
+        
+        celebrationOverlay.appendChild(celebrationModal);
+        document.body.appendChild(celebrationOverlay);
+        
+        // Add celebration styles
+        if (!document.getElementById('celebration-styles')) {
+            const style = document.createElement('style');
+            style.id = 'celebration-styles';
+            style.textContent = `
+                @keyframes celebrationAppear {
+                    0% { opacity: 0; }
+                    100% { opacity: 1; }
+                }
+                
+                @keyframes celebrationModalAppear {
+                    0% { 
+                        opacity: 0; 
+                        transform: translateY(-50px) scale(0.8); 
+                        filter: blur(10px);
+                    }
+                    100% { 
+                        opacity: 1; 
+                        transform: translateY(0) scale(1); 
+                        filter: blur(0);
+                    }
+                }
+                
+                @keyframes celebrationBounce {
+                    0%, 100% { transform: translateY(0) scale(1); }
+                    50% { transform: translateY(-10px) scale(1.1); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Add close functionality
+        document.getElementById('celebration-close').addEventListener('click', () => {
+            celebrationOverlay.style.opacity = '0';
+            celebrationOverlay.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                celebrationOverlay.remove();
+            }, 300);
+        });
+        
+        // Auto-close after 5 seconds
+        setTimeout(() => {
+            if (celebrationOverlay.parentNode) {
+                celebrationOverlay.style.opacity = '0';
+                celebrationOverlay.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    celebrationOverlay.remove();
+                }, 300);
+            }
+        }, 5000);
+        
+        // Play celebration sound
+        if (window.soundManager) {
+            window.soundManager.playQuestComplete();
+        }
     }
     
     unlockNextQuests(completedQuestId) {

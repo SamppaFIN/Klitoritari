@@ -81,16 +81,22 @@ class TutorialSystem {
         // Create tutorial modal
         const tutorialModal = document.createElement('div');
         tutorialModal.style.cssText = `
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            border: 2px solid #4a9eff;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 600px;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 25%, #2a2a4a 50%, #1a1a3a 75%, #0a0a1a 100%);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            border-image: linear-gradient(45deg, #4a9eff, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57) 1;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 700px;
             width: 90%;
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(74, 158, 255, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
             position: relative;
+            animation: tutorialModalAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         `;
 
         // Create tutorial content
@@ -110,34 +116,46 @@ class TutorialSystem {
                 </h3>
                 <div style="display: grid; gap: 15px;">
                     ${this.encounterTypes.map(encounter => `
-                        <div style="
-                            background: rgba(74, 158, 255, 0.1);
-                            border: 1px solid ${encounter.color}40;
-                            border-radius: 12px;
-                            padding: 15px;
+                        <div class="encounter-card" style="
+                            background: linear-gradient(135deg, rgba(74, 158, 255, 0.08) 0%, rgba(74, 158, 255, 0.15) 100%);
+                            border: 2px solid ${encounter.color}60;
+                            border-radius: 15px;
+                            padding: 20px;
                             display: flex;
                             align-items: center;
-                            gap: 15px;
-                            transition: all 0.3s ease;
-                        " onmouseover="this.style.background='rgba(74, 158, 255, 0.2)'" onmouseout="this.style.background='rgba(74, 158, 255, 0.1)'">
+                            gap: 20px;
+                            margin-bottom: 15px;
+                            position: relative;
+                            overflow: hidden;
+                        ">
                             <div style="
-                                font-size: 32px;
-                                text-shadow: 0 0 10px ${encounter.color};
-                                min-width: 50px;
-                                text-align: center;
+                                background: linear-gradient(135deg, ${encounter.color}20, ${encounter.color}40);
+                                border-radius: 50%;
+                                width: 60px;
+                                height: 60px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 28px;
+                                text-shadow: 0 0 15px ${encounter.color};
+                                box-shadow: 0 0 20px ${encounter.color}40;
+                                animation: cosmicGlow 4s ease-in-out infinite;
                             ">${encounter.emoji}</div>
                             <div style="flex: 1;">
                                 <h4 style="
                                     color: ${encounter.color};
-                                    margin: 0 0 8px 0;
-                                    font-size: 18px;
-                                    text-shadow: 0 0 5px ${encounter.color};
+                                    margin: 0 0 10px 0;
+                                    font-size: 20px;
+                                    font-weight: bold;
+                                    text-shadow: 0 0 8px ${encounter.color};
+                                    letter-spacing: 0.5px;
                                 ">${encounter.name}</h4>
                                 <p style="
-                                    color: #b8d4f0;
+                                    color: #c8d8f0;
                                     margin: 0;
-                                    font-size: 14px;
-                                    line-height: 1.4;
+                                    font-size: 15px;
+                                    line-height: 1.5;
+                                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
                                 ">${encounter.description}</p>
                             </div>
                         </div>
@@ -163,19 +181,21 @@ class TutorialSystem {
             </div>
             
             <div style="text-align: center;">
-                <button id="tutorial-close" style="
-                    background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-                    border: none;
+                <button id="tutorial-close" class="cosmic-button" style="
+                    background: linear-gradient(135deg, #4a9eff 0%, #357abd 50%, #4a9eff 100%);
+                    border: 2px solid rgba(74, 158, 255, 0.6);
                     color: white;
-                    padding: 12px 30px;
-                    border-radius: 25px;
-                    font-size: 16px;
+                    padding: 15px 40px;
+                    border-radius: 30px;
+                    font-size: 18px;
                     font-weight: bold;
                     cursor: pointer;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3);
-                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(74, 158, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(74, 158, 255, 0.3)'">
-                    Begin Your Cosmic Journey
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 8px 25px rgba(74, 158, 255, 0.4);
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                    letter-spacing: 1px;
+                " onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 12px 35px rgba(74, 158, 255, 0.6)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(74, 158, 255, 0.4)'">
+                    🌌 Begin Your Cosmic Journey 🌌
                 </button>
             </div>
         `;
@@ -239,7 +259,7 @@ class TutorialSystem {
         `;
         notification.textContent = message;
 
-        // Add CSS animation
+        // Add CSS animations and styles
         if (!document.getElementById('tutorial-styles')) {
             const style = document.createElement('style');
             style.id = 'tutorial-styles';
@@ -249,6 +269,60 @@ class TutorialSystem {
                     20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
                     80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
                     100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                }
+                
+                @keyframes tutorialModalAppear {
+                    0% { 
+                        opacity: 0; 
+                        transform: translateY(-50px) scale(0.9); 
+                        filter: blur(10px);
+                    }
+                    100% { 
+                        opacity: 1; 
+                        transform: translateY(0) scale(1); 
+                        filter: blur(0);
+                    }
+                }
+                
+                @keyframes encounterCardHover {
+                    0% { transform: translateY(0) scale(1); }
+                    100% { transform: translateY(-5px) scale(1.02); }
+                }
+                
+                @keyframes cosmicGlow {
+                    0%, 100% { box-shadow: 0 0 20px rgba(74, 158, 255, 0.3); }
+                    50% { box-shadow: 0 0 30px rgba(74, 158, 255, 0.6), 0 0 40px rgba(74, 158, 255, 0.3); }
+                }
+                
+                .encounter-card {
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    cursor: pointer;
+                }
+                
+                .encounter-card:hover {
+                    animation: encounterCardHover 0.3s ease forwards;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                }
+                
+                .cosmic-button {
+                    animation: cosmicGlow 3s ease-in-out infinite;
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .cosmic-button::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                    transition: left 0.5s;
+                }
+                
+                .cosmic-button:hover::before {
+                    left: 100%;
                 }
             `;
             document.head.appendChild(style);

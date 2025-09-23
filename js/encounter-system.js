@@ -264,75 +264,250 @@ class EncounterSystem {
         panel.style.zIndex = '10000';
         panel.innerHTML = `
             <div class="debug-content">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3>🎭 Debug Panel</h3>
-                    <button id="close-debug-panel" style="background: #ff4444; color: white; border: none; border-radius: 3px; padding: 5px 10px; cursor: pointer;">×</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid rgba(74, 158, 255, 0.3);">
+                    <h3 style="color: #4a9eff; margin: 0; text-shadow: 0 0 10px #4a9eff;">🎭 Debug Panel</h3>
+                    <button id="close-debug-panel" style="background: linear-gradient(135deg, #ff4444, #cc3333); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);">×</button>
                 </div>
-                <div class="debug-content-simple">
-                    <h4>📊 Player Stats</h4>
-                    <div class="health-sanity-display">
-                        <div class="stat-bar">
-                            <span class="stat-label">Health:</span>
-                            <div class="health-bar">
-                                <div class="health-fill" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
+                
+                <!-- Player Stats Section -->
+                <div class="debug-section">
+                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff;">📊 Player Stats</h4>
+                    <div class="health-sanity-display" style="background: rgba(74, 158, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+                        <div class="stat-bar" style="margin-bottom: 10px;">
+                            <span class="stat-label" style="color: #b8d4f0; font-weight: bold; min-width: 80px; display: inline-block;">Health:</span>
+                            <div class="health-bar" style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 20px; width: 200px; display: inline-block; margin: 0 10px; overflow: hidden;">
+                                <div class="health-fill" style="background: linear-gradient(90deg, #ff6b6b, #ff5252); height: 100%; transition: width 0.3s ease; border-radius: 10px;" style="width: ${(this.playerStats.health / this.playerStats.maxHealth) * 100}%"></div>
                             </div>
-                            <span class="stat-value">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
+                            <span class="stat-value" style="color: #b8d4f0; font-weight: bold;">${this.playerStats.health}/${this.playerStats.maxHealth}</span>
                         </div>
                         <div class="stat-bar">
-                            <span class="stat-label">Sanity:</span>
-                            <div class="sanity-bar">
-                                <div class="sanity-fill" style="width: ${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%"></div>
+                            <span class="stat-label" style="color: #b8d4f0; font-weight: bold; min-width: 80px; display: inline-block;">Sanity:</span>
+                            <div class="sanity-bar" style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; height: 20px; width: 200px; display: inline-block; margin: 0 10px; overflow: hidden;">
+                                <div class="sanity-fill" style="background: linear-gradient(90deg, #4ecdc4, #26a69a); height: 100%; transition: width 0.3s ease; border-radius: 10px;" style="width: ${(this.playerStats.sanity / this.playerStats.maxSanity) * 100}%"></div>
                             </div>
-                            <span class="stat-value">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
+                            <span class="stat-value" style="color: #b8d4f0; font-weight: bold;">${this.playerStats.sanity}/${this.playerStats.maxSanity}</span>
                         </div>
-                    </div>
-                    
-                    <div class="debug-controls">
-                        <h4>🎭 Test Encounters</h4>
-                        <button id="test-heavy" class="debug-btn">⚡ Test HEVY</button>
-                        <button id="test-cosmic-shrine" class="debug-btn">🏛️ Test Cosmic Shrine</button>
-                        <button id="test-eldritch-horror" class="debug-btn">👹 Test Eldritch Horror</button>
-                        <button id="test-wisdom-crystal" class="debug-btn">💎 Test Wisdom Crystal</button>
-                        <button id="test-cosmic-merchant" class="debug-btn">🛒 Test Cosmic Merchant</button>
-                        <button id="test-monster" class="debug-btn">👹 Test Monster</button>
-                        
-                        <h4>📊 Player Stats</h4>
-                        <button id="heal-player" class="debug-btn">Heal Player</button>
-                        <button id="restore-sanity" class="debug-btn">Restore Sanity</button>
-                        <button id="lose-health" class="debug-btn">Lose 10 Health</button>
-                        <button id="lose-sanity" class="debug-btn">Lose 10 Sanity</button>
-                        
-                        <h4>🎮 Simulation</h4>
-                        <button id="start-simulation" class="debug-btn simulation-btn">🎭 Start Quest Simulation</button>
-                        <button id="stop-simulation" class="debug-btn simulation-btn">⏹️ Stop Simulation</button>
-                        
-                        <h4>🎯 Test Minigames</h4>
-                        <button id="test-tetris" class="debug-btn">🧩 Test Tetris</button>
-                        <button id="test-quiz" class="debug-btn">❓ Test Quiz</button>
-                        <button id="test-riddle" class="debug-btn">🧩 Test Riddle</button>
-                        <button id="test-fight" class="debug-btn">⚔️ Test Fight</button>
-                        
-                        <h4>🌀 Test Visual Effects</h4>
-                        <button id="test-distortion-effects" class="debug-btn">🌀 Test Distortion Effects</button>
-                        <button id="test-cosmic-effects" class="debug-btn">🌌 Test Cosmic Effects</button>
-                        <button id="test-sanity-loss" class="debug-btn">😵 Test Sanity Loss</button>
-                        <button id="test-screen-effects" class="debug-btn">📺 Test Screen Effects</button>
-                        
-                        <h4>🔊 Test Audio & Sound</h4>
-                        <button id="test-soundboard" class="debug-btn">🎵 Test Soundboard</button>
-                        <button id="test-ambient-sounds" class="debug-btn">🌊 Test Ambient Sounds</button>
-                        <button id="test-combat-sounds" class="debug-btn">⚔️ Test Combat Sounds</button>
-                        <button id="test-quest-sounds" class="debug-btn">🎭 Test Quest Sounds</button>
-                        
-                        <h4>🎨 Test All Effects</h4>
-                        <button id="test-all-effects" class="debug-btn">✨ Test All Effects</button>
-                        <button id="test-chaos-mode" class="debug-btn">🌪️ Test Chaos Mode</button>
                     </div>
                 </div>
                 
-                <button id="toggle-debug" class="debug-btn">Toggle Debug Panel</button>
+                <!-- Debug Controls Grid -->
+                <div class="debug-controls" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    
+                    <!-- Encounter Testing -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎭 Test Encounters</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="test-heavy" class="debug-btn" title="Test HEVY legendary encounter">⚡ HEVY</button>
+                            <button id="test-cosmic-shrine" class="debug-btn" title="Test Cosmic Shrine encounter">🏛️ Shrine</button>
+                            <button id="test-eldritch-horror" class="debug-btn" title="Test Eldritch Horror encounter">👹 Horror</button>
+                            <button id="test-wisdom-crystal" class="debug-btn" title="Test Wisdom Crystal encounter">💎 Crystal</button>
+                            <button id="test-cosmic-merchant" class="debug-btn" title="Test Cosmic Merchant encounter">🛒 Merchant</button>
+                            <button id="test-monster" class="debug-btn" title="Test random monster encounter">👹 Monster</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Player Stats Controls -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">📊 Player Stats</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="heal-player" class="debug-btn" title="Restore player health to maximum">❤️ Heal</button>
+                            <button id="restore-sanity" class="debug-btn" title="Restore player sanity to maximum">🧠 Sanity</button>
+                            <button id="lose-health" class="debug-btn" title="Reduce player health by 10">💔 -10 HP</button>
+                            <button id="lose-sanity" class="debug-btn" title="Reduce player sanity by 10">😵 -10 Sanity</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Simulation Controls -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎮 Simulation</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="start-simulation" class="debug-btn simulation-btn" title="Start quest simulation mode">🎭 Start</button>
+                            <button id="stop-simulation" class="debug-btn simulation-btn" title="Stop quest simulation mode">⏹️ Stop</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Minigames Testing -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎯 Minigames</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="test-tetris" class="debug-btn" title="Test Tetris minigame">🧩 Tetris</button>
+                            <button id="test-quiz" class="debug-btn" title="Test Quiz minigame">❓ Quiz</button>
+                            <button id="test-riddle" class="debug-btn" title="Test Riddle minigame">🧩 Riddle</button>
+                            <button id="test-fight" class="debug-btn" title="Test Fight minigame">⚔️ Fight</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Visual Effects Testing -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🌀 Visual Effects</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="test-distortion-effects" class="debug-btn" title="Test screen distortion effects">🌀 Distort</button>
+                            <button id="test-cosmic-effects" class="debug-btn" title="Test cosmic visual effects">🌌 Cosmic</button>
+                            <button id="test-sanity-loss" class="debug-btn" title="Test sanity loss effects">😵 Sanity</button>
+                            <button id="test-screen-effects" class="debug-btn" title="Test general screen effects">📺 Screen</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Audio Testing -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🔊 Audio</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="test-soundboard" class="debug-btn" title="Test general soundboard">🎵 Sound</button>
+                            <button id="test-ambient-sounds" class="debug-btn" title="Test ambient sounds">🌊 Ambient</button>
+                            <button id="test-combat-sounds" class="debug-btn" title="Test combat sounds">⚔️ Combat</button>
+                            <button id="test-quest-sounds" class="debug-btn" title="Test quest sounds">🎭 Quest</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Chaos Mode -->
+                    <div class="debug-group">
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎨 Chaos Mode</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button id="test-all-effects" class="debug-btn" title="Test all effects sequentially">✨ All Effects</button>
+                            <button id="test-chaos-mode" class="debug-btn" title="Activate chaos mode - rapid fire all effects">🌪️ Chaos</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid rgba(74, 158, 255, 0.3);">
+                    <button id="toggle-debug" class="debug-btn" style="background: linear-gradient(135deg, #4a9eff, #357abd); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold;" title="Toggle debug panel visibility">Toggle Panel</button>
+                </div>
             </div>
         `;
+        
+        // Add CSS styling for the debug panel
+        if (!document.getElementById('debug-panel-styles')) {
+            const style = document.createElement('style');
+            style.id = 'debug-panel-styles';
+            style.textContent = `
+                .debug-panel {
+                    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 25%, #2a2a4a 50%, #1a1a3a 75%, #0a0a1a 100%);
+                    border: 2px solid rgba(74, 158, 255, 0.4);
+                    border-radius: 15px;
+                    box-shadow: 
+                        0 20px 40px rgba(0, 0, 0, 0.6),
+                        0 0 0 1px rgba(74, 158, 255, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                    backdrop-filter: blur(10px);
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+                
+                .debug-content {
+                    padding: 20px;
+                    color: #b8d4f0;
+                }
+                
+                .debug-btn {
+                    background: linear-gradient(135deg, rgba(74, 158, 255, 0.2), rgba(74, 158, 255, 0.1));
+                    border: 1px solid rgba(74, 158, 255, 0.4);
+                    color: #b8d4f0;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: bold;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .debug-btn:hover {
+                    background: linear-gradient(135deg, rgba(74, 158, 255, 0.4), rgba(74, 158, 255, 0.3));
+                    border-color: rgba(74, 158, 255, 0.6);
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3);
+                    color: #ffffff;
+                }
+                
+                .debug-btn:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 6px rgba(74, 158, 255, 0.2);
+                }
+                
+                .debug-btn::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+                    transition: left 0.3s;
+                }
+                
+                .debug-btn:hover::before {
+                    left: 100%;
+                }
+                
+                .simulation-btn {
+                    background: linear-gradient(135deg, rgba(255, 107, 107, 0.2), rgba(255, 107, 107, 0.1));
+                    border-color: rgba(255, 107, 107, 0.4);
+                }
+                
+                .simulation-btn:hover {
+                    background: linear-gradient(135deg, rgba(255, 107, 107, 0.4), rgba(255, 107, 107, 0.3));
+                    border-color: rgba(255, 107, 107, 0.6);
+                    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+                }
+                
+                .debug-group {
+                    background: rgba(74, 158, 255, 0.05);
+                    border: 1px solid rgba(74, 158, 255, 0.2);
+                    border-radius: 12px;
+                    padding: 15px;
+                    transition: all 0.3s ease;
+                }
+                
+                .debug-group:hover {
+                    background: rgba(74, 158, 255, 0.08);
+                    border-color: rgba(74, 158, 255, 0.3);
+                }
+                
+                .stat-bar {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+                
+                .stat-label {
+                    min-width: 80px;
+                    font-weight: bold;
+                }
+                
+                .stat-value {
+                    font-weight: bold;
+                    margin-left: 10px;
+                }
+                
+                .health-bar, .sanity-bar {
+                    background: rgba(0, 0, 0, 0.3);
+                    border-radius: 10px;
+                    height: 20px;
+                    width: 200px;
+                    margin: 0 10px;
+                    overflow: hidden;
+                    position: relative;
+                }
+                
+                .health-fill {
+                    background: linear-gradient(90deg, #ff6b6b, #ff5252);
+                    height: 100%;
+                    transition: width 0.3s ease;
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+                }
+                
+                .sanity-fill {
+                    background: linear-gradient(90deg, #4ecdc4, #26a69a);
+                    height: 100%;
+                    transition: width 0.3s ease;
+                    border-radius: 10px;
+                    box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         document.body.appendChild(panel);
         console.log('🎭 Debug panel created and added to DOM');
