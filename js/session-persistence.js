@@ -70,6 +70,10 @@ class SessionPersistenceManager {
         return null;
     }
 
+    clearPath() {
+        try { localStorage.removeItem(this.key('path')); } catch (_) {}
+    }
+
     // Quest mode (demo/game) and maybe objective positions
     saveQuestState(state) {
         try {
@@ -110,6 +114,52 @@ class SessionPersistenceManager {
             if (Array.isArray(arr)) return arr;
         } catch (_) {}
         return [];
+    }
+
+    clearFlags() {
+        try { localStorage.removeItem(this.key('flags')); } catch (_) {}
+    }
+
+    // Player profile (name, symbol)
+    saveProfile(profile) {
+        try {
+            const safe = {
+                name: (profile?.name || '').toString().slice(0, 24),
+                symbol: (profile?.symbol || 'finnish').toString(),
+            };
+            localStorage.setItem(this.key('profile'), JSON.stringify(safe));
+        } catch (_) {}
+    }
+
+    restoreProfile() {
+        try {
+            const raw = localStorage.getItem(this.key('profile'));
+            return raw ? JSON.parse(raw) : null;
+        } catch (_) { return null; }
+    }
+
+    // Inventory
+    saveInventory(items) {
+        try {
+            if (!Array.isArray(items)) return;
+            const compact = items.map(it => ({
+                name: it.name,
+                emoji: it.emoji,
+                rarity: it.rarity,
+                color: it.color,
+                acquiredAt: it.acquiredAt || Date.now()
+            }));
+            localStorage.setItem(this.key('inventory'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restoreInventory() {
+        try {
+            const raw = localStorage.getItem(this.key('inventory'));
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            return Array.isArray(arr) ? arr : [];
+        } catch (_) { return []; }
     }
 }
 

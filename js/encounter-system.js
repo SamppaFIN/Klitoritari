@@ -51,6 +51,15 @@ class EncounterSystem {
             isDead: false,
             deathReason: null
         };
+
+        // Restore inventory from session
+        try {
+            const inv = window.sessionPersistence?.restoreInventory?.();
+            if (Array.isArray(inv) && inv.length) {
+                this.playerStats.inventory = inv;
+                console.log('🎒 Restored inventory items:', inv.length);
+            }
+        } catch (_) {}
         
         // Encounter types
         this.encounterTypes = {
@@ -134,6 +143,7 @@ class EncounterSystem {
         // Create encounter UI elements
         this.createEncounterModal();
         this.createRewardsPanel();
+        this.createInventoryPanel();
     }
     
     // Update mobile UI stats
@@ -616,7 +626,55 @@ class EncounterSystem {
         if (sanityValue) {
             sanityValue.textContent = `${this.playerStats.sanity}/${this.playerStats.maxSanity}`;
         }
-        
+        this.updateInventoryUI?.();
+    }
+
+    createInventoryPanel() {
+        const existing = document.getElementById('inventory-panel');
+        if (existing) existing.remove();
+        const panel = document.createElement('div');
+        panel.id = 'inventory-panel';
+        panel.style.position = 'fixed';
+        panel.style.bottom = '20px';
+        panel.style.left = '20px';
+        panel.style.zIndex = '10000';
+        panel.style.background = 'rgba(10,10,26,0.8)';
+        panel.style.border = '1px solid rgba(74,158,255,0.3)';
+        panel.style.borderRadius = '10px';
+        panel.style.padding = '10px';
+        panel.style.color = '#b8d4f0';
+        panel.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">🎒 Inventory</div>
+                <button id="inventory-toggle" class="debug-btn" style="padding:4px 8px;">Toggle</button>
+            </div>
+            <div id="inventory-list" style="margin-top:8px; max-height:160px; overflow:auto; display:grid; grid-template-columns: repeat(2,1fr); gap:6px;"></div>
+        `;
+        document.body.appendChild(panel);
+        document.getElementById('inventory-toggle').addEventListener('click', ()=>{
+            const list = document.getElementById('inventory-list');
+            list.style.display = list.style.display === 'none' ? 'grid' : 'none';
+        });
+        this.updateInventoryUI();
+    }
+
+    updateInventoryUI() {
+        const list = document.getElementById('inventory-list');
+        if (!list) return;
+        const items = this.playerStats.inventory || [];
+        if (!items.length) {
+            list.innerHTML = `<div style="grid-column:1 / -1; opacity:0.7;">No items</div>`;
+            return;
+        }
+        list.innerHTML = items.map(it => `
+            <div style="display:flex; align-items:center; gap:6px; background:rgba(74,158,255,0.08); border:1px solid rgba(74,158,255,0.2); padding:6px; border-radius:8px;">
+                <span style="font-size:18px;">${it.emoji || '💠'}</span>
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-weight:600; color:#e6f0ff;">${it.name}</span>
+                    <span style="font-size:11px; opacity:0.8;">${it.rarity || ''}</span>
+                </div>
+            </div>
+        `).join('');
     }
 
     // Simple debug action methods
@@ -1677,6 +1735,23 @@ class EncounterSystem {
         // Remove item from map
         if (window.mapEngine && window.mapEngine.removeItemFromMap) {
             window.mapEngine.removeItemFromMap(item.name);
+        }
+        
+        // Add to inventory and persist
+        try {
+            const invItem = {
+                name: item.name,
+                emoji: item.emoji,
+                rarity: item.rarity,
+                color: item.color,
+                acquiredAt: Date.now()
+            };
+            this.playerStats.inventory.push(invItem);
+            window.sessionPersistence?.saveInventory?.(this.playerStats.inventory);
+            // Optional: update UI inventory panel if exists
+            try { this.updateInventoryUI?.(); } catch (_) {}
+        } catch (e) {
+            console.warn('🎒 Failed to add item to inventory:', e);
         }
         
         // Apply item effects

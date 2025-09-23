@@ -110,6 +110,12 @@ class MultiplayerManager {
             case 'player_update':
                 this.updatePlayer(data.playerId, data.playerData);
                 break;
+            case 'playerCount':
+                // Server broadcast with total players online
+                if (data.payload && typeof data.payload.count === 'number') {
+                    this.updatePlayerCountDisplay(data.payload.count);
+                }
+                break;
             case 'player_join':
                 this.addPlayer(data.playerId, data.playerData);
                 break;
@@ -150,6 +156,15 @@ class MultiplayerManager {
             return null;
         }
         
+        // Profile and symbol
+        let profile = null;
+        try { profile = window.sessionPersistence?.restoreProfile?.(); } catch (_) {}
+        const symbol = profile?.symbol || 'finnish';
+        const name = profile?.name || 'Wanderer';
+        // Moral nickname
+        let nickname = '';
+        try { nickname = window.eldritchApp?.systems?.moralChoice?.getNickname?.() || ''; } catch (_) {}
+
         return {
             position: {
                 lat: mapEngine.playerPosition.lat,
@@ -157,7 +172,8 @@ class MultiplayerManager {
             },
             markerConfig: mapEngine.getPlayerMarkerConfig(),
             steps: window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            profile: { name, symbol, nickname }
         };
     }
     
@@ -226,6 +242,9 @@ class MultiplayerManager {
                 'info'
             );
         }
+
+        // Update subtle player count (self + others we know)
+        this.updatePlayerCountDisplay(this.players.size + 1);
     }
     
     /**
@@ -235,6 +254,9 @@ class MultiplayerManager {
         console.log('🌐 Player left:', playerId);
         this.players.delete(playerId);
         this.removeOtherPlayerMarker(playerId);
+
+        // Update subtle player count (self + others we know)
+        this.updatePlayerCountDisplay(this.players.size + 1);
     }
     
     /**
@@ -243,7 +265,7 @@ class MultiplayerManager {
     renderOtherPlayer(playerId, playerData) {
         if (!window.mapEngine) return;
         
-        const { position, markerConfig } = playerData;
+        const { position, markerConfig, profile } = playerData;
         if (!position || !markerConfig) return;
         
         // Check if player is within sync radius
@@ -258,7 +280,10 @@ class MultiplayerManager {
         }
         
         // Use map engine to add player marker
-        window.mapEngine.addOtherPlayerMarker(playerId, playerData);
+        window.mapEngine.addOtherPlayerMarker(playerId, { ...playerData, profile });
+
+        // Update subtle player count (self + others we know)
+        this.updatePlayerCountDisplay(this.players.size + 1);
     }
     
     /**
@@ -284,8 +309,8 @@ class MultiplayerManager {
         // Sync flag with other players by adding to canvas layer
         try {
             if (window.mapEngine && window.mapEngine.finnishFlagLayer && flagData) {
-                const { lat, lng, size, rotation } = flagData;
-                window.mapEngine.finnishFlagLayer.addFlagPin(lat, lng, size, rotation);
+                const { lat, lng, size, rotation, symbol } = flagData;
+                window.mapEngine.finnishFlagLayer.addFlagPin(lat, lng, size, rotation, symbol);
                 console.log('🌐 Flag update applied:', flagId, flagData);
             } else {
                 console.log('🌐 Flag update received but layer unavailable');
@@ -383,6 +408,29 @@ class MultiplayerManager {
         }
         
         console.log('🌐 Multiplayer disconnected');
+
+        // Reflect zero/one player state (just self disconnected)
+        this.updatePlayerCountDisplay(1);
+    }
+
+    /**
+     * Update subtle online player count in UI
+     */
+    updatePlayerCountDisplay(totalCount) {
+        try {
+            const countEl = document.getElementById('player-count');
+            if (countEl) {
+                countEl.textContent = String(totalCount);
+            }
+            const statusText = document.getElementById('multiplayerStatusText');
+            if (statusText) {
+                // Keep it subtle: "Connected (N)" or "Disconnected"
+                const connectedLabel = this.isConnected ? `Connected (${totalCount})` : 'Disconnected';
+                statusText.textContent = connectedLabel;
+            }
+        } catch (_) {
+            // no-op
+        }
     }
 }
 
