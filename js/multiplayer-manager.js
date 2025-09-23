@@ -162,9 +162,20 @@ class MultiplayerManager {
                 break;
             case 'player_join':
                 this.addPlayer(data.playerId, data.playerData);
+                try {
+                    if (window.gruesomeNotifications) {
+                        const name = data?.playerData?.profile?.name || 'Explorer';
+                        window.gruesomeNotifications.showNotification(`${name} connected`, 'info');
+                    }
+                } catch (_) {}
                 break;
             case 'player_leave':
                 this.removePlayer(data.playerId);
+                break;
+            case 'players_snapshot':
+                if (Array.isArray(data.payload)) {
+                    data.payload.forEach(p => this.addPlayer(p.playerId, p.playerData));
+                }
                 break;
             case 'flag_update':
                 this.updateFlag(data.flagId, data.flagData);

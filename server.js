@@ -89,13 +89,25 @@ class EldritchSanctuaryServer {
                 payload: { count: this.players.size }
             });
 
-            // Notify other players and update count
+            // Notify the connecting client about currently online players (snapshot)
+            const playersSnapshot = Array.from(this.players.entries()).filter(([id]) => id !== playerId).map(([id, p]) => ({
+                playerId: id,
+                playerData: {
+                    position: p.position,
+                    profile: { name: p.name },
+                    timestamp: p.lastSeen || Date.now()
+                }
+            }));
+            this.sendToClient(ws, { type: 'players_snapshot', payload: playersSnapshot });
+
+            // Notify other players and update count (use snake_case for client compatibility)
             this.broadcastToOthers(playerId, {
-                type: 'playerJoin',
-                payload: {
-                    playerId: player.id,
-                    name: player.name,
-                    timestamp: Date.now()
+                type: 'player_join',
+                playerId: player.id,
+                playerData: {
+                    position: player.position,
+                    profile: { name: player.name },
+                    timestamp: player.lastSeen
                 }
             });
             this.broadcastToAll({ type: 'playerCount', payload: { count: this.players.size } });
@@ -170,6 +182,15 @@ class EldritchSanctuaryServer {
                     type: 'flag_update',
                     flagId: message.flagId,
                     flagData: message.flagData
+                });
+                break;
+            }
+            case 'request_flags': {
+                // Ask everyone except requester to re-broadcast their flags
+                this.broadcastToOthers(ws.playerId, {
+                    type: 'request_flags',
+                    requesterId: ws.playerId,
+                    timestamp: Date.now()
                 });
                 break;
             }
