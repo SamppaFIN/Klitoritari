@@ -755,6 +755,7 @@ class EncounterSystem {
             if (distance < 50 && !monster.encountered) { // 50m for closer interaction
                 console.log(`🎭 Monster encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 monster.encountered = true;
+                try { this.hideMonsterMarker(monster); } catch (_) {}
                 this.startMonsterEncounter(monster);
             }
         });
@@ -791,6 +792,7 @@ class EncounterSystem {
             if (distance < 50 && !item.collected) { // 50m for closer interaction
                 console.log(`🎭 Item encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 item.collected = true;
+                try { this.hideItemMarker(item); } catch (_) {}
                 this.startItemEncounter(item);
             }
         });
@@ -810,6 +812,7 @@ class EncounterSystem {
             if (distance < 30 && !poi.encountered) { // 30m for closer interaction
                 console.log(`🎭 POI encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 poi.encountered = true;
+                try { if (window.mapEngine?.map) window.mapEngine.map.removeLayer(poi); } catch (_) {}
                 this.startPOIEncounter(poi);
             }
         });
@@ -843,6 +846,8 @@ class EncounterSystem {
             if (distance < 30) { // 30m for quest marker interaction
                 console.log(`🎭 Quest marker encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 questMarker.encountered = true;
+                try { if (window.eldritchApp?.systems?.mapEngine?.map) window.eldritchApp.systems.mapEngine.map.removeLayer(questMarker); } catch (_) {}
+                try { window.unifiedQuestSystem?.questMarkers?.delete?.(key); } catch (_) {}
                 this.startQuestMarkerEncounter(questMarker, key);
             }
         });
@@ -867,9 +872,42 @@ class EncounterSystem {
             if (distance < 25) { // 25m for closer interaction
                 console.log(`🎯 Test quest encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 questMarker.encountered = true;
+                try { if (window.mapEngine?.map) window.mapEngine.map.removeLayer(questMarker); } catch (_) {}
                 this.startTestQuestEncounter(questMarker);
             }
         });
+    }
+
+    hideMonsterMarker(monster) {
+        if (!window.mapEngine) return;
+        const name = monster.type?.name || monster.name;
+        try {
+            if (name && window.mapEngine.monsterMarkers?.has?.(name)) {
+                const stored = window.mapEngine.monsterMarkers.get(name);
+                if (stored?.marker && window.mapEngine.map) {
+                    window.mapEngine.map.removeLayer(stored.marker);
+                }
+                window.mapEngine.monsterMarkers.delete(name);
+                return;
+            }
+        } catch (_) {}
+        try { if (monster.marker && window.mapEngine.map) window.mapEngine.map.removeLayer(monster.marker); } catch (_) {}
+    }
+
+    hideItemMarker(item) {
+        if (!window.mapEngine) return;
+        const name = item.name;
+        try {
+            if (name && window.mapEngine.itemMarkers?.has?.(name)) {
+                const stored = window.mapEngine.itemMarkers.get(name);
+                if (stored?.marker && window.mapEngine.map) {
+                    window.mapEngine.map.removeLayer(stored.marker);
+                }
+                window.mapEngine.itemMarkers.delete(name);
+                return;
+            }
+        } catch (_) {}
+        try { if (item.marker && window.mapEngine.map) window.mapEngine.map.removeLayer(item.marker); } catch (_) {}
     }
 
     checkLegendaryEncounters(playerPos) {
