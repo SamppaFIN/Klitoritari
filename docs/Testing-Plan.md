@@ -1,5 +1,124 @@
 # Testing Plan — Cosmic Map Engine
 
+## Feature List — Eldritch Sanctuary Platform
+
+### **Core Map Features**
+- **Infinite Scrolling Maps**: Leaflet-based infinite scrolling with cosmic styling
+- **Real-time Geolocation**: HTML5 GPS tracking with accuracy indicators and simulator mode
+- **Player Position Tracking**: Live player marker with customizable appearance
+- **Map Centering**: Automatic centering on player position with smooth animations
+- **Context Menu**: Right-click/long-press menu with location-based actions
+- **Flag System**: Finnish flag markers with customizable themes and placement
+- **Path Visualization**: Player movement tracking with brush-based path painting
+- **Territory System**: Base building and territory expansion through movement
+
+### **Encounter System Features**
+- **Direct Map Interactions**: Proximity-based encounters with map markers
+- **Monster Encounters**: 50m trigger radius for combat encounters
+- **Item Collection**: 50m trigger radius for item collection dialogs
+- **Dice Combat System**: Turn-based combat with D20 rolls and strategic depth
+- **Item Effects**: Health Potion, Sanity Elixir, Power Orb, Cosmic Crystal, Ancient Scroll
+- **Map Cleanup**: Used markers disappear to prevent duplicate encounters
+- **No Random Encounters**: Clean, predictable gameplay focused on exploration
+
+### **Quest System Features**
+- **Unified Quest System**: Complete quest chains with progressive marker revelation
+- **Quest Markers**: Proximity-triggered quest interactions with 30m radius
+- **Dialog System**: Lovecraftian storytelling with branching choices and consequences
+- **Riddle Minigame**: Interactive riddle system with multiple questions and outcomes
+- **Quest Progression**: Dynamic marker hiding/showing and objective completion
+- **Stat Consequences**: Health and sanity changes based on player choices
+- **Revive Shrine**: Health and sanity restoration at specific coordinates
+
+### **NPC System Features**
+- **Aurora (👑)**: Cosmic Navigator with mystical movement and wisdom
+- **Zephyr (💨)**: Wandering Wind with fast directional movement
+- **HEVY (⚡)**: Legendary cosmic entity with energy effects and riddles
+- **Proximity Detection**: 20m trigger radius for NPC interactions
+- **Chat System**: Full dialogue system with character-specific responses
+- **Movement Patterns**: Distinct behaviors for each NPC type
+
+### **Visual Effects Features**
+- **Sanity Distortion System**: Psychological horror elements with visual effects
+- **Cosmic Effects**: Three.js particle systems and energy wave animations
+- **Screen Effects**: Blur, noise, chromatic aberration, vignette, shake, glitch
+- **Particle Systems**: Dynamic particle effects based on player sanity
+- **WebGL Integration**: High-performance rendering with fallback support
+- **Animation System**: Smooth transitions and atmospheric animations
+
+### **Audio System Features**
+- **Sound Manager**: Centralized audio system with WebAudio fallbacks
+- **Ambient Sounds**: Eerie hum and atmospheric audio
+- **Combat Sounds**: Victory, defeat, and battle audio cues
+- **Quest Sounds**: Quest completion and interaction audio
+- **Step Sounds**: Movement audio feedback
+- **Audio Fallbacks**: Graceful degradation when audio unavailable
+
+### **UI/UX Features**
+- **Debug Panel**: Unified draggable interface with tabbed organization
+- **Settings Panel**: Player marker customization and system configuration
+- **Notification System**: Centered notifications with smooth animations
+- **Tutorial System**: Contextual help and guidance messages
+- **Mobile Optimization**: Touch-friendly interface with responsive design
+- **Accessibility**: Screen reader support and keyboard navigation
+
+### **Persistence Features**
+- **Session Persistence**: Map view and path restoration across sessions
+- **Local Storage**: Investigation progress and player state storage
+- **Marker Customization**: Persistent player marker appearance settings
+- **Quest Progress**: Save and restore quest completion state
+- **Statistics Tracking**: Player stats and encounter history
+
+### **Multiplayer Features**
+- **WebSocket Communication**: Real-time position sharing and collaboration
+- **Other Player Simulation**: AI-driven NPC players for testing
+- **Position Sharing**: Live player positions and movement tracking
+- **Multiplayer Status**: Connection status and player count display
+- **Session Management**: Isolated sessions with proper cleanup
+
+### **PWA Features**
+- **Mobile Installation**: "Add to Home Screen" functionality
+- **Service Worker**: Offline functionality and caching
+- **Manifest**: Complete PWA manifest with icons and shortcuts
+- **Icon System**: Favicon and PWA icons (72x72 to 512x512)
+- **Offline Support**: Basic offline functionality with cached resources
+
+### **Debug and Development Features**
+- **Debug Toggle**: Global dev/debug mode with panel visibility control
+- **Console Logging**: Comprehensive logging for debugging and development
+- **Test Buttons**: Debug buttons for testing all implemented effects
+- **Performance Monitoring**: FPS tracking and performance indicators
+- **Error Handling**: Comprehensive error handling with user feedback
+- **Development Tools**: Built-in testing and debugging utilities
+
+### **Accessibility Features**
+- **Keyboard Navigation**: Full keyboard support for all features
+- **Screen Reader Support**: ARIA labels and semantic HTML
+- **High Contrast Mode**: Enhanced visibility for accessibility
+- **Text Scaling**: Responsive text sizing for readability
+- **Touch Targets**: Appropriately sized touch targets for mobile
+- **Motion Reduction**: Respect for user motion preferences
+
+### **Performance Features**
+- **60fps Rendering**: Smooth map scrolling and zoom performance
+- **Efficient Proximity Detection**: Optimized distance calculations
+- **Memory Management**: Proper cleanup of markers and encounter instances
+- **WebGL Optimization**: High-performance rendering with fallback support
+- **Mobile Performance**: Optimized for mid-range mobile devices
+- **Battery Optimization**: Efficient power usage for mobile devices
+
+### **Security and Privacy Features**
+- **Geolocation Consent**: Explicit permission requests with clear feedback
+- **Local Storage Only**: No external tracking or data collection
+- **Rate Limiting**: WebSocket message rate limiting for security
+- **HTTPS/WSS**: Secure connections for production deployment
+- **Privacy First**: No external analytics or user tracking
+- **Data Protection**: Secure local storage with proper cleanup
+
+---
+
+## Testing Plan
+
 ## Unit Tests
 - **Map System**: Leaflet initialization and infinite scrolling
 - **Geolocation**: Position tracking and accuracy calculations
