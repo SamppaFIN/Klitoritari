@@ -83,13 +83,13 @@ class EldritchSanctuaryServer {
             this.players.set(playerId, player);
             ws.playerId = playerId;
 
-            // Send welcome message
+            // Send welcome message and current player count
             this.sendToClient(ws, {
                 type: 'playerCount',
                 payload: { count: this.players.size }
             });
 
-            // Notify other players
+            // Notify other players and update count
             this.broadcastToOthers(playerId, {
                 type: 'playerJoin',
                 payload: {
@@ -98,6 +98,7 @@ class EldritchSanctuaryServer {
                     timestamp: Date.now()
                 }
             });
+            this.broadcastToAll({ type: 'playerCount', payload: { count: this.players.size } });
 
             // Handle incoming messages
             ws.on('message', (data) => {

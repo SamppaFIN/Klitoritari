@@ -73,6 +73,8 @@ class MultiplayerManager {
                     
                     // Send initial player data
                     this.sendPlayerData();
+                    // After connecting, broadcast our existing flags so late joiners see them
+                    setTimeout(() => this.sendExistingFlags(), 300);
                     resolve();
                 };
                 
@@ -102,6 +104,38 @@ class MultiplayerManager {
                 reject(error);
             }
         });
+    }
+
+    /**
+     * Broadcast all existing flags owned by this client so others can render them
+     */
+    sendExistingFlags() {
+        try {
+            if (!this.isConnected || !window.mapEngine || !window.mapEngine.finnishFlagLayer) return;
+            const pins = window.mapEngine.finnishFlagLayer.flagPins || [];
+            const ownerId = this.playerId;
+            pins.forEach(pin => {
+                // Only re-broadcast our own pins to avoid rebroadcast storms
+                if (pin.ownerId && pin.ownerId !== ownerId) return;
+                this.sendMessage({
+                    type: 'flag_update',
+                    playerId: ownerId,
+                    flagId: `${pin.lat.toFixed(6)}_${pin.lng.toFixed(6)}_${pin.timestamp}`,
+                    flagData: {
+                        lat: pin.lat,
+                        lng: pin.lng,
+                        size: pin.size,
+                        rotation: pin.rotation,
+                        symbol: pin.symbol,
+                        ownerId: ownerId,
+                        timestamp: pin.timestamp
+                    }
+                });
+            });
+            console.log(`🌐 Re-broadcasted ${pins.length} existing flags for owner ${ownerId}`);
+        } catch (e) {
+            console.warn('🌐 Failed to send existing flags:', e);
+        }
     }
     
     /**
