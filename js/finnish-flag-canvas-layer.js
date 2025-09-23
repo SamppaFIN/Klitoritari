@@ -358,6 +358,12 @@ class FinnishFlagCanvasLayer {
                     case 'flower':
                         this.drawFlower(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
                         break;
+                    case 'swedish':
+                        this.drawSwedishFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
+                    case 'norwegian':
+                        this.drawNorwegianFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
                     default:
                         this.drawFinnishFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
                 }
@@ -543,6 +549,82 @@ class FinnishFlagCanvasLayer {
             [0, 0], [0, -r], [0, r], [-0.866*r, -0.5*r], [0.866*r, -0.5*r], [-0.866*r, 0.5*r], [0.866*r, 0.5*r]
         ];
         circles.forEach(([cx, cy]) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke(); });
+        ctx.restore();
+    }
+
+    drawSwedishFlag(x, y, size, rotation) {
+        const ctx = this.ctx;
+        const halfSize = size / 2;
+        const crossWidth = Math.max(2, size / 8);
+        
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        
+        // Draw blue background
+        ctx.fillStyle = '#006AA7';
+        ctx.fillRect(-halfSize, -halfSize, size, size);
+        
+        // Draw yellow border
+        ctx.strokeStyle = '#FECC00';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-halfSize, -halfSize, size, size);
+        
+        // Draw horizontal cross (yellow)
+        ctx.fillStyle = '#FECC00';
+        ctx.fillRect(-halfSize, -crossWidth/2, size, crossWidth);
+        
+        // Draw vertical cross (yellow)
+        ctx.fillRect(-crossWidth/2, -halfSize, crossWidth, size);
+        
+        // Add glow effect
+        ctx.shadowColor = '#FECC00';
+        ctx.shadowBlur = 2;
+        ctx.strokeStyle = '#FECC00';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(-halfSize, -halfSize, size, size);
+        
+        ctx.restore();
+    }
+
+    drawNorwegianFlag(x, y, size, rotation) {
+        const ctx = this.ctx;
+        const halfSize = size / 2;
+        const crossWidth = Math.max(2, size / 8);
+        
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rotation);
+        
+        // Draw red background
+        ctx.fillStyle = '#EF2B2D';
+        ctx.fillRect(-halfSize, -halfSize, size, size);
+        
+        // Draw white border
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-halfSize, -halfSize, size, size);
+        
+        // Draw horizontal cross (white)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-halfSize, -crossWidth/2, size, crossWidth);
+        
+        // Draw vertical cross (white)
+        ctx.fillRect(-crossWidth/2, -halfSize, crossWidth, size);
+        
+        // Draw blue cross on top (smaller)
+        const blueCrossWidth = crossWidth / 2;
+        ctx.fillStyle = '#002868';
+        ctx.fillRect(-halfSize, -blueCrossWidth/2, size, blueCrossWidth);
+        ctx.fillRect(-blueCrossWidth/2, -halfSize, blueCrossWidth, size);
+        
+        // Add glow effect
+        ctx.shadowColor = '#EF2B2D';
+        ctx.shadowBlur = 2;
+        ctx.strokeStyle = '#EF2B2D';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(-halfSize, -halfSize, size, size);
+        
         ctx.restore();
     }
 }

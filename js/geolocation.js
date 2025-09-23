@@ -32,9 +32,9 @@ class GeolocationManager {
     }
 
     setupUI() {
-        // Use a single Locate Me button in the footer
+        // Use the Locate Me button in the header
         const locateBtn = document.getElementById('locate-me-btn');
-        const accuracyDisplay = document.getElementById('accuracy-value');
+        const accuracyDisplay = document.getElementById('accuracy-display-header');
         
         if (locateBtn) {
             locateBtn.addEventListener('click', () => this.startTracking());
@@ -423,31 +423,47 @@ class GeolocationManager {
     }
 
     updateAccuracyDisplay() {
-        const accuracyDisplay = document.getElementById('accuracy-value');
-        if (!accuracyDisplay || !this.currentPosition) return;
+        const accuracyDisplay = document.getElementById('accuracy-display-header');
+        const locateStatus = document.getElementById('locate-status');
+        
+        if (!this.currentPosition) {
+            if (accuracyDisplay) accuracyDisplay.textContent = 'Accuracy: --';
+            if (locateStatus) {
+                locateStatus.textContent = 'GPS Ready';
+                locateStatus.className = 'btn-status disconnected';
+            }
+            return;
+        }
 
         const accuracy = this.currentPosition.accuracy;
-        let displayText = '--';
-        let color = 'var(--cosmic-green)';
+        let displayText = 'Accuracy: --';
+        let statusText = 'GPS Ready';
+        let statusClass = 'btn-status disconnected';
 
         if (accuracy !== null) {
             if (accuracy <= 10) {
-                displayText = `${Math.round(accuracy)}m (Excellent)`;
-                color = 'var(--cosmic-green)';
-            } else if (accuracy <= 50) {
-                displayText = `${Math.round(accuracy)}m (Good)`;
-                color = 'var(--cosmic-blue)';
-            } else if (accuracy <= 100) {
-                displayText = `${Math.round(accuracy)}m (Fair)`;
-                color = 'var(--cosmic-purple)';
+                displayText = `Accuracy: ${Math.round(accuracy)}m`;
+                statusText = '<10m';
+                statusClass = 'btn-status green';
+            } else if (accuracy <= 1100) {
+                displayText = `Accuracy: ${Math.round(accuracy)}m`;
+                statusText = '<1100m';
+                statusClass = 'btn-status yellow';
             } else {
-                displayText = `${Math.round(accuracy)}m (Poor)`;
-                color = 'var(--cosmic-red)';
+                displayText = `Accuracy: ${Math.round(accuracy)}m`;
+                statusText = 'Poor';
+                statusClass = 'btn-status red';
             }
         }
 
-        accuracyDisplay.textContent = displayText;
-        accuracyDisplay.style.color = color;
+        if (accuracyDisplay) {
+            accuracyDisplay.textContent = displayText;
+        }
+        
+        if (locateStatus) {
+            locateStatus.textContent = statusText;
+            locateStatus.className = statusClass;
+        }
 
         if (this.onAccuracyChange) {
             this.onAccuracyChange(accuracy);
@@ -455,13 +471,13 @@ class GeolocationManager {
     }
 
     updateUI() {
-        const locateBtn = document.getElementById('locate-btn');
+        const locateBtn = document.getElementById('locate-me-btn');
         if (locateBtn) {
             if (this.isTracking) {
-                locateBtn.innerHTML = '<span class="icon">⏹️</span> Stop Tracking';
+                locateBtn.innerHTML = '<span class="btn-icon">⏹️</span><span class="btn-text">STOP</span><span class="btn-status" id="locate-status">Tracking</span>';
                 locateBtn.classList.add('tracking');
             } else {
-                locateBtn.innerHTML = '<span class="icon">📍</span> Locate Me';
+                locateBtn.innerHTML = '<span class="btn-icon">📍</span><span class="btn-text">LOCATE</span><span class="btn-status" id="locate-status">GPS Ready</span>';
                 locateBtn.classList.remove('tracking');
             }
         }

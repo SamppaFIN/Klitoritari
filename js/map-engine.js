@@ -33,6 +33,15 @@ class MapEngine {
         this.flagDropDistance = 10; // Drop flag every 10 meters
     }
 
+    getCurrentPlayerLatLng() {
+        try {
+            if (this.playerPosition && typeof this.playerPosition.lat === 'number') {
+                return { lat: this.playerPosition.lat, lng: this.playerPosition.lng };
+            }
+        } catch (_) {}
+        return null;
+    }
+
     init() {
         if (this.isInitialized) {
             console.log('🗺️ Map engine already initialized, skipping');

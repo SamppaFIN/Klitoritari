@@ -409,6 +409,55 @@ class MoralChoiceSystem {
             wisdom: { value: wisdom, description: wisdomDesc }
         };
     }
+
+    // --- New helpers: nickname and derived stat/modifiers ---
+    getAlignment() {
+        return { ...this.playerAlignment };
+    }
+
+    getNickname() {
+        const a = this.playerAlignment;
+        // Determine primary axis by absolute value
+        const entries = [
+            ['cosmic', a.cosmic],
+            ['ethical', a.ethical],
+            ['wisdom', a.wisdom]
+        ].sort((x, y) => Math.abs(y[1]) - Math.abs(x[1]));
+        const [axis, value] = entries[0];
+        // Titles per axis and polarity
+        const titles = {
+            cosmic: value >= 30 ? 'Orderbound' : value <= -30 ? 'Chaos-Touched' : 'Wanderer',
+            ethical: value >= 30 ? 'Good Samaritan' : value <= -30 ? 'Bar Fighter' : 'Drifter',
+            wisdom: value >= 30 ? 'Enlightened' : value <= -30 ? 'Fool' : 'Seeker'
+        };
+        return titles[axis];
+    }
+
+    // Small combat modifier based on morals
+    getCombatModifier() {
+        const { cosmic, ethical, wisdom } = this.playerAlignment;
+        let bonus = 0;
+        // Wisdom helps planning
+        if (wisdom > 50) bonus += 0.10; else if (wisdom < -50) bonus -= 0.10;
+        // Ethical courage
+        if (ethical > 50) bonus += 0.05; else if (ethical < -50) bonus -= 0.05;
+        // Cosmic order provides steadiness, chaos is risky but sometimes rewarding
+        if (cosmic > 50) bonus += 0.05; else if (cosmic < -50) bonus -= 0.02; // chaos slightly harmful by default
+        // Clamp
+        return Math.max(-0.2, Math.min(0.2, bonus));
+    }
+
+    // Derived stat nudges (non-persistent, for display or temporary use)
+    getDerivedStatModifiers() {
+        const { cosmic, ethical, wisdom } = this.playerAlignment;
+        return {
+            attack: Math.round((wisdom > 0 ? wisdom : 0) * 0.05 + (ethical > 0 ? ethical : 0) * 0.03),
+            defense: Math.round((cosmic > 0 ? cosmic : 0) * 0.04),
+            luck: Math.round((cosmic < 0 ? -cosmic : 0) * 0.03),
+            diplomacy: Math.round((ethical > 0 ? ethical : 0) * 0.05),
+            investigation: Math.round((wisdom > 0 ? wisdom : 0) * 0.05)
+        };
+    }
 }
 
 // Initialize global instance

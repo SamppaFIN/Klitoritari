@@ -278,6 +278,8 @@ class TutorialSystem {
     getSymbolOptionsHTML() {
         const options = [
             { id: 'finnish', label: 'Finnish Flag', svg: this.svgFinnishFlag(36) },
+            { id: 'swedish', label: 'Swedish Flag', svg: this.svgSwedishFlag(36) },
+            { id: 'norwegian', label: 'Norwegian Flag', svg: this.svgNorwegianFlag(36) },
             { id: 'flower', label: 'Flower of Life', svg: this.svgFlowerOfLife(36) },
             { id: 'triangle', label: 'Sacred Triangle', svg: this.svgTriangle(36) },
             { id: 'hex', label: 'Hexagon', svg: this.svgHexagon(36) },
@@ -299,6 +301,24 @@ class TutorialSystem {
             <rect width="60" height="40" fill="#FFFFFF"/>
             <rect x="0" y="16" width="60" height="8" fill="#003580"/>
             <rect x="20" y="0" width="8" height="40" fill="#003580"/>
+        </svg>`;
+    }
+
+    svgSwedishFlag(size) {
+        return `<svg width="${size}" height="${size*0.66}" viewBox="0 0 60 40">
+            <rect width="60" height="40" fill="#006AA7"/>
+            <rect x="0" y="16" width="60" height="8" fill="#FECC00"/>
+            <rect x="20" y="0" width="8" height="40" fill="#FECC00"/>
+        </svg>`;
+    }
+
+    svgNorwegianFlag(size) {
+        return `<svg width="${size}" height="${size*0.66}" viewBox="0 0 60 40">
+            <rect width="60" height="40" fill="#EF2B2D"/>
+            <rect x="0" y="16" width="60" height="8" fill="#FFFFFF"/>
+            <rect x="20" y="0" width="8" height="40" fill="#FFFFFF"/>
+            <rect x="0" y="18" width="60" height="4" fill="#002868"/>
+            <rect x="22" y="0" width="4" height="40" fill="#002868"/>
         </svg>`;
     }
 
