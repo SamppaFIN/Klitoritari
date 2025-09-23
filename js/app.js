@@ -2373,6 +2373,10 @@ class EldritchSanctuaryApp {
 
         // Initialize map engine
         this.systems.mapEngine = new EnhancedMapEngine();
+        
+        // Set window.mapEngine immediately after creation for tutorial access
+        window.mapEngine = this.systems.mapEngine;
+        console.log('🌌 Setting window.mapEngine early for tutorial:', !!window.mapEngine);
 
         // Set up tutorial start callback immediately after map engine creation
         try {
