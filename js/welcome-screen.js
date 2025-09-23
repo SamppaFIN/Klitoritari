@@ -190,7 +190,11 @@ class WelcomeScreen {
         this.hideWelcomeScreen();
         
         // Show notification
-        this.showNotification('🌟 Hello Cosmic Explorer! What is your name?');
+        if (window.app && window.app.showNotification) {
+            window.app.showNotification('🌟 Hello Cosmic Explorer! What is your name?');
+        } else {
+            console.log('🌟 Hello Cosmic Explorer! What is your name?');
+        }
         
         // Show user settings modal
         const modal = document.getElementById('user-settings-modal');
