@@ -567,6 +567,7 @@ class TutorialEncounterSystem {
         });
 
         const marker = L.marker([position.lat, position.lng], { icon }).addTo(window.mapEngine.map);
+        console.log('🧪 Leaflet marker created and added to map:', marker);
         
         marker.bindPopup(`
             <div class="tutorial-popup">
