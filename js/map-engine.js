@@ -824,17 +824,18 @@ class MapEngine {
         
         // 1. Test quest markers removed as requested
         
+        // Temporarily disabled for tutorial-first approach
         // 2. Generate points of interest
-        this.generatePointsOfInterest();
+        // this.generatePointsOfInterest();
         
         // 3. Generate monsters
-        this.generateMonsters();
+        // this.generateMonsters();
         
         // 4. Generate legendary encounters
-        this.generateLegendaryEncounters();
+        // this.generateLegendaryEncounters();
         
         // 5. Add HEVY and other special markers
-        this.createSpecialMarkers();
+        // this.createSpecialMarkers();
         
         // 6. Quest markers handled by unified quest system
         
@@ -857,18 +858,19 @@ class MapEngine {
         // 9. Start proximity detection
         this.startProximityDetection();
         
+        // Temporarily disabled for tutorial-first approach
         // 10. Load mystery zones if investigation system is available
-        if (window.investigationSystem) {
-            const zones = window.investigationSystem.getMysteryZones();
-            this.addMysteryZoneMarkers(zones);
-            console.log('🎯 Mystery zones recreated:', zones.length);
-        }
+        // if (window.investigationSystem) {
+        //     const zones = window.investigationSystem.getMysteryZones();
+        //     this.addMysteryZoneMarkers(zones);
+        //     console.log('🎯 Mystery zones recreated:', zones.length);
+        // }
         
         // 11. Load NPCs if NPC system is available
-        if (window.npcSystem) {
-            window.npcSystem.generateNPCs();
-            console.log('🎯 NPCs recreated');
-        }
+        // if (window.npcSystem) {
+        //     window.npcSystem.generateNPCs();
+        //     console.log('🎯 NPCs recreated');
+        // }
         
         console.log('🎯 All markers recreated successfully');
     }
@@ -910,21 +912,22 @@ class MapEngine {
             this.updatePlayerPosition(defaultPosition);
         }
         
+        // Temporarily disabled for tutorial-first approach
         // Also create special markers (HEVY, shrines, items, monsters)
-        this.createSpecialMarkers();
+        // this.createSpecialMarkers();
         
         // Create NPCs (Aurora and Zephyr) if NPC system is available
-        if (window.npcSystem) {
-            console.log('👥 Creating NPCs on map ready...');
-            window.npcSystem.generateNPCs();
-            window.npcSystem.startSimulation();
-        }
+        // if (window.npcSystem) {
+        //     console.log('👥 Creating NPCs on map ready...');
+        //     window.npcSystem.generateNPCs();
+        //     window.npcSystem.startSimulation();
+        // }
         
         // Create quest markers if quest system is available
-        if (window.unifiedQuestSystem) {
-            console.log('🎭 Creating quest markers on map ready...');
-            window.unifiedQuestSystem.createQuestMarkers();
-        }
+        // if (window.unifiedQuestSystem) {
+        //     console.log('🎭 Creating quest markers on map ready...');
+        //     window.unifiedQuestSystem.createQuestMarkers();
+        // }
     }
 
     // Start proximity detection for encounters
@@ -1126,12 +1129,13 @@ class MapEngine {
         
         // Marker showcase removed - using WebGL rendering instead
         
+        // Temporarily disabled for tutorial-first approach
         // Generate legendary encounters
-        this.generateLegendaryEncounters();
+        // this.generateLegendaryEncounters();
         
         // Generate map content
-        this.generatePointsOfInterest();
-        this.generateMonsters();
+        // this.generatePointsOfInterest();
+        // this.generateMonsters();
     }
 
     openBaseManagement() {

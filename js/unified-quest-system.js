@@ -333,6 +333,10 @@ class UnifiedQuestSystem {
     }
     
     createQuestMarkers() {
+        // Temporarily disabled for tutorial-first approach
+        console.log('🎭 Quest marker creation disabled for tutorial-first approach');
+        return;
+        
         // Create quest markers on the map
         if (this.awaitingLocate || !this.startingPosition) {
             console.log('🎭 Deferring quest marker creation until starting position is known');
