@@ -42,6 +42,24 @@ class FinnishFlagCanvasLayer {
         this.setupEventListeners();
         this.startAnimation();
         console.log('🇫🇮 Finnish Flag Canvas Layer initialized');
+
+        // Restore persisted flags
+        try {
+            const restored = window.sessionPersistence?.restoreFlags?.();
+            if (restored && restored.length) {
+                this.flagPins = restored.map(p => ({
+                    lat: p.lat,
+                    lng: p.lng,
+                    size: p.size,
+                    rotation: p.rotation,
+                    timestamp: p.t || Date.now()
+                }));
+                console.log(`🇫🇮 Restored ${this.flagPins.length} persisted flags`);
+                this.render();
+            }
+        } catch (e) {
+            console.warn('🇫🇮 Failed to restore flags:', e);
+        }
     }
     
     createCanvas() {
@@ -138,6 +156,10 @@ class FinnishFlagCanvasLayer {
         if (window.soundManager) {
             try { window.soundManager.playBling({ frequency: 980, duration: 0.1, type: 'sine' }); } catch (e) {}
         }
+
+        // Persist & replicate
+        this.persistFlags();
+        this.replicateFlagPin(pin);
     }
     
     findNearbyFlag(lat, lng, maxDistance = 10) {
@@ -204,6 +226,8 @@ class FinnishFlagCanvasLayer {
     removeFlagsWithinRadius(lat, lng, radiusMeters) {
         this.flagPins = this.flagPins.filter(f => this.calculateDistance(lat, lng, f.lat, f.lng) > radiusMeters);
         this.render();
+        // Persist after bulk removal
+        this.persistFlags();
     }
     
     isValidLatLng(lat, lng) {
@@ -332,6 +356,7 @@ class FinnishFlagCanvasLayer {
         this.flagPins = [];
         this.render();
         console.log('🇫🇮 All flags cleared');
+        this.persistFlags();
     }
     
     getFlagCount() {
@@ -365,6 +390,33 @@ class FinnishFlagCanvasLayer {
             this.canvas.parentNode.removeChild(this.canvas);
         }
         console.log('🇫🇮 Finnish Flag Canvas Layer destroyed');
+    }
+
+    // Persistence helper
+    persistFlags() {
+        try { window.sessionPersistence?.saveFlags?.(this.flagPins); } catch (_) {}
+    }
+
+    // Multiplayer replication helper
+    replicateFlagPin(pin) {
+        try {
+            if (window.multiplayerManager && window.multiplayerManager.isConnected) {
+                window.multiplayerManager.sendMessage({
+                    type: 'flag_update',
+                    playerId: window.multiplayerManager.playerId,
+                    flagId: `${pin.lat.toFixed(6)}_${pin.lng.toFixed(6)}_${pin.timestamp}`,
+                    flagData: {
+                        lat: pin.lat,
+                        lng: pin.lng,
+                        size: pin.size,
+                        rotation: pin.rotation,
+                        timestamp: pin.timestamp
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn('🇫🇮 Failed to replicate flag pin:', e);
+        }
     }
 }
 

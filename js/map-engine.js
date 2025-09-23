@@ -2014,6 +2014,15 @@ class MapEngine {
             console.log('🇫🇮 Finnish flag canvas layer initialized');
             // Make it globally accessible for step system
             window.mapEngine = this;
+
+            // Persist flags on visibility change/app pause
+            try {
+                window.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        try { window.sessionPersistence?.saveFlags?.(this.finnishFlagLayer.flagPins); } catch (_) {}
+                    }
+                });
+            } catch (_) {}
         } else {
             console.warn('🇫🇮 FinnishFlagCanvasLayer not available');
         }

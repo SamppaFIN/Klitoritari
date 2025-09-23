@@ -83,6 +83,34 @@ class SessionPersistenceManager {
             return raw ? JSON.parse(raw) : null;
         } catch (_) { return null; }
     }
+
+    // Finnish flag pins (canvas layer)
+    saveFlags(flagPins) {
+        try {
+            if (!Array.isArray(flagPins)) return;
+            // Store compact objects: {lat,lng,size,rotation,t}
+            const compact = flagPins
+                .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+                .map(p => ({
+                    lat: +p.lat,
+                    lng: +p.lng,
+                    size: +p.size || 30,
+                    rotation: +p.rotation || 0,
+                    t: p.timestamp || Date.now()
+                }));
+            localStorage.setItem(this.key('flags'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restoreFlags() {
+        try {
+            const raw = localStorage.getItem(this.key('flags'));
+            if (!raw) return [];
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) return arr;
+        } catch (_) {}
+        return [];
+    }
 }
 
 window.sessionPersistence = new SessionPersistenceManager();

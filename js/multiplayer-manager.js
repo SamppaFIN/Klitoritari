@@ -281,10 +281,17 @@ class MultiplayerManager {
      * Update flag data
      */
     updateFlag(flagId, flagData) {
-        // Sync flag with other players
-        if (window.mapEngine && window.mapEngine.flagLayer) {
-            // This would integrate with the existing flag system
-            console.log('🌐 Flag update received:', flagId, flagData);
+        // Sync flag with other players by adding to canvas layer
+        try {
+            if (window.mapEngine && window.mapEngine.finnishFlagLayer && flagData) {
+                const { lat, lng, size, rotation } = flagData;
+                window.mapEngine.finnishFlagLayer.addFlagPin(lat, lng, size, rotation);
+                console.log('🌐 Flag update applied:', flagId, flagData);
+            } else {
+                console.log('🌐 Flag update received but layer unavailable');
+            }
+        } catch (e) {
+            console.warn('🌐 Failed to apply flag update:', e);
         }
     }
     
