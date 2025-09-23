@@ -312,9 +312,12 @@ class TutorialEncounterSystem {
             
             // Direct DOM update as fallback
             const healthEl = document.getElementById('health-value');
+            console.log(`🎓 Direct DOM update attempt: health=${health}, element=`, healthEl);
             if (healthEl) {
                 healthEl.textContent = health;
                 console.log(`🎓 Direct DOM update: health-value set to ${health}`);
+            } else {
+                console.warn('🎓 health-value element not found!');
             }
         }
         

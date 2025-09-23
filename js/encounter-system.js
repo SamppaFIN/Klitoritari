@@ -1944,16 +1944,44 @@ class EncounterSystem {
         // Apply different effects based on item type
         switch(item.name) {
             case 'Health Potion':
-                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
-                    window.eldritchApp.systems.statistics.restoreHealth(20);
-                    this.showNotification('🧪 Health restored by 20!');
+                // Restore health directly in encounter system
+                const currentHealth = this.playerStats.health;
+                const maxHealth = this.playerStats.maxHealth;
+                const newHealth = Math.min(currentHealth + 20, maxHealth);
+                this.playerStats.health = newHealth;
+                
+                // Update UI
+                if (window.app && window.app.updateMobileStats) {
+                    window.app.updateMobileStats();
                 }
+                
+                // Direct DOM update as fallback
+                const healthEl = document.getElementById('health-value');
+                if (healthEl) {
+                    healthEl.textContent = newHealth;
+                }
+                
+                this.showNotification(`🧪 Health restored by 20! Now ${newHealth}/${maxHealth}`);
                 break;
             case 'Sanity Elixir':
-                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
-                    window.eldritchApp.systems.statistics.restoreSanity(15);
-                    this.showNotification('🧠 Sanity restored by 15!');
+                // Restore sanity directly in encounter system
+                const currentSanity = this.playerStats.sanity;
+                const maxSanity = this.playerStats.maxSanity;
+                const newSanity = Math.min(currentSanity + 15, maxSanity);
+                this.playerStats.sanity = newSanity;
+                
+                // Update UI
+                if (window.app && window.app.updateMobileStats) {
+                    window.app.updateMobileStats();
                 }
+                
+                // Direct DOM update as fallback
+                const sanityEl = document.getElementById('sanity-value');
+                if (sanityEl) {
+                    sanityEl.textContent = newSanity;
+                }
+                
+                this.showNotification(`🧠 Sanity restored by 15! Now ${newSanity}/${maxSanity}`);
                 break;
             case 'Power Orb':
                 if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
