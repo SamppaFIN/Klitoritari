@@ -32,6 +32,9 @@ class WebGLVectorRenderer {
 
     init() {
         try {
+            if (!this.gl || !this.gl.VERTEX_SHADER) {
+                throw new Error('WebGL context not available');
+            }
             this.createShaderProgram();
             this.createBuffers();
             this.isInitialized = true;

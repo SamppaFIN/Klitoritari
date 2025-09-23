@@ -551,7 +551,13 @@ class EldritchSanctuaryApp {
         if (this.systems.npc) {
             // Reset any NPC-related caches
             if (this.systems.npc.npcMarkers) {
-                this.systems.npc.npcMarkers.clear();
+                if (typeof this.systems.npc.npcMarkers.clear === 'function') {
+                    this.systems.npc.npcMarkers.clear();
+                } else if (Array.isArray(this.systems.npc.npcMarkers)) {
+                    this.systems.npc.npcMarkers.length = 0;
+                } else {
+                    this.systems.npc.npcMarkers = new Map();
+                }
             }
         }
         
@@ -1775,7 +1781,7 @@ class EldritchSanctuaryApp {
             
             console.log('🔧 Dev toggle initialized, production mode:', isProduction);
         } else {
-            console.error('🔧 Dev toggle button not found');
+            console.log('🔧 Dev toggle button not found - skipping dev toggle initialization');
         }
     }
     
@@ -2321,6 +2327,16 @@ class EldritchSanctuaryApp {
         }, 5000);
     }
     
+    showWelcomeScreen() {
+        console.log('🌌 Returning to welcome screen');
+        if (this.welcomeScreen && this.welcomeScreen.showWelcomeScreen) {
+            this.welcomeScreen.showWelcomeScreen();
+        } else {
+            // Fallback: reload the page to show welcome screen
+            window.location.reload();
+        }
+    }
+    
     async initCosmicEffects() {
         try {
             this.systems.cosmicEffects = new CosmicEffects();
@@ -2441,9 +2457,20 @@ class EldritchSanctuaryApp {
         this.systems.finnishFlagGenerator = new FinnishFlagGenerator();
         this.systems.finnishFlagGenerator.init();
         
-        // Initialize WebGL vector renderer
-        this.systems.webglVectorRenderer = new WebGLVectorRenderer();
-        this.systems.webglVectorRenderer.init();
+        // Initialize WebGL vector renderer (with proper WebGL context)
+        try {
+            const canvas = document.getElementById('map-canvas');
+            const gl = canvas ? canvas.getContext('webgl') || canvas.getContext('experimental-webgl') : null;
+            if (gl) {
+                this.systems.webglVectorRenderer = new WebGLVectorRenderer(gl, canvas);
+            } else {
+                console.warn('🎨 WebGL not available, skipping vector renderer');
+                this.systems.webglVectorRenderer = null;
+            }
+        } catch (error) {
+            console.warn('🎨 Failed to initialize WebGL vector renderer:', error);
+            this.systems.webglVectorRenderer = null;
+        }
         
         // Initialize enhanced path painting system
         this.systems.enhancedPathPainting = new EnhancedPathPaintingSystem();
@@ -2471,23 +2498,35 @@ class EldritchSanctuaryApp {
         
         // Initialize gruesome notifications
         this.systems.gruesomeNotifications = new GruesomeNotifications();
-        this.systems.gruesomeNotifications.init();
         
-        // Initialize welcome screen
-        this.systems.welcomeScreen = new WelcomeScreen();
-        this.systems.welcomeScreen.init();
+        // Welcome screen already initialized in initWelcomeScreen()
+        this.systems.welcomeScreen = this.welcomeScreen;
         
         // Initialize webgl map renderer
         this.systems.webglMapRenderer = new WebGLMapRenderer();
         this.systems.webglMapRenderer.init();
         
         // Initialize webgl map integration
-        this.systems.webglMapIntegration = new WebGLMapIntegration();
-        this.systems.webglMapIntegration.init();
+        try {
+            this.systems.webglMapIntegration = new WebGLMapIntegration(this.systems.mapEngine);
+        } catch (error) {
+            console.warn('🌌 Failed to initialize WebGL map integration:', error);
+            this.systems.webglMapIntegration = null;
+        }
         
-        // Initialize webgl test
-        this.systems.webglTest = new WebGLTest();
-        this.systems.webglTest.init();
+        // Initialize webgl test (if available)
+        try {
+            if (typeof WebGLTest !== 'undefined') {
+                this.systems.webglTest = new WebGLTest();
+                this.systems.webglTest.init();
+            } else {
+                console.warn('🌌 WebGLTest not available, skipping');
+                this.systems.webglTest = null;
+            }
+        } catch (error) {
+            console.warn('🌌 Failed to initialize WebGL test:', error);
+            this.systems.webglTest = null;
+        }
         
         // Initialize mobile wake lock (if on mobile)
         if (this.isMobile && window.mobileWakeLock) {
@@ -2516,6 +2555,7 @@ class EldritchSanctuaryApp {
         window.baseSystem = this.systems.base;
         window.encounterSystem = this.systems.encounter;
         window.npcSystem = this.systems.npc;
+        window.app = this; // Make app instance globally available
     }
     
     setupSystemIntegration() {
@@ -2523,7 +2563,11 @@ class EldritchSanctuaryApp {
         this.systems.geolocation.onPositionUpdate = (position) => {
             this.systems.mapEngine.updatePlayerPosition(position);
             this.systems.websocket.sendPositionUpdate(position);
-            this.systems.investigation.updateInvestigationProgress(position);
+            
+            // Update investigation system if available
+            if (this.systems.investigation && this.systems.investigation.updateInvestigationProgress) {
+                this.systems.investigation.updateInvestigationProgress(position);
+            }
             
             // Update encounter system with position for step tracking
             if (this.systems.encounter) {
@@ -2603,9 +2647,13 @@ class EldritchSanctuaryApp {
         };
         
         // WebGL Vector Renderer to Map Engine
-        this.systems.webglVectorRenderer.onRenderComplete = (data) => {
-            this.systems.mapEngine.updateWebGLDisplay(data);
-        };
+        if (this.systems.webglVectorRenderer) {
+            this.systems.webglVectorRenderer.onRenderComplete = (data) => {
+                if (this.systems.mapEngine && this.systems.mapEngine.updateWebGLDisplay) {
+                    this.systems.mapEngine.updateWebGLDisplay(data);
+                }
+            };
+        }
         
         // Enhanced Path Painting System to Map Engine
         this.systems.enhancedPathPainting.onPathUpdate = (path) => {
@@ -2623,29 +2671,49 @@ class EldritchSanctuaryApp {
         };
         
         // Other Player Simulation to Map Engine
-        this.systems.otherPlayerSimulation.onPlayerSimulate = (player) => {
-            this.systems.mapEngine.simulateOtherPlayer(player);
-        };
+        if (this.systems.otherPlayerSimulation) {
+            this.systems.otherPlayerSimulation.onPlayerSimulate = (player) => {
+                if (this.systems.mapEngine && this.systems.mapEngine.simulateOtherPlayer) {
+                    this.systems.mapEngine.simulateOtherPlayer(player);
+                }
+            };
+        }
         
         // Sanity Distortion to Map Engine
-        this.systems.sanityDistortion.onDistortionTrigger = (distortion) => {
-            this.systems.mapEngine.triggerDistortion(distortion);
-        };
+        if (this.systems.sanityDistortion) {
+            this.systems.sanityDistortion.onDistortionTrigger = (distortion) => {
+                if (this.systems.mapEngine && this.systems.mapEngine.triggerDistortion) {
+                    this.systems.mapEngine.triggerDistortion(distortion);
+                }
+            };
+        }
         
         // Gruesome Notifications to Map Engine
-        this.systems.gruesomeNotifications.onNotificationShow = (notification) => {
-            this.systems.mapEngine.showNotification(notification);
-        };
+        if (this.systems.gruesomeNotifications) {
+            this.systems.gruesomeNotifications.onNotificationShow = (notification) => {
+                if (this.systems.mapEngine && this.systems.mapEngine.showNotification) {
+                    this.systems.mapEngine.showNotification(notification);
+                }
+            };
+        }
         
         // Welcome Screen to Map Engine
-        this.systems.welcomeScreen.onWelcomeComplete = () => {
-            this.systems.mapEngine.initializeMap();
-        };
+        if (this.systems.welcomeScreen) {
+            this.systems.welcomeScreen.onWelcomeComplete = () => {
+                if (this.systems.mapEngine) {
+                    this.systems.mapEngine.initializeMap();
+                }
+            };
+        }
         
         // WebGL Map Renderer to Map Engine
-        this.systems.webglMapRenderer.onRenderComplete = (data) => {
-            this.systems.mapEngine.updateWebGLMap(data);
-        };
+        if (this.systems.webglMapRenderer) {
+            this.systems.webglMapRenderer.onRenderComplete = (data) => {
+                if (this.systems.mapEngine && this.systems.mapEngine.updateWebGLMap) {
+                    this.systems.mapEngine.updateWebGLMap(data);
+                }
+            };
+        }
         
         // WebGL Map Integration to Map Engine
         this.systems.webglMapIntegration.onIntegrationComplete = (data) => {
@@ -2653,9 +2721,13 @@ class EldritchSanctuaryApp {
         };
         
         // WebGL Test to Map Engine
-        this.systems.webglTest.onTestComplete = (data) => {
-            this.systems.mapEngine.updateWebGLTest(data);
-        };
+        if (this.systems.webglTest) {
+            this.systems.webglTest.onTestComplete = (data) => {
+                if (this.systems.mapEngine && this.systems.mapEngine.updateWebGLTest) {
+                    this.systems.mapEngine.updateWebGLTest(data);
+                }
+            };
+        }
         
         console.log('🔧 System integration setup complete');
     }
@@ -2670,13 +2742,21 @@ class EldritchSanctuaryApp {
     }
     
     loadMysteryZones() {
-        const zones = this.systems.investigation.getMysteryZones();
-        this.systems.mapEngine.addMysteryZoneMarkers(zones);
+        if (this.systems.investigation && this.systems.investigation.getMysteryZones) {
+            const zones = this.systems.investigation.getMysteryZones();
+            if (this.systems.mapEngine && this.systems.mapEngine.addMysteryZoneMarkers) {
+                this.systems.mapEngine.addMysteryZoneMarkers(zones);
+            }
+        } else {
+            console.log('🔍 Investigation system not available, skipping mystery zones');
+        }
         
         // Update zone count in info panel
         const zoneCountElement = document.getElementById('zone-count');
         if (zoneCountElement) {
-            zoneCountElement.textContent = zones.length;
+            const zoneCount = this.systems.investigation && this.systems.investigation.getMysteryZones ? 
+                this.systems.investigation.getMysteryZones().length : 0;
+            zoneCountElement.textContent = zoneCount;
         }
     }
     

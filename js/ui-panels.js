@@ -126,13 +126,61 @@
 
     function wireButtons() {
         // Individual panel toggle buttons
+        const inventoryToggle = document.getElementById('inventory-toggle');
         const questToggle = document.getElementById('quest-log-toggle');
         const baseToggle = document.getElementById('base-management-toggle');
         const settingsToggle = document.getElementById('user-settings-toggle');
+        const debugFooterToggle = document.getElementById('debug-footer-toggle');
 
+        if (inventoryToggle) inventoryToggle.addEventListener('click', () => togglePanel('inventory-panel'));
         if (questToggle) questToggle.addEventListener('click', () => togglePanel('quest-log-panel'));
         if (baseToggle) baseToggle.addEventListener('click', () => togglePanel('base-management-panel'));
         if (settingsToggle) settingsToggle.addEventListener('click', () => togglePanel('user-settings-panel'));
+        if (debugFooterToggle) debugFooterToggle.addEventListener('click', () => togglePanel('debug-footer-panel'));
+
+        // Event delegation for debug footer buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dbg-open-window')) {
+                const debugPanel = document.getElementById('debug-panel');
+                if (debugPanel) {
+                    debugPanel.style.display = 'block';
+                    // Also show the debug content inside
+                    const debugContent = debugPanel.querySelector('.debug-content');
+                    if (debugContent) {
+                        debugContent.style.display = 'block';
+                    }
+                    console.log('🔧 Debug window opened');
+                }
+            } else if (e.target.classList.contains('dbg-heal')) {
+                console.log('🔧 Heal button clicked');
+                if (window.encounterSystem && window.encounterSystem.healPlayer) {
+                    window.encounterSystem.healPlayer();
+                } else {
+                    console.warn('🔧 Encounter system not available');
+                }
+            } else if (e.target.classList.contains('dbg-sanity')) {
+                console.log('🔧 Sanity button clicked');
+                if (window.encounterSystem && window.encounterSystem.restoreSanity) {
+                    window.encounterSystem.restoreSanity();
+                } else {
+                    console.warn('🔧 Encounter system not available');
+                }
+            } else if (e.target.classList.contains('dbg-heavy')) {
+                console.log('🔧 HEVY button clicked');
+                if (window.encounterSystem && window.encounterSystem.testLegendaryEncounter) {
+                    window.encounterSystem.testLegendaryEncounter('heavy');
+                } else {
+                    console.warn('🔧 Encounter system not available');
+                }
+            } else if (e.target.classList.contains('dbg-monster')) {
+                console.log('🔧 Monster button clicked');
+                if (window.encounterSystem && window.encounterSystem.testLegendaryEncounter) {
+                    window.encounterSystem.testLegendaryEncounter('eldritchMonster');
+                } else {
+                    console.warn('🔧 Encounter system not available');
+                }
+            }
+        });
 
         // Modal controls
         const closeQuest = qs('#close-quest-log');
@@ -145,17 +193,64 @@
         if (saveUser) saveUser.addEventListener('click', saveUserSettings);
     }
 
+    function toggleDebugPanel() {
+        const debugPanel = document.getElementById('debug-panel');
+        const footerPanel = document.getElementById('debug-footer-panel');
+        const footerToggle = document.getElementById('debug-footer-toggle');
+        
+        if (!debugPanel || !footerPanel || !footerToggle) return;
+        
+        const isHidden = debugPanel.style.display === 'none' || debugPanel.style.display === '';
+        debugPanel.style.display = isHidden ? 'block' : 'none';
+        
+        // Also toggle the debug content visibility
+        const debugContent = debugPanel.querySelector('.debug-content');
+        if (debugContent) {
+            debugContent.style.display = isHidden ? 'block' : 'none';
+        }
+        
+        footerToggle.textContent = isHidden ? 'Hide' : 'Toggle';
+        
+        // Visual feedback for footer panel
+        if (isHidden) {
+            footerPanel.style.borderColor = 'rgba(74, 158, 255, 0.6)';
+            footerPanel.style.boxShadow = '0 0 15px rgba(74, 158, 255, 0.3)';
+        } else {
+            footerPanel.style.borderColor = 'rgba(74, 158, 255, 0.3)';
+            footerPanel.style.boxShadow = 'none';
+        }
+    }
+
     function togglePanel(panelId) {
         const panel = document.getElementById(panelId);
         if (!panel) return;
         
-        const isHidden = panel.style.display === 'none';
-        panel.style.display = isHidden ? 'block' : 'none';
+        // Find the content area (the div after the header)
+        const contentArea = panel.querySelector('div[id$="-list"]');
+        if (!contentArea) return;
+        
+        const isHidden = contentArea.style.display === 'none';
+        
+        // Handle different display types based on panel
+        if (panelId === 'inventory-panel') {
+            contentArea.style.display = isHidden ? 'grid' : 'none';
+        } else {
+            contentArea.style.display = isHidden ? 'block' : 'none';
+        }
         
         // Update button text
         const toggleBtn = panel.querySelector('button');
         if (toggleBtn) {
             toggleBtn.textContent = isHidden ? 'Hide' : 'Toggle';
+        }
+        
+        // Add visual feedback for expanded state
+        if (isHidden) {
+            panel.style.borderColor = 'rgba(74, 158, 255, 0.6)';
+            panel.style.boxShadow = '0 0 15px rgba(74, 158, 255, 0.3)';
+        } else {
+            panel.style.borderColor = 'rgba(74, 158, 255, 0.3)';
+            panel.style.boxShadow = 'none';
         }
     }
 
@@ -222,6 +317,37 @@
         }
     }
 
+    function populateInventoryPanel() {
+        const inventoryList = document.getElementById('inventory-list');
+        if (!inventoryList) return;
+        
+        try {
+            // Try to get inventory from encounter system
+            let items = [];
+            if (window.encounterSystem && window.encounterSystem.playerStats && window.encounterSystem.playerStats.inventory) {
+                items = window.encounterSystem.playerStats.inventory;
+            } else if (window.itemSystem && window.itemSystem.playerInventory) {
+                items = window.itemSystem.playerInventory;
+            }
+            
+            if (items && items.length > 0) {
+                inventoryList.innerHTML = items.map(item => `
+                    <div style="display:flex; align-items:center; gap:6px; background:rgba(74,158,255,0.08); border:1px solid rgba(74,158,255,0.2); padding:6px; border-radius:8px;">
+                        <span style="font-size:18px;">${item.emoji || '💠'}</span>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:bold; font-size:0.8em;">${item.name || 'Unknown Item'}</div>
+                            <div style="font-size:0.7em; opacity:0.8;">${item.description || 'Mysterious item'}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                inventoryList.innerHTML = '<div style="opacity:0.7;">No items</div>';
+            }
+        } catch (e) {
+            inventoryList.innerHTML = '<div style="opacity:0.7;">Error loading inventory</div>';
+        }
+    }
+
     function populateUserSettingsPanel() {
         const settingsList = document.getElementById('user-settings-list');
         if (!settingsList) return;
@@ -245,13 +371,35 @@
         }
     }
 
+    function populateDebugFooterPanel() {
+        const debugList = document.getElementById('debug-footer-list');
+        if (!debugList) return;
+        
+        try {
+            debugList.innerHTML = `
+                <div style="display:grid; gap:6px; grid-template-columns: repeat(2, 1fr);">
+                    <button class="debug-btn dbg-open-window" style="grid-column:1 / -1; font-size:0.8em;">Open Debug Window</button>
+                    <button class="debug-btn dbg-heal" style="font-size:0.8em;">❤️ Heal</button>
+                    <button class="debug-btn dbg-sanity" style="font-size:0.8em;">🧠 Sanity</button>
+                    <button class="debug-btn dbg-heavy" style="font-size:0.8em;">⚡ HEVY</button>
+                    <button class="debug-btn dbg-monster" style="font-size:0.8em;">👹 Monster</button>
+                </div>
+            `;
+        } catch (e) {
+            debugList.innerHTML = '<div style="opacity:0.7;">Debug tools available</div>';
+        }
+    }
+
     // Initialize panel content
     function initializePanels() {
+        populateInventoryPanel();
         populateQuestLogPanel();
         populateBaseManagementPanel();
         populateUserSettingsPanel();
+        populateDebugFooterPanel();
         
-        // Refresh quest log periodically
+        // Refresh panels periodically
+        setInterval(populateInventoryPanel, 3000);
         setInterval(populateQuestLogPanel, 5000);
     }
 
@@ -261,9 +409,12 @@
         openBaseManagement,
         openUserSettings,
         saveUserSettings,
+        toggleDebugPanel,
+        populateInventoryPanel,
         populateQuestLogPanel,
         populateBaseManagementPanel,
-        populateUserSettingsPanel
+        populateUserSettingsPanel,
+        populateDebugFooterPanel
     };
 })();
 

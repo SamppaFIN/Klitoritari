@@ -391,11 +391,19 @@ class MultiplayerManager {
         const markerConfig = playerData?.markerConfig || (window.mapEngine.getPlayerMarkerConfig ? window.mapEngine.getPlayerMarkerConfig() : {});
         const profile = playerData?.profile || {};
         
+        // Ensure markerConfig has required properties
+        if (!markerConfig.color) {
+            markerConfig.color = '#666666';
+        }
+        if (!markerConfig.emoji) {
+            markerConfig.emoji = '👤';
+        }
+        
         // Check if player is within sync radius
-        const distance = this.calculateDistance(
+        const distance = window.mapEngine?.playerPosition ? this.calculateDistance(
             window.mapEngine.playerPosition,
             position
-        );
+        ) : Infinity;
         
         // Relax filtering: render regardless of radius so fresh sessions see others immediately
         

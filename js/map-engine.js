@@ -2437,27 +2437,33 @@ class MapEngine {
         if (!this.map || !playerData.position) return;
         
         const { position, markerConfig, profile } = playerData;
+        const safeMarkerConfig = (markerConfig && typeof markerConfig === 'object') ? markerConfig : {};
+        const isNewMarker = !this.otherPlayerMarkers.has(playerId);
         let marker = this.otherPlayerMarkers.get(playerId);
+        
         if (marker) {
             try { marker.setLatLng([position.lat, position.lng]); } catch (_) {}
         } else {
             marker = L.marker([position.lat, position.lng], {
-                icon: this.createOtherPlayerIcon(markerConfig, playerId)
+                icon: this.createOtherPlayerIcon(safeMarkerConfig, playerId)
             }).addTo(this.map);
             // Store reference for cleanup
             this.otherPlayerMarkers.set(playerId, marker);
         }
         
-        // Add popup with player info
-        const pname = profile?.name || 'Player';
-        const pnick = profile?.nickname ? `, ${profile.nickname}` : '';
-        marker.bindPopup(`
-            <div class="other-player-popup">
-                <h4>${markerConfig.emoji || '👤'} ${pname}${pnick}</h4>
-                <p>Steps: ${playerData.steps || 0}</p>
-                <p>Distance: ${Math.round(this.calculateDistance(this.playerPosition, position))}m</p>
-            </div>
-        `);
+        // Add popup with player info (only for new markers)
+        if (isNewMarker) {
+            const pname = profile?.name || 'Player';
+            const pnick = profile?.nickname ? `, ${profile.nickname}` : '';
+            const emoji = safeMarkerConfig?.emoji || '👤';
+            marker.bindPopup(`
+                <div class="other-player-popup">
+                    <h4>${emoji} ${pname}${pnick}</h4>
+                    <p>Steps: ${playerData.steps || 0}</p>
+                    <p>Distance: ${this.playerPosition ? Math.round(this.calculateDistance(this.playerPosition, position)) : 'Unknown'}m</p>
+                </div>
+            `);
+        }
         
         console.log('🌐 Other player marker added:', playerId);
     }
@@ -2477,6 +2483,12 @@ class MapEngine {
     }
     
     createOtherPlayerIcon(markerConfig, playerId) {
+        // Validate markerConfig
+        if (!markerConfig || typeof markerConfig !== 'object') {
+            console.warn('🗺️ Invalid markerConfig for player', playerId, ':', markerConfig);
+            markerConfig = {};
+        }
+        
         const color = markerConfig.color || '#666666';
         const emoji = markerConfig.emoji || '👤';
         
@@ -2514,12 +2526,31 @@ class MapEngine {
         } catch (e) { /* no-op */ }
     }
     
-    calculateDistance(pos1, pos2) {
-        const R = 6371000; // Earth's radius in meters
-        const dLat = (pos2.lat - pos1.lat) * Math.PI / 180;
-        const dLng = (pos2.lng - pos1.lng) * Math.PI / 180;
+    calculateDistance(arg1, arg2, arg3, arg4) {
+        // Flexible signature:
+        //  - calculateDistance({lat,lng}, {lat,lng})
+        //  - calculateDistance(lat1, lng1, lat2, lng2)
+        let lat1, lng1, lat2, lng2;
+        if (typeof arg1 === 'object' && typeof arg2 === 'object') {
+            const pos1 = arg1;
+            const pos2 = arg2;
+            if (!pos1 || !pos2 || typeof pos1.lat !== 'number' || typeof pos1.lng !== 'number' || typeof pos2.lat !== 'number' || typeof pos2.lng !== 'number') {
+                console.warn('🗺️ Invalid position data for distance calculation:', { pos1, pos2 });
+                return 0;
+            }
+            lat1 = pos1.lat; lng1 = pos1.lng; lat2 = pos2.lat; lng2 = pos2.lng;
+        } else {
+            lat1 = Number(arg1); lng1 = Number(arg2); lat2 = Number(arg3); lng2 = Number(arg4);
+            if (![lat1, lng1, lat2, lng2].every(v => typeof v === 'number' && isFinite(v))) {
+                console.warn('🗺️ Invalid numeric args for distance calculation:', { lat1, lng1, lat2, lng2 });
+                return 0;
+            }
+        }
+        const R = 6371000; // meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(pos1.lat * Math.PI / 180) * Math.cos(pos2.lat * Math.PI / 180) *
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                   Math.sin(dLng/2) * Math.sin(dLng/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return R * c;

@@ -387,6 +387,13 @@ class GeolocationManager {
         // Update device location display with error
         this.updateDeviceLocationDisplay(displayMessage, 'Error');
         
+        // Handle permission denied gracefully without redirecting
+        if (error.code === error.PERMISSION_DENIED) {
+            console.log('📍 Geolocation permission denied - continuing without location services');
+            // Don't redirect to welcome screen - let the game continue with fallback position
+            return;
+        }
+        
         // Don't stop tracking on timeout errors - keep trying
         if (error.code === error.TIMEOUT) {
             console.log('📍 Geolocation timeout - will retry in background...');

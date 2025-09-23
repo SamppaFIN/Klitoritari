@@ -310,8 +310,9 @@ class EncounterSystem {
         panel.style.maxHeight = '80vh'; // Limit height to avoid scrollbars
         panel.style.overflowY = 'auto'; // Add scroll if needed
         panel.style.zIndex = '10000';
+        panel.style.display = 'none'; // Start hidden
         panel.innerHTML = `
-            <div class="debug-content">
+            <div class="debug-content" style="display:none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid rgba(74, 158, 255, 0.3);">
                     <h3 style="color: #4a9eff; margin: 0; text-shadow: 0 0 10px #4a9eff;">🎭 Debug Panel</h3>
                     <button id="close-debug-panel" style="background: linear-gradient(135deg, #ff4444, #cc3333); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);">×</button>
@@ -437,7 +438,7 @@ class EncounterSystem {
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid rgba(74, 158, 255, 0.3);">
-                    <button id="toggle-debug" class="debug-btn" style="background: linear-gradient(135deg, #4a9eff, #357abd); color: white; padding: 10px 20px; border-radius: 20px; font-weight: bold;" title="Toggle debug panel visibility">Toggle Panel</button>
+                    <div style="color: #4a9eff; font-size: 0.9em; opacity: 0.8;">Use the Debug button in the footer to toggle this panel</div>
                 </div>
             </div>
         `;
@@ -579,6 +580,8 @@ class EncounterSystem {
         document.body.appendChild(panel);
         console.log('🎭 Debug panel created and added to DOM');
         
+        // Close button will be wired up later in the event listeners section
+        
         // Add event listeners
         document.getElementById('test-heavy').addEventListener('click', () => this.testLegendaryEncounter('heavy'));
         document.getElementById('test-cosmic-shrine').addEventListener('click', () => this.testLegendaryEncounter('cosmicShrine'));
@@ -586,13 +589,12 @@ class EncounterSystem {
         document.getElementById('test-wisdom-crystal').addEventListener('click', () => this.testLegendaryEncounter('wisdomCrystal'));
         document.getElementById('test-cosmic-merchant').addEventListener('click', () => this.testLegendaryEncounter('cosmicMerchant'));
         document.getElementById('test-monster').addEventListener('click', () => this.triggerMonsterEncounter());
-        document.getElementById('toggle-debug').addEventListener('click', () => {
-            panel.classList.toggle('hidden');
-        });
         
-        // Close button
+        // Close button - now uses footer toggle system
         document.getElementById('close-debug-panel').addEventListener('click', () => {
-            panel.classList.add('hidden');
+            if (window.UIPanels && window.UIPanels.toggleDebugPanel) {
+                window.UIPanels.toggleDebugPanel();
+            }
         });
         
         // Stats debug buttons
@@ -748,31 +750,8 @@ class EncounterSystem {
     }
 
     createInventoryPanel() {
-        const existing = document.getElementById('inventory-panel');
-        if (existing) existing.remove();
-        const panel = document.createElement('div');
-        panel.id = 'inventory-panel';
-        panel.style.position = 'fixed';
-        panel.style.bottom = '20px';
-        panel.style.left = '20px';
-        panel.style.zIndex = '10000';
-        panel.style.background = 'rgba(10,10,26,0.8)';
-        panel.style.border = '1px solid rgba(74,158,255,0.3)';
-        panel.style.borderRadius = '10px';
-        panel.style.padding = '10px';
-        panel.style.color = '#b8d4f0';
-        panel.innerHTML = `
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <div style="font-weight:bold; color:#4a9eff; text-shadow:0 0 6px #4a9eff;">🎒 Inventory</div>
-                <button id="inventory-toggle" class="debug-btn" style="padding:4px 8px;">Toggle</button>
-            </div>
-            <div id="inventory-list" style="margin-top:8px; max-height:160px; overflow:auto; display:grid; grid-template-columns: repeat(2,1fr); gap:6px;"></div>
-        `;
-        document.body.appendChild(panel);
-        document.getElementById('inventory-toggle').addEventListener('click', ()=>{
-            const list = document.getElementById('inventory-list');
-            list.style.display = list.style.display === 'none' ? 'grid' : 'none';
-        });
+        // Inventory panel is now handled by HTML and UIPanels system
+        // Just update the existing panel content
         this.updateInventoryUI();
     }
 

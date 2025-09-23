@@ -9,6 +9,8 @@ class WelcomeScreen {
         this.hasSeenWelcome = false;
         this.tutorialStep = 0;
         this.maxTutorialSteps = 4;
+        this.gpsEnabled = false;
+        this.gpsPermissionRequested = false;
     }
 
     init() {
@@ -35,6 +37,18 @@ class WelcomeScreen {
     }
 
     setupEventListeners() {
+        // GPS Enable button
+        const enableGpsBtn = document.getElementById('enable-gps-btn');
+        if (enableGpsBtn) {
+            console.log('🌟 GPS enable button found, adding event listener');
+            enableGpsBtn.addEventListener('click', () => {
+                console.log('📍 GPS enable button clicked!');
+                this.requestGPSPermission();
+            });
+        } else {
+            console.error('🌟 GPS enable button not found!');
+        }
+
         // Continue adventure button
         const continueBtn = document.getElementById('continue-adventure');
         if (continueBtn) {
@@ -439,6 +453,119 @@ class WelcomeScreen {
     // Method to show welcome screen again (for testing)
     showWelcomeAgain() {
         this.showWelcomeScreen();
+    }
+
+    // GPS Permission Methods
+    async requestGPSPermission() {
+        if (this.gpsPermissionRequested) {
+            console.log('📍 GPS permission already requested');
+            return;
+        }
+
+        this.gpsPermissionRequested = true;
+        this.updateGPSStatus('Requesting GPS permission...', 'loading');
+
+        try {
+            // Request geolocation permission
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    reject,
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            });
+
+            console.log('📍 GPS permission granted!', position);
+            this.gpsEnabled = true;
+            this.updateGPSStatus('GPS enabled successfully!', 'success');
+            this.enableGameButtons();
+
+        } catch (error) {
+            console.log('📍 GPS permission denied or failed:', error);
+            this.updateGPSStatus('GPS permission denied. Game will use fallback location.', 'warning');
+            // Still enable buttons - game can work with fallback location
+            this.gpsEnabled = true;
+            this.enableGameButtons();
+        }
+    }
+
+    updateGPSStatus(message, status) {
+        const statusTitle = document.getElementById('gps-status-title');
+        const statusMessage = document.getElementById('gps-status-message');
+        const statusIcon = document.getElementById('gps-status-icon');
+        const gpsSection = document.getElementById('gps-permission-section');
+        const gpsBtn = document.getElementById('enable-gps-btn');
+
+        if (statusTitle) statusTitle.textContent = message;
+        if (statusMessage) {
+            switch (status) {
+                case 'loading':
+                    statusMessage.textContent = 'Please allow location access in your browser...';
+                    break;
+                case 'success':
+                    statusMessage.textContent = 'Location services are now active. You can start your adventure!';
+                    break;
+                case 'warning':
+                    statusMessage.textContent = 'Location access was denied. The game will use a default location instead.';
+                    break;
+                default:
+                    statusMessage.textContent = message;
+            }
+        }
+
+        if (statusIcon) {
+            switch (status) {
+                case 'loading':
+                    statusIcon.textContent = '⏳';
+                    break;
+                case 'success':
+                    statusIcon.textContent = '✅';
+                    break;
+                case 'warning':
+                    statusIcon.textContent = '⚠️';
+                    break;
+                default:
+                    statusIcon.textContent = '📍';
+            }
+        }
+
+        if (gpsSection) {
+            gpsSection.className = `gps-permission-section ${status === 'success' ? 'gps-enabled' : ''}`;
+        }
+
+        if (gpsBtn) {
+            if (status === 'success' || status === 'warning') {
+                gpsBtn.textContent = '✅ GPS Ready';
+                gpsBtn.disabled = true;
+            } else if (status === 'loading') {
+                gpsBtn.textContent = '⏳ Requesting...';
+                gpsBtn.disabled = true;
+            }
+        }
+    }
+
+    enableGameButtons() {
+        const gameActionsSection = document.getElementById('game-actions-section');
+        const continueBtn = document.getElementById('continue-adventure');
+        const startBtn = document.getElementById('start-fresh');
+
+        if (gameActionsSection) {
+            gameActionsSection.style.display = 'flex';
+        }
+
+        if (continueBtn) {
+            continueBtn.disabled = false;
+        }
+
+        if (startBtn) {
+            startBtn.disabled = false;
+        }
+
+        console.log('🎮 Game buttons enabled - GPS permission granted');
     }
 }
 
