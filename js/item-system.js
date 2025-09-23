@@ -408,6 +408,14 @@ class ItemSystem {
 
         console.log(`📦 Added ${quantity}x ${item.name} to inventory!`);
         this.savePlayerInventory();
+        
+        // Update UI inventory panel
+        try {
+            if (window.UIPanels && window.UIPanels.populateInventoryPanel) {
+                window.UIPanels.populateInventoryPanel();
+            }
+        } catch (_) {}
+        
         return true;
     }
 

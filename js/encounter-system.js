@@ -1937,8 +1937,14 @@ class EncounterSystem {
                 this.playerStats.inventory.push(invItem);
                 window.sessionPersistence?.saveInventory?.(this.playerStats.inventory);
             }
-            // Optional: update UI inventory panel if exists
-            try { this.updateInventoryUI?.(); } catch (_) {}
+            // Update UI inventory panel
+            try { 
+                this.updateInventoryUI?.(); 
+                // Also update the main inventory panel (checks both encounter and item systems)
+                if (window.UIPanels && window.UIPanels.populateInventoryPanel) {
+                    window.UIPanels.populateInventoryPanel();
+                }
+            } catch (_) {}
         } catch (e) {
             console.warn('🎒 Failed to add item to inventory:', e);
         }
