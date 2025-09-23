@@ -1843,9 +1843,31 @@ class EncounterSystem {
     }
 
     startBattle(monster) {
+        console.log('🎭 Starting battle with:', monster);
         
         const battle = document.getElementById('battle-interface');
         const actions = document.getElementById('encounter-actions');
+        
+        // Initialize battle state if not exists
+        if (!this.activeEncounter) {
+            this.activeEncounter = {
+                type: 'monster',
+                data: monster,
+                battleState: {
+                    monsterHealth: monster.health || 100,
+                    playerHealth: this.playerStats.health || 100,
+                    monsterAttack: monster.attack || 15,
+                    playerAttack: this.playerStats.attack || 15
+                }
+            };
+        } else if (!this.activeEncounter.battleState) {
+            this.activeEncounter.battleState = {
+                monsterHealth: monster.health || 100,
+                playerHealth: this.playerStats.health || 100,
+                monsterAttack: monster.attack || 15,
+                playerAttack: this.playerStats.attack || 15
+            };
+        }
         
         battle.classList.remove('hidden');
         actions.classList.add('hidden');
@@ -1855,6 +1877,8 @@ class EncounterSystem {
         document.getElementById('monster-name').textContent = monsterName;
         document.getElementById('monster-health').textContent = `${this.activeEncounter.battleState.monsterHealth}/100`;
         document.getElementById('player-health').textContent = `${this.activeEncounter.battleState.playerHealth}/100`;
+        
+        console.log('🎭 Battle state initialized:', this.activeEncounter.battleState);
     }
 
     battleAction(action) {
@@ -3921,7 +3945,7 @@ class EncounterSystem {
     receiveShrineBlessing(encounter) {
         this.showDialog(encounter.dialogue.blessing);
         this.applyEncounterEffects(encounter.effects);
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     meditateAtShrine(encounter) {
@@ -3931,12 +3955,12 @@ class EncounterSystem {
             experience: 75,
             skills: { investigation: 1, survival: 1 }
         });
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     leaveShrine(encounter) {
         this.showDialog(encounter.dialogue.farewell);
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     // Eldritch Horror interactions
@@ -3956,7 +3980,7 @@ class EncounterSystem {
         const fleeChance = Math.random();
         if (fleeChance < 0.3) { // 30% chance to flee
             this.showDialog("You successfully flee from the eldritch horror!");
-            this.closeEncounterModal();
+            this.closeLegendaryModal();
         } else {
             this.showDialog("The horror blocks your escape! You must fight!");
             this.fightEldritchHorror(encounter);
@@ -3972,7 +3996,7 @@ class EncounterSystem {
     touchWisdomCrystal(encounter) {
         this.showDialog(encounter.dialogue.blessing);
         this.applyEncounterEffects(encounter.effects);
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     studyWisdomCrystal(encounter) {
@@ -3982,30 +4006,30 @@ class EncounterSystem {
             sanity: 15,
             skills: { investigation: 3, survival: 2 }
         });
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     leaveWisdomCrystal(encounter) {
         this.showDialog(encounter.dialogue.farewell);
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     // Cosmic Merchant interactions
     browseMerchantWares(encounter) {
         this.showDialog("The merchant shows you their wares. (Shop system would be implemented here)");
         // TODO: Implement shop system
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     askMerchantAboutItems(encounter) {
         this.showDialog("The merchant tells you about the cosmic properties of their items and their origins.");
         this.applyEncounterEffects({ experience: 25, skills: { investigation: 1 } });
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     leaveMerchant(encounter) {
         this.showDialog(encounter.dialogue.farewell);
-        this.closeEncounterModal();
+        this.closeLegendaryModal();
     }
     
     // Helper methods for applying encounter effects
@@ -4034,36 +4058,18 @@ class EncounterSystem {
     applyEncounterEffects(effects) {
         console.log('🎭 Applying encounter effects:', effects);
         
-        // Use the statistics system if available
-        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
-            const stats = window.eldritchApp.systems.statistics;
-            
-            if (effects.health) {
-                stats.restoreHealth(effects.health);
-                this.showNotification(`❤️ Health restored by ${effects.health}!`);
-            }
-            if (effects.sanity) {
-                stats.restoreSanity(effects.sanity);
-                this.showNotification(`🧠 Sanity restored by ${effects.sanity}!`);
-            }
-            if (effects.experience) {
-                stats.addExperience(effects.experience);
-                this.showNotification(`⭐ Gained ${effects.experience} experience!`);
-            }
-        } else {
-            // Fallback to local stats if statistics system not available
-            if (effects.health) {
-                this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + effects.health);
-                this.showNotification(`❤️ Health restored by ${effects.health}!`);
-            }
-            if (effects.sanity) {
-                this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + effects.sanity);
-                this.showNotification(`🧠 Sanity restored by ${effects.sanity}!`);
-            }
-            if (effects.experience) {
-                this.playerStats.experience += effects.experience;
-                this.showNotification(`⭐ Gained ${effects.experience} experience!`);
-            }
+        // Use local stats system (statistics system is for logging only)
+        if (effects.health) {
+            this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + effects.health);
+            this.showNotification(`❤️ Health restored by ${effects.health}!`);
+        }
+        if (effects.sanity) {
+            this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + effects.sanity);
+            this.showNotification(`🧠 Sanity restored by ${effects.sanity}!`);
+        }
+        if (effects.experience) {
+            this.playerStats.experience += effects.experience;
+            this.showNotification(`⭐ Gained ${effects.experience} experience!`);
         }
         
         // Handle skills, luck, attack, defense locally
