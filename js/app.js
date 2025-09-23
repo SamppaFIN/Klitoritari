@@ -2520,7 +2520,7 @@ class EldritchSanctuaryApp {
         
         // Initialize item system
         this.systems.item = new ItemSystem();
-        this.systems.item.init();
+        window.itemSystem = this.systems.item;
         
         // Initialize inventory UI
         this.systems.inventoryUI = new InventoryUI();

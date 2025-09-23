@@ -7,6 +7,7 @@
 
 class ItemSystem {
     constructor() {
+        console.log('🎒 ItemSystem constructor called');
         this.items = new Map();
         this.playerInventory = [];
         this.equippedItems = {
@@ -18,6 +19,7 @@ class ItemSystem {
         
         this.initializeItems();
         this.loadPlayerInventory();
+        console.log('🎒 ItemSystem initialized with', this.playerInventory.length, 'items in inventory');
     }
 
     // Initialize all available items in the cosmic realm
@@ -412,6 +414,7 @@ class ItemSystem {
         }
 
         console.log(`📦 Added ${quantity}x ${item.name} to inventory!`);
+        console.log('🎒 Current inventory after adding:', this.playerInventory);
         this.savePlayerInventory();
         
         // Update UI inventory panel
