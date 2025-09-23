@@ -532,6 +532,7 @@
     <script src="js/webgl-test.js"></script>
     <script src="js/app.js"></script>
     <script src="js/step-currency-system.js"></script>
+    <script src="js/ui-panels.js"></script>
     
     
     <!-- Side Panel for Settings/Debug -->
@@ -568,26 +569,35 @@
         </div>
     </div>
 
-    <!-- Footer with Settings Button -->
-    <footer id="game-footer">
-        <div class="footer-buttons">
-            <button id="quest-log-btn" class="footer-btn quest-log-btn" title="Quest Log">
-                <span class="btn-icon">📜</span>
-                <span class="btn-text">QUESTS</span>
-                <span class="btn-status" id="quest-status">0 Active</span>
-            </button>
-            <button id="establish-base-btn" class="footer-btn base-button" title="Base Management">
-                <span class="btn-icon">🏗️</span>
-                <span class="btn-text">ESTABLISH BASE</span>
-                <span class="btn-status" id="base-status">No Base</span>
-            </button>
-            <button id="flag-theme-btn" class="footer-btn" title="Cycle Flag Theme">
-                <span class="btn-icon">🌈</span>
-                <span class="btn-text">FLAGS</span>
-                <span class="btn-status" id="flag-theme-status">Theme</span>
-            </button>
+    <!-- User Settings Modal -->
+    <div id="user-settings-modal" class="modal hidden">
+        <div class="modal-content user-settings-modal">
+            <div class="modal-header">
+                <h2>⚙️ Player Settings</h2>
+                <button id="close-user-settings" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <label for="player-name-input">Player Name</label>
+                    <input id="player-name-input" type="text" placeholder="Enter your name" maxlength="24">
+                </div>
+                <div class="setting-row">
+                    <label for="path-color-input">Path Color</label>
+                    <input id="path-color-input" type="color" value="#6c5ce7">
+                </div>
+                <div class="setting-row">
+                    <label>Symbol</label>
+                    <div id="symbol-options" class="symbol-options-grid">
+                        <!-- Filled by JS using tutorial-system generators when available -->
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button id="save-user-settings" class="sacred-button">Save</button>
+                    <button id="cancel-user-settings" class="sacred-button secondary">Cancel</button>
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
     
 </body>
 </html>
