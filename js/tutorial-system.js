@@ -76,6 +76,7 @@ class TutorialSystem {
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         `;
 
         // Create tutorial modal
@@ -91,6 +92,7 @@ class TutorialSystem {
             width: 90%;
             max-height: 85vh;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             box-shadow: 
                 0 25px 50px rgba(0, 0, 0, 0.7),
                 0 0 0 1px rgba(74, 158, 255, 0.3),
@@ -99,7 +101,7 @@ class TutorialSystem {
             animation: tutorialModalAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         `;
 
-        // Create tutorial content
+        // Create tutorial content with onboarding (name + symbol selection)
         tutorialModal.innerHTML = `
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 28px; text-shadow: 0 0 10px #4a9eff;">
@@ -108,6 +110,22 @@ class TutorialSystem {
                 <p style="color: #b8d4f0; margin: 0; font-size: 16px;">
                     Discover the different types of encounters you can find on the cosmic map
                 </p>
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 15px; border: 1px solid rgba(74,158,255,0.3); border-radius: 12px; background: rgba(74,158,255,0.08);">
+                <h3 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 18px;">🧙 Start Your Journey</h3>
+                <div style="display: grid; gap: 10px;">
+                    <label style="color:#b8d4f0; font-size: 14px;">Player Name</label>
+                    <input id="onboarding-name" type="text" placeholder="Enter your name" style="
+                        width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(74,158,255,0.3);
+                        background: rgba(0,0,0,0.3); color: #e6f0ff; outline: none;">
+                    <label style="color:#b8d4f0; font-size: 14px; margin-top: 8px;">Choose Your Symbol</label>
+                    <div id="onboarding-symbols" style="display:grid; grid-template-columns: repeat(3,1fr); gap:10px;">
+                        ${this.getSymbolOptionsHTML()}
+                    </div>
+                    <label style="color:#b8d4f0; font-size: 14px; margin-top: 8px;">Path Color</label>
+                    <input id="onboarding-pathcolor" type="color" value="#00ff00" style="width: 120px; height: 36px; border-radius: 6px; border: 1px solid rgba(74,158,255,0.3); background: rgba(0,0,0,0.2);">
+                </div>
             </div>
             
             <div style="margin-bottom: 25px;">
@@ -204,7 +222,36 @@ class TutorialSystem {
         document.body.appendChild(tutorialOverlay);
 
         // Add close button functionality
+        // Make symbol selection work without inline onclick (event delegation)
+        const symbolContainer = tutorialModal.querySelector('#onboarding-symbols');
+        if (symbolContainer) {
+            const selectHandler = (e) => {
+                const option = e.target.closest('.symbol-option');
+                if (!option) return;
+                Array.from(symbolContainer.children).forEach(c => c.classList.remove('selected'));
+                option.classList.add('selected');
+            };
+            symbolContainer.addEventListener('click', selectHandler, { passive: true });
+            symbolContainer.addEventListener('touchstart', selectHandler, { passive: true });
+        }
+
         document.getElementById('tutorial-close').addEventListener('click', () => {
+            // Save profile
+            const nameEl = document.getElementById('onboarding-name');
+            const selected = tutorialModal.querySelector('.symbol-option.selected');
+            const profile = {
+                name: (nameEl?.value || '').trim() || 'Wanderer',
+                symbol: selected?.dataset?.symbol || 'finnish'
+            };
+            try { window.sessionPersistence?.saveProfile?.(profile); } catch (_) {}
+            // Expose to multiplayer
+            try {
+                if (window.multiplayerManager) {
+                    window.multiplayerManager.playerProfile = profile;
+                    // Send one immediate update so others see name/symbol
+                    window.multiplayerManager.sendPlayerData();
+                }
+            } catch (_) {}
             this.closeTutorial();
         });
 
@@ -226,6 +273,64 @@ class TutorialSystem {
 
         // Show notification
         this.showNotification('📚 Welcome to Eldritch Sanctuary! Learn about encounter types.');
+    }
+
+    getSymbolOptionsHTML() {
+        const options = [
+            { id: 'finnish', label: 'Finnish Flag', svg: this.svgFinnishFlag(36) },
+            { id: 'flower', label: 'Flower of Life', svg: this.svgFlowerOfLife(36) },
+            { id: 'triangle', label: 'Sacred Triangle', svg: this.svgTriangle(36) },
+            { id: 'hex', label: 'Hexagon', svg: this.svgHexagon(36) },
+            { id: 'spiral', label: 'Cosmic Spiral', svg: this.svgSpiral(36) },
+            { id: 'star', label: 'Star', svg: this.svgStar(36) }
+        ];
+        return options.map(opt => `
+            <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}" style="
+                border:1px solid rgba(74,158,255,0.3); border-radius:10px; padding:10px; cursor:pointer;
+                display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.25);
+            " onclick="Array.from(this.parentNode.children).forEach(c=>c.classList.remove('selected')); this.classList.add('selected');">
+                ${opt.svg}
+            </div>
+        `).join('');
+    }
+
+    svgFinnishFlag(size) {
+        return `<svg width="${size}" height="${size*0.66}" viewBox="0 0 60 40">
+            <rect width="60" height="40" fill="#FFFFFF"/>
+            <rect x="0" y="16" width="60" height="8" fill="#003580"/>
+            <rect x="20" y="0" width="8" height="40" fill="#003580"/>
+        </svg>`;
+    }
+
+    svgTriangle(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <polygon points="50,10 90,90 10,90" fill="none" stroke="#4a9eff" stroke-width="6"/>
+        </svg>`;
+    }
+
+    svgHexagon(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <polygon points="50,5 93,27 93,73 50,95 7,73 7,27" fill="none" stroke="#4ecdc4" stroke-width="6"/>
+        </svg>`;
+    }
+
+    svgStar(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <polygon points="50,5 61,39 98,39 67,59 78,93 50,73 22,93 33,59 2,39 39,39" fill="none" stroke="#ffd700" stroke-width="5"/>
+        </svg>`;
+    }
+
+    svgSpiral(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            <path d="M50 50 m0,-35 a35,35 0 1,1 -25,60 a20,20 0 1,0 15,-35 a10,10 0 1,1 -7,17" fill="none" stroke="#ff6b6b" stroke-width="5"/>
+        </svg>`;
+    }
+
+    svgFlowerOfLife(size) {
+        const r = 14; const c = (dx,dy)=>`<circle cx="${dx}" cy="${dy}" r="${r}" fill="none" stroke="#9b59b6" stroke-width="3"/>`;
+        return `<svg width="${size}" height="${size}" viewBox="0 0 100 100">
+            ${c(50,50)}${c(50,50-r)}${c(50,50+r)}${c(50-r*0.866,50-r*0.5)}${c(50+r*0.866,50-r*0.5)}${c(50-r*0.866,50+r*0.5)}${c(50+r*0.866,50+r*0.5)}
+        </svg>`;
     }
 
     closeTutorial() {
@@ -323,6 +428,33 @@ class TutorialSystem {
                 
                 .cosmic-button:hover::before {
                     left: 100%;
+                }
+
+                /* Symbol selection styles */
+                .symbol-option {
+                    border:1px solid rgba(74,158,255,0.3);
+                    border-radius:10px; 
+                    padding:10px; 
+                    cursor:pointer;
+                    display:flex; 
+                    align-items:center; 
+                    justify-content:center; 
+                    background: rgba(0,0,0,0.25);
+                    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+                    user-select: none;
+                }
+                .symbol-option:hover { 
+                    box-shadow: 0 0 12px rgba(74,158,255,0.4);
+                    transform: translateY(-2px);
+                }
+                .symbol-option.selected { 
+                    border-color: #4a9eff; 
+                    box-shadow: 0 0 16px rgba(74,158,255,0.7), inset 0 0 8px rgba(74,158,255,0.3);
+                }
+
+                /* Mobile layout for symbol grid */
+                @media (max-width: 480px) {
+                    #onboarding-symbols { grid-template-columns: repeat(2, 1fr) !important; }
                 }
             `;
             document.head.appendChild(style);
