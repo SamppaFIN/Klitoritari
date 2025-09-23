@@ -8999,54 +8999,47 @@ input[type="range"]::-moz-range-thumb {
     letter-spacing: 0.5px;
 }
 
-/* Enhanced Footer Panels - Tablist Behavior */
+/* Simple Tablist - All panels hidden by default */
 .inventory-panel,
 .quest-log-panel,
 .base-management-panel,
-.user-settings-panel {
+.user-settings-panel,
+.debug-footer-panel {
     position: fixed;
-    bottom: 80px; /* Raised from 20px to give room for other footer buttons */
+    bottom: 80px;
     left: 20px;
     z-index: 10000;
     background: rgba(10, 10, 26, 0.95);
     border: 2px solid rgba(74, 158, 255, 0.4);
     border-radius: 12px;
     color: rgb(184, 212, 240);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-    /* Desktop-specific height */
     max-height: 70vh;
     width: 400px;
     min-width: 300px;
-    /* Tablist behavior - hidden by default */
+    /* Hidden by default */
     display: none;
-    transform: translateY(100px);
-    opacity: 0;
 }
 
-/* Active panel state */
+/* Active tab - only one visible at a time */
 .inventory-panel.active,
 .quest-log-panel.active,
 .base-management-panel.active,
-.user-settings-panel.active {
+.user-settings-panel.active,
+.debug-footer-panel.active {
     display: block;
-    transform: translateY(0);
-    opacity: 1;
     border-color: rgba(74, 158, 255, 0.6);
     box-shadow: 0 12px 40px rgba(74, 158, 255, 0.2);
 }
 
-/* Button active states */
+/* Active button styling */
 .toggle-btn.active {
-    background: rgba(74, 158, 255, 0.3);
-    border-color: rgba(74, 158, 255, 0.6);
-    color: #4a9eff;
+    background: rgba(74, 158, 255, 0.3) !important;
+    border-color: rgba(74, 158, 255, 0.6) !important;
+    color: #4a9eff !important;
 }
 
 .toggle-btn.active .toggle-text {
-    color: #4a9eff;
+    color: #4a9eff !important;
     text-shadow: 0 0 8px #4a9eff;
 }
 

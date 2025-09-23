@@ -238,61 +238,51 @@
     }
 
     function togglePanel(panelId) {
-        console.log(`🎛️ Tablist toggle called for: ${panelId}`);
+        console.log(`🎛️ Simple tablist toggle: ${panelId}`);
         
-        // Get all footer panels
-        const allPanels = [
+        // All tab panels
+        const allTabs = [
             'inventory-panel',
             'quest-log-panel', 
             'base-management-panel',
-            'user-settings-panel'
+            'user-settings-panel',
+            'debug-footer-panel'
         ];
         
-        // Check if this panel is currently active
-        const targetPanel = document.getElementById(panelId);
-        const isCurrentlyActive = targetPanel && targetPanel.classList.contains('active');
-        
-        console.log(`🎛️ Panel ${panelId} currently active:`, isCurrentlyActive);
-        
-        // Close all panels first
-        allPanels.forEach(pid => {
-            const panel = document.getElementById(pid);
-            if (panel) {
-                panel.classList.remove('active');
-                panel.style.display = 'none';
-                panel.style.transform = 'translateY(100px)';
-                panel.style.opacity = '0';
-                
-                // Update button states
-                const button = document.querySelector(`[data-panel="${pid}"]`);
-                if (button) {
-                    button.classList.remove('active');
-                    const toggleText = button.querySelector('.toggle-text');
-                    if (toggleText) toggleText.textContent = '⚡';
-                }
+        // Close all tabs first
+        allTabs.forEach(tabId => {
+            const tab = document.getElementById(tabId);
+            const button = document.querySelector(`[data-panel="${tabId}"]`);
+            
+            if (tab) {
+                tab.style.display = 'none';
+                tab.classList.remove('active');
             }
-        });
-        
-        // If the clicked panel wasn't active, open it
-        if (!isCurrentlyActive && targetPanel) {
-            console.log(`🎛️ Opening panel: ${panelId}`);
             
-            // Show the target panel
-            targetPanel.classList.add('active');
-            targetPanel.style.display = 'block';
-            targetPanel.style.transform = 'translateY(0)';
-            targetPanel.style.opacity = '1';
-            targetPanel.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            
-            // Update button state
-            const button = document.querySelector(`[data-panel="${panelId}"]`);
             if (button) {
-                button.classList.add('active');
+                button.classList.remove('active');
                 const toggleText = button.querySelector('.toggle-text');
                 if (toggleText) toggleText.textContent = '⚡';
             }
+        });
+        
+        // If this tab wasn't active, open it
+        const targetTab = document.getElementById(panelId);
+        const targetButton = document.querySelector(`[data-panel="${panelId}"]`);
+        
+        if (targetTab && targetButton) {
+            console.log(`🎛️ Opening tab: ${panelId}`);
             
-            // Populate content based on panel type
+            // Show the tab
+            targetTab.style.display = 'block';
+            targetTab.classList.add('active');
+            
+            // Highlight the button
+            targetButton.classList.add('active');
+            const toggleText = targetButton.querySelector('.toggle-text');
+            if (toggleText) toggleText.textContent = '⚡';
+            
+            // Populate content
             switch (panelId) {
                 case 'inventory-panel':
                     populateInventoryPanel();
@@ -306,9 +296,10 @@
                 case 'user-settings-panel':
                     populateUserSettingsPanel();
                     break;
+                case 'debug-footer-panel':
+                    populateDebugFooterPanel();
+                    break;
             }
-        } else {
-            console.log(`🎛️ Panel ${panelId} closed (tablist behavior)`);
         }
     }
 
