@@ -260,6 +260,16 @@ class WebGLMapIntegration {
             this.convertBaseMarker();
         }
         
+        // Convert item markers (including tutorial items)
+        if (this.mapEngine.itemMarkers && this.mapEngine.itemMarkers.length > 0) {
+            console.log('🌌 Converting item markers:', this.mapEngine.itemMarkers.length);
+            this.mapEngine.itemMarkers.forEach((itemData, index) => {
+                if (itemData.marker) {
+                    this.convertItemMarker(itemData, index);
+                }
+            });
+        }
+        
         console.log(`🌌 Converted ${this.objectMap.size} markers to WebGL objects`);
     }
     
@@ -581,6 +591,22 @@ class WebGLMapIntegration {
             isEnabled: this.isEnabled,
             targetFPS: this.targetFPS
         };
+    }
+    
+    convertItemMarker(itemData, index) {
+        const latlng = itemData.marker.getLatLng();
+        const normalizedPos = this.latLngToNormalized(latlng.lat, latlng.lng);
+        
+        const webglObject = {
+            type: 'item',
+            position: normalizedPos,
+            color: itemData.tutorialItem ? [1.0, 0.0, 0.0, 0.8] : [0.0, 1.0, 0.0, 0.8], // Red for tutorial items
+            size: 0.02,
+            itemData: itemData
+        };
+        
+        this.objectMap.set(`item_${index}`, webglObject);
+        console.log(`🌌 Item marker converted: ${itemData.itemDef?.name || 'Unknown'} at`, normalizedPos);
     }
 }
 

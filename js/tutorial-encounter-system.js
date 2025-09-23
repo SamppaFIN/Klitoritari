@@ -296,12 +296,18 @@ class TutorialEncounterSystem {
         
         // Set health in encounter system if available
         if (window.encounterSystem) {
-            window.encounterSystem.playerHealth = health;
-            window.encounterSystem.maxHealth = 100;
+            // Update the correct playerStats object
+            window.encounterSystem.playerStats.health = health;
+            window.encounterSystem.playerStats.maxHealth = 100;
             
             // Update health display if available
             if (window.encounterSystem.updateHealthDisplay) {
                 window.encounterSystem.updateHealthDisplay();
+            }
+            
+            // Also update mobile header if app is available
+            if (window.app && window.app.updateMobileStats) {
+                window.app.updateMobileStats();
             }
         }
         
@@ -569,14 +575,22 @@ class TutorialEncounterSystem {
         `);
 
         // Add to map engine's itemMarkers array for WebGL integration
-        if (window.mapEngine.itemMarkers) {
+        if (window.mapEngine) {
+            // Initialize itemMarkers array if it doesn't exist
+            if (!window.mapEngine.itemMarkers) {
+                window.mapEngine.itemMarkers = [];
+                console.log('🧪 Initialized map engine itemMarkers array');
+            }
+            
             window.mapEngine.itemMarkers.push({
                 marker: marker,
                 position: position,
                 itemDef: itemDef,
                 tutorialItem: true
             });
-            console.log('🧪 Added tutorial item to map engine itemMarkers array');
+            console.log('🧪 Added tutorial item to map engine itemMarkers array, total items:', window.mapEngine.itemMarkers.length);
+        } else {
+            console.warn('🧪 Map engine not available for item marker registration');
         }
 
         return marker;
