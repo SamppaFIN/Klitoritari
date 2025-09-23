@@ -15,6 +15,9 @@ class MultiplayerManager {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 1000; // ms
+        this._lastJoinSoundAt = 0;
+        this._lastLeaveSoundAt = 0;
+        this._flagsReconcileInterval = null;
         
         // WebSocket server URL - derive from current origin by default
         const isSecure = window.location.protocol === 'https:';
@@ -50,6 +53,11 @@ class MultiplayerManager {
         try {
             await this.connect();
             this.startPositionSync();
+            if (!this._flagsReconcileInterval) {
+                this._flagsReconcileInterval = setInterval(() => {
+                    try { this.requestAllFlags(); } catch (_) {}
+                }, 30000);
+            }
             console.log('🌐 Multiplayer initialized successfully');
         } catch (error) {
             console.warn('🌐 Multiplayer initialization failed:', error);
@@ -329,6 +337,13 @@ class MultiplayerManager {
         }
         console.log('🌐 Player joined:', playerId);
         this.players.set(playerId, { ...playerData, lastSeen: Date.now() });
+        try {
+            const now = Date.now();
+            if (now - this._lastJoinSoundAt > 3000 && window.soundManager?.playNotification) {
+                this._lastJoinSoundAt = now;
+                window.soundManager.playNotification();
+            }
+        } catch (_) {}
         
         this.renderOtherPlayer(playerId, playerData);
         
@@ -352,6 +367,13 @@ class MultiplayerManager {
         console.log('🌐 Player left:', playerId);
         this.players.delete(playerId);
         this.removeOtherPlayerMarker(playerId);
+        try {
+            const now = Date.now();
+            if (now - this._lastLeaveSoundAt > 3000 && window.soundManager?.playNotification) {
+                this._lastLeaveSoundAt = now;
+                window.soundManager.playNotification();
+            }
+        } catch (_) {}
 
         // Update subtle player count (self + others we know)
         this.updatePlayerCountDisplay(this.players.size + 1);

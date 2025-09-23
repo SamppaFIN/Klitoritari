@@ -8,6 +8,7 @@ class MapEngine {
         this.map = null;
         this.playerMarker = null;
         this.otherPlayerMarkers = new Map();
+        this.otherPlayerPolylines = new Map();
         this.investigationMarkers = new Map();
         this.mysteryZoneMarkers = new Map();
         this.testQuestMarkers = new Map();
@@ -160,6 +161,9 @@ class MapEngine {
                 <div class="info-title">🌌 Eldritch Sanctuary</div>
                 <div class="info-content">
                     <div>Explorers: <span id="player-count">1</span></div>
+                    <div id="player-names-row" style="font-size:11px; opacity:0.95; margin-top:2px; color:#0f5132; background:rgba(25,135,84,0.12); padding:2px 6px; border-radius:6px; border:1px solid rgba(25,135,84,0.35);">
+                        <span id="player-names">You</span>
+                    </div>
                     <div>Active Investigations: <span id="investigation-count">0</span></div>
                     <div>Mystery Zones: <span id="zone-count">0</span></div>
                 </div>
@@ -2424,12 +2428,16 @@ class MapEngine {
         if (!this.map || !playerData.position) return;
         
         const { position, markerConfig, profile } = playerData;
-        const marker = L.marker([position.lat, position.lng], {
-            icon: this.createOtherPlayerIcon(markerConfig, playerId)
-        }).addTo(this.map);
-        
-        // Store reference for cleanup
-        this.otherPlayerMarkers.set(playerId, marker);
+        let marker = this.otherPlayerMarkers.get(playerId);
+        if (marker) {
+            try { marker.setLatLng([position.lat, position.lng]); } catch (_) {}
+        } else {
+            marker = L.marker([position.lat, position.lng], {
+                icon: this.createOtherPlayerIcon(markerConfig, playerId)
+            }).addTo(this.map);
+            // Store reference for cleanup
+            this.otherPlayerMarkers.set(playerId, marker);
+        }
         
         // Add popup with player info
         const pname = profile?.name || 'Player';
@@ -2452,6 +2460,11 @@ class MapEngine {
             this.otherPlayerMarkers.delete(playerId);
             console.log('🌐 Other player marker removed:', playerId);
         }
+        const line = this.otherPlayerPolylines.get(playerId);
+        if (line) {
+            this.map.removeLayer(line);
+            this.otherPlayerPolylines.delete(playerId);
+        }
     }
     
     createOtherPlayerIcon(markerConfig, playerId) {
@@ -2469,6 +2482,27 @@ class MapEngine {
             iconSize: [30, 30],
             iconAnchor: [15, 15]
         });
+    }
+
+    updateOtherPlayerPath(playerId, latlngs, baseOpacity) {
+        try {
+            if (!this.map || !Array.isArray(latlngs) || latlngs.length < 2) return;
+            let poly = this.otherPlayerPolylines.get(playerId);
+            if (!poly) {
+                poly = L.polyline(latlngs, { color: '#4a9eff', weight: 3, opacity: baseOpacity ?? 0.8 }).addTo(this.map);
+                this.otherPlayerPolylines.set(playerId, poly);
+            } else {
+                poly.setLatLngs(latlngs);
+                if (typeof baseOpacity === 'number') poly.setStyle({ opacity: baseOpacity });
+            }
+        } catch (e) { console.warn('updateOtherPlayerPath failed', e); }
+    }
+
+    clearOtherPlayerPath(playerId) {
+        try {
+            const poly = this.otherPlayerPolylines.get(playerId);
+            if (poly) { this.map.removeLayer(poly); this.otherPlayerPolylines.delete(playerId); }
+        } catch (e) { /* no-op */ }
     }
     
     calculateDistance(pos1, pos2) {
@@ -2520,6 +2554,28 @@ class MapEngine {
                 window.sanityDistortion[randomEffect]();
             }
         }
+
+        // Add a small debug button for reloading flags
+        try {
+            if (!document.getElementById('reload-flags-debug')) {
+                const btn = document.createElement('button');
+                btn.id = 'reload-flags-debug';
+                btn.textContent = 'Reload Flags';
+                btn.style.position = 'absolute';
+                btn.style.right = '12px';
+                btn.style.bottom = '90px';
+                btn.style.zIndex = '2000';
+                btn.style.padding = '6px 10px';
+                btn.style.borderRadius = '8px';
+                btn.style.border = '1px solid rgba(74,158,255,0.5)';
+                btn.style.background = 'rgba(10,10,30,0.6)';
+                btn.style.color = '#b8d4f0';
+                btn.addEventListener('click', () => {
+                    try { window.multiplayerManager?.requestAllFlags?.(); } catch (_) {}
+                });
+                (this.map.getContainer() || document.body).appendChild(btn);
+            }
+        } catch (_) {}
     }
     
     // Create special markers (HEVY, shrines, items, etc.)
