@@ -1795,7 +1795,7 @@ class MapEngine {
         if (Math.floor(progress * 20) % 3 === 0) {
             console.log(`🎨 Adding Finnish flag at progress ${progress.toFixed(2)}`);
             if (this.finnishFlagLayer) {
-                this.finnishFlagLayer.addFlagPin(lat, lng);
+                this.finnishFlagLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
                 // Give 50 cosmic steps for drawing a flag (async to not block movement)
                 setTimeout(() => {
                     this.giveFlagSteps();
@@ -2027,6 +2027,14 @@ class MapEngine {
             console.warn('🇫🇮 FinnishFlagCanvasLayer not available');
         }
     }
+
+    // Read current symbol from profile
+    getCurrentSymbol() {
+        try {
+            const prof = window.sessionPersistence?.restoreProfile?.();
+            return (prof && prof.symbol) ? prof.symbol : 'finnish';
+        } catch (_) { return 'finnish'; }
+    }
     
     initDistortionEffectsLayer() {
         if (typeof DistortionEffectsCanvasLayer !== 'undefined') {
@@ -2083,7 +2091,7 @@ class MapEngine {
             return;
         }
         console.log(`🇫🇮 Dropping flag at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        this.finnishFlagLayer.addFlagPin(lat, lng);
+        this.finnishFlagLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
         if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
             window.gruesomeNotifications.showNotification({
                 type: 'success',
@@ -2245,7 +2253,7 @@ class MapEngine {
             for (let i = 0; i < 5; i++) {
                 const testLat = playerPos.lat + (i * 0.0001);
                 const testLng = playerPos.lng + (i * 0.0001);
-                this.finnishFlagLayer.addFlagPin(testLat, testLng);
+                this.finnishFlagLayer.addFlagPin(testLat, testLng, null, null, this.getCurrentSymbol?.());
             }
             console.log('🇫🇮 Test flags created on canvas layer, total flags:', this.finnishFlagLayer.getFlagCount());
         } else {
@@ -2350,7 +2358,7 @@ class MapEngine {
             // Drop flag every 10 meters of movement
             if (distance >= this.flagDropDistance) {
                 console.log(`🎨 Player moved ${distance.toFixed(1)}m - dropping flag`);
-                this.finnishFlagLayer.addFlagPin(position.lat, position.lng);
+                this.finnishFlagLayer.addFlagPin(position.lat, position.lng, null, null, this.getCurrentSymbol?.());
                 
                 // Give steps for movement
                 if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {
@@ -2415,7 +2423,7 @@ class MapEngine {
     addOtherPlayerMarker(playerId, playerData) {
         if (!this.map || !playerData.position) return;
         
-        const { position, markerConfig } = playerData;
+        const { position, markerConfig, profile } = playerData;
         const marker = L.marker([position.lat, position.lng], {
             icon: this.createOtherPlayerIcon(markerConfig, playerId)
         }).addTo(this.map);
@@ -2424,9 +2432,11 @@ class MapEngine {
         this.otherPlayerMarkers.set(playerId, marker);
         
         // Add popup with player info
+        const pname = profile?.name || 'Player';
+        const pnick = profile?.nickname ? `, ${profile.nickname}` : '';
         marker.bindPopup(`
             <div class="other-player-popup">
-                <h4>${markerConfig.emoji || '👤'} Player</h4>
+                <h4>${markerConfig.emoji || '👤'} ${pname}${pnick}</h4>
                 <p>Steps: ${playerData.steps || 0}</p>
                 <p>Distance: ${Math.round(this.calculateDistance(this.playerPosition, position))}m</p>
             </div>
@@ -2550,12 +2560,17 @@ class MapEngine {
         
         console.log('🎯 Special markers created');
         
-        // Show tutorial after markers are created
-        if (window.tutorialSystem && !window.tutorialSystem.tutorialShown) {
-            setTimeout(() => {
-                window.tutorialSystem.showEncounterTutorial();
-            }, 1000);
-        }
+        // Show tutorial only if explicitly requested by fresh start
+        try {
+            const shouldShow = localStorage.getItem('eldritch_show_tutorial') === 'true';
+            if (shouldShow && window.tutorialSystem && !window.tutorialSystem.tutorialShown) {
+                setTimeout(() => {
+                    window.tutorialSystem.showEncounterTutorial();
+                    // Clear the flag so it doesn't show again on reload
+                    localStorage.removeItem('eldritch_show_tutorial');
+                }, 1000);
+            }
+        } catch (_) {}
     }
     
     createHEVYMarker(baseLat, baseLng) {

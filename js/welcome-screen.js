@@ -29,16 +29,8 @@ class WelcomeScreen {
         const hasSeenWelcome = localStorage.getItem('eldritch_welcome_seen');
         if (hasSeenWelcome === 'true') {
             this.hasSeenWelcome = true;
-            // Auto-skip welcome screen for returning users
-            console.log('🌟 Returning user detected, auto-continuing adventure');
-            this.hideWelcomeScreen();
-            // Initialize immediately without reset
-            this.initializeGame(false);
-            // Start NPCs
-            if (window.eldritchApp) {
-                window.eldritchApp.startNPCSimulation();
-            }
-            return;
+            // Returning users: show welcome to choose Continue or Start Fresh
+            console.log('🌟 Returning user detected, showing choice screen');
         }
     }
 
@@ -164,6 +156,8 @@ class WelcomeScreen {
         
         // Mark welcome as seen
         localStorage.setItem('eldritch_welcome_seen', 'true');
+        // Ensure tutorial/onboarding will be shown after map init
+        localStorage.setItem('eldritch_show_tutorial', 'true');
         this.hasSeenWelcome = true;
         
         // Reset all game state
