@@ -477,6 +477,7 @@ class EldritchSanctuaryApp {
         if (this.sound) return;
         try {
             this.sound = new SoundManager();
+            this.sound.init(); // Initialize the audio context
             window.soundManager = this.sound;
             console.log('🔊 Sound manager initialized');
         } catch (e) {
@@ -2930,14 +2931,35 @@ class SoundManager {
         if (this.audioContext) return;
         try {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            console.log('🔊 Sound system initialized');
+            console.log('🔊 Sound system initialized, state:', this.audioContext.state);
+            
+            // Resume audio context if suspended (required for user interaction)
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume().then(() => {
+                    console.log('🔊 Audio context resumed');
+                });
+            }
         } catch (e) {
             console.warn('🔊 WebAudio not supported:', e);
         }
     }
     
     playTone(frequency, duration, type = 'sine', volume = 0.1) {
-        if (!this.enabled || !this.audioContext) return;
+        if (!this.enabled || !this.audioContext) {
+            console.warn('🔊 Audio context not available or disabled:', {enabled: this.enabled, audioContext: !!this.audioContext});
+            return;
+        }
+        
+        // Ensure audio context is resumed
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume().then(() => {
+                console.log('🔊 Audio context resumed for playback');
+                this.playTone(frequency, duration, type, volume);
+            });
+            return;
+        }
+        
+        console.log(`🔊 Playing tone: ${frequency}Hz, ${duration}s, ${type}, volume: ${volume * this.masterVolume}`);
         
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
