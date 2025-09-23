@@ -29,9 +29,16 @@ class WelcomeScreen {
         const hasSeenWelcome = localStorage.getItem('eldritch_welcome_seen');
         if (hasSeenWelcome === 'true') {
             this.hasSeenWelcome = true;
-            // Skip welcome screen for returning users, but still show it briefly
-            console.log('🌟 Returning user detected, showing welcome screen briefly');
-            // Don't auto-start the game, let user click "Begin Adventure"
+            // Auto-skip welcome screen for returning users
+            console.log('🌟 Returning user detected, auto-continuing adventure');
+            this.hideWelcomeScreen();
+            // Initialize immediately without reset
+            this.initializeGame(false);
+            // Start NPCs
+            if (window.eldritchApp) {
+                window.eldritchApp.startNPCSimulation();
+            }
+            return;
         }
     }
 
@@ -74,6 +81,7 @@ class WelcomeScreen {
             welcomeScreen.style.display = 'flex';
             this.isVisible = true;
             this.animateWelcomeScreen();
+            this.updateContinueAdventureLabel();
         }
     }
 
@@ -115,6 +123,40 @@ class WelcomeScreen {
         if (window.eldritchApp) {
             window.eldritchApp.startNPCSimulation();
         }
+    }
+
+    updateContinueAdventureLabel() {
+        try {
+            const btn = document.getElementById('continue-adventure');
+            if (!btn) return;
+            // Load profile
+            let name = 'Wanderer';
+            try {
+                const raw = localStorage.getItem((window.sessionPersistence?.key && window.sessionPersistence.key('profile')) || '');
+                if (raw) {
+                    const prof = JSON.parse(raw);
+                    if (prof?.name) name = prof.name;
+                }
+            } catch (_) {}
+            // Load morals
+            let morals = this.getMoralSummary();
+            // Nickname
+            let nick = '';
+            try { nick = window.eldritchApp?.systems?.moralChoice?.getNickname?.() || ''; } catch (_) {}
+            const nickText = nick ? `, ${nick}` : '';
+            btn.textContent = morals ? `Continue as ${name}${nickText} ${morals}` : `Continue as ${name}${nickText}`;
+        } catch (_) {}
+    }
+
+    getMoralSummary() {
+        try {
+            const raw = localStorage.getItem('eldritch-moral-alignment');
+            if (!raw) return '';
+            const a = JSON.parse(raw);
+            const fmt = (v)=> (v>0?`+${v}`:`${v}`);
+            // Keep short
+            return `(cosmic ${fmt(Math.trunc(a.cosmic||0))} · ethical ${fmt(Math.trunc(a.ethical||0))} · wisdom ${fmt(Math.trunc(a.wisdom||0))})`;
+        } catch (_) { return ''; }
     }
 
     startFreshAdventure() {
@@ -192,6 +234,20 @@ class WelcomeScreen {
                 window.encounterSystem.updateStatBars();
                 console.log('🎭 Encounter system reset');
             }
+
+            // Remove only current player's flags from the canvas and persistence
+            try {
+                const ownerId = window.multiplayerManager ? window.multiplayerManager.playerId : null;
+                if (ownerId && window.mapEngine && window.mapEngine.finnishFlagLayer) {
+                    window.mapEngine.finnishFlagLayer.removeFlagsByOwner(ownerId);
+                    console.log('🇫🇮 Cleared current player\'s flags');
+                } else {
+                    // Fallback: clear all flags if ownerId not available
+                    if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
+                        window.mapEngine.finnishFlagLayer.clearFlags();
+                    }
+                }
+            } catch (_) {}
             
             // Reset quest system
             if (window.unifiedQuestSystem) {
@@ -207,6 +263,11 @@ class WelcomeScreen {
                     localStorage.removeItem(window.sessionPersistence.key('questState'));
                     localStorage.removeItem(window.sessionPersistence.key('mapView'));
                     localStorage.removeItem(window.sessionPersistence.key('path'));
+                    localStorage.removeItem(window.sessionPersistence.key('flags'));
+                    localStorage.removeItem(window.sessionPersistence.key('profile'));
+                    localStorage.removeItem(window.sessionPersistence.key('inventory'));
+                    localStorage.removeItem(window.sessionPersistence.key('stats'));
+                    localStorage.removeItem(window.sessionPersistence.key('encounters'));
                 } catch (e) {
                     console.warn('Failed to clear session persistence:', e);
                 }

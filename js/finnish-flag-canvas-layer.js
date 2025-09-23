@@ -10,7 +10,7 @@ class FinnishFlagCanvasLayer {
         this.ctx = null;
         this.isVisible = true;
         this.opacity = 1.0;
-        this.flagPins = []; // Array of {lat, lng, size, rotation, timestamp}
+        this.flagPins = []; // Array of {lat, lng, size, rotation, timestamp, symbol, ownerId}
         this.animationFrame = null;
         this.rotationPhase = 0;
         
@@ -52,7 +52,9 @@ class FinnishFlagCanvasLayer {
                     lng: p.lng,
                     size: p.size,
                     rotation: p.rotation,
-                    timestamp: p.t || Date.now()
+                    timestamp: p.t || Date.now(),
+                    symbol: p.symbol || 'finnish',
+                    ownerId: p.owner || null
                 }));
                 console.log(`🇫🇮 Restored ${this.flagPins.length} persisted flags`);
                 this.render();
@@ -106,14 +108,14 @@ class FinnishFlagCanvasLayer {
         }
     }
     
-    addFlagPin(lat, lng, size = null, rotation = null) {
+    addFlagPin(lat, lng, size = null, rotation = null, symbol = null, ownerId = null) {
         // Validate coordinates
         if (!this.isValidLatLng(lat, lng)) {
             console.warn('🇫🇮 Skipping addFlagPin due to invalid coordinates:', { lat, lng });
             return;
         }
         // Check for nearby flags and determine size
-        const nearbyFlag = this.findNearbyFlag(lat, lng);
+        const nearbyFlag = this.findNearbyFlag(lat, lng, 10, ownerId);
         let flagSize;
         
         if (nearbyFlag) {
@@ -134,12 +136,18 @@ class FinnishFlagCanvasLayer {
             flagSize = this.flagSizes[0]; // Start with smallest size
         }
         
+        // Determine symbol from profile if not provided
+        const currentSymbol = symbol || this.getCurrentSymbol();
+        const currentOwner = ownerId || (window.multiplayerManager ? window.multiplayerManager.playerId : null);
+
         const pin = {
             lat: lat,
             lng: lng,
             size: size || flagSize,
             rotation: rotation || Math.random() * Math.PI * 2,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            symbol: currentSymbol,
+            ownerId: currentOwner
         };
         
         this.flagPins.push(pin);
@@ -162,10 +170,12 @@ class FinnishFlagCanvasLayer {
         this.replicateFlagPin(pin);
     }
     
-    findNearbyFlag(lat, lng, maxDistance = 10) {
+    findNearbyFlag(lat, lng, maxDistance = 10, ownerId = null) {
         // Check if there's already a flag within maxDistance meters
         for (let i = 0; i < this.flagPins.length; i++) {
             const flag = this.flagPins[i];
+            // Only cluster flags from the same owner; different owners should create separate pins
+            if (ownerId && flag.ownerId && flag.ownerId !== ownerId) continue;
             if (!this.isValidLatLng(flag.lat, flag.lng)) continue;
             const distance = this.calculateDistance(lat, lng, flag.lat, flag.lng);
             
@@ -318,8 +328,26 @@ class FinnishFlagCanvasLayer {
                 
                 // Add rotation animation
                 const animatedRotation = pin.rotation + (this.rotationPhase * 0.1);
-                
-                this.drawFinnishFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                const sym = pin.symbol || 'finnish';
+                switch (sym) {
+                    case 'triangle':
+                        this.drawTriangle(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
+                    case 'hex':
+                        this.drawHexagon(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
+                    case 'star':
+                        this.drawStar(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
+                    case 'spiral':
+                        this.drawSpiral(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
+                    case 'flower':
+                        this.drawFlower(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                        break;
+                    default:
+                        this.drawFinnishFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
+                }
             }
         });
     }
@@ -410,6 +438,8 @@ class FinnishFlagCanvasLayer {
                         lng: pin.lng,
                         size: pin.size,
                         rotation: pin.rotation,
+                        symbol: pin.symbol,
+                        ownerId: pin.ownerId || window.multiplayerManager.playerId,
                         timestamp: pin.timestamp
                     }
                 });
@@ -417,6 +447,90 @@ class FinnishFlagCanvasLayer {
         } catch (e) {
             console.warn('🇫🇮 Failed to replicate flag pin:', e);
         }
+    }
+
+    // Remove all flags belonging to a specific owner
+    removeFlagsByOwner(ownerId) {
+        if (!ownerId) return;
+        const before = this.flagPins.length;
+        this.flagPins = this.flagPins.filter(f => f.ownerId !== ownerId);
+        const after = this.flagPins.length;
+        if (before !== after) {
+            console.log(`🇫🇮 Removed ${before - after} flags for owner ${ownerId}`);
+            this.persistFlags();
+            this.render();
+        }
+    }
+
+    // Get current symbol preference
+    getCurrentSymbol() {
+        try {
+            const prof = window.sessionPersistence?.restoreProfile?.();
+            return (prof && prof.symbol) ? prof.symbol : 'finnish';
+        } catch (_) { return 'finnish'; }
+    }
+
+    // Drawing helpers for symbols
+    drawTriangle(x, y, size, rotation) {
+        const ctx = this.ctx; const h = size / 2;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
+        ctx.strokeStyle = '#4a9eff'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -h);
+        ctx.lineTo(h * 0.866, h);
+        ctx.lineTo(-h * 0.866, h);
+        ctx.closePath(); ctx.stroke(); ctx.restore();
+    }
+
+    drawHexagon(x, y, size, rotation) {
+        const ctx = this.ctx; const r = size / 2; const a = Math.PI / 3;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
+        ctx.strokeStyle = '#4ecdc4'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const px = r * Math.cos(a * i);
+            const py = r * Math.sin(a * i);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.stroke(); ctx.restore();
+    }
+
+    drawStar(x, y, size, rotation) {
+        const ctx = this.ctx; const outer = size / 2; const inner = outer / 2.5;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
+        ctx.strokeStyle = '#ffd700'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+            const r = (i % 2 === 0) ? outer : inner;
+            const ang = i * Math.PI / 5 - Math.PI / 2;
+            const px = r * Math.cos(ang);
+            const py = r * Math.sin(ang);
+            if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.closePath(); ctx.stroke(); ctx.restore();
+    }
+
+    drawSpiral(x, y, size, rotation) {
+        const ctx = this.ctx; const turns = 2; const maxR = size / 2;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
+        ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let t = 0; t <= 1; t += 0.02) {
+            const r = t * maxR;
+            const ang = turns * 2 * Math.PI * t;
+            const px = r * Math.cos(ang);
+            const py = r * Math.sin(ang);
+            if (t === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+        }
+        ctx.stroke(); ctx.restore();
+    }
+
+    drawFlower(x, y, size, rotation) {
+        const ctx = this.ctx; const r = size / 4;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(rotation);
+        ctx.strokeStyle = '#9b59b6'; ctx.lineWidth = 2;
+        const circles = [
+            [0, 0], [0, -r], [0, r], [-0.866*r, -0.5*r], [0.866*r, -0.5*r], [-0.866*r, 0.5*r], [0.866*r, 0.5*r]
+        ];
+        circles.forEach(([cx, cy]) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke(); });
+        ctx.restore();
     }
 }
 

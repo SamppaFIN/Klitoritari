@@ -88,11 +88,11 @@ class SessionPersistenceManager {
         } catch (_) { return null; }
     }
 
-    // Finnish flag pins (canvas layer)
+    // Finnish flag pins (canvas layer) - persist all owners
     saveFlags(flagPins) {
         try {
             if (!Array.isArray(flagPins)) return;
-            // Store compact objects: {lat,lng,size,rotation,t}
+            // Store compact objects: {lat,lng,size,rotation,t,symbol,owner}
             const compact = flagPins
                 .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng))
                 .map(p => ({
@@ -100,7 +100,9 @@ class SessionPersistenceManager {
                     lng: +p.lng,
                     size: +p.size || 30,
                     rotation: +p.rotation || 0,
-                    t: p.timestamp || Date.now()
+                    t: p.timestamp || Date.now(),
+                    symbol: (p.symbol || 'finnish').toString(),
+                    owner: p.ownerId || null
                 }));
             localStorage.setItem(this.key('flags'), JSON.stringify(compact));
         } catch (_) {}
@@ -126,6 +128,7 @@ class SessionPersistenceManager {
             const safe = {
                 name: (profile?.name || '').toString().slice(0, 24),
                 symbol: (profile?.symbol || 'finnish').toString(),
+                pathColor: (profile?.pathColor || '#00ff00').toString()
             };
             localStorage.setItem(this.key('profile'), JSON.stringify(safe));
         } catch (_) {}
@@ -160,6 +163,60 @@ class SessionPersistenceManager {
             const arr = JSON.parse(raw);
             return Array.isArray(arr) ? arr : [];
         } catch (_) { return []; }
+    }
+
+    // Player stats (subset)
+    saveStats(stats) {
+        try {
+            const keep = {
+                health: stats.health,
+                maxHealth: stats.maxHealth,
+                sanity: stats.sanity,
+                maxSanity: stats.maxSanity,
+                attack: stats.attack,
+                defense: stats.defense,
+                luck: stats.luck,
+                experience: stats.experience,
+                level: stats.level
+            };
+            localStorage.setItem(this.key('stats'), JSON.stringify(keep));
+        } catch (_) {}
+    }
+
+    restoreStats() {
+        try {
+            const raw = localStorage.getItem(this.key('stats'));
+            return raw ? JSON.parse(raw) : null;
+        } catch (_) { return null; }
+    }
+
+    // Encounter state (what the player has already interacted with)
+    saveEncounterState(state) {
+        try {
+            const compact = {
+                monsters: Array.from(state.monsters || []),
+                items: Array.from(state.items || []),
+                pois: Array.from(state.pois || []),
+                quests: Array.from(state.quests || [])
+            };
+            localStorage.setItem(this.key('encounters'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restoreEncounterState() {
+        try {
+            const raw = localStorage.getItem(this.key('encounters'));
+            if (!raw) return { monsters: [], items: [], pois: [], quests: [] };
+            const obj = JSON.parse(raw);
+            return {
+                monsters: new Set(obj.monsters || []),
+                items: new Set(obj.items || []),
+                pois: new Set(obj.pois || []),
+                quests: new Set(obj.quests || [])
+            };
+        } catch (_) {
+            return { monsters: new Set(), items: new Set(), pois: new Set(), quests: new Set() };
+        }
     }
 }
 
