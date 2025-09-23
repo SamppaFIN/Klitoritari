@@ -368,13 +368,107 @@ class WelcomeScreen {
             window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color });
         }
         
-        // Hide modal and start game
+        // Hide modal
         const modal = document.getElementById('user-settings-modal');
         if (modal) {
             modal.classList.add('hidden');
         }
         
-        this.proceedWithGameStart();
+        // Show story notification
+        this.showStoryNotification(name);
+        
+        // Start game after story
+        setTimeout(() => {
+            this.proceedWithGameStart();
+        }, 3000);
+    }
+
+    showStoryNotification(playerName) {
+        const storyMessage = `🌙 ${playerName}, you wake up in an unknown place... You don't remember how you got here, but you feel wounded and weak. Your vision is blurry, and you sense danger nearby.`;
+        
+        const notification = document.createElement('div');
+        notification.id = 'story-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 0, 40, 0.9) 100%);
+            border: 2px solid #8b00ff;
+            border-radius: 15px;
+            padding: 25px 35px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: normal;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 0 40px rgba(139, 0, 255, 0.4);
+            animation: storyNotificationFadeIn 0.8s ease-out;
+            max-width: 500px;
+            word-wrap: break-word;
+            line-height: 1.6;
+        `;
+        
+        notification.innerHTML = `
+            <div style="margin-bottom: 15px; font-size: 20px; color: #8b00ff; font-weight: bold;">
+                🌙 The Awakening
+            </div>
+            <div style="margin-bottom: 15px;">
+                ${storyMessage}
+            </div>
+            <div style="font-size: 14px; color: rgba(255, 255, 255, 0.7); margin-top: 15px;">
+                Look around... you might find something to help you survive.
+            </div>
+        `;
+        
+        // Add CSS animation
+        if (!document.getElementById('story-notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'story-notification-styles';
+            style.textContent = `
+                @keyframes storyNotificationFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translate(-50%, -60%);
+                        scale: 0.9;
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate(-50%, -50%);
+                        scale: 1;
+                    }
+                }
+                @keyframes storyNotificationFadeOut {
+                    from {
+                        opacity: 1;
+                        transform: translate(-50%, -50%);
+                        scale: 1;
+                    }
+                    to {
+                        opacity: 0;
+                        transform: translate(-50%, -40%);
+                        scale: 0.9;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification && notification.parentNode) {
+                notification.style.animation = 'storyNotificationFadeOut 0.5s ease-in';
+                setTimeout(() => {
+                    if (notification && notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }
+        }, 5000);
+        
+        console.log('🌙 Story notification:', storyMessage);
     }
 
     showWelcomeNotification(message) {
