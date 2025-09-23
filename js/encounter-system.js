@@ -70,9 +70,23 @@ class EncounterSystem {
         // Sync with health bar system if available
         setTimeout(() => {
             if (window.healthBar) {
-                window.healthBar.setHealth(this.playerStats.health, this.playerStats.maxHealth);
+                // Check if tutorial has set a different health value
+                const tutorialHealth = window.tutorialEncounterSystem?.tutorialFlags?.get('player_health');
+                const tutorialMaxHealth = window.tutorialEncounterSystem?.tutorialFlags?.get('max_health');
+                
+                if (tutorialHealth !== undefined && tutorialMaxHealth !== undefined) {
+                    // Use tutorial health values
+                    window.healthBar.setHealth(tutorialHealth, tutorialMaxHealth);
+                    this.playerStats.health = tutorialHealth;
+                    this.playerStats.maxHealth = tutorialMaxHealth;
+                    console.log(`❤️ Synced with tutorial health: ${tutorialHealth}/${tutorialMaxHealth}`);
+                } else {
+                    // Use encounter system health values
+                    window.healthBar.setHealth(this.playerStats.health, this.playerStats.maxHealth);
+                    console.log('❤️ Synced encounter system stats with health bar');
+                }
+                
                 window.healthBar.setSanity(this.playerStats.sanity, this.playerStats.maxSanity);
-                console.log('❤️ Synced encounter system stats with health bar');
             }
         }, 200);
 
@@ -1931,7 +1945,8 @@ class EncounterSystem {
         
         // Apply item effects only for non-consumable items
         // Consumable items should be used from inventory instead
-        if (item.type !== 'consumable') {
+        const itemType = item.type || item.itemDef?.type || 'item';
+        if (itemType !== 'consumable') {
             this.applyItemEffects(item);
         }
         
