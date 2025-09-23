@@ -2957,23 +2957,23 @@ class SoundManager {
     }
     
     playNotification() {
-        this.playTone(800, 0.2, 'sine', 0.1);
-        setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.1), 100);
+        this.playTone(800, 0.2, 'sine', 0.3);
+        setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.3), 100);
     }
     
     playError() {
-        this.playTone(200, 0.5, 'sawtooth', 0.15);
+        this.playTone(200, 0.5, 'sawtooth', 0.4);
     }
     
     playSuccess() {
-        this.playTone(600, 0.1, 'sine', 0.1);
-        setTimeout(() => this.playTone(800, 0.1, 'sine', 0.1), 50);
-        setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.1), 100);
+        this.playTone(600, 0.1, 'sine', 0.3);
+        setTimeout(() => this.playTone(800, 0.1, 'sine', 0.3), 50);
+        setTimeout(() => this.playTone(1000, 0.2, 'sine', 0.3), 100);
     }
     
     playEerieHum(options = {}) {
         const duration = options.duration || 2.0;
-        const volume = options.volume || 0.05;
+        const volume = options.volume || 0.2;
         
         // Create a low-frequency eerie hum
         this.playTone(60, duration, 'sine', volume);
@@ -2985,7 +2985,7 @@ class SoundManager {
         // Generic sound player that maps sound names to appropriate methods
         switch(soundName) {
             case 'step_sound':
-                this.playTone(400, 0.1, 'sine', 0.1);
+                this.playTone(400, 0.1, 'sine', 0.3);
                 break;
             case 'quest_complete':
                 this.playQuestComplete();
@@ -3001,23 +3001,23 @@ class SoundManager {
                 break;
             default:
                 console.warn('Unknown sound:', soundName);
-                this.playTone(440, 0.2, 'sine', 0.1);
+                this.playTone(440, 0.2, 'sine', 0.3);
         }
     }
 
     // Quest-related cues used by UnifiedQuestSystem
     playQuestOpen() {
         // rising triad
-        this.playTone(523.25, 0.08, 'sine', 0.12); // C5
-        setTimeout(() => this.playTone(659.25, 0.10, 'sine', 0.12), 60); // E5
-        setTimeout(() => this.playTone(783.99, 0.14, 'sine', 0.12), 120); // G5
+        this.playTone(523.25, 0.08, 'sine', 0.3); // C5
+        setTimeout(() => this.playTone(659.25, 0.10, 'sine', 0.3), 60); // E5
+        setTimeout(() => this.playTone(783.99, 0.14, 'sine', 0.3), 120); // G5
     }
 
     playQuestComplete() {
         // short success fanfare
-        this.playTone(880.0, 0.10, 'triangle', 0.15);
-        setTimeout(() => this.playTone(1174.66, 0.12, 'triangle', 0.15), 90);
-        setTimeout(() => this.playTone(1046.50, 0.20, 'triangle', 0.18), 180);
+        this.playTone(880.0, 0.10, 'triangle', 0.4);
+        setTimeout(() => this.playTone(1174.66, 0.12, 'triangle', 0.4), 90);
+        setTimeout(() => this.playTone(1046.50, 0.20, 'triangle', 0.5), 180);
     }
     
     setVolume(volume) {

@@ -226,7 +226,7 @@ class AssetManager {
         
         // Generate a simple tone
         for (let i = 0; i < length; i++) {
-            data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.1;
+            data[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate) * 0.3;
         }
         
         this.audioBuffers.set(assetId, audioBuffer);
