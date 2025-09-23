@@ -400,6 +400,15 @@ class EncounterSystem {
                             <button id="test-quest-sounds" class="debug-btn" title="Test quest sounds">🎭 Quest</button>
                         </div>
                     </div>
+
+                <!-- Multiplayer Tools -->
+                <div class="debug-group">
+                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🌐 Multiplayer</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <button id="debug-reload-flags" class="debug-btn" title="Request all clients to re-send flags">🏳️ Reload Flags</button>
+                        <button id="debug-refresh-players" class="debug-btn" title="Re-render known other players on map">👥 Refresh Players</button>
+                    </div>
+                </div>
                     
                     <!-- Chaos Mode -->
                     <div class="debug-group">
@@ -620,6 +629,22 @@ class EncounterSystem {
         document.getElementById('test-ambient-sounds').addEventListener('click', () => this.testAmbientSounds());
         document.getElementById('test-combat-sounds').addEventListener('click', () => this.testCombatSounds());
         document.getElementById('test-quest-sounds').addEventListener('click', () => this.testQuestSounds());
+
+        // Multiplayer debug
+        const reloadFlagsBtn = document.getElementById('debug-reload-flags');
+        if (reloadFlagsBtn) reloadFlagsBtn.addEventListener('click', () => {
+            try { window.multiplayerManager?.requestAllFlags?.(); } catch (_) {}
+        });
+        const refreshPlayersBtn = document.getElementById('debug-refresh-players');
+        if (refreshPlayersBtn) refreshPlayersBtn.addEventListener('click', () => {
+            try {
+                if (window.multiplayerManager && window.mapEngine) {
+                    for (const [pid, pdata] of window.multiplayerManager.players.entries()) {
+                        window.mapEngine.addOtherPlayerMarker(pid, pdata);
+                    }
+                }
+            } catch (_) {}
+        });
         
         // All effects test buttons
         document.getElementById('test-all-effects').addEventListener('click', () => this.testAllEffects());
