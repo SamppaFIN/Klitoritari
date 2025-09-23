@@ -322,12 +322,22 @@
         if (!inventoryList) return;
         
         try {
-            // Try to get inventory from encounter system
+            // Try to get inventory from encounter system first
             let items = [];
             if (window.encounterSystem && window.encounterSystem.playerStats && window.encounterSystem.playerStats.inventory) {
                 items = window.encounterSystem.playerStats.inventory;
             } else if (window.itemSystem && window.itemSystem.playerInventory) {
-                items = window.itemSystem.playerInventory;
+                // Convert item system inventory to display format
+                items = window.itemSystem.playerInventory.map(invItem => {
+                    const itemDef = window.itemSystem.getItem(invItem.id);
+                    return {
+                        emoji: itemDef?.emoji || '💠',
+                        name: itemDef?.name || 'Unknown Item',
+                        description: itemDef?.description || 'Mysterious item',
+                        quantity: invItem.quantity,
+                        equipped: invItem.equipped
+                    };
+                });
             }
             
             if (items && items.length > 0) {
@@ -335,7 +345,7 @@
                     <div style="display:flex; align-items:center; gap:6px; background:rgba(74,158,255,0.08); border:1px solid rgba(74,158,255,0.2); padding:6px; border-radius:8px;">
                         <span style="font-size:18px;">${item.emoji || '💠'}</span>
                         <div style="flex:1; min-width:0;">
-                            <div style="font-weight:bold; font-size:0.8em;">${item.name || 'Unknown Item'}</div>
+                            <div style="font-weight:bold; font-size:0.8em;">${item.name || 'Unknown Item'}${item.quantity > 1 ? ` x${item.quantity}` : ''}</div>
                             <div style="font-size:0.7em; opacity:0.8;">${item.description || 'Mysterious item'}</div>
                         </div>
                     </div>
@@ -344,6 +354,7 @@
                 inventoryList.innerHTML = '<div style="opacity:0.7;">No items</div>';
             }
         } catch (e) {
+            console.error('Error populating inventory panel:', e);
             inventoryList.innerHTML = '<div style="opacity:0.7;">Error loading inventory</div>';
         }
     }
