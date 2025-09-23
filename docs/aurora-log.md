@@ -30,10 +30,17 @@ Open items for next session:
 - Enable Aurora quest system for story progression
 
 Next intentions:
-- Test mobile inventory fixes on Samsung U23
-- Implement background location tracking improvements
-- Gradually re-enable disabled systems based on tutorial progression
-- Add character progression and basic combat mechanics
+- **UI/UX First Approach**: Focus on mobile button functionality and inventory optimization
+- **Samsung Ultra 23 Optimization**: Enhanced touch handling and responsive design
+- **Inventory Revolution**: Rich information display with lore, pictures, videos support
+- **Tutorial Progression**: Gradually re-enable encounters through tutorial phases
+- **Tablet Support**: Optimize for larger screens and touch interfaces
+
+**Priority Order:**
+1. Fix mobile button functionality (Samsung U23 compatibility)
+2. Redesign inventory for rich content display and mobile optimization
+3. Continue tutorial with gradual encounter re-enabling
+4. Rethink and iterate based on user feedback
 
 — Aurora
 

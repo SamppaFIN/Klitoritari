@@ -55,86 +55,180 @@ class EldritchSanctuaryApp {
     wireMobileFooterButtons() {
         console.log('📱 Wiring mobile footer buttons...');
         
-        // Inventory button
-        const inventoryBtn = document.getElementById('mobile-inventory-btn');
-        if (inventoryBtn) {
-            console.log('📱 Found mobile inventory button, adding listeners...');
-            
-            // Add multiple event types for better mobile compatibility
-            ['click', 'touchend'].forEach(eventType => {
-                inventoryBtn.addEventListener(eventType, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log(`📱 Mobile inventory button ${eventType} triggered`);
-                    
-                    if (window.UIPanels && window.UIPanels.togglePanel) {
-                        console.log('📱 Calling togglePanel for inventory-panel');
-                        window.UIPanels.togglePanel('inventory-panel');
-                    } else {
-                        console.warn('📱 UIPanels or togglePanel not available');
-                    }
-                }, { passive: false });
-            });
-            
-            // Add visual feedback for mobile
-            inventoryBtn.addEventListener('touchstart', (e) => {
-                inventoryBtn.style.transform = 'scale(0.95)';
-                inventoryBtn.style.opacity = '0.8';
-            });
-            
-            inventoryBtn.addEventListener('touchend', (e) => {
-                setTimeout(() => {
-                    inventoryBtn.style.transform = 'scale(1)';
-                    inventoryBtn.style.opacity = '1';
-                }, 100);
-            });
-        } else {
-            console.warn('📱 Mobile inventory button not found!');
-        }
+        // Define all mobile buttons with their actions
+        const mobileButtons = [
+            { id: 'mobile-inventory-btn', action: 'inventory', panel: 'inventory-panel' },
+            { id: 'mobile-locate-btn', action: 'locate', panel: null },
+            { id: 'mobile-quest-btn', action: 'quest', panel: 'quest-log-panel' },
+            { id: 'mobile-base-btn', action: 'base', panel: 'base-management-panel' },
+            { id: 'mobile-settings-btn', action: 'settings', panel: 'user-settings-panel' }
+        ];
         
-        // Locate button
-        const locateBtn = document.getElementById('mobile-locate-btn');
-        if (locateBtn) {
-            locateBtn.addEventListener('click', () => {
-                console.log('📱 Mobile locate button clicked');
-                this.locateMe();
-            });
-        }
+        mobileButtons.forEach(buttonConfig => {
+            const btn = document.getElementById(buttonConfig.id);
+            if (btn) {
+                console.log(`📱 Found ${buttonConfig.id}, adding enhanced listeners...`);
+                
+                // Enhanced Samsung Ultra 23 compatibility
+                this.setupEnhancedMobileButton(btn, buttonConfig);
+            } else {
+                console.warn(`📱 Mobile button ${buttonConfig.id} not found!`);
+            }
+        });
+    }
+    
+    // Enhanced mobile button setup for Samsung Ultra 23 compatibility
+    setupEnhancedMobileButton(button, config) {
+        let touchStartTime = 0;
+        let touchStartPos = { x: 0, y: 0 };
+        let isLongPress = false;
+        let longPressTimer = null;
         
-        // Quest button
-        const questBtn = document.getElementById('mobile-quest-btn');
-        if (questBtn) {
-            questBtn.addEventListener('click', () => {
-                console.log('📱 Mobile quest button clicked');
+        // Multiple event types for maximum compatibility
+        const eventTypes = ['click', 'touchend', 'touchstart'];
+        
+        eventTypes.forEach(eventType => {
+            button.addEventListener(eventType, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log(`📱 ${config.id} ${eventType} triggered`);
+                
+                // Handle different actions
+                this.handleMobileButtonAction(config, e);
+                
+            }, { passive: false });
+        });
+        
+        // Enhanced touch feedback for Samsung devices
+        button.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            
+            // Visual feedback
+            button.style.transform = 'scale(0.95)';
+            button.style.opacity = '0.8';
+            button.style.transition = 'all 0.1s ease';
+            
+            // Haptic feedback (if supported)
+            if (navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+            
+            // Long press detection
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                this.handleLongPress(button, config);
+            }, 500);
+            
+        }, { passive: false });
+        
+        button.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            const touchEndPos = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            const touchDistance = Math.sqrt(
+                Math.pow(touchEndPos.x - touchStartPos.x, 2) + 
+                Math.pow(touchEndPos.y - touchStartPos.y, 2)
+            );
+            
+            // Clear long press timer
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            
+            // Reset visual state
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+                button.style.opacity = '1';
+                button.style.transition = 'all 0.2s ease';
+            }, 100);
+            
+            // Handle different touch types
+            if (isLongPress) {
+                console.log(`📱 ${config.id} long press detected`);
+                isLongPress = false;
+            } else if (touchDuration < 200 && touchDistance < 10) {
+                console.log(`📱 ${config.id} tap detected`);
+            } else if (touchDistance > 50) {
+                console.log(`📱 ${config.id} swipe detected`);
+            }
+            
+        }, { passive: false });
+        
+        // Handle touch cancel
+        button.addEventListener('touchcancel', (e) => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            button.style.transform = 'scale(1)';
+            button.style.opacity = '1';
+        });
+    }
+    
+    // Handle mobile button actions
+    handleMobileButtonAction(config, event) {
+        switch (config.action) {
+            case 'inventory':
                 if (window.UIPanels && window.UIPanels.togglePanel) {
+                    console.log('📱 Opening inventory panel');
+                    window.UIPanels.togglePanel('inventory-panel');
+                } else {
+                    console.warn('📱 UIPanels not available');
+                }
+                break;
+                
+            case 'locate':
+                console.log('📱 Locating player');
+                this.locateMe();
+                break;
+                
+            case 'quest':
+                if (window.UIPanels && window.UIPanels.togglePanel) {
+                    console.log('📱 Opening quest panel');
                     window.UIPanels.togglePanel('quest-log-panel');
                 }
-            });
-        }
-        
-        // Base button
-        const baseBtn = document.getElementById('mobile-base-btn');
-        if (baseBtn) {
-            baseBtn.addEventListener('click', () => {
-                console.log('📱 Mobile base button clicked');
+                break;
+                
+            case 'base':
                 if (window.UIPanels && window.UIPanels.togglePanel) {
+                    console.log('📱 Opening base panel');
                     window.UIPanels.togglePanel('base-management-panel');
                 }
-            });
-        }
-        
-        // Settings button
-        const settingsBtn = document.getElementById('mobile-settings-btn');
-        if (settingsBtn) {
-            settingsBtn.addEventListener('click', () => {
-                console.log('📱 Mobile settings button clicked');
+                break;
+                
+            case 'settings':
                 if (window.UIPanels && window.UIPanels.togglePanel) {
+                    console.log('📱 Opening settings panel');
                     window.UIPanels.togglePanel('user-settings-panel');
                 }
-            });
+                break;
+        }
+    }
+    
+    // Handle long press actions
+    handleLongPress(button, config) {
+        console.log(`📱 Long press on ${config.id}`);
+        
+        // Add long press visual feedback
+        button.style.transform = 'scale(1.05)';
+        button.style.boxShadow = '0 0 20px rgba(74, 158, 255, 0.5)';
+        
+        // Haptic feedback for long press
+        if (navigator.vibrate) {
+            navigator.vibrate([50, 50, 50]);
         }
         
-        console.log('📱 Mobile footer buttons wired');
+        // Long press actions (future feature)
+        switch (config.action) {
+            case 'inventory':
+                // Future: Quick inventory actions
+                break;
+            case 'locate':
+                // Future: Advanced location options
+                break;
+        }
     }
     
     // Hide all debug elements for mobile
