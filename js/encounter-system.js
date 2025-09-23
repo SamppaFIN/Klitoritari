@@ -409,6 +409,16 @@ class EncounterSystem {
                         <button id="debug-refresh-players" class="debug-btn" title="Re-render known other players on map">👥 Refresh Players</button>
                     </div>
                 </div>
+                
+                <!-- Mobile Wake Lock -->
+                <div class="debug-group">
+                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">📱 Mobile Wake Lock</h4>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                        <button id="debug-wake-lock-start" class="debug-btn" title="Start mobile wake lock">🔒 Start Wake Lock</button>
+                        <button id="debug-wake-lock-stop" class="debug-btn" title="Stop mobile wake lock">🔓 Stop Wake Lock</button>
+                        <button id="debug-wake-lock-status" class="debug-btn" title="Check wake lock status">📊 Status</button>
+                    </div>
+                </div>
                     
                     <!-- Chaos Mode -->
                     <div class="debug-group">
@@ -644,6 +654,51 @@ class EncounterSystem {
                     }
                 }
             } catch (_) {}
+        });
+
+        // Mobile wake lock debug
+        const wakeLockStartBtn = document.getElementById('debug-wake-lock-start');
+        if (wakeLockStartBtn) wakeLockStartBtn.addEventListener('click', () => {
+            try {
+                if (window.mobileWakeLock) {
+                    window.mobileWakeLock.enableForGame();
+                    this.showNotification('📱 Wake lock started');
+                } else {
+                    this.showNotification('📱 Wake lock not available');
+                }
+            } catch (e) {
+                this.showNotification('📱 Wake lock start failed: ' + e.message);
+            }
+        });
+
+        const wakeLockStopBtn = document.getElementById('debug-wake-lock-stop');
+        if (wakeLockStopBtn) wakeLockStopBtn.addEventListener('click', () => {
+            try {
+                if (window.mobileWakeLock) {
+                    window.mobileWakeLock.disableForGame();
+                    this.showNotification('📱 Wake lock stopped');
+                } else {
+                    this.showNotification('📱 Wake lock not available');
+                }
+            } catch (e) {
+                this.showNotification('📱 Wake lock stop failed: ' + e.message);
+            }
+        });
+
+        const wakeLockStatusBtn = document.getElementById('debug-wake-lock-status');
+        if (wakeLockStatusBtn) wakeLockStatusBtn.addEventListener('click', () => {
+            try {
+                if (window.mobileWakeLock) {
+                    const status = window.mobileWakeLock.getStatus();
+                    const statusText = `Active: ${status.isActive}, Supported: ${status.isSupported}, Fallback: ${status.fallbackActive}`;
+                    this.showNotification('📱 Wake Lock Status: ' + statusText);
+                    console.log('📱 Wake Lock Status:', status);
+                } else {
+                    this.showNotification('📱 Wake lock not available');
+                }
+            } catch (e) {
+                this.showNotification('📱 Wake lock status failed: ' + e.message);
+            }
         });
         
         // All effects test buttons

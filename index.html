@@ -19,6 +19,7 @@
     
     <!-- Asset Manager -->
     <script src="js/asset-manager.js"></script>
+    <script src="js/mobile-wake-lock.js"></script>
     
     <!-- Device Testing Suite -->
     <script src="js/device-testing-suite.js"></script>
@@ -67,6 +68,12 @@
                         <span id="accuracy-display-header">Accuracy: --</span>
                     </div>
                     
+                    <!-- Locate Me Button -->
+                    <button id="locate-me-btn" class="header-btn locate-me-btn" title="Locate Me">
+                        <span class="btn-icon">📍</span>
+                        <span class="btn-text">LOCATE</span>
+                        <span class="btn-status" id="locate-status">GPS Ready</span>
+                    </button>
                     
                     <!-- Multiplayer Status -->
                     <div id="multiplayerStatus" class="multiplayer-status disconnected">
@@ -564,16 +571,6 @@
     <!-- Footer with Settings Button -->
     <footer id="game-footer">
         <div class="footer-buttons">
-            <button id="inventory-btn" class="footer-btn inventory-btn" title="Inventory">
-                <span class="btn-icon">🎒</span>
-                <span class="btn-text">INVENTORY</span>
-                <span class="btn-status" id="inventory-status">Empty</span>
-            </button>
-            <button id="locate-me-btn" class="footer-btn locate-me-btn" title="Locate Me">
-                <span class="btn-icon">📍</span>
-                <span class="btn-text">LOCATE ME</span>
-                <span class="btn-status" id="locate-status">GPS Ready</span>
-            </button>
             <button id="quest-log-btn" class="footer-btn quest-log-btn" title="Quest Log">
                 <span class="btn-icon">📜</span>
                 <span class="btn-text">QUESTS</span>

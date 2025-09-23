@@ -2489,6 +2489,16 @@ class EldritchSanctuaryApp {
         this.systems.webglTest = new WebGLTest();
         this.systems.webglTest.init();
         
+        // Initialize mobile wake lock (if on mobile)
+        if (this.isMobile && window.mobileWakeLock) {
+            try {
+                window.mobileWakeLock.enableForGame();
+                console.log('📱 Mobile wake lock enabled for game session');
+            } catch (e) {
+                console.warn('📱 Failed to enable mobile wake lock:', e);
+            }
+        }
+        
         console.log('🔧 Core systems initialized successfully');
     }
     
@@ -2777,6 +2787,16 @@ class EldritchSanctuaryApp {
     
     // Cleanup
     destroy() {
+        // Disable mobile wake lock
+        if (window.mobileWakeLock) {
+            try {
+                window.mobileWakeLock.disableForGame();
+                console.log('📱 Mobile wake lock disabled');
+            } catch (e) {
+                console.warn('📱 Failed to disable mobile wake lock:', e);
+            }
+        }
+        
         Object.values(this.systems).forEach(system => {
             if (system && typeof system.destroy === 'function') {
                 system.destroy();
