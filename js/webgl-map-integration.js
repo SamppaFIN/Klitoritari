@@ -261,11 +261,11 @@ class WebGLMapIntegration {
         }
         
         // Convert item markers (including tutorial items)
-        if (this.mapEngine.itemMarkers && this.mapEngine.itemMarkers.length > 0) {
-            console.log('🌌 Converting item markers:', this.mapEngine.itemMarkers.length);
-            this.mapEngine.itemMarkers.forEach((itemData, index) => {
+        if (this.mapEngine.itemMarkers && this.mapEngine.itemMarkers.size > 0) {
+            console.log('🌌 Converting item markers:', this.mapEngine.itemMarkers.size);
+            this.mapEngine.itemMarkers.forEach((itemData, key) => {
                 if (itemData.marker) {
-                    this.convertItemMarker(itemData, index);
+                    this.convertItemMarker(itemData, key);
                 }
             });
         }

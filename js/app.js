@@ -300,17 +300,25 @@ class EldritchSanctuaryApp {
     
     // Update mobile UI stats
     updateMobileStats() {
-        if (!this.isMobile) return;
-        
         if (this.systems.encounter) {
             const health = this.systems.encounter.playerStats.health;
             const sanity = this.systems.encounter.playerStats.sanity;
             
-            const healthEl = document.getElementById('mobile-health');
-            const sanityEl = document.getElementById('mobile-sanity');
+            // Update mobile UI (if on mobile)
+            if (this.isMobile) {
+                const healthEl = document.getElementById('mobile-health');
+                const sanityEl = document.getElementById('mobile-sanity');
+                
+                if (healthEl) healthEl.textContent = health;
+                if (sanityEl) sanityEl.textContent = sanity;
+            }
             
-            if (healthEl) healthEl.textContent = health;
-            if (sanityEl) sanityEl.textContent = sanity;
+            // Update desktop header UI
+            const desktopHealthEl = document.getElementById('health-value');
+            const desktopSanityEl = document.getElementById('sanity-value');
+            
+            if (desktopHealthEl) desktopHealthEl.textContent = health;
+            if (desktopSanityEl) desktopSanityEl.textContent = sanity;
         }
     }
     
