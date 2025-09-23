@@ -1808,7 +1808,7 @@ class EncounterSystem {
         
         // Award experience for interaction
         this.awardExperience(10);
-        this.updatePlayerStats({ experience: 10 });
+        // Note: Experience is handled by awardExperience method
     }
     
     observeQuestMarker(questMarker, markerKey) {
@@ -1829,7 +1829,7 @@ class EncounterSystem {
         
         // Award small experience for observation
         this.awardExperience(5);
-        this.updatePlayerStats({ experience: 5 });
+        // Note: Experience is handled by awardExperience method
         
         // Close after a delay
         setTimeout(() => {
@@ -4012,7 +4012,7 @@ class EncounterSystem {
     applyEncounterRewards(rewards) {
         if (rewards.experience) {
             this.playerStats.experience += rewards.experience;
-            this.updatePlayerStats({ experience: rewards.experience });
+            this.showNotification(`⭐ Gained ${rewards.experience} experience!`);
         }
         if (rewards.steps) {
             // Add steps to step currency system
@@ -4032,28 +4032,56 @@ class EncounterSystem {
     }
     
     applyEncounterEffects(effects) {
-        if (effects.health) {
-            this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + effects.health);
-            this.updatePlayerStats({ health: effects.health });
+        console.log('🎭 Applying encounter effects:', effects);
+        
+        // Use the statistics system if available
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
+            const stats = window.eldritchApp.systems.statistics;
+            
+            if (effects.health) {
+                stats.restoreHealth(effects.health);
+                this.showNotification(`❤️ Health restored by ${effects.health}!`);
+            }
+            if (effects.sanity) {
+                stats.restoreSanity(effects.sanity);
+                this.showNotification(`🧠 Sanity restored by ${effects.sanity}!`);
+            }
+            if (effects.experience) {
+                stats.addExperience(effects.experience);
+                this.showNotification(`⭐ Gained ${effects.experience} experience!`);
+            }
+        } else {
+            // Fallback to local stats if statistics system not available
+            if (effects.health) {
+                this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + effects.health);
+                this.showNotification(`❤️ Health restored by ${effects.health}!`);
+            }
+            if (effects.sanity) {
+                this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + effects.sanity);
+                this.showNotification(`🧠 Sanity restored by ${effects.sanity}!`);
+            }
+            if (effects.experience) {
+                this.playerStats.experience += effects.experience;
+                this.showNotification(`⭐ Gained ${effects.experience} experience!`);
+            }
         }
-        if (effects.sanity) {
-            this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + effects.sanity);
-            this.updatePlayerStats({ sanity: effects.sanity });
-        }
-        if (effects.experience) {
-            this.playerStats.experience += effects.experience;
-            this.updatePlayerStats({ experience: effects.experience });
-        }
+        
+        // Handle skills, luck, attack, defense locally
         if (effects.skills) {
+            if (!this.playerStats.skills) this.playerStats.skills = {};
             Object.entries(effects.skills).forEach(([skill, value]) => {
                 this.playerStats.skills[skill] = (this.playerStats.skills[skill] || 0) + value;
+                this.showNotification(`📚 ${skill} skill increased by ${value}!`);
             });
         }
         if (effects.stats) {
             Object.entries(effects.stats).forEach(([stat, value]) => {
                 this.playerStats[stat] = (this.playerStats[stat] || 0) + value;
+                this.showNotification(`📊 ${stat} increased by ${value}!`);
             });
         }
+        
+        console.log('🎭 Encounter effects applied successfully');
         this.updateStatBars();
     }
 
