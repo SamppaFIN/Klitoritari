@@ -108,7 +108,7 @@ class FinnishFlagCanvasLayer {
         }
     }
     
-    addFlagPin(lat, lng, size = null, rotation = null, symbol = null, ownerId = null) {
+    addFlagPin(lat, lng, size = null, rotation = null, symbol = null, ownerId = null, suppressReplicate = false, incomingTimestamp = null) {
         // Validate coordinates
         if (!this.isValidLatLng(lat, lng)) {
             console.warn('🇫🇮 Skipping addFlagPin due to invalid coordinates:', { lat, lng });
@@ -145,10 +145,21 @@ class FinnishFlagCanvasLayer {
             lng: lng,
             size: size || flagSize,
             rotation: rotation || Math.random() * Math.PI * 2,
-            timestamp: Date.now(),
+            timestamp: incomingTimestamp || Date.now(),
             symbol: currentSymbol,
             ownerId: currentOwner
         };
+
+        // De-duplicate: if a pin with same owner and very close lat/lng exists, skip adding
+        const existing = this.flagPins.find(p => p.ownerId === pin.ownerId && Math.abs(p.lat - pin.lat) < 1e-6 && Math.abs(p.lng - pin.lng) < 1e-6);
+        if (existing) {
+            // Prefer larger size
+            existing.size = Math.max(existing.size || 0, pin.size || 0);
+            existing.timestamp = Math.max(existing.timestamp || 0, pin.timestamp || 0);
+            this.persistFlags();
+            this.render();
+            return;
+        }
         
         this.flagPins.push(pin);
         console.log('🇫🇮 Added new flag pin:', pin);
@@ -167,7 +178,9 @@ class FinnishFlagCanvasLayer {
 
         // Persist & replicate
         this.persistFlags();
-        this.replicateFlagPin(pin);
+        if (!suppressReplicate) {
+            this.replicateFlagPin(pin);
+        }
     }
     
     findNearbyFlag(lat, lng, maxDistance = 10, ownerId = null) {

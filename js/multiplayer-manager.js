@@ -137,6 +137,14 @@ class MultiplayerManager {
             console.warn('🌐 Failed to send existing flags:', e);
         }
     }
+
+    /**
+     * Request all other clients to re-send their flags
+     */
+    requestAllFlags() {
+        if (!this.isConnected) return;
+        this.sendMessage({ type: 'request_flags', requesterId: this.playerId });
+    }
     
     /**
      * Handle incoming WebSocket messages
@@ -160,6 +168,10 @@ class MultiplayerManager {
                 break;
             case 'flag_update':
                 this.updateFlag(data.flagId, data.flagData);
+                break;
+            case 'request_flags':
+                // When someone requests flags, re-broadcast our own
+                this.sendExistingFlags();
                 break;
             case 'pong':
                 // Heartbeat response
@@ -343,8 +355,9 @@ class MultiplayerManager {
         // Sync flag with other players by adding to canvas layer
         try {
             if (window.mapEngine && window.mapEngine.finnishFlagLayer && flagData) {
-                const { lat, lng, size, rotation, symbol, ownerId } = flagData;
-                window.mapEngine.finnishFlagLayer.addFlagPin(lat, lng, size, rotation, symbol, ownerId);
+                const { lat, lng, size, rotation, symbol, ownerId, timestamp } = flagData;
+                // Apply without re-replicating, and persist locally for offline
+                window.mapEngine.finnishFlagLayer.addFlagPin(lat, lng, size, rotation, symbol, ownerId, true, timestamp);
                 console.log('🌐 Flag update applied:', flagId, flagData);
             } else {
                 console.log('🌐 Flag update received but layer unavailable');
