@@ -57,7 +57,7 @@ class TutorialEncounterSystem {
     initializeGameObjectsRegistry() {
         // Define all game objects with their spawn rules
         this.gameObjectsRegistry.set('health_potion', {
-            type: 'item',
+            type: 'consumable',
             name: 'Health Potion',
             emoji: '🧪',
             description: 'A glowing red potion that restores health',
@@ -305,13 +305,15 @@ class TutorialEncounterSystem {
                 window.encounterSystem.updateHealthDisplay();
             }
             
-            // Update health bar system
-            if (window.healthBar) {
-                window.healthBar.setHealth(health, 100);
-                console.log(`🎓 Health bar updated: ${health}/100`);
-            } else {
-                console.warn('🎓 Health bar system not available!');
-            }
+            // Update health bar system with a small delay to ensure it's initialized
+            setTimeout(() => {
+                if (window.healthBar) {
+                    window.healthBar.setHealth(health, 100);
+                    console.log(`🎓 Health bar updated: ${health}/100`);
+                } else {
+                    console.warn('🎓 Health bar system not available!');
+                }
+            }, 100);
         }
         
         // Set health in tutorial flags

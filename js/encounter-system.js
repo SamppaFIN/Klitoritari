@@ -66,6 +66,15 @@ class EncounterSystem {
                 console.log('💾 Restored player stats from session');
             }
         } catch (_) {}
+        
+        // Sync with health bar system if available
+        setTimeout(() => {
+            if (window.healthBar) {
+                window.healthBar.setHealth(this.playerStats.health, this.playerStats.maxHealth);
+                window.healthBar.setSanity(this.playerStats.sanity, this.playerStats.maxSanity);
+                console.log('❤️ Synced encounter system stats with health bar');
+            }
+        }, 200);
 
         // Restore inventory from session
         try {
