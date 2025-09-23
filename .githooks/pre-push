@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# Pre-push guard: only push tested versions unless explicitly overridden.
+# Allows override with: ALLOW_UNTESTED=1 git push
+
+set -euo pipefail
+
+if [ "${ALLOW_UNTESTED:-0}" = "1" ]; then
+  echo "[pre-push] Override enabled (ALLOW_UNTESTED=1). Skipping checks."
+  exit 0
+fi
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+PLAN_FILE="$ROOT_DIR/docs/Testing-Plan.md"
+
+if [ ! -f "$PLAN_FILE" ]; then
+  echo "[pre-push] Testing plan not found at docs/Testing-Plan.md. Blocking push to encourage adding tests."
+  echo "           To override once: ALLOW_UNTESTED=1 git push"
+  exit 1
+fi
+
+if grep -q "(Untested)" "$PLAN_FILE"; then
+  echo "[pre-push] Detected '(Untested)' markers in docs/Testing-Plan.md."
+  echo "           Please execute the plan and mark features as Verified before pushing."
+  echo "           To override once: ALLOW_UNTESTED=1 git push"
+  exit 1
+fi
+
+echo "[pre-push] Testing plan shows no '(Untested)' markers. Proceeding with push."
+exit 0
+
+
