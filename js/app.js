@@ -2364,9 +2364,16 @@ class EldritchSanctuaryApp {
         // Start tracking automatically
         this.systems.geolocation.startTracking();
         
+        // Initialize tutorial encounter system first
+        this.systems.tutorialEncounter = new TutorialEncounterSystem();
+        this.systems.tutorialEncounter.init();
+        
+        // Make globally available
+        window.tutorialEncounterSystem = this.systems.tutorialEncounter;
+
         // Initialize map engine
         this.systems.mapEngine = new EnhancedMapEngine();
-        
+
         // Set up tutorial start callback immediately after map engine creation
         try {
             const previousOnMapReady = this.systems.mapEngine.onMapReady;
@@ -2376,10 +2383,13 @@ class EldritchSanctuaryApp {
                 }
                 try {
                     const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
+                    console.log('🎓 Tutorial check:', { shouldStartTutorial, tutorialSystem: !!window.tutorialEncounterSystem, hasStartTutorial: !!(window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) });
                     if (shouldStartTutorial && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
                         console.log('🎓 Starting tutorial from onMapReady callback');
                         window.tutorialEncounterSystem.startTutorial();
                         localStorage.removeItem('eldritch_start_tutorial_encounter');
+                    } else {
+                        console.log('🎓 Tutorial not started:', { shouldStartTutorial, tutorialSystem: !!window.tutorialEncounterSystem });
                     }
                 } catch (error) {
                     console.warn('🎓 Failed to start tutorial:', error);
@@ -2524,12 +2534,7 @@ class EldritchSanctuaryApp {
         // Welcome screen already initialized in initWelcomeScreen()
         this.systems.welcomeScreen = this.welcomeScreen;
         
-        // Initialize tutorial encounter system
-        this.systems.tutorialEncounter = new TutorialEncounterSystem();
-        this.systems.tutorialEncounter.init();
-        
-        // Make globally available
-        window.tutorialEncounterSystem = this.systems.tutorialEncounter;
+        // Tutorial encounter system already initialized earlier
         
         // Initialize webgl map renderer
         this.systems.webglMapRenderer = new WebGLMapRenderer();
