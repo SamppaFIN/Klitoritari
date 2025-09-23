@@ -138,6 +138,15 @@ class EldritchSanctuaryServer {
             case 'playerJoin':
                 this.handlePlayerJoin(ws, message.payload);
                 break;
+            case 'player_update': {
+                // Relay player state to others
+                this.broadcastToOthers(ws.playerId, {
+                    type: 'player_update',
+                    playerId: message.playerId,
+                    playerData: message.playerData
+                });
+                break;
+            }
                 
             case 'positionUpdate':
                 this.handlePositionUpdate(ws, message.payload);
@@ -154,6 +163,15 @@ class EldritchSanctuaryServer {
             case 'zoneEntry':
                 this.handleZoneEntry(ws, message.payload);
                 break;
+            case 'flag_update': {
+                // Broadcast flag update to everyone except sender
+                this.broadcastToOthers(ws.playerId, {
+                    type: 'flag_update',
+                    flagId: message.flagId,
+                    flagData: message.flagData
+                });
+                break;
+            }
                 
             default:
                 console.log('Unknown message type:', message.type);

@@ -16,12 +16,14 @@ class MultiplayerManager {
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 1000; // ms
         
-        // WebSocket server URL (placeholder - would be configured in production)
-        this.serverUrl = 'wss://eldritch-sanctuary.herokuapp.com/ws';
-        
-        // Fallback to localhost for development
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            this.serverUrl = 'ws://localhost:8080/ws';
+        // WebSocket server URL - derive from current origin by default
+        const isSecure = window.location.protocol === 'https:';
+        const host = window.location.hostname;
+        const port = window.location.port || (isSecure ? '443' : '80');
+        this.serverUrl = `${isSecure ? 'wss' : 'ws'}://${host}:${port}/ws`;
+        // Allow override via env-style global if provided
+        if (window.ELDRITCH_WS_URL) {
+            this.serverUrl = window.ELDRITCH_WS_URL;
         }
         
         console.log('🌐 MultiplayerManager initialized');
@@ -188,7 +190,8 @@ class MultiplayerManager {
         this.positionUpdateInterval = setInterval(() => {
             if (this.isConnected) {
                 const currentPos = this.getCurrentPlayerData();
-                if (currentPos && this.hasPositionChanged(currentPos)) {
+                if (currentPos) {
+                    // Always send periodic update so others see you on fresh sessions
                     this.sendPlayerData();
                     this.lastPosition = currentPos;
                 }
@@ -274,10 +277,7 @@ class MultiplayerManager {
             position
         );
         
-        if (distance > this.syncRadius) {
-            this.removeOtherPlayerMarker(playerId);
-            return;
-        }
+        // Relax filtering: render regardless of radius so fresh sessions see others immediately
         
         // Use map engine to add player marker
         window.mapEngine.addOtherPlayerMarker(playerId, { ...playerData, profile });
