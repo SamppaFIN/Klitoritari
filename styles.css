@@ -9106,116 +9106,342 @@ input[type="range"]::-moz-range-thumb {
     color: #888;
 }
 
-/* Inventory Items Grid */
+/* Modern Inventory Items Grid - Samsung Ultra 23 Optimized */
 .inventory-items {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    padding: 8px 0;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 12px 0;
+    /* Samsung Ultra 23 optimizations */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
-.inventory-item {
-    background: rgba(74, 158, 255, 0.08);
-    border: 1px solid rgba(74, 158, 255, 0.2);
-    border-radius: 8px;
-    padding: 12px;
+/* Modern Inventory Item Cards - Instagram/TikTok Style */
+.inventory-item-card {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(138, 43, 226, 0.1));
+    border: 2px solid rgba(74, 158, 255, 0.2);
+    border-radius: 16px;
+    padding: 0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
+    /* Samsung Ultra 23 optimizations */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    will-change: transform, opacity, box-shadow;
+    /* Card shadow */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
-.inventory-item:hover {
-    background: rgba(74, 158, 255, 0.15);
+.inventory-item-card:hover {
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.15), rgba(138, 43, 226, 0.15));
     border-color: rgba(74, 158, 255, 0.4);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.2);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(74, 158, 255, 0.2);
 }
 
-.inventory-item:active {
-    transform: translateY(0);
+.inventory-item-card:active {
+    transform: translateY(-2px) scale(0.98);
+    transition: transform 0.1s ease;
 }
 
-.inventory-item-header {
+/* Item Media Section */
+.item-media {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(138, 43, 226, 0.1));
+}
+
+.item-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.item-icon-placeholder {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(74, 158, 255, 0.2), rgba(138, 43, 226, 0.2));
 }
 
-.inventory-item-icon {
-    font-size: 1.5em;
-    filter: drop-shadow(0 0 4px currentColor);
+.item-emoji {
+    font-size: 4rem;
+    filter: drop-shadow(0 0 10px rgba(74, 158, 255, 0.5));
 }
 
-.inventory-item-name {
-    font-weight: bold;
-    font-size: 1em;
+.item-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-3d {
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+
+/* Rarity Glow Effect */
+.rarity-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px 12px 0 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.rarity-common .rarity-glow {
+    opacity: 0;
+}
+
+.rarity-uncommon .rarity-glow {
+    background: linear-gradient(45deg, transparent, rgba(34, 197, 94, 0.2), transparent);
+    opacity: 0.6;
+}
+
+.rarity-rare .rarity-glow {
+    background: linear-gradient(45deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+    opacity: 0.8;
+}
+
+.rarity-epic .rarity-glow {
+    background: linear-gradient(45deg, transparent, rgba(168, 85, 247, 0.4), transparent);
+    opacity: 1;
+}
+
+.rarity-legendary .rarity-glow {
+    background: linear-gradient(45deg, transparent, rgba(251, 191, 36, 0.5), transparent);
+    opacity: 1;
+    animation: legendaryPulse 2s ease-in-out infinite;
+}
+
+@keyframes legendaryPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Quantity Badge */
+.quantity-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.8);
     color: #fff;
-    flex: 1;
-}
-
-.inventory-item-quantity {
-    background: rgba(74, 158, 255, 0.3);
-    color: #4a9eff;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
     font-weight: bold;
-    min-width: 24px;
-    text-align: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(74, 158, 255, 0.3);
 }
 
-.inventory-item-description {
-    font-size: 0.85em;
-    color: #ccc;
-    line-height: 1.3;
+/* Item Info Section */
+.item-info {
+    padding: 16px;
+}
+
+.item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 8px;
 }
 
-.inventory-item-actions {
-    display: flex;
-    gap: 6px;
-    margin-top: 8px;
+.item-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.inventory-action-btn {
+.item-type-badge {
     background: rgba(74, 158, 255, 0.2);
-    border: 1px solid rgba(74, 158, 255, 0.3);
-    border-radius: 4px;
     color: #4a9eff;
-    padding: 4px 8px;
-    font-size: 0.8em;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.item-description {
+    font-size: 0.9rem;
+    color: #ccc;
+    line-height: 1.4;
+    margin: 0 0 12px 0;
+}
+
+.item-lore {
+    background: rgba(0, 0, 0, 0.3);
+    border-left: 3px solid rgba(74, 158, 255, 0.5);
+    padding: 12px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+}
+
+.lore-text {
+    font-size: 0.85rem;
+    color: #b8d4f0;
+    font-style: italic;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.item-stats {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+
+.stat-name {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 0.85rem;
+    color: #4a9eff;
+    font-weight: 600;
+}
+
+/* Action Buttons */
+.item-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 12px 12px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border: 2px solid rgba(74, 158, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(74, 158, 255, 0.1);
+    color: #4a9eff;
+    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     flex: 1;
+    justify-content: center;
+    /* Samsung Ultra 23 optimizations */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    min-height: 44px;
 }
 
-.inventory-action-btn:hover {
-    background: rgba(74, 158, 255, 0.3);
+.action-btn:hover {
+    background: rgba(74, 158, 255, 0.2);
     border-color: rgba(74, 158, 255, 0.5);
+    transform: translateY(-1px);
 }
 
-.inventory-action-btn.primary {
+.action-btn:active {
+    transform: translateY(0);
+    background: rgba(74, 158, 255, 0.3);
+}
+
+.action-btn.primary {
     background: rgba(34, 197, 94, 0.2);
     border-color: rgba(34, 197, 94, 0.4);
     color: #22c55e;
 }
 
-.inventory-action-btn.primary:hover {
+.action-btn.primary:hover {
     background: rgba(34, 197, 94, 0.3);
     border-color: rgba(34, 197, 94, 0.6);
 }
 
-/* Consumable items get special styling */
-.inventory-item.consumable {
-    border-color: rgba(34, 197, 94, 0.3);
-    background: rgba(34, 197, 94, 0.05);
+.btn-icon {
+    font-size: 1rem;
 }
 
-.inventory-item.consumable:hover {
+.btn-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Swipe Indicators */
+.swipe-indicators {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.swipe-left,
+.swipe-right {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.swipe-left {
+    background: rgba(239, 68, 68, 0.8);
+    color: white;
+}
+
+.swipe-right {
+    background: rgba(34, 197, 94, 0.8);
+    color: white;
+}
+
+/* Consumable items get special styling */
+.inventory-item-card.consumable {
+    border-color: rgba(34, 197, 94, 0.3);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), rgba(74, 158, 255, 0.05));
+}
+
+.inventory-item-card.consumable:hover {
     border-color: rgba(34, 197, 94, 0.5);
-    background: rgba(34, 197, 94, 0.1);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(74, 158, 255, 0.1));
 }
 
 /* Hide desktop floating panels on mobile */
@@ -9250,6 +9476,31 @@ input[type="range"]::-moz-range-thumb {
     .mobile-footer .btn-text {
         font-size: 0.7rem;
     }
+    
+    /* Tablet inventory optimizations */
+    .inventory-items {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    
+    .inventory-item-card {
+        border-radius: 20px;
+    }
+    
+    .item-media {
+        height: 240px;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .item-emoji {
+        font-size: 5rem;
+    }
+    
+    .action-btn {
+        min-height: 48px;
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
 }
 
 /* Samsung Ultra 23 specific optimizations */
@@ -9272,6 +9523,40 @@ input[type="range"]::-moz-range-thumb {
     
     .mobile-footer .btn-text {
         font-size: 0.75rem;
+    }
+    
+    /* Samsung Ultra 23 inventory optimizations */
+    .inventory-items {
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 24px;
+    }
+    
+    .inventory-item-card {
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+    
+    .item-media {
+        height: 280px;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .item-emoji {
+        font-size: 6rem;
+    }
+    
+    .action-btn {
+        min-height: 52px;
+        padding: 14px 24px;
+        font-size: 0.95rem;
+    }
+    
+    .item-name {
+        font-size: 1.4rem;
+    }
+    
+    .item-description {
+        font-size: 1rem;
     }
 }
 

@@ -441,55 +441,244 @@
     function createInventoryItemHTML(item) {
         const isConsumable = item.type === 'consumable';
         const quantityText = item.quantity > 1 ? ` x${item.quantity}` : '';
+        const rarityClass = item.rarity ? `rarity-${item.rarity}` : 'rarity-common';
         
         return `
-            <div class="inventory-item ${isConsumable ? 'consumable' : ''}" data-item-id="${item.id}">
-                <div class="inventory-item-header">
-                    <span class="inventory-item-icon">${item.emoji || '💠'}</span>
-                    <span class="inventory-item-name">${item.name || 'Unknown Item'}</span>
-                    ${quantityText ? `<span class="inventory-item-quantity">${item.quantity}</span>` : ''}
+            <div class="inventory-item-card ${isConsumable ? 'consumable' : ''} ${rarityClass}" 
+                 data-item-id="${item.id}" 
+                 data-item-type="${item.type}">
+                
+                <!-- Item Media Section -->
+                <div class="item-media">
+                    ${item.image ? `
+                        <img src="${item.image}" alt="${item.name}" class="item-image" loading="lazy">
+                    ` : `
+                        <div class="item-icon-placeholder">
+                            <span class="item-emoji">${item.emoji || '💠'}</span>
+                        </div>
+                    `}
+                    ${item.video ? `
+                        <video class="item-video" muted loop>
+                            <source src="${item.video}" type="video/mp4">
+                        </video>
+                    ` : ''}
+                    ${item.model3d ? `
+                        <canvas class="item-3d" data-model="${item.model3d}"></canvas>
+                    ` : ''}
+                    
+                    <!-- Rarity Glow Effect -->
+                    <div class="rarity-glow"></div>
+                    
+                    <!-- Quantity Badge -->
+                    ${quantityText ? `
+                        <div class="quantity-badge">
+                            <span class="quantity-number">${item.quantity}</span>
+                        </div>
+                    ` : ''}
                 </div>
-                <div class="inventory-item-description">${item.description || 'Mysterious item'}</div>
-                ${isConsumable ? `
-                    <div class="inventory-item-actions">
-                        <button class="inventory-action-btn primary" data-action="use">Use</button>
-                        <button class="inventory-action-btn" data-action="info">Info</button>
+                
+                <!-- Item Info Section -->
+                <div class="item-info">
+                    <div class="item-header">
+                        <h3 class="item-name">${item.name || 'Unknown Item'}</h3>
+                        <div class="item-type-badge">${item.type || 'item'}</div>
                     </div>
-                ` : `
-                    <div class="inventory-item-actions">
-                        <button class="inventory-action-btn" data-action="equip">Equip</button>
-                        <button class="inventory-action-btn" data-action="info">Info</button>
-                    </div>
-                `}
+                    
+                    <p class="item-description">${item.description || 'Mysterious item'}</p>
+                    
+                    ${item.lore ? `
+                        <div class="item-lore">
+                            <p class="lore-text">${item.lore}</p>
+                        </div>
+                    ` : ''}
+                    
+                    ${item.stats ? `
+                        <div class="item-stats">
+                            ${Object.entries(item.stats).map(([stat, value]) => `
+                                <div class="stat-row">
+                                    <span class="stat-name">${stat}:</span>
+                                    <span class="stat-value">${value}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="item-actions">
+                    ${isConsumable ? `
+                        <button class="action-btn primary use-btn" data-action="use">
+                            <span class="btn-icon">⚡</span>
+                            <span class="btn-text">Use</span>
+                        </button>
+                        <button class="action-btn info-btn" data-action="info">
+                            <span class="btn-icon">ℹ️</span>
+                            <span class="btn-text">Info</span>
+                        </button>
+                    ` : `
+                        <button class="action-btn equip-btn" data-action="equip">
+                            <span class="btn-icon">⚔️</span>
+                            <span class="btn-text">Equip</span>
+                        </button>
+                        <button class="action-btn info-btn" data-action="info">
+                            <span class="btn-icon">ℹ️</span>
+                            <span class="btn-text">Info</span>
+                        </button>
+                    `}
+                </div>
+                
+                <!-- Swipe Indicators -->
+                <div class="swipe-indicators">
+                    <div class="swipe-left">🗑️</div>
+                    <div class="swipe-right">⚡</div>
+                </div>
             </div>
         `;
     }
     
     function addInventoryItemHandlers() {
         // Remove existing handlers
-        document.querySelectorAll('.inventory-item').forEach(item => {
+        document.querySelectorAll('.inventory-item-card').forEach(item => {
             item.replaceWith(item.cloneNode(true));
         });
         
-        // Add new handlers
-        document.querySelectorAll('.inventory-item').forEach(item => {
+        // Add new handlers for modern card-based inventory
+        document.querySelectorAll('.inventory-item-card').forEach(item => {
             const itemId = item.dataset.itemId;
             
-            // Click on item to use/equip
-            item.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('inventory-action-btn')) {
-                    handleItemAction(itemId, 'use');
-                }
-            });
+            // Enhanced touch handling for Samsung Ultra 23
+            setupInventoryCardGestures(item, itemId);
             
             // Action buttons
-            item.querySelectorAll('.inventory-action-btn').forEach(btn => {
+            item.querySelectorAll('.action-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const action = btn.dataset.action;
                     handleItemAction(itemId, action);
                 });
             });
+        });
+    }
+    
+    function setupInventoryCardGestures(card, itemId) {
+        let touchStartTime = 0;
+        let touchStartPos = { x: 0, y: 0 };
+        let touchStartDistance = 0;
+        let isDragging = false;
+        let dragThreshold = 50;
+        
+        // Touch start
+        card.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            touchStartDistance = 0;
+            isDragging = false;
+            
+            // Visual feedback
+            card.style.transform = 'scale(0.98)';
+            card.style.transition = 'transform 0.1s ease';
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(5);
+            }
+        }, { passive: false });
+        
+        // Touch move - handle swiping
+        card.addEventListener('touchmove', (e) => {
+            if (!touchStartPos) return;
+            
+            const currentPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            const deltaX = currentPos.x - touchStartPos.x;
+            const deltaY = currentPos.y - touchStartPos.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            touchStartDistance = distance;
+            
+            // Check if this is a horizontal swipe
+            if (Math.abs(deltaX) > Math.abs(deltaY) && distance > 20) {
+                isDragging = true;
+                e.preventDefault();
+                
+                // Visual feedback for swiping
+                const swipeProgress = Math.min(Math.abs(deltaX) / 100, 1);
+                const direction = deltaX > 0 ? 1 : -1;
+                
+                card.style.transform = `translateX(${deltaX * 0.3}px) scale(${1 - swipeProgress * 0.05})`;
+                card.style.opacity = 1 - swipeProgress * 0.3;
+                
+                // Show swipe indicators
+                const swipeLeft = card.querySelector('.swipe-left');
+                const swipeRight = card.querySelector('.swipe-right');
+                
+                if (direction > 0 && swipeRight) {
+                    swipeRight.style.opacity = swipeProgress;
+                    swipeRight.style.transform = `scale(${swipeProgress})`;
+                } else if (direction < 0 && swipeLeft) {
+                    swipeLeft.style.opacity = swipeProgress;
+                    swipeLeft.style.transform = `scale(${swipeProgress})`;
+                }
+            }
+        }, { passive: false });
+        
+        // Touch end - handle gestures
+        card.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            const currentPos = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            const deltaX = currentPos.x - touchStartPos.x;
+            const deltaY = currentPos.y - touchStartPos.y;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            // Reset visual state
+            card.style.transform = 'scale(1)';
+            card.style.opacity = '1';
+            card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Hide swipe indicators
+            card.querySelectorAll('.swipe-indicators > div').forEach(indicator => {
+                indicator.style.opacity = '0';
+                indicator.style.transform = 'scale(0.5)';
+            });
+            
+            // Handle different gestures
+            if (isDragging && Math.abs(deltaX) > dragThreshold) {
+                // Swipe gesture
+                if (deltaX > 0) {
+                    // Swipe right - use item
+                    console.log(`📱 Swipe right on ${itemId} - using item`);
+                    handleItemAction(itemId, 'use');
+                } else {
+                    // Swipe left - delete item
+                    console.log(`📱 Swipe left on ${itemId} - deleting item`);
+                    handleItemAction(itemId, 'delete');
+                }
+            } else if (touchDuration < 200 && distance < 20) {
+                // Quick tap - use/equip item
+                console.log(`📱 Tap on ${itemId} - using item`);
+                handleItemAction(itemId, 'use');
+            } else if (touchDuration > 500) {
+                // Long press - show item info
+                console.log(`📱 Long press on ${itemId} - showing info`);
+                handleItemAction(itemId, 'info');
+            }
+            
+            // Reset state
+            isDragging = false;
+            touchStartPos = { x: 0, y: 0 };
+        }, { passive: false });
+        
+        // Touch cancel
+        card.addEventListener('touchcancel', (e) => {
+            card.style.transform = 'scale(1)';
+            card.style.opacity = '1';
+            isDragging = false;
+        });
+        
+        // Click fallback for desktop
+        card.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('action-btn')) {
+                handleItemAction(itemId, 'use');
+            }
         });
     }
     
@@ -521,6 +710,29 @@
             case 'info':
                 showItemInfo(item);
                 break;
+            case 'delete':
+                deleteItem(itemId);
+                break;
+        }
+    }
+    
+    function deleteItem(itemId) {
+        console.log(`🗑️ Deleting item: ${itemId}`);
+        
+        if (window.itemSystem && window.itemSystem.removeFromInventory) {
+            const success = window.itemSystem.removeFromInventory(itemId, 1);
+            if (success) {
+                console.log(`🗑️ Successfully deleted ${itemId}`);
+                // Refresh inventory display
+                populateInventoryPanel();
+                // Show notification
+                if (window.encounterSystem && window.encounterSystem.showNotification) {
+                    const item = window.itemSystem.getItem(itemId);
+                    window.encounterSystem.showNotification(`Deleted ${item.name}!`, 'info');
+                }
+            } else {
+                console.warn(`🗑️ Failed to delete ${itemId}`);
+            }
         }
     }
     

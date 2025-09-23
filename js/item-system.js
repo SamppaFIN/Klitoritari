@@ -33,11 +33,16 @@ class ItemSystem {
             rarity: 'common',
             emoji: '🧪',
             description: 'A glowing red potion that restores health',
-            stats: { heal: 20 },
+            stats: { 
+                heal: 20,
+                'Healing': '20 HP',
+                'Duration': 'Instant',
+                'Source': 'Cosmic Alchemy'
+            },
             effects: ['restore_health'],
             value: 25,
             weight: 0.1,
-            lore: 'A reassuringly red liquid of unknown provenance.'
+            lore: 'Brewed from the tears of cosmic entities, this potion carries the essence of life itself. Each drop contains the concentrated energy of a thousand healing stars.'
         });
 
         this.addItem({
