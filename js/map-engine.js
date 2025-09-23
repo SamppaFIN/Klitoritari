@@ -2619,6 +2619,45 @@ class MapEngine {
     }
     
     // Create special markers (HEVY, shrines, items, etc.)
+    clearAllSpecialMarkers() {
+        console.log('🎯 Clearing all special markers...');
+        
+        // Clear HEVY marker
+        if (this.hevyMarker && this.map) {
+            this.map.removeLayer(this.hevyMarker);
+            this.hevyMarker = null;
+        }
+        
+        // Clear shrine markers
+        if (this.shrineMarkers) {
+            this.shrineMarkers.forEach(marker => {
+                if (this.map) this.map.removeLayer(marker);
+            });
+            this.shrineMarkers = [];
+        }
+        
+        // Clear item markers
+        if (this.itemMarkers) {
+            this.itemMarkers.forEach(itemData => {
+                if (this.map && itemData.marker) this.map.removeLayer(itemData.marker);
+            });
+            this.itemMarkers = [];
+        }
+        
+        // Clear monster markers
+        if (this.monsterMarkers) {
+            this.monsterMarkers.forEach(monsterData => {
+                if (this.map && monsterData.marker) this.map.removeLayer(monsterData.marker);
+            });
+            this.monsterMarkers = [];
+        }
+        
+        // Reset creation flag
+        this.specialMarkersCreated = false;
+        
+        console.log('🎯 All special markers cleared');
+    }
+
     createSpecialMarkers() {
         if (!this.map) return;
         
@@ -2645,11 +2684,9 @@ class MapEngine {
         // Create shrine markers
         this.createShrineMarkers(baseLat, baseLng);
         
-        // Create item markers
-        this.createItemMarkers(baseLat, baseLng);
-        
-        // Create monster markers
-        this.createMonsterMarkers(baseLat, baseLng);
+        // Temporarily disable prepopulated random encounters/items scattered 100–300m
+        // this.createItemMarkers(baseLat, baseLng);
+        // this.createMonsterMarkers(baseLat, baseLng);
         
         // Mark as created to prevent duplicates
         this.specialMarkersCreated = true;
@@ -2665,6 +2702,18 @@ class MapEngine {
                     // Clear the flag so it doesn't show again on reload
                     localStorage.removeItem('eldritch_show_tutorial');
                 }, 1000);
+            }
+        } catch (_) {}
+        
+        // Start tutorial encounter system if requested
+        try {
+            const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
+            if (shouldStartTutorial && window.tutorialEncounterSystem) {
+                setTimeout(() => {
+                    window.tutorialEncounterSystem.startTutorial();
+                    // Clear the flag so it doesn't start again on reload
+                    localStorage.removeItem('eldritch_start_tutorial_encounter');
+                }, 1500);
             }
         } catch (_) {}
     }
@@ -2692,8 +2741,8 @@ class MapEngine {
             iconAnchor: [25, 25]
         });
         
-        const hevyMarker = L.marker([lat, lng], { icon: hevyIcon }).addTo(this.map);
-        hevyMarker.bindPopup(`
+        this.hevyMarker = L.marker([lat, lng], { icon: hevyIcon }).addTo(this.map);
+        this.hevyMarker.bindPopup(`
             <div class="hevy-popup">
                 <h4>⚡ HEVY</h4>
                 <p><strong>Type:</strong> Cosmic Entity</p>
@@ -2718,6 +2767,7 @@ class MapEngine {
             { name: 'Wisdom Shrine', emoji: '📚', color: '#00ff00', effect: 'wisdom' }
         ];
         
+        this.shrineMarkers = [];
         shrineTypes.forEach((shrine, index) => {
             const angle = (Math.PI * 2 / shrineTypes.length) * index + Math.random() * 0.5;
             const distance = 0.0015 + Math.random() * 0.001; // 150-250m
@@ -2751,6 +2801,8 @@ class MapEngine {
                     </div>
                 </div>
             `);
+            
+            this.shrineMarkers.push(shrineMarker);
         });
     }
     
@@ -2765,7 +2817,7 @@ class MapEngine {
         
         // Initialize item markers storage if not exists
         if (!this.itemMarkers) {
-            this.itemMarkers = new Map();
+            this.itemMarkers = [];
         }
         
         itemTypes.forEach((item, index) => {
@@ -2809,7 +2861,7 @@ class MapEngine {
             `);
             
             // Store item marker reference with full data
-            this.itemMarkers.set(item.name, {
+            this.itemMarkers.push({
                 marker: itemMarker,
                 name: item.name,
                 emoji: item.emoji,
@@ -2834,7 +2886,7 @@ class MapEngine {
         
         // Initialize monster markers storage if not exists
         if (!this.monsterMarkers) {
-            this.monsterMarkers = new Map();
+            this.monsterMarkers = [];
         }
         
         monsterTypes.forEach((monster, index) => {
@@ -2878,7 +2930,7 @@ class MapEngine {
             `);
             
             // Store monster marker reference with full data
-            this.monsterMarkers.set(monster.name, {
+            this.monsterMarkers.push({
                 marker: monsterMarker,
                 name: monster.name,
                 emoji: monster.emoji,
