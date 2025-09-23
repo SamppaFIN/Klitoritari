@@ -2372,7 +2372,11 @@ class EldritchSanctuaryApp {
         // Start tracking automatically
         this.systems.geolocation.startTracking();
         
-        // Initialize tutorial encounter system first
+        // Initialize health bar system first
+        this.systems.healthBar = new HealthBar();
+        window.healthBar = this.systems.healthBar;
+        
+        // Initialize tutorial encounter system
         this.systems.tutorialEncounter = new TutorialEncounterSystem();
         this.systems.tutorialEncounter.init();
         

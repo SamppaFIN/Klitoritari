@@ -305,19 +305,12 @@ class TutorialEncounterSystem {
                 window.encounterSystem.updateHealthDisplay();
             }
             
-            // Also update mobile header if app is available
-            if (window.app && window.app.updateMobileStats) {
-                window.app.updateMobileStats();
-            }
-            
-            // Direct DOM update as fallback
-            const healthEl = document.getElementById('health-value');
-            console.log(`🎓 Direct DOM update attempt: health=${health}, element=`, healthEl);
-            if (healthEl) {
-                healthEl.textContent = `${health}/100`;
-                console.log(`🎓 Direct DOM update: health-value set to ${health}/100`);
+            // Update health bar system
+            if (window.healthBar) {
+                window.healthBar.setHealth(health, 100);
+                console.log(`🎓 Health bar updated: ${health}/100`);
             } else {
-                console.warn('🎓 health-value element not found!');
+                console.warn('🎓 Health bar system not available!');
             }
         }
         

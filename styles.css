@@ -8992,3 +8992,53 @@ input[type="range"]::-moz-range-thumb {
 .tutorial-item-marker:hover {
     cursor: pointer;
 }
+
+/* Health Bar Styles */
+.health-bar-container, .sanity-bar-container {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.health-bar, .sanity-bar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.health-bar-fill, .sanity-bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 10px;
+}
+
+.health-bar-text, .sanity-bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* Health bar specific colors */
+.health-bar-fill {
+    background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+}
+
+/* Sanity bar specific colors */
+.sanity-bar-fill {
+    background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+}

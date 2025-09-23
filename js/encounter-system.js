@@ -1891,25 +1891,40 @@ class EncounterSystem {
             window.mapEngine.removeItemFromMap(item.name);
         }
         
-        // Add to inventory and persist
+        // Add to inventory using item system
         try {
-            const invItem = {
-                name: item.name,
-                emoji: item.emoji,
-                rarity: item.rarity,
-                color: item.color,
-                acquiredAt: Date.now()
-            };
-            this.playerStats.inventory.push(invItem);
-            window.sessionPersistence?.saveInventory?.(this.playerStats.inventory);
+            if (this.itemSystem && this.itemSystem.addToInventory) {
+                // Use the item system's addToInventory method
+                const itemId = item.name.toLowerCase().replace(/\s+/g, '_');
+                const success = this.itemSystem.addToInventory(itemId, 1);
+                if (success) {
+                    console.log(`🎒 Added ${item.name} to item system inventory`);
+                } else {
+                    console.warn(`🎒 Failed to add ${item.name} to item system inventory`);
+                }
+            } else {
+                // Fallback to encounter system inventory
+                const invItem = {
+                    name: item.name,
+                    emoji: item.emoji,
+                    rarity: item.rarity,
+                    color: item.color,
+                    acquiredAt: Date.now()
+                };
+                this.playerStats.inventory.push(invItem);
+                window.sessionPersistence?.saveInventory?.(this.playerStats.inventory);
+            }
             // Optional: update UI inventory panel if exists
             try { this.updateInventoryUI?.(); } catch (_) {}
         } catch (e) {
             console.warn('🎒 Failed to add item to inventory:', e);
         }
         
-        // Apply item effects
-        this.applyItemEffects(item);
+        // Apply item effects only for non-consumable items
+        // Consumable items should be used from inventory instead
+        if (item.type !== 'consumable') {
+            this.applyItemEffects(item);
+        }
         
         // Show collection feedback
         this.showNotification(`💎 Collected ${item.name}!`);
@@ -1950,15 +1965,9 @@ class EncounterSystem {
                 const newHealth = Math.min(currentHealth + 20, maxHealth);
                 this.playerStats.health = newHealth;
                 
-                // Update UI
-                if (window.app && window.app.updateMobileStats) {
-                    window.app.updateMobileStats();
-                }
-                
-                // Direct DOM update as fallback
-                const healthEl = document.getElementById('health-value');
-                if (healthEl) {
-                    healthEl.textContent = `${newHealth}/${maxHealth}`;
+                // Update health bar system
+                if (window.healthBar) {
+                    window.healthBar.setHealth(newHealth, maxHealth);
                 }
                 
                 this.showNotification(`🧪 Health restored by 20! Now ${newHealth}/${maxHealth}`);
@@ -1970,15 +1979,9 @@ class EncounterSystem {
                 const newSanity = Math.min(currentSanity + 15, maxSanity);
                 this.playerStats.sanity = newSanity;
                 
-                // Update UI
-                if (window.app && window.app.updateMobileStats) {
-                    window.app.updateMobileStats();
-                }
-                
-                // Direct DOM update as fallback
-                const sanityEl = document.getElementById('sanity-value');
-                if (sanityEl) {
-                    sanityEl.textContent = `${newSanity}/${maxSanity}`;
+                // Update health bar system
+                if (window.healthBar) {
+                    window.healthBar.setSanity(newSanity, maxSanity);
                 }
                 
                 this.showNotification(`🧠 Sanity restored by 15! Now ${newSanity}/${maxSanity}`);
