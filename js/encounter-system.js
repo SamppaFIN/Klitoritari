@@ -24,7 +24,8 @@ class EncounterSystem {
         this.globalCooldownUntil = 0; // millis timestamp; while active, no encounters
         
         // Initialize item system
-        this.itemSystem = new ItemSystem();
+        // Use the global item system instead of creating a new instance
+        this.itemSystem = null; // Will be set to window.itemSystem when available
         
         // Initialize quest system (disabled for testing)
         // this.questSystem = new QuestSystem();
@@ -146,6 +147,22 @@ class EncounterSystem {
 
     init() {
         console.log('🎭 Encounter system initialized');
+        
+        // Initialize item system reference
+        if (window.itemSystem) {
+            this.itemSystem = window.itemSystem;
+            console.log('🎭 Item system reference initialized');
+        } else {
+            console.warn('🎭 Item system not available yet, will retry later');
+            // Retry after a short delay
+            setTimeout(() => {
+                if (window.itemSystem) {
+                    this.itemSystem = window.itemSystem;
+                    console.log('🎭 Item system reference initialized (delayed)');
+                }
+            }, 1000);
+        }
+        
         this.isInitialized = true;
         this.startProximityDetection();
         this.setupUI();
