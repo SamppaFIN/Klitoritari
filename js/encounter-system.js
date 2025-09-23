@@ -2020,40 +2020,79 @@ class EncounterSystem {
     startBattle(monster) {
         console.log('🎭 Starting battle with:', monster);
         
-        const battle = document.getElementById('battle-interface');
-        const actions = document.getElementById('encounter-actions');
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
         
-        // Initialize battle state if not exists
-        if (!this.activeEncounter) {
-            this.activeEncounter = {
-                type: 'monster',
-                data: monster,
-                battleState: {
-                    monsterHealth: monster.health || 100,
-                    playerHealth: this.playerStats.health || 100,
-                    monsterAttack: monster.attack || 15,
-                    playerAttack: this.playerStats.attack || 15
-                }
-            };
-        } else if (!this.activeEncounter.battleState) {
-            this.activeEncounter.battleState = {
-                monsterHealth: monster.health || 100,
-                playerHealth: this.playerStats.health || 100,
-                monsterAttack: monster.attack || 15,
-                playerAttack: this.playerStats.attack || 15
-            };
+        // Simulate combat with dice rolls
+        const playerRoll = Math.random();
+        const monsterRoll = Math.random();
+        
+        // Calculate combat chances based on monster difficulty
+        const monsterDifficulty = monster.difficulty || 'medium';
+        let playerWinChance = 0.5; // Base 50% chance
+        
+        switch (monsterDifficulty) {
+            case 'easy':
+                playerWinChance = 0.7; // 70% chance
+                break;
+            case 'medium':
+                playerWinChance = 0.5; // 50% chance
+                break;
+            case 'hard':
+                playerWinChance = 0.3; // 30% chance
+                break;
+            case 'legendary':
+                playerWinChance = 0.2; // 20% chance
+                break;
         }
         
-        battle.classList.remove('hidden');
-        actions.classList.add('hidden');
+        // Add player stats influence
+        const playerLevel = Math.floor(this.playerStats.experience / 100) || 1;
+        const levelBonus = Math.min(playerLevel * 0.05, 0.2); // Up to 20% bonus
+        playerWinChance += levelBonus;
         
-        // Update battle UI
-        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
-        document.getElementById('monster-name').textContent = monsterName;
-        document.getElementById('monster-health').textContent = `${this.activeEncounter.battleState.monsterHealth}/100`;
-        document.getElementById('player-health').textContent = `${this.activeEncounter.battleState.playerHealth}/100`;
+        this.showDialog(`You engage in combat with the ${monsterName}!`);
         
-        console.log('🎭 Battle state initialized:', this.activeEncounter.battleState);
+        setTimeout(() => {
+            if (playerRoll < playerWinChance) {
+                // Player wins
+                this.showDialog(`You defeat the ${monsterName}! Victory is yours!`);
+                this.applyEncounterEffects({
+                    experience: monster.experience || 50,
+                    health: -(monster.attack || 10), // Take some damage
+                    skills: { combat: 2, courage: 1 }
+                });
+                this.showNotification(`🎉 ${monsterName} defeated! +${monster.experience || 50} XP, +2 Combat, +1 Courage`);
+                
+                // Remove monster from map
+                this.removeMonsterFromMap(monster);
+            } else {
+                // Monster wins
+                this.showDialog(`The ${monsterName} overwhelms you! You retreat, battered but wiser.`);
+                this.applyEncounterEffects({
+                    health: -(monster.attack || 10) * 2, // Take more damage
+                    sanity: -5, // Battle affects sanity
+                    experience: Math.floor((monster.experience || 50) * 0.3) // Some learning from defeat
+                });
+                this.showNotification(`💀 Defeated by ${monsterName}! -${(monster.attack || 10) * 2} HP, -5 Sanity, +${Math.floor((monster.experience || 50) * 0.3)} XP`);
+            }
+            
+            this.closeEncounterModal();
+        }, 1500);
+    }
+    
+    removeMonsterFromMap(monster) {
+        // Remove the monster marker from the map
+        if (window.mapEngine && window.mapEngine.monsterMarkers) {
+            const monsterName = monster.type?.name || monster.name;
+            if (monsterName && window.mapEngine.monsterMarkers.has(monsterName)) {
+                const marker = window.mapEngine.monsterMarkers.get(monsterName);
+                if (marker && marker.marker) {
+                    window.mapEngine.map.removeLayer(marker.marker);
+                    window.mapEngine.monsterMarkers.delete(monsterName);
+                    console.log('🎭 Removed monster marker:', monsterName);
+                }
+            }
+        }
     }
 
     battleAction(action) {
@@ -2207,14 +2246,25 @@ class EncounterSystem {
     }
 
     attemptFlee(monster) {
-        const success = Math.random() < 0.7; // 70% chance
+        const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
+        const success = Math.random() < 0.6; // 60% chance
         
-        if (success) {
-            this.showDialog('You successfully fled from the monster!');
-        } else {
-            this.showDialog('The monster caught you! You must fight!');
-            this.startBattle(monster);
-        }
+        this.showDialog(`You attempt to flee from the ${monsterName}...`);
+        
+        setTimeout(() => {
+            if (success) {
+                this.showDialog(`You successfully fled from the ${monsterName}! Your quick thinking saves you.`);
+                this.applyEncounterEffects({
+                    sanity: -3, // Still shaken by the encounter
+                    experience: 15, // Learning from the experience
+                    skills: { survival: 1, stealth: 1 }
+                });
+                this.showNotification(`🏃 Successfully fled from ${monsterName}! -3 Sanity, +15 XP, +1 Survival, +1 Stealth`);
+            } else {
+                this.showDialog(`The ${monsterName} blocks your escape! You must fight!`);
+                setTimeout(() => this.startBattle(monster), 1000);
+            }
+        }, 1500);
     }
 
     observeMonster(monster) {
@@ -2222,8 +2272,19 @@ class EncounterSystem {
         const monsterSpeed = monster.type?.speed || monster.speed || 0.0001;
         const monsterColor = monster.type?.color || monster.color || '#4B0082';
         
-        this.showDialog(`You observe the ${monsterName}. It seems ${monsterSpeed > 0.0001 ? 'agile' : 'slow'} and ${monsterColor === '#4B0082' ? 'mysterious' : 'powerful'}.`);
-        this.closeEncounter();
+        this.showDialog(`You carefully observe the ${monsterName}...`);
+        
+        setTimeout(() => {
+            this.showDialog(`You observe the ${monsterName}. It seems ${monsterSpeed > 0.0001 ? 'agile' : 'slow'} and ${monsterColor === '#4B0082' ? 'mysterious' : 'powerful'}. Your careful study provides valuable insights.`);
+            
+            this.applyEncounterEffects({
+                experience: 10, // Learning from observation
+                skills: { investigation: 1, survival: 1 }
+            });
+            this.showNotification(`👁️ Observed ${monsterName}! +10 XP, +1 Investigation, +1 Survival`);
+            
+            this.closeEncounterModal();
+        }, 1500);
     }
 
     samplePOI(poi) {
@@ -4140,31 +4201,99 @@ class EncounterSystem {
     
     // Eldritch Horror interactions
     fightEldritchHorror(encounter) {
-        this.showDialog(encounter.dialogue.combat);
-        // Start combat with the horror
-        this.startBattle({
-            type: encounter.name.toLowerCase().replace(' ', '_'),
-            name: encounter.name,
-            health: encounter.combat.health,
-            attack: encounter.combat.attack,
-            defense: encounter.combat.defense
-        });
+        this.showDialog("You engage in combat with the Eldritch Horror!");
+        
+        // Simulate combat with dice rolls
+        const playerRoll = Math.random();
+        const monsterRoll = Math.random();
+        
+        // Player has advantage due to cosmic knowledge
+        const playerAdvantage = 0.1;
+        const playerWinChance = 0.4 + playerAdvantage; // 50% base chance
+        
+        if (playerRoll < playerWinChance) {
+            // Player wins
+            this.showDialog("You defeat the Eldritch Horror! Its cosmic essence fades away.");
+            this.applyEncounterEffects({
+                experience: 200,
+                health: -20, // Some damage taken
+                sanity: -10, // Horror affects sanity
+                skills: { combat: 5, courage: 3 }
+            });
+            this.showNotification("🎉 Eldritch Horror defeated! +200 XP, +5 Combat, +3 Courage");
+        } else {
+            // Monster wins
+            this.showDialog("The Eldritch Horror overwhelms you with its otherworldly power!");
+            this.applyEncounterEffects({
+                health: -40, // Significant damage
+                sanity: -25, // Major sanity loss
+                experience: 50 // Some learning from defeat
+            });
+            this.showNotification("💀 Defeated by Eldritch Horror! -40 HP, -25 Sanity, +50 XP");
+        }
+        
+        // Remove the encounter from the map
+        this.removeLegendaryEncounterFromMap(encounter);
+        this.closeLegendaryModal();
     }
     
     fleeFromHorror(encounter) {
         const fleeChance = Math.random();
-        if (fleeChance < 0.3) { // 30% chance to flee
-            this.showDialog("You successfully flee from the eldritch horror!");
-            this.closeLegendaryModal();
+        if (fleeChance < 0.4) { // 40% chance to flee
+            this.showDialog("You successfully flee from the eldritch horror! Your quick thinking saves you.");
+            this.applyEncounterEffects({
+                sanity: -5, // Still shaken by the encounter
+                experience: 25, // Learning from the experience
+                skills: { survival: 2, stealth: 1 }
+            });
+            this.showNotification("🏃 Successfully fled! -5 Sanity, +25 XP, +2 Survival, +1 Stealth");
         } else {
             this.showDialog("The horror blocks your escape! You must fight!");
-            this.fightEldritchHorror(encounter);
+            setTimeout(() => this.fightEldritchHorror(encounter), 1500);
         }
     }
     
     diplomacyWithHorror(encounter) {
-        this.showDialog("You attempt to communicate with the eldritch horror, but it only responds with otherworldly screeches. It seems diplomacy is not an option.");
-        setTimeout(() => this.fightEldritchHorror(encounter), 2000);
+        this.showDialog("You attempt to communicate with the eldritch horror...");
+        
+        setTimeout(() => {
+            const diplomacyChance = Math.random();
+            if (diplomacyChance < 0.15) { // 15% chance for diplomacy to work
+                this.showDialog("Miraculously, the horror seems to understand your cosmic language! It grants you knowledge before departing.");
+                this.applyEncounterEffects({
+                    experience: 150,
+                    sanity: 10, // Gaining cosmic understanding
+                    skills: { diplomacy: 4, cosmic_lore: 3 }
+                });
+                this.showNotification("🤝 Diplomacy successful! +150 XP, +10 Sanity, +4 Diplomacy, +3 Cosmic Lore");
+            } else {
+                this.showDialog("The horror only responds with otherworldly screeches. Diplomacy fails!");
+                this.applyEncounterEffects({
+                    sanity: -15, // Failed diplomacy is mentally taxing
+                    experience: 30 // Some learning from the attempt
+                });
+                this.showNotification("💀 Diplomacy failed! -15 Sanity, +30 XP");
+                setTimeout(() => this.fightEldritchHorror(encounter), 2000);
+            }
+            
+            // Remove encounter regardless of outcome
+            this.removeLegendaryEncounterFromMap(encounter);
+            this.closeLegendaryModal();
+        }, 2000);
+    }
+    
+    removeLegendaryEncounterFromMap(encounter) {
+        // Remove the encounter marker from the map
+        if (window.mapEngine && window.mapEngine.map) {
+            // Find and remove the encounter marker
+            window.mapEngine.map.eachLayer((layer) => {
+                if (layer.options && layer.options.encounterType === 'legendary' && 
+                    layer.options.encounterName === encounter.name) {
+                    window.mapEngine.map.removeLayer(layer);
+                    console.log('🎭 Removed legendary encounter marker:', encounter.name);
+                }
+            });
+        }
     }
     
     // Wisdom Crystal interactions
