@@ -2502,6 +2502,13 @@ class EldritchSanctuaryApp {
         // Welcome screen already initialized in initWelcomeScreen()
         this.systems.welcomeScreen = this.welcomeScreen;
         
+        // Initialize tutorial encounter system
+        this.systems.tutorialEncounter = new TutorialEncounterSystem();
+        this.systems.tutorialEncounter.init();
+        
+        // Make globally available
+        window.tutorialEncounterSystem = this.systems.tutorialEncounter;
+        
         // Initialize webgl map renderer
         this.systems.webglMapRenderer = new WebGLMapRenderer();
         this.systems.webglMapRenderer.init();
@@ -2513,6 +2520,23 @@ class EldritchSanctuaryApp {
             console.warn('🌌 Failed to initialize WebGL map integration:', error);
             this.systems.webglMapIntegration = null;
         }
+
+        // Chain tutorial start after map is ready
+        try {
+            const previousOnMapReady = this.systems.mapEngine.onMapReady;
+            this.systems.mapEngine.onMapReady = () => {
+                if (typeof previousOnMapReady === 'function') {
+                    try { previousOnMapReady(); } catch (_) {}
+                }
+                try {
+                    const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
+                    if (shouldStartTutorial && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
+                        window.tutorialEncounterSystem.startTutorial();
+                        localStorage.removeItem('eldritch_start_tutorial_encounter');
+                    }
+                } catch (_) {}
+            };
+        } catch (_) {}
         
         // Initialize webgl test (if available)
         try {
