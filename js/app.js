@@ -37,9 +37,78 @@ class EldritchSanctuaryApp {
     // Initialize mobile-optimized UI
     initMobileUI() {
         console.log('📱 Initializing mobile UI...');
-        // Mobile-specific injected UI is disabled to prevent duplicate controls.
-        // Intentionally no-op to avoid creating dynamic mobile controls/header.
-        return;
+        
+        if (this.isMobile) {
+            // Show mobile footer
+            const mobileFooter = document.getElementById('mobile-footer');
+            if (mobileFooter) {
+                mobileFooter.style.display = 'block';
+                console.log('📱 Mobile footer enabled');
+            }
+            
+            // Wire mobile footer buttons
+            this.wireMobileFooterButtons();
+        }
+    }
+    
+    // Wire mobile footer button event listeners
+    wireMobileFooterButtons() {
+        console.log('📱 Wiring mobile footer buttons...');
+        
+        // Inventory button
+        const inventoryBtn = document.getElementById('mobile-inventory-btn');
+        if (inventoryBtn) {
+            inventoryBtn.addEventListener('click', () => {
+                console.log('📱 Mobile inventory button clicked');
+                if (window.UIPanels && window.UIPanels.togglePanel) {
+                    window.UIPanels.togglePanel('inventory-panel');
+                }
+            });
+        }
+        
+        // Locate button
+        const locateBtn = document.getElementById('mobile-locate-btn');
+        if (locateBtn) {
+            locateBtn.addEventListener('click', () => {
+                console.log('📱 Mobile locate button clicked');
+                this.locateMe();
+            });
+        }
+        
+        // Quest button
+        const questBtn = document.getElementById('mobile-quest-btn');
+        if (questBtn) {
+            questBtn.addEventListener('click', () => {
+                console.log('📱 Mobile quest button clicked');
+                if (window.UIPanels && window.UIPanels.togglePanel) {
+                    window.UIPanels.togglePanel('quest-log-panel');
+                }
+            });
+        }
+        
+        // Base button
+        const baseBtn = document.getElementById('mobile-base-btn');
+        if (baseBtn) {
+            baseBtn.addEventListener('click', () => {
+                console.log('📱 Mobile base button clicked');
+                if (window.UIPanels && window.UIPanels.togglePanel) {
+                    window.UIPanels.togglePanel('base-management-panel');
+                }
+            });
+        }
+        
+        // Settings button
+        const settingsBtn = document.getElementById('mobile-settings-btn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                console.log('📱 Mobile settings button clicked');
+                if (window.UIPanels && window.UIPanels.togglePanel) {
+                    window.UIPanels.togglePanel('user-settings-panel');
+                }
+            });
+        }
+        
+        console.log('📱 Mobile footer buttons wired');
     }
     
     // Hide all debug elements for mobile

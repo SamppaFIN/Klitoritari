@@ -8902,6 +8902,81 @@ input[type="range"]::-moz-range-thumb {
     display: none !important;
 }
 
+/* Mobile Footer */
+.mobile-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1500;
+    background: linear-gradient(135deg, rgba(15, 15, 35, 0.95), rgba(25, 25, 55, 0.95));
+    backdrop-filter: blur(10px);
+    border-top: 2px solid rgba(0, 255, 255, 0.3);
+    padding: 15px 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-footer .footer-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.mobile-footer .footer-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    text-align: center;
+    min-width: 80px;
+    max-width: 120px;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-footer .footer-btn:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+}
+
+.mobile-footer .btn-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.mobile-footer .btn-text {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Hide desktop floating panels on mobile */
+@media (max-width: 768px) {
+    #inventory-panel,
+    #quest-log-panel,
+    #base-management-panel,
+    #user-settings-panel,
+    #debug-footer-panel {
+        display: none !important;
+    }
+}
+
 /* Apply mobile button styling to footer locate button */
 .footer-btn.locate-me-btn {
     background: linear-gradient(135deg, #667eea, #764ba2);
