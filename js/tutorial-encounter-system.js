@@ -309,6 +309,13 @@ class TutorialEncounterSystem {
             if (window.app && window.app.updateMobileStats) {
                 window.app.updateMobileStats();
             }
+            
+            // Direct DOM update as fallback
+            const healthEl = document.getElementById('health-value');
+            if (healthEl) {
+                healthEl.textContent = health;
+                console.log(`🎓 Direct DOM update: health-value set to ${health}`);
+            }
         }
         
         // Set health in tutorial flags
@@ -431,15 +438,12 @@ class TutorialEncounterSystem {
         }
         
         // Add to inventory (if inventory system exists)
-        if (window.itemSystem && window.itemSystem.addItem) {
-            window.itemSystem.addItem({
-                name: potionDef.name,
-                emoji: potionDef.emoji,
-                description: potionDef.description,
-                type: 'consumable',
-                effect: 'heal',
-                value: potionDef.interaction.value
-            });
+        if (window.encounterSystem && window.encounterSystem.itemSystem && window.encounterSystem.itemSystem.addToInventory) {
+            const itemId = 'health_potion';
+            window.encounterSystem.itemSystem.addToInventory(itemId, 1);
+            console.log('🧪 Added health potion to encounter system inventory');
+        } else {
+            console.warn('🧪 Encounter system or item system not available for inventory');
         }
         
         // Set tutorial flag
@@ -461,36 +465,54 @@ class TutorialEncounterSystem {
     useHealthPotion() {
         console.log('🧪 Using health potion from inventory');
         
-        // Check if player has potion in inventory
-        if (!this.tutorialFlags.get('potion_in_inventory')) {
-            this.showTutorialMessage('You don\'t have a health potion in your inventory!');
-            return false;
-        }
-        
-        // Restore health
-        const currentHealth = this.tutorialFlags.get('player_health') || 50;
-        const maxHealth = this.tutorialFlags.get('max_health') || 100;
-        const newHealth = Math.min(currentHealth + 50, maxHealth);
-        
-        this.setPlayerHealth(newHealth);
-        
-        // Remove potion from inventory
-        this.tutorialFlags.set('potion_in_inventory', false);
-        this.tutorialFlags.set('potion_used', true);
-        this.saveTutorialState();
-        
-        // Show healing message
-        this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${newHealth}/100. You feel much better!`);
-        
-        // Update encounter system health
-        if (window.encounterSystem) {
-            window.encounterSystem.playerHealth = newHealth;
-            if (window.encounterSystem.updateHealthDisplay) {
-                window.encounterSystem.updateHealthDisplay();
+        // Check if player has potion in encounter system inventory
+        if (window.encounterSystem && window.encounterSystem.itemSystem) {
+            const hasPotion = window.encounterSystem.itemSystem.playerInventory.some(item => item.id === 'health_potion');
+            if (!hasPotion) {
+                this.showTutorialMessage('You don\'t have a health potion in your inventory!');
+                return false;
             }
+            
+            // Use the potion through the encounter system
+            const success = window.encounterSystem.itemSystem.useConsumable('health_potion');
+            if (success) {
+                // Update tutorial flags
+                this.tutorialFlags.set('potion_used', true);
+                this.saveTutorialState();
+                
+                // Show healing message
+                const currentHealth = window.encounterSystem.playerStats.health;
+                this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${currentHealth}/100. You feel much better!`);
+                
+                return true;
+            } else {
+                this.showTutorialMessage('Failed to use the health potion!');
+                return false;
+            }
+        } else {
+            // Fallback to tutorial flags if encounter system not available
+            if (!this.tutorialFlags.get('potion_in_inventory')) {
+                this.showTutorialMessage('You don\'t have a health potion in your inventory!');
+                return false;
+            }
+            
+            // Restore health
+            const currentHealth = this.tutorialFlags.get('player_health') || 50;
+            const maxHealth = this.tutorialFlags.get('max_health') || 100;
+            const newHealth = Math.min(currentHealth + 50, maxHealth);
+            
+            this.setPlayerHealth(newHealth);
+            
+            // Remove potion from inventory
+            this.tutorialFlags.set('potion_in_inventory', false);
+            this.tutorialFlags.set('potion_used', true);
+            this.saveTutorialState();
+            
+            // Show healing message
+            this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${newHealth}/100. You feel much better!`);
+            
+            return true;
         }
-        
-        return true;
     }
 
     spawnShrines() {
