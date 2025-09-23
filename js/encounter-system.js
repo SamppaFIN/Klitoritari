@@ -8,6 +8,9 @@ class EncounterSystem {
         this.isInitialized = false;
         this.isDialogOpen = false; // Prevent duplicate dialogs
         this.playerSteps = 0;
+        
+        // Set up global event delegation for encounter buttons
+        this.setupGlobalEventDelegation();
         this.encounters = new Map();
         this.activeEncounter = null;
         this.proximityCheckInterval = null;
@@ -80,6 +83,51 @@ class EncounterSystem {
         
         // Create debug panel for testing
         this.createDebugPanel();
+    }
+    
+    setupGlobalEventDelegation() {
+        // Use event delegation to handle all encounter button clicks
+        document.addEventListener('click', (e) => {
+            // Handle legendary action buttons
+            if (e.target.id === 'legendary-action-1' || e.target.id === 'legendary-action-2' || e.target.id === 'legendary-action-3') {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const actionNumber = parseInt(e.target.id.split('-')[2]);
+                const encounter = this.currentLegendaryEncounter;
+                
+                if (encounter) {
+                    console.log('🎭 Global delegation: Legendary action', actionNumber, 'clicked for', encounter.name);
+                    this.handleLegendaryAction(encounter, actionNumber);
+                }
+            }
+            
+            // Handle regular action buttons
+            if (e.target.id === 'action-1' || e.target.id === 'action-2' || e.target.id === 'action-3') {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const actionNumber = parseInt(e.target.id.split('-')[1]);
+                console.log('🎭 Global delegation: Action', actionNumber, 'clicked');
+                
+                // Handle based on current encounter type
+                if (this.activeEncounter) {
+                    if (this.activeEncounter.type === 'monster') {
+                        const monster = this.activeEncounter.data;
+                        if (actionNumber === 1) this.startBattle(monster);
+                        else if (actionNumber === 2) this.attemptFlee(monster);
+                        else if (actionNumber === 3) this.observeMonster(monster);
+                    } else if (this.activeEncounter.type === 'item') {
+                        const item = this.activeEncounter.data;
+                        if (actionNumber === 1) this.collectItem(item);
+                        else if (actionNumber === 2) this.examineItem(item);
+                        else if (actionNumber === 3) this.leaveItem(item);
+                    }
+                }
+            }
+        });
+        
+        console.log('🎭 Global event delegation set up for encounter buttons');
     }
 
     setupUI() {
@@ -872,20 +920,45 @@ class EncounterSystem {
     }
 
     addLegendaryActionListeners(encounter) {
-        // Add event listeners for action buttons
-        const action1 = document.getElementById('legendary-action-1');
-        const action2 = document.getElementById('legendary-action-2');
-        const action3 = document.getElementById('legendary-action-3');
-        
-        if (action1) {
-            action1.addEventListener('click', () => this.handleLegendaryAction(encounter, 1));
-        }
-        if (action2) {
-            action2.addEventListener('click', () => this.handleLegendaryAction(encounter, 2));
-        }
-        if (action3) {
-            action3.addEventListener('click', () => this.handleLegendaryAction(encounter, 3));
-        }
+        // Use setTimeout to ensure DOM is fully rendered
+        setTimeout(() => {
+            // Add event listeners for action buttons
+            const action1 = document.getElementById('legendary-action-1');
+            const action2 = document.getElementById('legendary-action-2');
+            const action3 = document.getElementById('legendary-action-3');
+            
+            console.log('🎭 Adding legendary action listeners:', {
+                action1: !!action1,
+                action2: !!action2,
+                action3: !!action3,
+                encounter: encounter.name
+            });
+            
+            if (action1) {
+                action1.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Legendary action 1 clicked');
+                    this.handleLegendaryAction(encounter, 1);
+                });
+            }
+            if (action2) {
+                action2.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Legendary action 2 clicked');
+                    this.handleLegendaryAction(encounter, 2);
+                });
+            }
+            if (action3) {
+                action3.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Legendary action 3 clicked');
+                    this.handleLegendaryAction(encounter, 3);
+                });
+            }
+        }, 100);
     }
 
     handleLegendaryAction(encounter, actionNumber) {
@@ -1339,10 +1412,45 @@ class EncounterSystem {
         
         battle.classList.add('hidden');
         
-        // Add event listeners
-        document.getElementById('action-1').addEventListener('click', () => this.collectItem(item));
-        document.getElementById('action-2').addEventListener('click', () => this.examineItem(item));
-        document.getElementById('action-3').addEventListener('click', () => this.leaveItem(item));
+        // Use setTimeout to ensure DOM is fully rendered
+        setTimeout(() => {
+            // Add event listeners
+            const action1 = document.getElementById('action-1');
+            const action2 = document.getElementById('action-2');
+            const action3 = document.getElementById('action-3');
+            
+            console.log('🎭 Adding item action listeners:', {
+                action1: !!action1,
+                action2: !!action2,
+                action3: !!action3,
+                item: item.name
+            });
+            
+            if (action1) {
+                action1.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Item action 1 (Collect) clicked');
+                    this.collectItem(item);
+                });
+            }
+            if (action2) {
+                action2.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Item action 2 (Examine) clicked');
+                    this.examineItem(item);
+                });
+            }
+            if (action3) {
+                action3.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Item action 3 (Leave) clicked');
+                    this.leaveItem(item);
+                });
+            }
+        }, 100);
         
         this.showEncounterModal();
     }
@@ -1513,10 +1621,45 @@ class EncounterSystem {
             actionsElement: actions
         });
         
-        // Re-add event listeners
-        document.getElementById('action-1').addEventListener('click', () => this.startBattle(monster));
-        document.getElementById('action-2').addEventListener('click', () => this.attemptFlee(monster));
-        document.getElementById('action-3').addEventListener('click', () => this.observeMonster(monster));
+        // Use setTimeout to ensure DOM is fully rendered
+        setTimeout(() => {
+            // Re-add event listeners
+            const action1 = document.getElementById('action-1');
+            const action2 = document.getElementById('action-2');
+            const action3 = document.getElementById('action-3');
+            
+            console.log('🎭 Adding monster action listeners:', {
+                action1: !!action1,
+                action2: !!action2,
+                action3: !!action3,
+                monster: monsterName
+            });
+            
+            if (action1) {
+                action1.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Monster action 1 (Fight) clicked');
+                    this.startBattle(monster);
+                });
+            }
+            if (action2) {
+                action2.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Monster action 2 (Flee) clicked');
+                    this.attemptFlee(monster);
+                });
+            }
+            if (action3) {
+                action3.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('🎭 Monster action 3 (Observe) clicked');
+                    this.observeMonster(monster);
+                });
+            }
+        }, 100);
     }
 
     showPOICutscene(poi) {
