@@ -555,26 +555,42 @@
         let touchStartPos = { x: 0, y: 0 };
         let touchStartDistance = 0;
         let isDragging = false;
-        let dragThreshold = 50;
+        let dragThreshold = 40; // Reduced for better Samsung U23 sensitivity
+        let isLongPress = false;
+        let longPressTimer = null;
         
-        // Touch start
+        // Touch start - Enhanced Samsung U23 handling
         card.addEventListener('touchstart', (e) => {
             touchStartTime = Date.now();
             touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
             touchStartDistance = 0;
             isDragging = false;
+            isLongPress = false;
             
             // Visual feedback
-            card.style.transform = 'scale(0.98)';
-            card.style.transition = 'transform 0.1s ease';
+            card.style.transform = 'scale(0.96)';
+            card.style.transition = 'transform 0.15s cubic-bezier(0.4, 0, 0.2, 1)';
             
-            // Haptic feedback
+            // Long press detection for info
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                console.log(`📱 Long press detected on ${itemId}`);
+                // Enhanced haptic feedback for long press
+                if (navigator.vibrate) {
+                    navigator.vibrate([10, 20, 10]);
+                }
+                // Visual feedback for long press
+                card.style.transform = 'scale(1.02)';
+                card.style.boxShadow = '0 8px 32px rgba(74, 158, 255, 0.4)';
+            }, 400); // Reduced from 500ms for better UX
+            
+            // Initial haptic feedback
             if (navigator.vibrate) {
-                navigator.vibrate(5);
+                navigator.vibrate(8);
             }
         }, { passive: false });
         
-        // Touch move - handle swiping
+        // Touch move - Enhanced swipe handling for Samsung U23
         card.addEventListener('touchmove', (e) => {
             if (!touchStartPos) return;
             
@@ -585,33 +601,47 @@
             
             touchStartDistance = distance;
             
-            // Check if this is a horizontal swipe
-            if (Math.abs(deltaX) > Math.abs(deltaY) && distance > 20) {
+            // Clear long press timer if moving
+            if (distance > 10 && longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+                isLongPress = false;
+            }
+            
+            // Check if this is a horizontal swipe (more sensitive for Samsung U23)
+            if (Math.abs(deltaX) > Math.abs(deltaY) && distance > 15) {
                 isDragging = true;
                 e.preventDefault();
                 
-                // Visual feedback for swiping
-                const swipeProgress = Math.min(Math.abs(deltaX) / 100, 1);
+                // Enhanced visual feedback for swiping
+                const swipeProgress = Math.min(Math.abs(deltaX) / 80, 1); // Reduced threshold
                 const direction = deltaX > 0 ? 1 : -1;
                 
-                card.style.transform = `translateX(${deltaX * 0.3}px) scale(${1 - swipeProgress * 0.05})`;
-                card.style.opacity = 1 - swipeProgress * 0.3;
+                card.style.transform = `translateX(${deltaX * 0.4}px) scale(${1 - swipeProgress * 0.03})`;
+                card.style.opacity = 1 - swipeProgress * 0.2;
                 
-                // Show swipe indicators
+                // Show swipe indicators with better visibility
                 const swipeLeft = card.querySelector('.swipe-left');
                 const swipeRight = card.querySelector('.swipe-right');
                 
                 if (direction > 0 && swipeRight) {
-                    swipeRight.style.opacity = swipeProgress;
-                    swipeRight.style.transform = `scale(${swipeProgress})`;
+                    swipeRight.style.opacity = Math.min(swipeProgress * 1.5, 1);
+                    swipeRight.style.transform = `scale(${Math.min(swipeProgress * 1.2, 1)})`;
+                    swipeRight.style.background = 'rgba(0, 255, 136, 0.8)';
                 } else if (direction < 0 && swipeLeft) {
-                    swipeLeft.style.opacity = swipeProgress;
-                    swipeLeft.style.transform = `scale(${swipeProgress})`;
+                    swipeLeft.style.opacity = Math.min(swipeProgress * 1.5, 1);
+                    swipeLeft.style.transform = `scale(${Math.min(swipeProgress * 1.2, 1)})`;
+                    swipeLeft.style.background = 'rgba(255, 100, 100, 0.8)';
+                }
+                
+                // Haptic feedback during swipe
+                if (swipeProgress > 0.7 && navigator.vibrate) {
+                    navigator.vibrate(3);
                 }
             }
         }, { passive: false });
         
-        // Touch end - handle gestures
+        // Touch end - Enhanced gesture handling for Samsung U23
         card.addEventListener('touchend', (e) => {
             const touchDuration = Date.now() - touchStartTime;
             const currentPos = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
@@ -619,49 +649,83 @@
             const deltaY = currentPos.y - touchStartPos.y;
             const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
             
-            // Reset visual state
+            // Clear long press timer
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            
+            // Reset visual state with smooth animation
             card.style.transform = 'scale(1)';
             card.style.opacity = '1';
-            card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            card.style.boxShadow = '';
+            card.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
             
-            // Hide swipe indicators
+            // Hide swipe indicators with animation
             card.querySelectorAll('.swipe-indicators > div').forEach(indicator => {
                 indicator.style.opacity = '0';
-                indicator.style.transform = 'scale(0.5)';
+                indicator.style.transform = 'scale(0.3)';
+                indicator.style.background = '';
             });
             
-            // Handle different gestures
+            // Enhanced gesture recognition for Samsung U23
             if (isDragging && Math.abs(deltaX) > dragThreshold) {
-                // Swipe gesture
+                // Swipe gesture - enhanced feedback
                 if (deltaX > 0) {
                     // Swipe right - use item
                     console.log(`📱 Swipe right on ${itemId} - using item`);
                     handleItemAction(itemId, 'use');
+                    // Success haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([10, 5, 10]);
+                    }
                 } else {
                     // Swipe left - delete item
                     console.log(`📱 Swipe left on ${itemId} - deleting item`);
                     handleItemAction(itemId, 'delete');
+                    // Warning haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([15, 10, 15]);
+                    }
                 }
-            } else if (touchDuration < 200 && distance < 20) {
-                // Quick tap - use/equip item
-                console.log(`📱 Tap on ${itemId} - using item`);
-                handleItemAction(itemId, 'use');
-            } else if (touchDuration > 500) {
+            } else if (isLongPress) {
                 // Long press - show item info
                 console.log(`📱 Long press on ${itemId} - showing info`);
                 handleItemAction(itemId, 'info');
+            } else if (touchDuration < 300 && distance < 25) {
+                // Quick tap - use/equip item (increased tolerance for Samsung U23)
+                console.log(`📱 Tap on ${itemId} - using item`);
+                handleItemAction(itemId, 'use');
+                // Light haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate(5);
+                }
             }
             
             // Reset state
             isDragging = false;
+            isLongPress = false;
             touchStartPos = { x: 0, y: 0 };
         }, { passive: false });
         
-        // Touch cancel
+        // Touch cancel - Enhanced cleanup
         card.addEventListener('touchcancel', (e) => {
+            // Clear timers
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            
+            // Reset visual state
             card.style.transform = 'scale(1)';
             card.style.opacity = '1';
+            card.style.boxShadow = '';
+            card.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            // Reset state
             isDragging = false;
+            isLongPress = false;
+            touchStartPos = { x: 0, y: 0 };
         });
         
         // Click fallback for desktop

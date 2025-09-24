@@ -27,9 +27,10 @@ class Tablist {
     }
     
     setupEventListeners() {
-        // Click events
+        // Enhanced touch/click events for mobile
         this.tabs.forEach((tab, index) => {
-            tab.addEventListener('click', () => this.activateTab(index));
+            // Enhanced mobile touch handling
+            this.setupEnhancedMobileButton(tab, index);
         });
         
         // Keyboard events
@@ -43,6 +44,88 @@ class Tablist {
                 this.refreshInventory();
             });
         }
+    }
+    
+    setupEnhancedMobileButton(button, index) {
+        let touchStartTime = 0;
+        let touchStartPos = { x: 0, y: 0 };
+        let isLongPress = false;
+        let longPressTimer = null;
+        
+        // Enhanced Samsung U23 compatibility
+        const eventTypes = ['click', 'touchend'];
+        
+        eventTypes.forEach(eventType => {
+            button.addEventListener(eventType, (e) => {
+                if (eventType === 'click' && e.isTrusted === false) return; // Prevent synthetic clicks
+                if (eventType === 'touchend' && isLongPress) return; // Don't trigger on long press
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                console.log(`📱 Tab ${index} ${eventType} detected`);
+                this.activateTab(index);
+                
+                // Haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate(10);
+                }
+            }, { passive: false });
+        });
+        
+        // Enhanced touch feedback for Samsung devices
+        button.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            isLongPress = false;
+            
+            // Visual feedback
+            button.style.transform = 'translateY(0) scale(0.95)';
+            button.style.transition = 'transform 0.1s ease';
+            
+            // Long press detection
+            longPressTimer = setTimeout(() => {
+                isLongPress = true;
+                console.log(`📱 Tab ${index} long press detected`);
+                // Haptic feedback for long press
+                if (navigator.vibrate) {
+                    navigator.vibrate([5, 10, 5]);
+                }
+            }, 500);
+            
+        }, { passive: false });
+        
+        button.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            const touchEndPos = { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+            const touchDistance = Math.sqrt(
+                Math.pow(touchEndPos.x - touchStartPos.x, 2) + 
+                Math.pow(touchEndPos.y - touchStartPos.y, 2)
+            );
+            
+            // Clear long press timer
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            
+            // Reset visual feedback
+            setTimeout(() => {
+                button.style.transform = '';
+                button.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            }, 100);
+            
+        }, { passive: false });
+        
+        // Handle touch cancel
+        button.addEventListener('touchcancel', (e) => {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+            isLongPress = false;
+            button.style.transform = '';
+        });
     }
     
     setInitialState() {

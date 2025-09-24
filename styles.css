@@ -8904,7 +8904,7 @@ input[type="range"]::-moz-range-thumb {
 
 /* Mobile Footer - REMOVED (replaced by tablist) */
 
-/* Footer Tablist - Clean Implementation */
+/* Footer Tablist - Enhanced Mobile Implementation */
 .footer-tablist {
     position: fixed;
     bottom: 20px;
@@ -8912,13 +8912,18 @@ input[type="range"]::-moz-range-thumb {
     transform: translateX(-50%);
     z-index: 10000;
     display: flex;
-    gap: 8px;
-    background: rgba(10, 10, 26, 0.95);
-    border: 2px solid rgba(74, 158, 255, 0.4);
-    border-radius: 16px;
-    padding: 8px;
-    backdrop-filter: blur(15px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    gap: 6px;
+    background: rgba(10, 10, 26, 0.98);
+    border: 2px solid rgba(74, 158, 255, 0.5);
+    border-radius: 20px;
+    padding: 10px 12px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(74, 158, 255, 0.2);
+    /* Enhanced touch handling */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .tab-button {
@@ -8926,34 +8931,62 @@ input[type="range"]::-moz-range-thumb {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding: 12px 16px;
+    padding: 14px 18px;
     background: transparent;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     color: rgba(184, 212, 240, 0.7);
     cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 80px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 85px;
     font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
+    /* Enhanced Samsung U23 touch handling */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    /* Larger touch target for better mobile UX */
+    min-height: 64px;
+    position: relative;
 }
 
 .tab-button:hover {
-    background: rgba(74, 158, 255, 0.1);
-    color: rgba(184, 212, 240, 0.9);
-    transform: translateY(-1px);
+    background: rgba(74, 158, 255, 0.15);
+    color: rgba(184, 212, 240, 0.95);
+    transform: translateY(-2px) scale(1.02);
 }
 
 .tab-button:focus {
-    outline: 2px solid rgba(74, 158, 255, 0.6);
+    outline: 2px solid rgba(74, 158, 255, 0.8);
     outline-offset: 2px;
 }
 
+.tab-button:active {
+    transform: translateY(0) scale(0.98);
+    background: rgba(74, 158, 255, 0.25);
+}
+
 .tab-button.active {
-    background: rgba(74, 158, 255, 0.2);
+    background: rgba(74, 158, 255, 0.25);
     color: #4a9eff;
-    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3);
+    box-shadow: 0 6px 20px rgba(74, 158, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+.tab-button.active::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, rgba(74, 158, 255, 0.3), rgba(0, 255, 136, 0.2));
+    border-radius: 18px;
+    z-index: -1;
+    opacity: 0.6;
 }
 
 .tab-icon {
@@ -8968,39 +9001,44 @@ input[type="range"]::-moz-range-thumb {
     letter-spacing: 0.5px;
 }
 
-/* Tab Panels */
+/* Tab Panels - Enhanced Mobile */
 .tab-panels {
     position: fixed;
-    bottom: 100px;
+    bottom: 110px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
-    width: 90%;
-    max-width: 500px;
-    max-height: 70vh;
+    width: 95%;
+    max-width: 520px;
+    max-height: 75vh;
+    /* Enhanced touch handling */
+    touch-action: pan-y;
 }
 
 .tab-panel {
-    background: rgba(10, 10, 26, 0.95);
-    border: 2px solid rgba(74, 158, 255, 0.4);
-    border-radius: 16px;
+    background: rgba(10, 10, 26, 0.98);
+    border: 2px solid rgba(74, 158, 255, 0.5);
+    border-radius: 20px;
     color: rgb(184, 212, 240);
-    backdrop-filter: blur(15px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(74, 158, 255, 0.2);
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     /* Hidden by default */
     display: none;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px) scale(0.95);
+    /* Enhanced mobile optimization */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .tab-panel.active {
     display: block;
     opacity: 1;
-    transform: translateY(0);
-    border-color: rgba(74, 158, 255, 0.6);
-    box-shadow: 0 16px 50px rgba(74, 158, 255, 0.2);
+    transform: translateY(0) scale(1);
+    border-color: rgba(74, 158, 255, 0.7);
+    box-shadow: 0 20px 60px rgba(74, 158, 255, 0.3), 0 0 40px rgba(74, 158, 255, 0.15);
 }
 
 /* Tab button states when no panel is active */
@@ -9062,9 +9100,13 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .panel-content {
-    padding: 20px;
-    max-height: 50vh;
+    padding: 24px;
+    max-height: 55vh;
     overflow-y: auto;
+    /* Enhanced mobile scrolling */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scroll-behavior: smooth;
 }
 
 /* Quest Info Modal */
@@ -10297,9 +10339,223 @@ input[type="range"]::-moz-range-thumb {
     }
 }
 
+/* Enhanced Mobile Panel Optimizations */
+@media (max-width: 768px) {
+    .footer-tablist {
+        bottom: 15px;
+        width: 95%;
+        max-width: 450px;
+        gap: 4px;
+        padding: 8px 10px;
+    }
+    
+    .tab-button {
+        min-width: 70px;
+        padding: 12px 14px;
+        min-height: 60px;
+    }
+    
+    .tab-icon {
+        font-size: 1.3rem;
+    }
+    
+    .tab-label {
+        font-size: 0.65rem;
+    }
+    
+    .tab-panels {
+        bottom: 95px;
+        width: 98%;
+        max-height: 70vh;
+    }
+    
+    .panel-content {
+        padding: 20px;
+        max-height: 50vh;
+    }
+}
+
+/* Enhanced Inventory Card Styles for Mobile */
+.inventory-item-card {
+    background: rgba(15, 15, 35, 0.95);
+    border: 2px solid rgba(74, 158, 255, 0.3);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 12px 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+    /* Enhanced touch handling */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.inventory-item-card:hover {
+    border-color: rgba(74, 158, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(74, 158, 255, 0.2);
+}
+
+.inventory-item-card.consumable {
+    border-color: rgba(0, 255, 136, 0.4);
+}
+
+.inventory-item-card.consumable:hover {
+    border-color: rgba(0, 255, 136, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 255, 136, 0.2);
+}
+
+.inventory-item-card .item-media {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.inventory-item-card .item-emoji {
+    font-size: 3rem;
+    filter: drop-shadow(0 0 10px currentColor);
+}
+
+.inventory-item-card .quantity-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(74, 158, 255, 0.9);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.inventory-item-card .item-info {
+    text-align: center;
+}
+
+.inventory-item-card .item-name {
+    color: #4a9eff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-shadow: 0 0 8px #4a9eff;
+}
+
+.inventory-item-card .item-description {
+    color: rgba(184, 212, 240, 0.8);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.inventory-item-card .item-type-badge {
+    background: rgba(74, 158, 255, 0.2);
+    color: #4a9eff;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.inventory-item-card .item-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.inventory-item-card .action-btn {
+    background: rgba(74, 158, 255, 0.1);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+    color: #4a9eff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    /* Enhanced touch targets */
+    min-height: 44px;
+    min-width: 80px;
+    touch-action: manipulation;
+}
+
+.inventory-item-card .action-btn:hover {
+    background: rgba(74, 158, 255, 0.2);
+    border-color: rgba(74, 158, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.inventory-item-card .action-btn.primary {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: rgba(0, 255, 136, 0.3);
+    color: #00ff88;
+}
+
+.inventory-item-card .action-btn.primary:hover {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: rgba(0, 255, 136, 0.5);
+}
+
+.inventory-item-card .swipe-indicators {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.inventory-item-card .swipe-left,
+.inventory-item-card .swipe-right {
+    font-size: 2rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
 /* Samsung Ultra 23 specific optimizations */
 @media (min-width: 1025px) and (max-width: 1440px) {
-    /* Mobile footer removed - using tablist instead */
+    .footer-tablist {
+        bottom: 25px;
+        gap: 8px;
+        padding: 12px 16px;
+    }
+    
+    .tab-button {
+        min-width: 90px;
+        padding: 16px 20px;
+        min-height: 68px;
+    }
     
     /* Samsung Ultra 23 inventory optimizations */
     .inventory-items {
@@ -10309,29 +10565,36 @@ input[type="range"]::-moz-range-thumb {
     
     .inventory-item-card {
         border-radius: 24px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        padding: 24px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
     }
     
-    .item-media {
+    .tab-panels {
+        bottom: 120px;
+        max-width: 550px;
+        max-height: 80vh;
+    }
+    
+    .inventory-item-card .item-media {
         height: 280px;
         border-radius: 20px 20px 0 0;
     }
     
-    .item-emoji {
+    .inventory-item-card .item-emoji {
         font-size: 6rem;
     }
     
-    .action-btn {
+    .inventory-item-card .action-btn {
         min-height: 52px;
         padding: 14px 24px;
         font-size: 0.95rem;
     }
     
-    .item-name {
+    .inventory-item-card .item-name {
         font-size: 1.4rem;
     }
     
-    .item-description {
+    .inventory-item-card .item-description {
         font-size: 1rem;
     }
 }
