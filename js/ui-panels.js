@@ -432,9 +432,11 @@
         const isConsumable = item.type === 'consumable';
         const quantityText = item.quantity > 1 ? ` x${item.quantity}` : '';
         const rarityClass = item.rarity ? `rarity-${item.rarity}` : 'rarity-common';
+        // Use compact layout for better space usage
+        const compactClass = 'compact';
         
         return `
-            <div class="inventory-item-card ${isConsumable ? 'consumable' : ''} ${rarityClass}" 
+            <div class="inventory-item-card ${isConsumable ? 'consumable' : ''} ${rarityClass} ${compactClass}" 
                  data-item-id="${item.id}" 
                  data-item-type="${item.type}">
                 

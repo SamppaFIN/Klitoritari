@@ -44,6 +44,15 @@ class Tablist {
                 this.refreshInventory();
             });
         }
+        
+        // Inventory layout toggle button
+        const layoutToggleBtn = document.getElementById('inventory-layout-toggle');
+        if (layoutToggleBtn) {
+            layoutToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleInventoryLayout();
+            });
+        }
     }
     
     setupEnhancedMobileButton(button, index) {
@@ -1081,6 +1090,35 @@ Location: ${stats.location}`);
     refreshInventory() {
         console.log('🔄 Refreshing inventory');
         this.populateInventoryPanel();
+    }
+    
+    toggleInventoryLayout() {
+        console.log('📋 Toggling inventory layout...');
+        const inventoryItems = document.querySelector('.inventory-items');
+        const layoutBtn = document.getElementById('inventory-layout-toggle');
+        
+        if (inventoryItems) {
+            inventoryItems.classList.toggle('compact-layout');
+            const isCompact = inventoryItems.classList.contains('compact-layout');
+            
+            // Update button icon
+            if (layoutBtn) {
+                layoutBtn.textContent = isCompact ? '📋' : '📄';
+                layoutBtn.title = isCompact ? 'Switch to Grid Layout' : 'Switch to Compact Layout';
+            }
+            
+            // Update all inventory cards
+            const cards = inventoryItems.querySelectorAll('.inventory-item-card');
+            cards.forEach(card => {
+                if (isCompact) {
+                    card.classList.add('compact');
+                } else {
+                    card.classList.remove('compact');
+                }
+            });
+            
+            console.log(`📋 Inventory layout switched to ${isCompact ? 'compact' : 'grid'} mode`);
+        }
     }
     
     spawnTestItem() {
