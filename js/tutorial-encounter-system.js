@@ -1009,8 +1009,8 @@ class TutorialEncounterSystem {
         const position = this.getPlayerPosition();
         if (!position) return;
 
-        // Calculate spawn position 30m from player
-        const spawnPos = this.calculateSpawnPosition(position, 30);
+        // Calculate spawn position 50m from player (further away for dramatic effect)
+        const spawnPos = this.calculateSpawnPosition(position, 50);
         
         if (!window.mapEngine || !window.mapEngine.map) {
             console.log('👑 Map not ready, waiting...');
@@ -1039,21 +1039,19 @@ class TutorialEncounterSystem {
                 <h3 style="color: #ffd700; margin: 0 0 10px 0;">👑 Aurora - The Cosmic Navigator</h3>
                 <p style="margin: 0 0 10px 0; color: #4ecdc4;">Lost star pilot with stellar wisdom</p>
                 <p style="margin: 0; font-size: 12px; color: #888;">
-                    Click to talk (within 20m)<br>
+                    Walking towards you...<br>
                     Main quest giver
                 </p>
             </div>
         `);
         
-        // Add click handler for Aurora interaction
-        marker.on('click', () => {
-            this.handleAuroraClick(marker);
-        });
-        
         // Store marker reference
         this.spawnedObjects.set('aurora', marker);
         
         console.log('👑 Aurora marker spawned at:', spawnPos);
+        
+        // Start Aurora walking animation towards player
+        this.startAuroraWalkingAnimation(marker, spawnPos, position);
         
         // Add CSS animation for Aurora marker
         const style = document.createElement('style');
@@ -1068,8 +1066,91 @@ class TutorialEncounterSystem {
                     transform: scale(1.1);
                 }
             }
+            @keyframes auroraWalking {
+                0%, 100% { 
+                    transform: translateY(0px);
+                }
+                50% { 
+                    transform: translateY(-3px);
+                }
+            }
         `;
         document.head.appendChild(style);
+    }
+    
+    startAuroraWalkingAnimation(marker, startPos, targetPos) {
+        console.log('👑 Starting Aurora walking animation...');
+        
+        // Show tutorial message about Aurora approaching
+        this.showTutorialMessage(`
+            👑 <strong>Aurora Approaches!</strong><br><br>
+            You see a golden figure walking towards you from the distance. 
+            The cosmic navigator Aurora has detected your presence and is coming to meet you!<br><br>
+            <em>She moves with purpose, her golden aura glowing brighter as she approaches...</em>
+        `);
+        
+        // Calculate walking path (straight line from start to target)
+        const steps = 20; // Number of animation steps
+        const latStep = (targetPos.lat - startPos.lat) / steps;
+        const lngStep = (targetPos.lng - startPos.lng) / steps;
+        
+        let currentStep = 0;
+        const walkInterval = setInterval(() => {
+            currentStep++;
+            
+            // Calculate new position
+            const newLat = startPos.lat + (latStep * currentStep);
+            const newLng = startPos.lng + (lngStep * currentStep);
+            
+            // Update marker position
+            marker.setLatLng([newLat, newLng]);
+            
+            // Add walking animation to the marker
+            const markerElement = marker.getElement();
+            if (markerElement) {
+                markerElement.style.animation = 'auroraWalking 0.6s infinite';
+            }
+            
+            // Check if Aurora has reached the player
+            const distance = this.calculateDistance({ lat: newLat, lng: newLng }, targetPos);
+            
+            if (currentStep >= steps || distance < 5) {
+                clearInterval(walkInterval);
+                console.log('👑 Aurora has reached the player!');
+                
+                // Stop walking animation
+                if (markerElement) {
+                    markerElement.style.animation = 'auroraMarkerGlow 3s infinite';
+                }
+                
+                // Update popup to show she's ready to talk
+                marker.bindPopup(`
+                    <div style="text-align: center; font-family: 'Courier New', monospace;">
+                        <h3 style="color: #ffd700; margin: 0 0 10px 0;">👑 Aurora - The Cosmic Navigator</h3>
+                        <p style="margin: 0 0 10px 0; color: #4ecdc4;">Lost star pilot with stellar wisdom</p>
+                        <p style="margin: 0; font-size: 12px; color: #888;">
+                            Click to talk (within 20m)<br>
+                            Main quest giver
+                        </p>
+                    </div>
+                `);
+                
+                // Add click handler for Aurora interaction
+                marker.on('click', () => {
+                    this.handleAuroraClick(marker);
+                });
+                
+                // Show final approach message
+                setTimeout(() => {
+                    this.showTutorialMessage(`
+                        👑 <strong>Aurora has arrived!</strong><br><br>
+                        The cosmic navigator stands before you, her golden aura pulsing with ancient wisdom. 
+                        She looks at you with knowing eyes, as if she's been waiting for this moment.<br><br>
+                        <em>Click on her to begin your conversation...</em>
+                    `);
+                }, 1000);
+            }
+        }, 200); // Move every 200ms for smooth animation
     }
     
     handleAuroraClick(marker) {
@@ -1569,7 +1650,7 @@ class TutorialEncounterSystem {
             console.log(`🎯 Distance to ${objectId}: ${distance.toFixed(1)}m`);
             
             if (distance < 40) { // Within 40 meters show hint
-                console.log(`🎯 Player is within 20m of ${objectId}`);
+                console.log(`🎯 Player is within 40m of ${objectId}`);
                 this.showProximityHint(objectId);
                 
                 // Check if this is a shrine and trigger interaction
@@ -1577,17 +1658,21 @@ class TutorialEncounterSystem {
                     console.log('🧘‍♀️ Found meditation shrine in proximity check!');
                     const shrineDef = this.gameObjectsRegistry.get('meditation_shrine');
                     if (shrineDef) {
-                        // Show tutorial message about the shrine
-                        this.showTutorialMessage(`
-                            🧘‍♀️ <strong>Meditation Shrine Nearby!</strong><br><br>
-                            You sense the peaceful energy of a meditation shrine. Click on it to restore your sanity and find inner peace.
-                            <br><br>
-                            <em>The shrine glows with golden light - you can't miss it!</em>
-                        `);
+                        // Only show tutorial message once per shrine
+                        if (!this.tutorialFlags.get('shrine_proximity_shown')) {
+                            this.showTutorialMessage(`
+                                🧘‍♀️ <strong>Meditation Shrine Nearby!</strong><br><br>
+                                You sense the peaceful energy of a meditation shrine. Click on it to restore your sanity and find inner peace.
+                                <br><br>
+                                <em>The shrine glows with golden light - you can't miss it!</em>
+                            `);
+                            this.tutorialFlags.set('shrine_proximity_shown', true);
+                        }
                         
                         // Auto-trigger shrine interaction if player is close enough
-                        if (distance < 25) { // Within 25 meters, auto-trigger (more forgiving for mobile GPS)
+                        if (distance < 25 && !this.tutorialFlags.get('shrine_auto_triggered')) { // Within 25 meters, auto-trigger (more forgiving for mobile GPS)
                             console.log('🧘‍♀️ Player is very close to shrine, auto-triggering meditation...');
+                            this.tutorialFlags.set('shrine_auto_triggered', true);
                             setTimeout(() => {
                                 this.handleMeditationShrineClick(marker, shrineDef);
                             }, 1000);
