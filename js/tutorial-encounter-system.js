@@ -1291,7 +1291,7 @@ class TutorialEncounterSystem {
             iconAnchor: [25, 25]
         });
 
-        const marker = L.marker([position.lat, position.lng], { icon }).addTo(window.mapEngine.map);
+        const marker = L.marker([position.lat, position.lng], { icon, interactive: true, riseOnHover: true, bubblingMouseEvents: true }).addTo(window.mapEngine.map);
         
         marker.bindPopup(`
             <div class="tutorial-popup">
@@ -1302,6 +1302,23 @@ class TutorialEncounterSystem {
                 </div>
             </div>
         `);
+
+        // Also bind direct click on marker to shrine interaction for reliability on mobile
+        try {
+            const shrineId = shrineDef.name.toLowerCase().replace(' ', '_');
+            marker.on('click', () => {
+                window.tutorialEncounterSystem?.interactWithShrine?.(shrineId);
+            });
+            // Extra safety: attach listener to underlying DOM element (helps some mobile browsers)
+            setTimeout(() => {
+                const el = marker.getElement?.();
+                if (el) {
+                    el.style.pointerEvents = 'auto';
+                    el.addEventListener('click', () => window.tutorialEncounterSystem?.interactWithShrine?.(shrineId));
+                    el.addEventListener('touchend', () => window.tutorialEncounterSystem?.interactWithShrine?.(shrineId), { passive: true });
+                }
+            }, 0);
+        } catch (_) {}
 
         return marker;
     }
@@ -1404,6 +1421,15 @@ class TutorialEncounterSystem {
 
         console.log(`🎓 Interacting with ${shrineDef.name}`);
         
+        // If this is the meditation shrine, use the dedicated meditation handler with distance check
+        if (shrineId === 'meditation_shrine') {
+            const marker = this.spawnedObjects.get('meditation_shrine');
+            if (marker) {
+                this.handleMeditationShrineClick(marker, shrineDef);
+                return;
+            }
+        }
+        
         // Apply shrine effect
         if (shrineDef.interaction.effect === 'buff' && window.encounterSystem) {
             // Apply temporary buff
@@ -1412,7 +1438,7 @@ class TutorialEncounterSystem {
 
         // Check if all shrines have been activated
         const activatedShrines = Array.from(this.tutorialFlags.keys()).filter(flag => flag.includes('shrine_activated')).length;
-        if (activatedShrines >= 1) { // Both shrines activated
+        if (activatedShrines >= 1) { // At least one shrine activated progresses tutorial here
             this.setTutorialFlag('shrines_activated', true);
             this.advanceTutorialStage();
         }
