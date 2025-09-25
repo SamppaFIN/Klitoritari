@@ -37,8 +37,302 @@ class CosmicEffects {
         // Handle window resize
         window.addEventListener('resize', () => this.onWindowResize());
 
+        // Integrate with enhanced cosmic effects
+        this.integrateWithEnhancedEffects();
+
         this.isInitialized = true;
-        console.log('🌌 Cosmic effects initialized');
+        console.log('🌌 Cosmic effects initialized with enhanced integration');
+    }
+    
+    integrateWithEnhancedEffects() {
+        // Wait for enhanced cosmic effects to be available
+        setTimeout(() => {
+            if (window.enhancedCosmicEffects) {
+                console.log('✨ Integrating with Enhanced Cosmic Effects');
+                
+                // Add cosmic energy bursts on user interactions
+                this.setupInteractionEffects();
+                
+                // Add cosmic energy waves on panel changes
+                this.setupPanelChangeEffects();
+            }
+        }, 1000);
+    }
+    
+    setupInteractionEffects() {
+        // Add cosmic energy bursts on tab button clicks
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.createEnergyBurst();
+            });
+        });
+        
+        // Add cosmic energy waves on inventory item interactions
+        const inventoryItems = document.querySelectorAll('.inventory-item-card');
+        inventoryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                this.createEnergyWave();
+            });
+        });
+    }
+    
+    setupPanelChangeEffects() {
+        // Monitor for panel changes and create cosmic effects
+        const panels = document.querySelectorAll('.tab-panel');
+        panels.forEach(panel => {
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (panel.classList.contains('active')) {
+                            this.createPanelActivationEffect();
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+        });
+    }
+    
+    createEnergyBurst() {
+        // Create a burst of energy particles
+        const burstGeometry = new THREE.BufferGeometry();
+        const burstCount = 50;
+        const positions = new Float32Array(burstCount * 3);
+        const colors = new Float32Array(burstCount * 3);
+        const sizes = new Float32Array(burstCount);
+        
+        for (let i = 0; i < burstCount; i++) {
+            const i3 = i * 3;
+            positions[i3] = (Math.random() - 0.5) * 2;
+            positions[i3 + 1] = (Math.random() - 0.5) * 2;
+            positions[i3 + 2] = (Math.random() - 0.5) * 2;
+            
+            colors[i3] = 0.3 + Math.random() * 0.4; // Blue
+            colors[i3 + 1] = 0.6 + Math.random() * 0.4; // Green
+            colors[i3 + 2] = 1.0; // Full blue
+            
+            sizes[i] = Math.random() * 0.5 + 0.1;
+        }
+        
+        burstGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        burstGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        burstGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        const burstMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }
+            },
+            vertexShader: `
+                attribute float size;
+                attribute vec3 color;
+                varying vec3 vColor;
+                uniform float time;
+                
+                void main() {
+                    vColor = color;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = size * (300.0 / -mvPosition.z) * (1.0 + sin(time * 2.0) * 0.3);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                
+                void main() {
+                    float distance = length(gl_PointCoord - vec2(0.5));
+                    if (distance > 0.5) discard;
+                    
+                    float alpha = 1.0 - distance * 2.0;
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const burstParticles = new THREE.Points(burstGeometry, burstMaterial);
+        this.scene.add(burstParticles);
+        
+        // Animate and remove burst
+        let burstTime = 0;
+        const animateBurst = () => {
+            burstTime += 0.016;
+            burstMaterial.uniforms.time.value = burstTime;
+            
+            if (burstTime > 2.0) {
+                this.scene.remove(burstParticles);
+                burstGeometry.dispose();
+                burstMaterial.dispose();
+                return;
+            }
+            
+            requestAnimationFrame(animateBurst);
+        };
+        
+        animateBurst();
+    }
+    
+    createEnergyWave() {
+        // Create a wave of energy particles
+        const waveGeometry = new THREE.BufferGeometry();
+        const waveCount = 30;
+        const positions = new Float32Array(waveCount * 3);
+        const colors = new Float32Array(waveCount * 3);
+        const sizes = new Float32Array(waveCount);
+        
+        for (let i = 0; i < waveCount; i++) {
+            const i3 = i * 3;
+            const angle = (i / waveCount) * Math.PI * 2;
+            const radius = 1.5;
+            
+            positions[i3] = Math.cos(angle) * radius;
+            positions[i3 + 1] = Math.sin(angle) * radius;
+            positions[i3 + 2] = 0;
+            
+            colors[i3] = 0.2 + Math.random() * 0.3; // Blue
+            colors[i3 + 1] = 0.8 + Math.random() * 0.2; // Green
+            colors[i3 + 2] = 1.0; // Full blue
+            
+            sizes[i] = Math.random() * 0.3 + 0.2;
+        }
+        
+        waveGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        waveGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        waveGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        const waveMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }
+            },
+            vertexShader: `
+                attribute float size;
+                attribute vec3 color;
+                varying vec3 vColor;
+                uniform float time;
+                
+                void main() {
+                    vColor = color;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = size * (300.0 / -mvPosition.z) * (1.0 + sin(time * 3.0) * 0.5);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                
+                void main() {
+                    float distance = length(gl_PointCoord - vec2(0.5));
+                    if (distance > 0.5) discard;
+                    
+                    float alpha = 1.0 - distance * 2.0;
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const waveParticles = new THREE.Points(waveGeometry, waveMaterial);
+        this.scene.add(waveParticles);
+        
+        // Animate and remove wave
+        let waveTime = 0;
+        const animateWave = () => {
+            waveTime += 0.016;
+            waveMaterial.uniforms.time.value = waveTime;
+            
+            if (waveTime > 3.0) {
+                this.scene.remove(waveParticles);
+                waveGeometry.dispose();
+                waveMaterial.dispose();
+                return;
+            }
+            
+            requestAnimationFrame(animateWave);
+        };
+        
+        animateWave();
+    }
+    
+    createPanelActivationEffect() {
+        // Create a cosmic panel activation effect
+        const activationGeometry = new THREE.BufferGeometry();
+        const activationCount = 20;
+        const positions = new Float32Array(activationCount * 3);
+        const colors = new Float32Array(activationCount * 3);
+        const sizes = new Float32Array(activationCount);
+        
+        for (let i = 0; i < activationCount; i++) {
+            const i3 = i * 3;
+            positions[i3] = (Math.random() - 0.5) * 4;
+            positions[i3 + 1] = (Math.random() - 0.5) * 4;
+            positions[i3 + 2] = (Math.random() - 0.5) * 4;
+            
+            colors[i3] = 0.4 + Math.random() * 0.3; // Blue
+            colors[i3 + 1] = 0.7 + Math.random() * 0.3; // Green
+            colors[i3 + 2] = 1.0; // Full blue
+            
+            sizes[i] = Math.random() * 0.4 + 0.2;
+        }
+        
+        activationGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        activationGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        activationGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
+        const activationMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                time: { value: 0 }
+            },
+            vertexShader: `
+                attribute float size;
+                attribute vec3 color;
+                varying vec3 vColor;
+                uniform float time;
+                
+                void main() {
+                    vColor = color;
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = size * (300.0 / -mvPosition.z) * (1.0 + sin(time * 4.0) * 0.4);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vColor;
+                
+                void main() {
+                    float distance = length(gl_PointCoord - vec2(0.5));
+                    if (distance > 0.5) discard;
+                    
+                    float alpha = 1.0 - distance * 2.0;
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending
+        });
+        
+        const activationParticles = new THREE.Points(activationGeometry, activationMaterial);
+        this.scene.add(activationParticles);
+        
+        // Animate and remove activation effect
+        let activationTime = 0;
+        const animateActivation = () => {
+            activationTime += 0.016;
+            activationMaterial.uniforms.time.value = activationTime;
+            
+            if (activationTime > 2.5) {
+                this.scene.remove(activationParticles);
+                activationGeometry.dispose();
+                activationMaterial.dispose();
+                return;
+            }
+            
+            requestAnimationFrame(animateActivation);
+        };
+        
+        animateActivation();
     }
 
     createParticleSystem() {
