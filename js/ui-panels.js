@@ -794,9 +794,14 @@
     
     function useConsumableItem(itemId) {
         console.log(`🧪 Using consumable: ${itemId}`);
+        console.log(`🧪 Item system available:`, !!window.itemSystem);
+        console.log(`🧪 Item system methods:`, window.itemSystem ? Object.getOwnPropertyNames(window.itemSystem) : 'N/A');
         
-        if (window.itemSystem && window.itemSystem.useConsumable) {
+        if (window.itemSystem && typeof window.itemSystem.useConsumable === 'function') {
+            console.log(`🧪 Calling useConsumable for ${itemId}`);
             const success = window.itemSystem.useConsumable(itemId);
+            console.log(`🧪 Use result:`, success);
+            
             if (success) {
                 console.log(`🧪 Successfully used ${itemId}`);
                 // Refresh inventory display
@@ -807,6 +812,10 @@
             } else {
                 console.warn(`🧪 Failed to use ${itemId}`);
             }
+        } else {
+            console.error(`🧪 Item system or useConsumable method not available`);
+            console.error(`🧪 Item system:`, window.itemSystem);
+            console.error(`🧪 useConsumable type:`, typeof window.itemSystem?.useConsumable);
         }
     }
     

@@ -350,10 +350,26 @@ class ItemSystem {
     buildConsumableHandlers() {
         return {
             health_potion: (item) => {
-                const ps = window.encounterSystem?.playerStats;
-                if (!ps) return false;
+                console.log(`🧪 Health potion handler called`);
+                console.log(`🧪 Encounter system available:`, !!window.encounterSystem);
+                console.log(`🧪 Player stats available:`, !!window.encounterSystem?.playerStats);
+                
+                let ps = window.encounterSystem?.playerStats;
+                if (!ps) {
+                    console.log(`🧪 No player stats available, creating fallback`);
+                    // Create fallback player stats for tutorial
+                    if (!window.encounterSystem) {
+                        window.encounterSystem = { playerStats: { health: 50, maxHealth: 100, sanity: 100, maxSanity: 100 } };
+                    } else if (!window.encounterSystem.playerStats) {
+                        window.encounterSystem.playerStats = { health: 50, maxHealth: 100, sanity: 100, maxSanity: 100 };
+                    }
+                    ps = window.encounterSystem.playerStats;
+                }
+                
                 const before = ps.health;
                 const healAmount = item.stats?.heal || 50;
+                
+                console.log(`🧪 Before health: ${before}, max health: ${ps.maxHealth}`);
                 
                 // Restore health to maximum
                 ps.health = ps.maxHealth;
@@ -361,6 +377,8 @@ class ItemSystem {
                 // Reduce sanity by 30 points (cosmic cost)
                 const beforeSanity = ps.sanity;
                 ps.sanity = Math.max(0, ps.sanity - 30);
+                
+                console.log(`🧪 After health: ${ps.health}, sanity: ${ps.sanity}`);
                 
                 // Show cosmic ghost effect
                 this.createCosmicGhostEffect();
@@ -740,14 +758,34 @@ class ItemSystem {
 
     // Use a consumable item by ID
     useConsumable(itemId) {
+        console.log(`🧪 ItemSystem.useConsumable called with: ${itemId}`);
+        console.log(`🧪 ItemSystem instance:`, this);
+        console.log(`🧪 Player inventory:`, this.playerInventory);
+        
         const item = this.getItem(itemId);
-        if (!item || item.type !== 'consumable') return false;
+        console.log(`🧪 Item found:`, item);
+        if (!item || item.type !== 'consumable') {
+            console.log(`🧪 Item not found or not consumable:`, item);
+            return false;
+        }
+        
         const inv = this.playerInventory.find(i => i.id === itemId);
-        if (!inv || inv.quantity <= 0) return false;
+        console.log(`🧪 Inventory item:`, inv);
+        if (!inv || inv.quantity <= 0) {
+            console.log(`🧪 No inventory item or quantity 0:`, inv);
+            return false;
+        }
+        
         const handler = this.consumableHandlers[itemId];
+        console.log(`🧪 Handler found:`, !!handler);
+        console.log(`🧪 Available handlers:`, Object.keys(this.consumableHandlers));
+        
         const applied = handler ? handler(item) : false;
+        console.log(`🧪 Handler applied:`, applied);
+        
         if (applied) {
             this.removeFromInventory(itemId, 1);
+            console.log(`🧪 Item removed from inventory`);
         }
         return applied;
     }
