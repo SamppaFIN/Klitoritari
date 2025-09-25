@@ -10445,6 +10445,34 @@ input[type="range"]::-moz-range-thumb {
         padding: 20px;
         max-height: 50vh;
     }
+    
+    /* Force button text to be visible on mobile */
+    .inventory-item-card .item-actions .btn-text {
+        display: inline !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure action buttons are always visible */
+    .inventory-item-card .item-actions {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Make action buttons more prominent on mobile */
+    .inventory-item-card .action-btn {
+        min-height: 48px !important;
+        padding: 12px 16px !important;
+        font-size: 0.9rem !important;
+        border: 2px solid rgba(74, 158, 255, 0.5) !important;
+        background: rgba(74, 158, 255, 0.2) !important;
+    }
+    
+    .inventory-item-card .action-btn.primary {
+        background: rgba(0, 255, 136, 0.2) !important;
+        border-color: rgba(0, 255, 136, 0.5) !important;
+    }
 }
 
 /* Enhanced Inventory Card Styles for Mobile */
@@ -10930,5 +10958,58 @@ input[type="range"]::-moz-range-thumb {
     100% {
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.9);
+    }
+}
+
+/* Fireworks Animations */
+@keyframes fireworksBurst {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 1;
+        transform: scale(0);
+    }
+    50% {
+        width: 120px;
+        height: 120px;
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        width: 200px;
+        height: 200px;
+        opacity: 0;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes sparkleFloat {
+    0% {
+        opacity: 1;
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.3) translate(0, -50px);
+    }
+}
+
+/* Shrine Highlight Effect */
+.shrine-pulse-highlight {
+    animation: shrinePulseHighlight 2s infinite !important;
+}
+
+@keyframes shrinePulseHighlight {
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+    }
+    50% {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1));
+    }
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
     }
 }

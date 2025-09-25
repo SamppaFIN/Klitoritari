@@ -213,17 +213,34 @@ class TutorialEncounterSystem {
     }
 
     setupEventListeners() {
+        console.log('🎓 Setting up tutorial event listeners...');
+        
         // Listen for player position updates to trigger proximity checks
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            console.log('🎓 Setting up geolocation proximity listener');
             window.eldritchApp.systems.geolocation.onPositionUpdate = (position) => {
                 this.checkProximityTriggers(position);
             };
+        } else {
+            console.log('🎓 Geolocation system not available, setting up manual proximity checking');
+            // Fallback: check proximity every 2 seconds
+            setInterval(() => {
+                if (this.isActive && this.spawnedObjects.size > 0) {
+                    const position = this.getPlayerPosition();
+                    this.checkProximityTriggers(position);
+                }
+            }, 2000);
         }
 
         // Listen for encounter completions
         document.addEventListener('encounterCompleted', (event) => {
             this.handleEncounterCompletion(event.detail);
         });
+    }
+    
+    handleEncounterCompletion(detail) {
+        console.log('🎓 Encounter completed:', detail);
+        // Handle encounter completion if needed
     }
 
     startTutorial() {
@@ -454,18 +471,52 @@ class TutorialEncounterSystem {
             window.mapEngine.map.removeLayer(marker);
         }
         
-        // Add to inventory (if inventory system exists)
-        if (window.encounterSystem && window.encounterSystem.itemSystem && window.encounterSystem.itemSystem.addToInventory) {
-            const itemId = 'health_potion';
-            window.encounterSystem.itemSystem.addToInventory(itemId, 1);
-            console.log('🧪 Added health potion to encounter system inventory');
-        } else {
-            console.warn('🧪 Encounter system or item system not available for inventory');
+        // Add to inventory using the main item system
+        console.log('🧪 Checking item system availability...');
+        console.log('🧪 window.itemSystem:', !!window.itemSystem);
+        console.log('🧪 window.itemSystem.addToInventory:', !!(window.itemSystem && window.itemSystem.addToInventory));
+        
+        const addToInventory = () => {
+            if (window.itemSystem && window.itemSystem.addToInventory) {
+                const itemId = 'health_potion';
+                console.log('🧪 Attempting to add health potion to inventory...');
+                const success = window.itemSystem.addToInventory(itemId, 1);
+                if (success) {
+                    console.log('🧪 Added health potion to main item system inventory');
+                    return true;
+                } else {
+                    console.warn('🧪 Failed to add health potion to main item system inventory');
+                    return false;
+                }
+            }
+            return false;
+        };
+        
+        if (!addToInventory()) {
+            console.warn('🧪 Main item system not available, trying fallback...');
+            // Fallback: try encounter system item system
+            if (window.encounterSystem && window.encounterSystem.itemSystem && window.encounterSystem.itemSystem.addToInventory) {
+                const itemId = 'health_potion';
+                const success = window.encounterSystem.itemSystem.addToInventory(itemId, 1);
+                if (success) {
+                    console.log('🧪 Added health potion to encounter system inventory (fallback)');
+                } else {
+                    console.warn('🧪 Failed to add health potion to encounter system inventory');
+                }
+            } else {
+                console.warn('🧪 No item system available for inventory');
+                console.warn('🧪 Available systems:', {
+                    itemSystem: !!window.itemSystem,
+                    encounterSystem: !!window.encounterSystem,
+                    encounterItemSystem: !!(window.encounterSystem && window.encounterSystem.itemSystem)
+                });
+            }
         }
         
-        // Set tutorial flag
+        // Set tutorial flag and advance stage
         this.tutorialFlags.set('potion_collected', true);
         this.tutorialFlags.set('potion_in_inventory', true);
+        this.tutorialStage = 2;
         this.saveTutorialState();
         
         // Show pickup message
@@ -488,23 +539,23 @@ class TutorialEncounterSystem {
     useHealthPotion() {
         console.log('🧪 Using health potion from inventory');
         
-        // Check if player has potion in encounter system inventory
-        if (window.encounterSystem && window.encounterSystem.itemSystem) {
-            const hasPotion = window.encounterSystem.itemSystem.playerInventory.some(item => item.id === 'health_potion');
+        // Use the main item system (same as mobile UI)
+        if (window.itemSystem) {
+            const hasPotion = window.itemSystem.playerInventory.some(item => item.id === 'health_potion');
             if (!hasPotion) {
                 this.showTutorialMessage('You don\'t have a health potion in your inventory!');
                 return false;
             }
             
-            // Use the potion through the encounter system
-            const success = window.encounterSystem.itemSystem.useConsumable('health_potion');
+            // Use the potion through the main item system
+            const success = window.itemSystem.useConsumable('health_potion');
             if (success) {
                 // Update tutorial flags
                 this.tutorialFlags.set('potion_used', true);
                 this.saveTutorialState();
                 
                 // Show healing message
-                const currentHealth = window.encounterSystem.playerStats.health;
+                const currentHealth = window.encounterSystem?.playerStats?.health || 100;
                 this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${currentHealth}/100. You feel much better!`);
                 
                 return true;
@@ -513,7 +564,7 @@ class TutorialEncounterSystem {
                 return false;
             }
         } else {
-            // Fallback to tutorial flags if encounter system not available
+            // Fallback to tutorial flags if item system not available
             if (!this.tutorialFlags.get('potion_in_inventory')) {
                 this.showTutorialMessage('You don\'t have a health potion in your inventory!');
                 return false;
@@ -539,19 +590,46 @@ class TutorialEncounterSystem {
     }
 
     spawnMeditationShrine() {
+        console.log('🧘‍♀️ Attempting to spawn meditation shrine...');
+        console.log('🧘‍♀️ Map engine available:', !!window.mapEngine);
+        console.log('🧘‍♀️ Map available:', !!(window.mapEngine && window.mapEngine.map));
+        console.log('🧘‍♀️ Tutorial stage:', this.tutorialStage);
+        
         const shrineDef = this.gameObjectsRegistry.get('meditation_shrine');
-        if (!shrineDef) return;
+        if (!shrineDef) {
+            console.error('🧘‍♀️ Meditation shrine definition not found');
+            return;
+        }
 
         const position = this.getPlayerPosition();
-        if (!position) return;
+        if (!position) {
+            console.error('🧘‍♀️ Player position not available');
+            return;
+        }
+
+        // Wait for map to be ready if not available
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.log('🧘‍♀️ Map not ready, waiting...');
+            setTimeout(() => {
+                this.spawnMeditationShrine();
+            }, 1000);
+            return;
+        }
 
         // Calculate spawn position 80m from player
         const spawnPos = this.calculateSpawnPosition(position, 80);
+        console.log('🧘‍♀️ Calculated spawn position:', spawnPos);
         
         const marker = this.createShrineMarker(spawnPos, shrineDef);
+        if (!marker) {
+            console.error('🧘‍♀️ Failed to create shrine marker');
+            return;
+        }
+        
         this.spawnedObjects.set('meditation_shrine', marker);
         
         console.log('🧘‍♀️ Meditation shrine spawned at:', spawnPos, 'Distance: 80m from player');
+        console.log('🧘‍♀️ Spawned objects count:', this.spawnedObjects.size);
         
         // Add popup with meditation instructions
         marker.bindPopup(`
@@ -560,7 +638,7 @@ class TutorialEncounterSystem {
                 <p style="margin: 0 0 10px 0; color: #00ff88;">${shrineDef.description}</p>
                 <p style="margin: 0; font-size: 12px; color: #888;">
                     Click to meditate (within 20m)<br>
-                    Restores 30 sanity points
+                    Restores ALL sanity points
                 </p>
             </div>
         `);
@@ -569,6 +647,56 @@ class TutorialEncounterSystem {
         marker.on('click', () => {
             this.handleMeditationShrineClick(marker, shrineDef);
         });
+        
+        // Show player where the shrine is located
+        this.showShrineLocation(spawnPos);
+        
+        // Force map update to ensure marker is visible
+        if (window.mapEngine && window.mapEngine.map) {
+            window.mapEngine.map.invalidateSize();
+            console.log('🧘‍♀️ Map invalidated to ensure marker visibility');
+        }
+        
+        // Trigger immediate proximity check
+        setTimeout(() => {
+            const position = this.getPlayerPosition();
+            console.log('🧘‍♀️ Triggering immediate proximity check after shrine spawn');
+            this.checkProximityTriggers(position);
+        }, 1000);
+    }
+    
+    showShrineLocation(shrinePos) {
+        console.log('📍 Showing shrine location to player...');
+        
+        // Center map on shrine location
+        if (window.mapEngine && window.mapEngine.map) {
+            window.mapEngine.map.setView([shrinePos.lat, shrinePos.lng], 16, {
+                animate: true,
+                duration: 2
+            });
+        }
+        
+        // Show tutorial message with shrine location
+        setTimeout(() => {
+            this.showTutorialMessage(`
+                🧘‍♀️ <strong>Meditation Shrine Located!</strong><br><br>
+                A peaceful meditation shrine has appeared on your map. Walk to it and click to meditate to restore your sanity.<br><br>
+                <em>The shrine glows with a golden aura - you can't miss it!</em>
+            `);
+        }, 1000);
+        
+        // Add a temporary pulsing effect to make the shrine more visible
+        setTimeout(() => {
+            const shrineMarker = this.spawnedObjects.get('meditation_shrine');
+            if (shrineMarker) {
+                shrineMarker.getElement()?.classList.add('shrine-pulse-highlight');
+                
+                // Remove highlight after 10 seconds
+                setTimeout(() => {
+                    shrineMarker.getElement()?.classList.remove('shrine-pulse-highlight');
+                }, 10000);
+            }
+        }, 2000);
     }
     
     handleMeditationShrineClick(marker, shrineDef) {
@@ -584,23 +712,25 @@ class TutorialEncounterSystem {
             return;
         }
         
-        // Restore sanity
+        // Restore all sanity points
         if (window.encounterSystem && window.encounterSystem.playerStats) {
             const beforeSanity = window.encounterSystem.playerStats.sanity;
-            window.encounterSystem.playerStats.sanity = Math.min(
-                window.encounterSystem.playerStats.maxSanity,
-                window.encounterSystem.playerStats.sanity + 30
-            );
+            window.encounterSystem.playerStats.sanity = window.encounterSystem.playerStats.maxSanity;
             const sanityGained = window.encounterSystem.playerStats.sanity - beforeSanity;
             
-            this.showTutorialMessage(`🧘‍♀️ You meditate at the shrine and feel your mind clearing... +${sanityGained} sanity restored!`);
+            // Update health bar system
+            if (window.healthBar) {
+                window.healthBar.setSanity(window.encounterSystem.playerStats.sanity, window.encounterSystem.playerStats.maxSanity);
+            }
+            
+            this.showTutorialMessage(`🧘‍♀️ You meditate at the shrine and feel your mind clearing... +${sanityGained} sanity restored! Your mind is now at peace.`);
             
             // Update tutorial stage
             this.tutorialStage = 4;
             this.tutorialFlags.set('shrine_meditated', true);
             this.saveTutorialState();
             
-            // Show next tutorial message
+            // Show next tutorial message and trigger Aurora meeting
             setTimeout(() => {
                 this.showTutorialMessage(`
                     🌟 Excellent! You have learned the basics of cosmic exploration:
@@ -609,8 +739,13 @@ class TutorialEncounterSystem {
                     • The cosmic cost of powerful potions (sanity loss)
                     • How to restore your sanity through meditation
                     <br><br>
-                    You are now ready to explore the cosmic realm! Look for more encounters, shrines, and mysteries in your journey.
+                    <em>As you finish meditating, you sense a presence approaching...</em>
                 `);
+                
+                // Trigger Aurora meeting after meditation
+                setTimeout(() => {
+                    this.triggerAuroraMeeting();
+                }, 3000);
                 
                 // Remove the shrine
                 this.spawnedObjects.delete('meditation_shrine');
@@ -620,7 +755,343 @@ class TutorialEncounterSystem {
             }, 2000);
         }
     }
+    
+    triggerAuroraMeeting() {
+        console.log('👑 Triggering Aurora meeting...');
+        
+        // Create Aurora meeting dialog
+        this.showAuroraMeetingDialog();
+        
+        // Spawn Aurora marker near player
+        this.spawnAuroraMarker();
+        
+        // Update tutorial stage
+        this.tutorialStage = 5;
+        this.tutorialFlags.set('aurora_met', true);
+        this.saveTutorialState();
+    }
+    
+    showAuroraMeetingDialog() {
+        const dialog = document.createElement('div');
+        dialog.id = 'aurora-meeting-dialog';
+        dialog.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s ease-in-out;
+        `;
+        
+        dialog.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 2px solid #4ecdc4;
+                border-radius: 20px;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                position: relative;
+                animation: slideInFromTop 0.6s ease-out;
+            ">
+                <div style="
+                    background: linear-gradient(90deg, #4ecdc4, #44a08d);
+                    color: #1a1a2e;
+                    padding: 20px;
+                    border-radius: 18px 18px 0 0;
+                    font-weight: bold;
+                    font-size: 20px;
+                    text-align: center;
+                    position: relative;
+                ">
+                    <div style="
+                        position: absolute;
+                        top: -10px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 60px;
+                        height: 60px;
+                        background: radial-gradient(circle, #ffd700, #ffed4e);
+                        border: 3px solid #ffffff;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 30px;
+                        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+                        animation: auroraGlow 2s infinite;
+                    ">👑</div>
+                    <div style="margin-top: 30px;">
+                        Aurora - The Cosmic Navigator
+                    </div>
+                </div>
+                <div style="padding: 30px;">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <p style="font-size: 18px; color: #4ecdc4; margin: 0 0 15px 0; font-style: italic;">
+                            "Greetings, cosmic wanderer. I have been watching your journey..."
+                        </p>
+                    </div>
+                    
+                    <div style="background: rgba(74, 158, 255, 0.1); border: 1px solid #4a9eff; border-radius: 10px; padding: 20px; margin: 20px 0;">
+                        <h3 style="color: #4a9eff; margin: 0 0 15px 0; text-align: center;">🌟 Main Quest: The Cosmic Convergence</h3>
+                        <p style="color: #ffffff; line-height: 1.6; margin: 0 0 15px 0;">
+                            The cosmic realm is in turmoil. Ancient forces are awakening, and the balance between light and shadow is shifting. 
+                            As one who has proven their worth through trials of health, sanity, and wisdom, you are chosen to restore cosmic harmony.
+                        </p>
+                        <p style="color: #4ecdc4; line-height: 1.6; margin: 0 0 15px 0;">
+                            <strong>Your first objective:</strong> Seek out the Corroding Lake, where the first signs of cosmic disturbance appeared. 
+                            There, you will find clues to the greater mystery that threatens all of existence.
+                        </p>
+                        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <h4 style="color: #ffd700; margin: 0 0 10px 0; text-align: center;">🌐 Multiplayer Cosmic Realm</h4>
+                            <p style="color: #feca57; line-height: 1.5; margin: 0; font-size: 14px;">
+                                <strong>You are not alone in this cosmic journey!</strong> Other cosmic wanderers are exploring the realm simultaneously. 
+                                You may encounter them at sacred sites, trade cosmic artifacts, or join forces to face greater cosmic challenges together.
+                                <br><br>
+                                <em>Look for golden markers on your map - these indicate areas where other players are active!</em>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px;">
+                        <p style="color: #feca57; font-size: 14px; margin: 0;">
+                            <em>"The path ahead is perilous, but I will guide you when I can. Trust in your cosmic intuition."</em>
+                        </p>
+                    </div>
+                </div>
+                <div style="
+                    padding: 20px;
+                    text-align: center;
+                    border-top: 1px solid #333;
+                ">
+                    <button onclick="this.closest('#aurora-meeting-dialog').remove()" style="
+                        background: linear-gradient(90deg, #4ecdc4, #44a08d);
+                        color: #1a1a2e;
+                        border: none;
+                        padding: 15px 40px;
+                        border-radius: 25px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: transform 0.2s ease;
+                        box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        Accept the Quest
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            @keyframes slideInFromTop {
+                from { 
+                    opacity: 0; 
+                    transform: translateY(-50px) scale(0.9); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translateY(0) scale(1); 
+                }
+            }
+            @keyframes auroraGlow {
+                0%, 100% { 
+                    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+                    transform: translateX(-50%) scale(1);
+                }
+                50% { 
+                    box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+                    transform: translateX(-50%) scale(1.05);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(dialog);
+        
+        // Auto-remove after 30 seconds if not closed
+        setTimeout(() => {
+            if (document.getElementById('aurora-meeting-dialog')) {
+                document.getElementById('aurora-meeting-dialog').remove();
+            }
+        }, 30000);
+    }
+    
+    spawnAuroraMarker() {
+        console.log('👑 Spawning Aurora marker...');
+        
+        const position = this.getPlayerPosition();
+        if (!position) return;
 
+        // Calculate spawn position 30m from player
+        const spawnPos = this.calculateSpawnPosition(position, 30);
+        
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.log('👑 Map not ready, waiting...');
+            setTimeout(() => {
+                this.spawnAuroraMarker();
+            }, 1000);
+            return;
+        }
+        
+        const icon = L.divIcon({
+            className: 'aurora-marker',
+            html: `
+                <div style="position: relative; width: 60px; height: 60px;">
+                    <div style="position: absolute; top: -5px; left: -5px; width: 70px; height: 70px; background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%); border-radius: 50%; animation: auroraMarkerGlow 3s infinite;"></div>
+                    <div style="position: absolute; top: 5px; left: 5px; width: 50px; height: 50px; background: linear-gradient(45deg, #ffd700, #ffed4e); border: 3px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);">👑</div>
+                </div>
+            `,
+            iconSize: [60, 60],
+            iconAnchor: [30, 30]
+        });
+
+        const marker = L.marker([spawnPos.lat, spawnPos.lng], { icon }).addTo(window.mapEngine.map);
+        
+        marker.bindPopup(`
+            <div style="text-align: center; font-family: 'Courier New', monospace;">
+                <h3 style="color: #ffd700; margin: 0 0 10px 0;">👑 Aurora - The Cosmic Navigator</h3>
+                <p style="margin: 0 0 10px 0; color: #4ecdc4;">Lost star pilot with stellar wisdom</p>
+                <p style="margin: 0; font-size: 12px; color: #888;">
+                    Click to talk (within 20m)<br>
+                    Main quest giver
+                </p>
+            </div>
+        `);
+        
+        // Add click handler for Aurora interaction
+        marker.on('click', () => {
+            this.handleAuroraClick(marker);
+        });
+        
+        // Store marker reference
+        this.spawnedObjects.set('aurora', marker);
+        
+        console.log('👑 Aurora marker spawned at:', spawnPos);
+        
+        // Add CSS animation for Aurora marker
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes auroraMarkerGlow {
+                0%, 100% { 
+                    opacity: 0.6;
+                    transform: scale(1);
+                }
+                50% { 
+                    opacity: 1;
+                    transform: scale(1.1);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    handleAuroraClick(marker) {
+        const playerPos = this.getPlayerPosition();
+        const auroraPos = marker.getLatLng();
+        
+        if (!playerPos || !auroraPos) return;
+
+        const distance = this.calculateDistance(playerPos, auroraPos);
+        
+        if (distance > 20) {
+            this.showTutorialMessage('You need to be closer to Aurora to talk (within 20m)');
+            return;
+        }
+        
+        // Show Aurora dialogue
+        this.showAuroraDialogue();
+    }
+    
+    showAuroraDialogue() {
+        const dialog = document.createElement('div');
+        dialog.id = 'aurora-dialogue';
+        dialog.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 26, 0.95);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 25px;
+            z-index: 10001;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);
+            max-width: 500px;
+            text-align: center;
+            animation: auroraDialogueAppear 0.5s ease-out;
+        `;
+        
+        dialog.innerHTML = `
+            <div style="text-align: center; font-family: 'Courier New', monospace;">
+                <h3 style="color: #ffd700; margin: 0 0 15px 0; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);">👑 Aurora</h3>
+                <p style="margin: 0 0 15px 0; color: #4ecdc4; font-size: 16px; line-height: 1.6;">
+                    "The cosmic realm needs your help, brave wanderer. The Corroding Lake holds the first key to understanding the great disturbance. 
+                    Seek it out, and remember - trust in your cosmic intuition."
+                </p>
+                <p style="margin: 0 0 15px 0; color: #ffd700; font-size: 14px; line-height: 1.5;">
+                    <strong>🌐 Multiplayer Note:</strong> You are not alone in this cosmic realm. Other cosmic wanderers are exploring simultaneously. 
+                    Look for golden markers on your map - these indicate areas where other players are active!
+                </p>
+                <p style="margin: 0; color: #feca57; font-size: 14px;">
+                    <em>"May the stars guide your path, and may you find allies in the cosmic darkness."</em>
+                </p>
+            </div>
+            <div style="margin-top: 20px;">
+                <button onclick="this.closest('#aurora-dialogue').remove()" style="
+                    background: linear-gradient(90deg, #ffd700, #ffed4e);
+                    color: #1a1a2e;
+                    border: none;
+                    padding: 12px 30px;
+                    border-radius: 25px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: transform 0.2s ease;
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    Continue Journey
+                </button>
+            </div>
+        `;
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes auroraDialogueAppear {
+                from { 
+                    opacity: 0; 
+                    transform: translate(-50%, -50%) scale(0.8); 
+                }
+                to { 
+                    opacity: 1; 
+                    transform: translate(-50%, -50%) scale(1); 
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(dialog);
+        
+        // Auto-remove after 15 seconds if not closed
+        setTimeout(() => {
+            if (document.getElementById('aurora-dialogue')) {
+                document.getElementById('aurora-dialogue').remove();
+            }
+        }, 15000);
+    }
+    
     spawnShrines() {
         const shrineDefs = [
             this.gameObjectsRegistry.get('health_shrine'),
@@ -984,13 +1455,44 @@ class TutorialEncounterSystem {
     }
 
     checkProximityTriggers(position) {
+        console.log('🎯 Checking proximity triggers...');
+        console.log('🎯 Player position:', position);
+        console.log('🎯 Spawned objects count:', this.spawnedObjects.size);
+        console.log('🎯 Spawned objects keys:', Array.from(this.spawnedObjects.keys()));
+        
         // Check if player is near any tutorial objects
         this.spawnedObjects.forEach((marker, objectId) => {
+            console.log(`🎯 Checking object: ${objectId}`);
             const markerPos = marker.getLatLng();
             const distance = this.calculateDistance(position, markerPos);
+            console.log(`🎯 Distance to ${objectId}: ${distance.toFixed(1)}m`);
             
             if (distance < 20) { // Within 20 meters
+                console.log(`🎯 Player is within 20m of ${objectId}`);
                 this.showProximityHint(objectId);
+                
+                // Check if this is a shrine and trigger interaction
+                if (objectId === 'meditation_shrine') {
+                    console.log('🧘‍♀️ Found meditation shrine in proximity check!');
+                    const shrineDef = this.gameObjectsRegistry.get('meditation_shrine');
+                    if (shrineDef) {
+                        // Show tutorial message about the shrine
+                        this.showTutorialMessage(`
+                            🧘‍♀️ <strong>Meditation Shrine Nearby!</strong><br><br>
+                            You sense the peaceful energy of a meditation shrine. Click on it to restore your sanity and find inner peace.
+                            <br><br>
+                            <em>The shrine glows with golden light - you can't miss it!</em>
+                        `);
+                        
+                        // Auto-trigger shrine interaction if player is close enough
+                        if (distance < 10) { // Within 10 meters, auto-trigger
+                            console.log('🧘‍♀️ Player is very close to shrine, auto-triggering meditation...');
+                            setTimeout(() => {
+                                this.handleMeditationShrineClick(marker, shrineDef);
+                            }, 1000);
+                        }
+                    }
+                }
             }
         });
     }

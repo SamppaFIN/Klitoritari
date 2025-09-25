@@ -432,8 +432,8 @@
         const isConsumable = item.type === 'consumable';
         const quantityText = item.quantity > 1 ? ` x${item.quantity}` : '';
         const rarityClass = item.rarity ? `rarity-${item.rarity}` : 'rarity-common';
-        // Use compact layout for better space usage
-        const compactClass = 'compact';
+        // Don't use compact layout by default to preserve button visibility
+        const compactClass = '';
         
         return `
             <div class="inventory-item-card ${isConsumable ? 'consumable' : ''} ${rarityClass} ${compactClass}" 
@@ -1032,8 +1032,8 @@
         populateUserSettingsPanel();
         populateDebugFooterPanel();
         
-        // Refresh panels periodically
-        setInterval(populateInventoryPanel, 3000);
+        // Refresh panels periodically (disabled for inventory to prevent button disappearing)
+        // setInterval(populateInventoryPanel, 3000);
         setInterval(populateQuestLogPanel, 5000);
     }
 

@@ -273,46 +273,81 @@ class Tablist {
                 const item = window.itemSystem.getItem(invItem.id);
                 if (!item) return '';
                 
+                const isConsumable = item.type === 'consumable';
+                const quantityText = invItem.quantity > 1 ? ` x${invItem.quantity}` : '';
+                const rarityClass = item.rarity ? `rarity-${item.rarity}` : 'rarity-common';
+                
                 return `
-                    <div class="inventory-item-card ${item.type === 'consumable' ? 'consumable' : ''}">
+                    <div class="inventory-item-card ${isConsumable ? 'consumable' : ''} ${rarityClass}" 
+                         data-item-id="${item.id}" 
+                         data-item-type="${item.type}">
+                        
+                        <!-- Item Media Section -->
                         <div class="item-media">
                             <div class="item-icon-placeholder">
                                 <span class="item-emoji">${item.emoji || '💠'}</span>
                             </div>
-                            ${invItem.quantity > 1 ? `
+                            ${quantityText ? `
                                 <div class="quantity-badge">
                                     <span class="quantity-number">${invItem.quantity}</span>
                                 </div>
                             ` : ''}
                         </div>
+                        
+                        <!-- Item Info Section -->
                         <div class="item-info">
                             <div class="item-header">
-                                <h3 class="item-name">${item.name}</h3>
-                                <div class="item-type-badge">${item.type}</div>
+                                <h3 class="item-name">${item.name || 'Unknown Item'}</h3>
+                                <div class="item-type-badge">${item.type || 'item'}</div>
                             </div>
-                            <p class="item-description">${item.description}</p>
+                            
+                            <p class="item-description">${item.description || 'Mysterious item'}</p>
+                            
                             ${item.lore ? `
                                 <div class="item-lore">
                                     <p class="lore-text">${item.lore}</p>
                                 </div>
                             ` : ''}
+                            
+                            ${item.stats ? `
+                                <div class="item-stats">
+                                    ${Object.entries(item.stats).map(([stat, value]) => `
+                                        <div class="stat-row">
+                                            <span class="stat-name">${stat}:</span>
+                                            <span class="stat-value">${value}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
                         </div>
+                        
+                        <!-- Action Buttons -->
                         <div class="item-actions">
-                            ${item.type === 'consumable' ? `
-                                <button class="action-btn primary" onclick="window.tablist.useItem('${item.id}')">
+                            ${isConsumable ? `
+                                <button class="action-btn primary use-btn" data-action="use" onclick="window.tablist.useItem('${item.id}')">
                                     <span class="btn-icon">⚡</span>
                                     <span class="btn-text">Use</span>
                                 </button>
+                                <button class="action-btn info-btn" data-action="info" onclick="window.tablist.showItemInfo('${item.id}')">
+                                    <span class="btn-icon">ℹ️</span>
+                                    <span class="btn-text">Info</span>
+                                </button>
                             ` : `
-                                <button class="action-btn" onclick="window.tablist.equipItem('${item.id}')">
+                                <button class="action-btn equip-btn" data-action="equip" onclick="window.tablist.equipItem('${item.id}')">
                                     <span class="btn-icon">⚔️</span>
                                     <span class="btn-text">Equip</span>
                                 </button>
+                                <button class="action-btn info-btn" data-action="info" onclick="window.tablist.showItemInfo('${item.id}')">
+                                    <span class="btn-icon">ℹ️</span>
+                                    <span class="btn-text">Info</span>
+                                </button>
                             `}
-                            <button class="action-btn" onclick="window.tablist.showItemInfo('${item.id}')">
-                                <span class="btn-icon">ℹ️</span>
-                                <span class="btn-text">Info</span>
-                            </button>
+                        </div>
+                        
+                        <!-- Swipe Indicators -->
+                        <div class="swipe-indicators">
+                            <div class="swipe-left">🗑️</div>
+                            <div class="swipe-right">⚡</div>
                         </div>
                     </div>
                 `;

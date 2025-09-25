@@ -20,6 +20,8 @@ class ItemSystem {
         this.initializeItems();
         this.loadPlayerInventory();
         console.log('🎒 ItemSystem initialized with', this.playerInventory.length, 'items in inventory');
+        console.log('🎒 Available items:', Array.from(this.items.keys()));
+        console.log('🎒 Health potion defined:', this.items.has('health_potion'));
     }
 
     // Initialize all available items in the cosmic realm
@@ -413,11 +415,14 @@ class ItemSystem {
                 // Check if this is tutorial potion usage
                 console.log(`🧪 Tutorial system available:`, !!window.tutorialEncounterSystem);
                 console.log(`🧪 Current tutorial stage:`, window.tutorialEncounterSystem?.tutorialStage);
-                if (window.tutorialEncounterSystem && window.tutorialEncounterSystem.tutorialStage >= 2) {
+                console.log(`🧪 Tutorial flags:`, window.tutorialEncounterSystem?.tutorialFlags);
+                
+                // Always trigger tutorial progression for health potion usage
+                if (window.tutorialEncounterSystem) {
                     console.log(`🧪 Triggering tutorial potion usage handler`);
                     this.handleTutorialPotionUsage();
                 } else {
-                    console.log(`🧪 Not in tutorial stage 2+, skipping tutorial progression`);
+                    console.log(`🧪 Tutorial system not available, skipping tutorial progression`);
                 }
                 
                 return true;
@@ -455,70 +460,103 @@ class ItemSystem {
     }
     
     createCosmicGhostEffect() {
-        console.log('👻 Creating cosmic ghost effect...');
+        console.log('🎆 Creating cosmic fireworks effect...');
         
-        // Create cosmic ghost overlay
-        const ghostOverlay = document.createElement('div');
-        ghostOverlay.className = 'cosmic-ghost-overlay';
-        ghostOverlay.style.cssText = `
+        // Create fireworks container
+        const fireworksContainer = document.createElement('div');
+        fireworksContainer.className = 'cosmic-fireworks-container';
+        fireworksContainer.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, 
-                rgba(74, 158, 255, 0.3) 0%, 
-                rgba(0, 255, 136, 0.2) 30%, 
-                rgba(74, 158, 255, 0.1) 60%, 
-                transparent 100%);
             pointer-events: none;
             z-index: 10000;
-            animation: cosmicGhostPulse 3s ease-in-out;
+            overflow: hidden;
         `;
         
-        document.body.appendChild(ghostOverlay);
+        document.body.appendChild(fireworksContainer);
         
-        // Create floating cosmic particles
-        this.createCosmicGhostParticles();
+        // Create multiple fireworks bursts
+        this.createFireworksBursts(fireworksContainer);
         
         // Create cosmic notification
         this.createCosmicGhostNotification();
         
-        // Remove overlay after animation
+        // Remove container after animation
         setTimeout(() => {
-            if (ghostOverlay.parentNode) {
-                ghostOverlay.parentNode.removeChild(ghostOverlay);
+            if (fireworksContainer.parentNode) {
+                fireworksContainer.parentNode.removeChild(fireworksContainer);
             }
-        }, 3000);
+        }, 5000);
     }
     
-    createCosmicGhostParticles() {
-        const particleCount = 20;
-        for (let i = 0; i < particleCount; i++) {
+    createFireworksBursts(container) {
+        const burstCount = 8;
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
+        
+        for (let i = 0; i < burstCount; i++) {
             setTimeout(() => {
-                const particle = document.createElement('div');
-                particle.className = 'cosmic-ghost-particle';
-                particle.style.cssText = `
-                    position: fixed;
-                    left: ${Math.random() * 100}%;
-                    top: ${Math.random() * 100}%;
-                    width: 8px;
-                    height: 8px;
-                    background: radial-gradient(circle, rgba(74, 158, 255, 0.8) 0%, transparent 70%);
+                const burst = document.createElement('div');
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                burst.style.cssText = `
+                    position: absolute;
+                    left: ${x}%;
+                    top: ${y}%;
+                    width: 0;
+                    height: 0;
                     border-radius: 50%;
-                    pointer-events: none;
-                    z-index: 10001;
-                    animation: cosmicGhostFloat ${2 + Math.random() * 2}s ease-out forwards;
+                    background: radial-gradient(circle, ${color} 0%, transparent 70%);
+                    animation: fireworksBurst 2s ease-out forwards;
+                    box-shadow: 0 0 20px ${color};
                 `;
                 
-                document.body.appendChild(particle);
+                container.appendChild(burst);
+                
+                // Create sparkles around the burst
+                this.createSparkles(container, x, y, color);
                 
                 setTimeout(() => {
-                    if (particle.parentNode) {
-                        particle.parentNode.removeChild(particle);
+                    if (burst.parentNode) {
+                        burst.parentNode.removeChild(burst);
                     }
-                }, 4000);
-            }, i * 100);
+                }, 2000);
+            }, i * 300);
+        }
+    }
+    
+    createSparkles(container, x, y, color) {
+        const sparkleCount = 12;
+        for (let i = 0; i < sparkleCount; i++) {
+            const sparkle = document.createElement('div');
+            const angle = (i / sparkleCount) * Math.PI * 2;
+            const distance = 50 + Math.random() * 30;
+            const sparkleX = x + Math.cos(angle) * distance;
+            const sparkleY = y + Math.sin(angle) * distance;
+            
+            sparkle.style.cssText = `
+                position: absolute;
+                left: ${sparkleX}%;
+                top: ${sparkleY}%;
+                width: 3px;
+                height: 3px;
+                background: ${color};
+                border-radius: 50%;
+                animation: sparkleFloat 1.5s ease-out forwards;
+                box-shadow: 0 0 8px ${color};
+            `;
+            
+            container.appendChild(sparkle);
+            
+            setTimeout(() => {
+                if (sparkle.parentNode) {
+                    sparkle.parentNode.removeChild(sparkle);
+                }
+            }, 1500);
         }
     }
     
@@ -527,9 +565,9 @@ class ItemSystem {
         notification.className = 'cosmic-ghost-notification';
         notification.innerHTML = `
             <div style="text-align: center; font-family: 'Courier New', monospace;">
-                <h3 style="color: #4a9eff; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(74, 158, 255, 0.8);">👻 Cosmic Ghost Effect</h3>
-                <p style="margin: 0 0 10px 0; color: #00ff88; font-size: 1.1rem;">The potion's power courses through your veins...</p>
-                <p style="margin: 0; color: #ff6b6b; font-size: 0.9rem;">But at what cost to your sanity?</p>
+                <h3 style="color: #ff6b6b; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(255, 107, 107, 0.8);">🎆 Cosmic Fireworks!</h3>
+                <p style="margin: 0 0 10px 0; color: #4ecdc4; font-size: 1.1rem;">The potion's power explodes in a burst of cosmic energy!</p>
+                <p style="margin: 0; color: #feca57; font-size: 0.9rem;">But the cosmic cost to your sanity is real...</p>
             </div>
         `;
         notification.style.cssText = `
@@ -570,27 +608,139 @@ class ItemSystem {
             window.tutorialEncounterSystem.saveTutorialState();
             
             console.log('📚 Tutorial stage advanced to:', window.tutorialEncounterSystem.tutorialStage);
-            console.log('📚 Tutorial flags:', window.tutorialEncounterSystem.tutorialFlags);
+            console.log('📚 Tutorial flags:', Array.from(window.tutorialEncounterSystem.tutorialFlags.entries()));
             
-            // Show tutorial message about sanity and shrine
+            // Show quest window about mind being shattered
             setTimeout(() => {
-                window.tutorialEncounterSystem.showTutorialMessage(`
-                    👻 The cosmic potion has restored your health to maximum, but at a cost...
-                    <br><br>
-                    Your sanity has been reduced by 30 points. You feel the cosmic energy coursing through you, but it's taking a toll on your mind.
-                    <br><br>
-                    Look for a meditation shrine nearby to restore your sanity through peaceful contemplation.
+                // Show quest window with mind shattered message
+                this.showQuestWindow(`
+                    <div style="text-align: center; padding: 20px;">
+                        <h2 style="color: #ff6b6b; margin-bottom: 15px;">🌀 Quest: Mind Shattered</h2>
+                        <div style="background: rgba(255, 107, 107, 0.1); border: 2px solid #ff6b6b; border-radius: 10px; padding: 15px; margin: 15px 0;">
+                            <p style="font-size: 16px; line-height: 1.6; color: #ff6b6b;">
+                                <strong>Something is not right...</strong><br><br>
+                                The cosmic potion has restored your health, but at a terrible cost. Your mind feels shattered, reality seems to warp around you, and you can hear whispers from beyond the veil of normal perception.
+                                <br><br>
+                                <em>"The cosmic truth was too much for mortal comprehension..."</em>
+                            </p>
+                        </div>
+                        <p style="color: #4ecdc4; font-size: 14px;">
+                            <strong>Objective:</strong> Find a meditation shrine to restore your sanity through peaceful contemplation.
+                        </p>
+                    </div>
                 `);
                 
-                // Spawn meditation shrine
-                setTimeout(() => {
-                    console.log('📚 Spawning meditation shrine...');
-                    window.tutorialEncounterSystem.spawnMeditationShrine();
-                }, 2000);
+                // Spawn meditation shrine immediately
+                console.log('📚 Spawning meditation shrine...');
+                console.log('📚 Map engine available:', !!window.mapEngine);
+                console.log('📚 Map available:', !!(window.mapEngine && window.mapEngine.map));
+                
+                // Try to spawn shrine with retry logic
+                const trySpawnShrine = (attempts = 0) => {
+                    if (attempts > 5) {
+                        console.error('📚 Failed to spawn shrine after 5 attempts');
+                        return;
+                    }
+                    
+                    if (window.mapEngine && window.mapEngine.map) {
+                        console.log('📚 Map is ready, spawning shrine...');
+                        window.tutorialEncounterSystem.spawnMeditationShrine();
+                    } else {
+                        console.log(`📚 Map not ready, retrying in 1 second... (attempt ${attempts + 1})`);
+                        setTimeout(() => trySpawnShrine(attempts + 1), 1000);
+                    }
+                };
+                
+                trySpawnShrine();
             }, 1000);
         } else {
             console.error('📚 Tutorial system not available for potion usage handler');
         }
+    }
+
+    showQuestWindow(content) {
+        // Create quest window overlay
+        const questWindow = document.createElement('div');
+        questWindow.id = 'quest-window';
+        questWindow.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-in-out;
+        `;
+        
+        questWindow.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 2px solid #4ecdc4;
+                border-radius: 15px;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                position: relative;
+            ">
+                <div style="
+                    background: linear-gradient(90deg, #4ecdc4, #44a08d);
+                    color: #1a1a2e;
+                    padding: 15px 20px;
+                    border-radius: 13px 13px 0 0;
+                    font-weight: bold;
+                    font-size: 18px;
+                    text-align: center;
+                ">
+                    🌌 Quest Received
+                </div>
+                <div style="padding: 0;">
+                    ${content}
+                </div>
+                <div style="
+                    padding: 20px;
+                    text-align: center;
+                    border-top: 1px solid #333;
+                ">
+                    <button onclick="this.closest('#quest-window').remove()" style="
+                        background: linear-gradient(90deg, #4ecdc4, #44a08d);
+                        color: #1a1a2e;
+                        border: none;
+                        padding: 12px 30px;
+                        border-radius: 25px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: transform 0.2s ease;
+                    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                        Accept Quest
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: scale(0.8); }
+                to { opacity: 1; transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(questWindow);
+        
+        // Auto-remove after 10 seconds if not closed
+        setTimeout(() => {
+            if (document.getElementById('quest-window')) {
+                document.getElementById('quest-window').remove();
+            }
+        }, 10000);
     }
 
     // Add an item to the system
@@ -605,11 +755,14 @@ class ItemSystem {
 
     // Add item to player inventory
     addToInventory(itemId, quantity = 1) {
+        console.log(`🎒 addToInventory called with itemId: ${itemId}, quantity: ${quantity}`);
         const item = this.getItem(itemId);
         if (!item) {
             console.log(`❌ Item ${itemId} not found!`);
+            console.log(`❌ Available items:`, Array.from(this.items.keys()));
             return false;
         }
+        console.log(`🎒 Found item:`, item);
 
         const existingItem = this.playerInventory.find(invItem => invItem.id === itemId);
         if (existingItem) {
