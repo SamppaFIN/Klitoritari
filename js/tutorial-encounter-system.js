@@ -244,6 +244,12 @@ class TutorialEncounterSystem {
     }
 
     startTutorial() {
+        // Check if tutorial is already complete
+        if (this.tutorialFlags.get('tutorial_complete')) {
+            console.log('🎓 Tutorial already completed, not starting');
+            return;
+        }
+        
         console.log('🎓 Starting tutorial encounter system');
         this.isActive = true;
         this.tutorialStage = 1;
@@ -1799,11 +1805,19 @@ class TutorialEncounterSystem {
     // Reset tutorial for testing
     resetTutorial() {
         localStorage.removeItem('eldritch_tutorial_state');
+        localStorage.removeItem('eldritch_start_tutorial_encounter');
         this.tutorialStage = 0;
         this.tutorialFlags.clear();
         this.spawnedObjects.clear();
         this.isActive = false;
         console.log('🎓 Tutorial reset');
+    }
+    
+    // Clear tutorial flag and disable tutorial
+    disableTutorial() {
+        localStorage.removeItem('eldritch_start_tutorial_encounter');
+        this.isActive = false;
+        console.log('🎓 Tutorial disabled');
     }
 }
 

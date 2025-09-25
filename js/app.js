@@ -2582,13 +2582,19 @@ class EldritchSanctuaryApp {
                 }
                 try {
                     const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
-                    console.log('🎓 Tutorial check:', { shouldStartTutorial, tutorialSystem: !!window.tutorialEncounterSystem, hasStartTutorial: !!(window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) });
-                    if (shouldStartTutorial && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
+                    const tutorialComplete = localStorage.getItem('eldritch_tutorial_state') && JSON.parse(localStorage.getItem('eldritch_tutorial_state')).flags?.some(([key, value]) => key === 'tutorial_complete' && value);
+                    console.log('🎓 Tutorial check:', { shouldStartTutorial, tutorialComplete, tutorialSystem: !!window.tutorialEncounterSystem, hasStartTutorial: !!(window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) });
+                    
+                    if (shouldStartTutorial && !tutorialComplete && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
                         console.log('🎓 Starting tutorial from onMapReady callback');
                         window.tutorialEncounterSystem.startTutorial();
                         localStorage.removeItem('eldritch_start_tutorial_encounter');
                     } else {
-                        console.log('🎓 Tutorial not started:', { shouldStartTutorial, tutorialSystem: !!window.tutorialEncounterSystem });
+                        console.log('🎓 Tutorial not started:', { shouldStartTutorial, tutorialComplete, tutorialSystem: !!window.tutorialEncounterSystem });
+                        // Clear the tutorial flag if tutorial is complete or shouldn't start
+                        if (tutorialComplete || !shouldStartTutorial) {
+                            localStorage.removeItem('eldritch_start_tutorial_encounter');
+                        }
                     }
                 } catch (error) {
                     console.warn('🎓 Failed to start tutorial:', error);
