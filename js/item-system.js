@@ -413,11 +413,11 @@ class ItemSystem {
                 // Check if this is tutorial potion usage
                 console.log(`🧪 Tutorial system available:`, !!window.tutorialEncounterSystem);
                 console.log(`🧪 Current tutorial stage:`, window.tutorialEncounterSystem?.tutorialStage);
-                if (window.tutorialEncounterSystem && window.tutorialEncounterSystem.tutorialStage === 2) {
+                if (window.tutorialEncounterSystem && window.tutorialEncounterSystem.tutorialStage >= 2) {
                     console.log(`🧪 Triggering tutorial potion usage handler`);
                     this.handleTutorialPotionUsage();
                 } else {
-                    console.log(`🧪 Not in tutorial stage 2, skipping tutorial progression`);
+                    console.log(`🧪 Not in tutorial stage 2+, skipping tutorial progression`);
                 }
                 
                 return true;

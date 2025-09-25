@@ -9,7 +9,7 @@
 /**
  * ✨ Particle System Component
  */
-class ParticleSystemComponent extends BaseComponent {
+class ParticleSystemComponent extends AuroraBaseComponent {
     constructor() {
         super('Particle System', 'Advanced particle effects with cosmic animations', 'cosmic');
     }
@@ -636,7 +636,7 @@ class ParticleSystemComponent extends BaseComponent {
 /**
  * 🌟 Cosmic Loading Component
  */
-class CosmicLoadingComponent extends BaseComponent {
+class CosmicLoadingComponent extends AuroraBaseComponent {
     constructor() {
         super('Cosmic Loading', 'Advanced loading animations with cosmic effects', 'cosmic');
     }

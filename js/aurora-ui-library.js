@@ -44,6 +44,33 @@
  * while the monk muse wisdom ensures every element serves a higher purpose.
  */
 
+/**
+ * 🔬 Performance System
+ * Simple performance monitoring system
+ */
+class PerformanceSystem {
+    constructor() {
+        this.metrics = new Map();
+        this.startTime = performance.now();
+    }
+    
+    startTimer(name) {
+        this.metrics.set(name, { start: performance.now() });
+    }
+    
+    endTimer(name) {
+        const metric = this.metrics.get(name);
+        if (metric) {
+            metric.end = performance.now();
+            metric.duration = metric.end - metric.start;
+        }
+    }
+    
+    getMetric(name) {
+        return this.metrics.get(name);
+    }
+}
+
 class AuroraUILibrary {
     constructor(options = {}) {
         this.version = '3.0';
