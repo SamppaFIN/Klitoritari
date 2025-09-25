@@ -250,6 +250,22 @@ class TutorialEncounterSystem {
             return;
         }
         
+        // Also check localStorage for tutorial completion
+        try {
+            const saved = localStorage.getItem('eldritch_tutorial_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                const flags = new Map(state.flags || []);
+                if (flags.get('tutorial_complete')) {
+                    console.log('🎓 Tutorial already completed (from localStorage), not starting');
+                    this.tutorialFlags.set('tutorial_complete', true);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('🎓 Failed to check localStorage tutorial state:', e);
+        }
+        
         console.log('🎓 Starting tutorial encounter system');
         this.isActive = true;
         this.tutorialStage = 1;
@@ -325,12 +341,23 @@ class TutorialEncounterSystem {
         
         document.body.appendChild(modal);
         
-        // Add event listener for continue button
-        document.getElementById('tutorial-welcome-continue').addEventListener('click', () => {
-            modal.remove();
-            this.tutorialFlags.set('welcome_completed', true);
-            this.saveTutorialState();
-        });
+        // Add event listener for continue button with a small delay to ensure DOM is ready
+        setTimeout(() => {
+            const continueBtn = document.getElementById('tutorial-welcome-continue');
+            if (continueBtn) {
+                continueBtn.addEventListener('click', () => {
+                    console.log('🎓 Tutorial welcome continue button clicked');
+                    modal.remove();
+                    this.tutorialFlags.set('welcome_completed', true);
+                    this.saveTutorialState();
+                    // Proceed with tutorial stage 1
+                    this.spawnTutorialStage1();
+                });
+                console.log('🎓 Tutorial welcome continue button event listener attached');
+            } else {
+                console.error('🎓 Tutorial welcome continue button not found!');
+            }
+        }, 100);
     }
 
     setPlayerHealth(health) {
@@ -1372,6 +1399,7 @@ class TutorialEncounterSystem {
                     window.webglMapIntegration.convertItemMarker(itemData, itemKey);
                     console.log('🧪 Triggered WebGL conversion for tutorial item');
                 }
+            }
         } else {
             console.warn('🧪 Map engine not available for item marker registration');
         }
@@ -1816,10 +1844,65 @@ class TutorialEncounterSystem {
     // Clear tutorial flag and disable tutorial
     disableTutorial() {
         localStorage.removeItem('eldritch_start_tutorial_encounter');
+        localStorage.removeItem('eldritch_tutorial_state');
         this.isActive = false;
-        console.log('🎓 Tutorial disabled');
+        this.tutorialFlags.clear();
+        this.tutorialStage = 0;
+        console.log('🎓 Tutorial disabled and state cleared');
+    }
+    
+    // Force complete tutorial to skip it
+    forceCompleteTutorial() {
+        this.tutorialFlags.set('tutorial_complete', true);
+        this.saveTutorialState();
+        this.isActive = false;
+        console.log('🎓 Tutorial force completed');
     }
 }
+
+// Global functions for tutorial management
+window.disableTutorial = function() {
+    if (window.tutorialEncounterSystem) {
+        window.tutorialEncounterSystem.disableTutorial();
+    } else {
+        localStorage.removeItem('eldritch_start_tutorial_encounter');
+        localStorage.removeItem('eldritch_tutorial_state');
+        console.log('🎓 Tutorial disabled (system not available)');
+    }
+};
+
+window.forceCompleteTutorial = function() {
+    if (window.tutorialEncounterSystem) {
+        window.tutorialEncounterSystem.forceCompleteTutorial();
+    } else {
+        localStorage.setItem('eldritch_tutorial_state', JSON.stringify({
+            stage: 0,
+            flags: [['tutorial_complete', true]]
+        }));
+        console.log('🎓 Tutorial force completed (system not available)');
+    }
+};
+
+window.clearTutorialModal = function() {
+    // Remove any tutorial modals
+    const tutorialModal = document.getElementById('tutorial-welcome-modal');
+    if (tutorialModal) {
+        tutorialModal.remove();
+        console.log('🎓 Tutorial welcome modal removed');
+    }
+    
+    // Remove any player identity modals
+    const identityModal = document.getElementById('user-settings-modal');
+    if (identityModal) {
+        identityModal.classList.add('hidden');
+        console.log('🎓 Player identity modal hidden');
+    }
+    
+    // Clear tutorial flags
+    localStorage.removeItem('eldritch_start_tutorial_encounter');
+    localStorage.removeItem('eldritch_tutorial_state');
+    console.log('🎓 Tutorial state cleared');
+};
 
 // Add CSS animations
 const tutorialStyles = document.createElement('style');
