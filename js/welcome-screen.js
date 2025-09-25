@@ -15,6 +15,15 @@ class WelcomeScreen {
 
     init() {
         console.log('🌟 Welcome screen initialized');
+        
+        // Check if tutorial is active - if so, skip welcome screen
+        const tutorialActive = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
+        if (tutorialActive) {
+            console.log('🎓 Tutorial active - skipping welcome screen');
+            this.hideWelcomeScreen();
+            return;
+        }
+        
         this.checkIfFirstVisit();
         this.setupEventListeners();
         this.showInitialLoading();
@@ -82,6 +91,14 @@ class WelcomeScreen {
     }
 
     showWelcomeScreen() {
+        // Check if tutorial is active - if so, don't show welcome screen
+        const tutorialActive = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
+        if (tutorialActive) {
+            console.log('🎓 Tutorial active - preventing welcome screen from showing');
+            this.hideWelcomeScreen();
+            return;
+        }
+        
         const welcomeScreen = document.getElementById('welcome-screen');
         if (welcomeScreen) {
             welcomeScreen.style.display = 'flex';
@@ -179,8 +196,10 @@ class WelcomeScreen {
         // Reset all game state
         this.resetAllGameState();
         
-        // Show player identity setup dialog first
-        this.showPlayerIdentityDialog();
+        // Skip player identity dialog when tutorial is active
+        // The tutorial will handle the initial setup
+        console.log('🎓 Tutorial mode - skipping player identity dialog');
+        this.proceedWithGameStart();
     }
 
     showPlayerIdentityDialog() {
@@ -1019,6 +1038,38 @@ tipStyles.textContent = `
     }
 `;
 document.head.appendChild(tipStyles);
+
+// Global function to clear all dialogs and fix stuck state
+window.clearAllDialogs = function() {
+    console.log('🧹 Clearing all dialogs...');
+    
+    // Clear tutorial modals
+    const tutorialModal = document.getElementById('tutorial-welcome-modal');
+    if (tutorialModal) {
+        tutorialModal.remove();
+        console.log('🎓 Tutorial welcome modal removed');
+    }
+    
+    // Hide player identity modal
+    const identityModal = document.getElementById('user-settings-modal');
+    if (identityModal) {
+        identityModal.classList.add('hidden');
+        console.log('🎭 Player identity modal hidden');
+    }
+    
+    // Hide welcome screen
+    const welcomeScreen = document.getElementById('welcome-screen');
+    if (welcomeScreen) {
+        welcomeScreen.style.display = 'none';
+        console.log('🌟 Welcome screen hidden');
+    }
+    
+    // Clear tutorial flags
+    localStorage.removeItem('eldritch_start_tutorial_encounter');
+    localStorage.removeItem('eldritch_tutorial_state');
+    localStorage.removeItem('eldritch_welcome_seen');
+    console.log('🧹 All dialogs cleared and flags reset');
+};
 
 // Make welcome screen globally available
 window.WelcomeScreen = WelcomeScreen;
