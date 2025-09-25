@@ -1373,32 +1373,31 @@ class TutorialEncounterSystem {
             </div>
         `);
 
-            // Add to map engine's itemMarkers Map for WebGL integration
-            if (window.mapEngine) {
-                // Initialize itemMarkers Map if it doesn't exist
-                if (!window.mapEngine.itemMarkers) {
-                    window.mapEngine.itemMarkers = new Map();
-                    console.log('🧪 Initialized map engine itemMarkers Map');
-                }
+        // Add to map engine's itemMarkers Map for WebGL integration
+        if (window.mapEngine) {
+            // Initialize itemMarkers Map if it doesn't exist
+            if (!window.mapEngine.itemMarkers) {
+                window.mapEngine.itemMarkers = new Map();
+                console.log('🧪 Initialized map engine itemMarkers Map');
+            }
 
-                const itemKey = `tutorial_${itemDef.name.toLowerCase().replace(' ', '_')}`;
-                window.mapEngine.itemMarkers.set(itemKey, {
-                    marker: marker,
-                    position: position,
-                    itemDef: itemDef,
-                    tutorialItem: true,
-                    lat: position.lat,
-                    lng: position.lng,
-                    name: itemDef.name
-                });
-                console.log('🧪 Added tutorial item to map engine itemMarkers Map, total items:', window.mapEngine.itemMarkers.size);
-            
-                // Trigger WebGL conversion for the new item
-                if (window.webglMapIntegration && window.webglMapIntegration.convertItemMarker) {
-                    const itemData = window.mapEngine.itemMarkers.get(itemKey);
-                    window.webglMapIntegration.convertItemMarker(itemData, itemKey);
-                    console.log('🧪 Triggered WebGL conversion for tutorial item');
-                }
+            const itemKey = `tutorial_${itemDef.name.toLowerCase().replace(' ', '_')}`;
+            window.mapEngine.itemMarkers.set(itemKey, {
+                marker: marker,
+                position: position,
+                itemDef: itemDef,
+                tutorialItem: true,
+                lat: position.lat,
+                lng: position.lng,
+                name: itemDef.name
+            });
+            console.log('🧪 Added tutorial item to map engine itemMarkers Map, total items:', window.mapEngine.itemMarkers.size);
+        
+            // Trigger WebGL conversion for the new item
+            if (window.webglMapIntegration && window.webglMapIntegration.convertItemMarker) {
+                const itemData = window.mapEngine.itemMarkers.get(itemKey);
+                window.webglMapIntegration.convertItemMarker(itemData, itemKey);
+                console.log('🧪 Triggered WebGL conversion for tutorial item');
             }
         } else {
             console.warn('🧪 Map engine not available for item marker registration');

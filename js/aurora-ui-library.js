@@ -98,25 +98,7 @@ class AnimationSystem {
     }
 }
 
-/**
- * 🔘 Aurora Base Component
- * Base class for all Aurora UI components
- */
-class AuroraBaseComponent {
-    constructor(name, description, category) {
-        this.name = name;
-        this.description = description;
-        this.category = category;
-    }
-    
-    mergeOptions(defaults, options) {
-        return { ...defaults, ...options };
-    }
-    
-    init() {
-        // Override in subclasses
-    }
-}
+// AuroraBaseComponent is defined in aurora-base-component.js
 
 /**
  * 🔘 Aurora Button Component
