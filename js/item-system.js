@@ -386,9 +386,38 @@ class ItemSystem {
                 // Show feedback
                 this.feedback(`+${ps.health - before} health, -${beforeSanity - ps.sanity} sanity`, 'success', 'playSuccess');
                 
+                // Update health bar system immediately
+                if (window.healthBar) {
+                    window.healthBar.setHealth(ps.health, ps.maxHealth);
+                    window.healthBar.setSanity(ps.sanity, ps.maxSanity);
+                    console.log(`🧪 Updated health bar: ${ps.health}/${ps.maxHealth}, sanity: ${ps.sanity}/${ps.maxSanity}`);
+                }
+                
+                // Trigger sanity distortion effects due to cosmic cost
+                if (window.sanityDistortion) {
+                    console.log(`🧪 Triggering sanity distortion effects due to cosmic cost`);
+                    window.sanityDistortion.distortionEffects.shake = 0.6;
+                    window.sanityDistortion.distortionEffects.colorShift = 0.4;
+                    window.sanityDistortion.distortionEffects.cosmicDistortion = 0.5;
+                    
+                    // Clear effects after 3 seconds
+                    setTimeout(() => {
+                        if (window.sanityDistortion) {
+                            window.sanityDistortion.distortionEffects.shake = 0;
+                            window.sanityDistortion.distortionEffects.colorShift = 0;
+                            window.sanityDistortion.distortionEffects.cosmicDistortion = 0;
+                        }
+                    }, 3000);
+                }
+                
                 // Check if this is tutorial potion usage
+                console.log(`🧪 Tutorial system available:`, !!window.tutorialEncounterSystem);
+                console.log(`🧪 Current tutorial stage:`, window.tutorialEncounterSystem?.tutorialStage);
                 if (window.tutorialEncounterSystem && window.tutorialEncounterSystem.tutorialStage === 2) {
+                    console.log(`🧪 Triggering tutorial potion usage handler`);
                     this.handleTutorialPotionUsage();
+                } else {
+                    console.log(`🧪 Not in tutorial stage 2, skipping tutorial progression`);
                 }
                 
                 return true;
@@ -531,12 +560,17 @@ class ItemSystem {
     
     handleTutorialPotionUsage() {
         console.log('📚 Handling tutorial potion usage...');
+        console.log('📚 Tutorial system available:', !!window.tutorialEncounterSystem);
+        console.log('📚 Current tutorial stage before:', window.tutorialEncounterSystem?.tutorialStage);
         
         // Advance tutorial stage
         if (window.tutorialEncounterSystem) {
             window.tutorialEncounterSystem.tutorialStage = 3;
             window.tutorialEncounterSystem.tutorialFlags.set('potion_used', true);
             window.tutorialEncounterSystem.saveTutorialState();
+            
+            console.log('📚 Tutorial stage advanced to:', window.tutorialEncounterSystem.tutorialStage);
+            console.log('📚 Tutorial flags:', window.tutorialEncounterSystem.tutorialFlags);
             
             // Show tutorial message about sanity and shrine
             setTimeout(() => {
@@ -550,9 +584,12 @@ class ItemSystem {
                 
                 // Spawn meditation shrine
                 setTimeout(() => {
+                    console.log('📚 Spawning meditation shrine...');
                     window.tutorialEncounterSystem.spawnMeditationShrine();
                 }, 2000);
             }, 1000);
+        } else {
+            console.error('📚 Tutorial system not available for potion usage handler');
         }
     }
 
