@@ -70,6 +70,11 @@ class PerformanceSystem {
         return this.metrics.get(name);
     }
     
+    init() {
+        // Initialize performance monitoring
+        this.updateMetrics();
+    }
+    
     updateMetrics() {
         // Update performance metrics
         const now = performance.now();
@@ -1096,28 +1101,7 @@ class AuroraMagneticElement extends AuroraBaseComponent {
     }
 }
 
-// Add placeholder classes for all techniques referenced in registerTechniques
-class MagneticButtonsTechnique extends AuroraBaseComponent {
-    constructor(options = {}) {
-        super('Magnetic Buttons Technique', 'Magnetic button interaction technique', 'technique');
-        this.options = this.mergeOptions({}, options);
-    }
-    
-    apply(element) {
-        // Implementation for magnetic buttons
-    }
-}
-
-class MorphingCardsTechnique extends AuroraBaseComponent {
-    constructor(options = {}) {
-        super('Morphing Cards Technique', 'Morphing card animation technique', 'technique');
-        this.options = this.mergeOptions({}, options);
-    }
-    
-    apply(element) {
-        // Implementation for morphing cards
-    }
-}
+// Technique classes are defined in separate files (magnetic-buttons.js, morphing-cards.js, etc.)
 
 class LiquidAnimationsTechnique extends AuroraBaseComponent {
     constructor(options = {}) {
@@ -1394,20 +1378,7 @@ class LightTheme extends AuroraBaseComponent {
     }
 }
 
-// Add placeholder classes for other systems
-class TutorialSystem extends AuroraBaseComponent {
-    constructor() {
-        super('Tutorial System', 'Tutorial system for Aurora UI', 'system');
-    }
-    
-    init() {
-        // Implementation for tutorial system
-    }
-    
-    toggle() {
-        // Implementation for toggling tutorial
-    }
-}
+// System classes are defined in separate files (tutorial-system.js, etc.)
 
 class AuroraUILibrary {
     constructor(options = {}) {
