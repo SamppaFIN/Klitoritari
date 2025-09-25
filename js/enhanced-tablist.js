@@ -235,7 +235,9 @@ class EnhancedTablist {
     
     setupEventListeners() {
         // Keyboard events
-        this.tablist.addEventListener('keydown', (e) => this.handleKeydown(e));
+        if (this.tablist) {
+            this.tablist.addEventListener('keydown', (e) => this.handleKeydown(e));
+        }
         
         // Inventory refresh button
         const refreshBtn = document.getElementById('inventory-refresh');

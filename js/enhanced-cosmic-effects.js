@@ -60,6 +60,11 @@ class EnhancedCosmicEffects {
         this.addCosmicBackgroundEffects();
     }
     
+    setupCosmicPanelEffects() {
+        // Setup cosmic panel effects
+        this.addCosmicPanelEffects();
+    }
+    
     addCosmicTabEffects() {
         const tabButtons = document.querySelectorAll('.tab-button');
         tabButtons.forEach((button, index) => {
