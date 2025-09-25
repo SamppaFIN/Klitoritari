@@ -333,9 +333,8 @@ class UnifiedQuestSystem {
     }
     
     createQuestMarkers() {
-        // Temporarily disabled for tutorial-first approach
-        console.log('🎭 Quest marker creation disabled for tutorial-first approach');
-        return;
+        // Re-enabled quest markers for full game experience
+        console.log('🎭 Creating quest markers...');
         
         // Create quest markers on the map
         if (this.awaitingLocate || !this.startingPosition) {

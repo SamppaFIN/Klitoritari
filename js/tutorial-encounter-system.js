@@ -1006,6 +1006,12 @@ class TutorialEncounterSystem {
     spawnAuroraMarker() {
         console.log('👑 Spawning Aurora marker...');
         
+        // Check if tutorial is complete - if so, don't spawn tutorial Aurora
+        if (this.tutorialFlags.get('tutorial_complete')) {
+            console.log('👑 Tutorial complete, not spawning tutorial Aurora');
+            return;
+        }
+        
         const position = this.getPlayerPosition();
         if (!position) return;
 
@@ -1733,6 +1739,19 @@ class TutorialEncounterSystem {
         // Trigger normal game initialization
         if (window.mapEngine) {
             window.mapEngine.createSpecialMarkers();
+        }
+        
+        // Initialize NPC system
+        if (window.eldritchApp && window.eldritchApp.systems.npc) {
+            console.log('👥 Starting NPC system after tutorial completion');
+            window.eldritchApp.systems.npc.startSimulation();
+        }
+        
+        // Initialize quest system
+        if (window.eldritchApp && window.eldritchApp.systems.quest) {
+            console.log('🎭 Starting quest system after tutorial completion');
+            window.eldritchApp.systems.quest.isPaused = false;
+            window.eldritchApp.systems.quest.createQuestMarkers();
         }
     }
 

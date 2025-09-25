@@ -835,7 +835,7 @@ class MapEngine {
         // this.generateLegendaryEncounters();
         
         // 5. Add HEVY and other special markers
-        // this.createSpecialMarkers();
+        this.createSpecialMarkers();
         
         // 6. Quest markers handled by unified quest system
         
@@ -912,22 +912,21 @@ class MapEngine {
             this.updatePlayerPosition(defaultPosition);
         }
         
-        // Temporarily disabled for tutorial-first approach
         // Also create special markers (HEVY, shrines, items, monsters)
-        // this.createSpecialMarkers();
+        this.createSpecialMarkers();
         
         // Create NPCs (Aurora and Zephyr) if NPC system is available
-        // if (window.npcSystem) {
-        //     console.log('👥 Creating NPCs on map ready...');
-        //     window.npcSystem.generateNPCs();
-        //     window.npcSystem.startSimulation();
-        // }
+        if (window.npcSystem) {
+            console.log('👥 Creating NPCs on map ready...');
+            window.npcSystem.generateNPCs();
+            window.npcSystem.startSimulation();
+        }
         
         // Create quest markers if quest system is available
-        // if (window.unifiedQuestSystem) {
-        //     console.log('🎭 Creating quest markers on map ready...');
-        //     window.unifiedQuestSystem.createQuestMarkers();
-        // }
+        if (window.unifiedQuestSystem) {
+            console.log('🎭 Creating quest markers on map ready...');
+            window.unifiedQuestSystem.createQuestMarkers();
+        }
     }
 
     // Start proximity detection for encounters

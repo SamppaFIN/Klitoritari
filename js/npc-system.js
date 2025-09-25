@@ -34,9 +34,8 @@ class NPCSystem {
     }
 
     generateNPCs() {
-        // Temporarily disabled for tutorial-first approach
-        console.log('👥 NPC generation disabled for tutorial-first approach');
-        return;
+        // Re-enabled NPC generation for full game experience
+        console.log('👥 Generating NPCs...');
         
         if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine) {
             console.log('👥 Map engine not ready for NPC generation');
