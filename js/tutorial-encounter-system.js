@@ -1373,16 +1373,15 @@ class TutorialEncounterSystem {
             </div>
         `);
 
-        // Add to map engine's itemMarkers Map for WebGL integration
+        // Add to map engine's itemMarkers array for WebGL integration
         if (window.mapEngine) {
-            // Initialize itemMarkers Map if it doesn't exist
+            // Initialize itemMarkers array if it doesn't exist
             if (!window.mapEngine.itemMarkers) {
-                window.mapEngine.itemMarkers = new Map();
-                console.log('🧪 Initialized map engine itemMarkers Map');
+                window.mapEngine.itemMarkers = [];
+                console.log('🧪 Initialized map engine itemMarkers array');
             }
 
-            const itemKey = `tutorial_${itemDef.name.toLowerCase().replace(' ', '_')}`;
-            window.mapEngine.itemMarkers.set(itemKey, {
+            const itemData = {
                 marker: marker,
                 position: position,
                 itemDef: itemDef,
@@ -1390,13 +1389,14 @@ class TutorialEncounterSystem {
                 lat: position.lat,
                 lng: position.lng,
                 name: itemDef.name
-            });
-            console.log('🧪 Added tutorial item to map engine itemMarkers Map, total items:', window.mapEngine.itemMarkers.size);
+            };
+            
+            window.mapEngine.itemMarkers.push(itemData);
+            console.log('🧪 Added tutorial item to map engine itemMarkers array, total items:', window.mapEngine.itemMarkers.length);
         
             // Trigger WebGL conversion for the new item
             if (window.webglMapIntegration && window.webglMapIntegration.convertItemMarker) {
-                const itemData = window.mapEngine.itemMarkers.get(itemKey);
-                window.webglMapIntegration.convertItemMarker(itemData, itemKey);
+                window.webglMapIntegration.convertItemMarker(itemData, `tutorial_${itemDef.name.toLowerCase().replace(' ', '_')}`);
                 console.log('🧪 Triggered WebGL conversion for tutorial item');
             }
         } else {

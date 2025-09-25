@@ -69,6 +69,16 @@ class PerformanceSystem {
     getMetric(name) {
         return this.metrics.get(name);
     }
+    
+    updateMetrics() {
+        // Update performance metrics
+        const now = performance.now();
+        this.metrics.set('uptime', { duration: now - this.startTime });
+        this.metrics.set('memory', { 
+            used: performance.memory ? performance.memory.usedJSHeapSize : 0,
+            total: performance.memory ? performance.memory.totalJSHeapSize : 0
+        });
+    }
 }
 
 /**
