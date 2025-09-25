@@ -541,28 +541,93 @@ class TutorialEncounterSystem {
         
         // Use the main item system (same as mobile UI)
         if (window.itemSystem) {
-            const hasPotion = window.itemSystem.playerInventory.some(item => item.id === 'health_potion');
+            const hasPotion = Array.isArray(window.itemSystem.playerInventory)
+                && window.itemSystem.playerInventory.some(item => item.id === 'health_potion' && (item.quantity ?? 0) > 0);
             if (!hasPotion) {
                 this.showTutorialMessage('You don\'t have a health potion in your inventory!');
                 return false;
             }
             
-            // Use the potion through the main item system
-            const success = window.itemSystem.useConsumable('health_potion');
-            if (success) {
-                // Update tutorial flags
-                this.tutorialFlags.set('potion_used', true);
-                this.saveTutorialState();
-                
-                // Show healing message
-                const currentHealth = window.encounterSystem?.playerStats?.health || 100;
-                this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${currentHealth}/100. You feel much better!`);
-                
-                return true;
-            } else {
-                this.showTutorialMessage('Failed to use the health potion!');
-                return false;
+            // Try the primary path via item system
+            let success = false;
+            try {
+                console.log('🧪 Attempting window.itemSystem.useConsumable("health_potion")');
+                success = !!window.itemSystem.useConsumable('health_potion');
+            } catch (err) {
+                console.warn('🧪 useConsumable threw error, will attempt fallback', err);
+                success = false;
             }
+            
+            if (!success) {
+                console.log('🧪 Primary consumable path returned false — applying robust fallback');
+                try {
+                    // Ensure player stats exist
+                    let ps = window.encounterSystem?.playerStats;
+                    if (!ps) {
+                        if (!window.encounterSystem) window.encounterSystem = {};
+                        window.encounterSystem.playerStats = {
+                            health: 50,
+                            maxHealth: 100,
+                            sanity: 100,
+                            maxSanity: 100
+                        };
+                        ps = window.encounterSystem.playerStats;
+                    }
+                    const beforeHealth = ps.health;
+                    const beforeSanity = ps.sanity;
+                    // Apply effects similar to item-system handler
+                    ps.health = ps.maxHealth;
+                    ps.sanity = Math.max(0, ps.sanity - 30);
+                    // Update UI bars if available
+                    try { window.healthBar?.setHealth?.(ps.health, ps.maxHealth); } catch(_) {}
+                    try { window.healthBar?.setSanity?.(ps.sanity, ps.maxSanity); } catch(_) {}
+                    
+                    // Remove one potion from inventory
+                    try {
+                        if (typeof window.itemSystem.removeFromInventory === 'function') {
+                            window.itemSystem.removeFromInventory('health_potion', 1);
+                        } else if (Array.isArray(window.itemSystem.playerInventory)) {
+                            const entry = window.itemSystem.playerInventory.find(i => i.id === 'health_potion');
+                            if (entry) {
+                                entry.quantity = Math.max(0, (entry.quantity ?? 1) - 1);
+                                if (entry.quantity === 0) {
+                                    window.itemSystem.playerInventory = window.itemSystem.playerInventory.filter(i => i.id !== 'health_potion');
+                                }
+                                window.itemSystem.savePlayerInventory?.();
+                            }
+                        }
+                    } catch (_) {
+                        console.warn('🧪 Fallback removal failed (non-fatal)');
+                    }
+                    
+                    // Tutorial progression
+                    this.tutorialFlags.set('potion_used', true);
+                    this.saveTutorialState();
+                    try {
+                        if (typeof window.itemSystem.handleTutorialPotionUsage === 'function') {
+                            window.itemSystem.handleTutorialPotionUsage();
+                        }
+                    } catch (_) {}
+                    
+                    // Feedback
+                    const healed = ps.health - beforeHealth;
+                    const sanityLoss = beforeSanity - ps.sanity;
+                    this.showTutorialMessage(`🧪 You used the health potion! +${healed} health, -${sanityLoss} sanity.`);
+                    try { window.UIPanels?.populateInventoryPanel?.(); } catch(_) {}
+                    return true;
+                } catch (fallbackErr) {
+                    console.error('🧪 Fallback application failed', fallbackErr);
+                    this.showTutorialMessage('Failed to use the health potion!');
+                    return false;
+                }
+            }
+            
+            // Primary path succeeded
+            this.tutorialFlags.set('potion_used', true);
+            this.saveTutorialState();
+            const currentHealth = window.encounterSystem?.playerStats?.health || 100;
+            this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${currentHealth}/100. You feel much better!`);
+            return true;
         } else {
             // Fallback to tutorial flags if item system not available
             if (!this.tutorialFlags.get('potion_in_inventory')) {
