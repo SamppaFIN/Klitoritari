@@ -722,12 +722,22 @@ class TutorialEncounterSystem {
             console.log('🧘‍♀️ Map invalidated to ensure marker visibility');
         }
         
-        // Trigger immediate proximity check
+        // Trigger immediate proximity check and periodic proximity checks while shrine exists
         setTimeout(() => {
             const position = this.getPlayerPosition();
             console.log('🧘‍♀️ Triggering immediate proximity check after shrine spawn');
             this.checkProximityTriggers(position);
-        }, 1000);
+        }, 800);
+        
+        // Periodic checks (stop when shrine removed)
+        const proximityTimer = setInterval(() => {
+            if (!this.spawnedObjects.has('meditation_shrine')) {
+                clearInterval(proximityTimer);
+                return;
+            }
+            const pos = this.getPlayerPosition();
+            this.checkProximityTriggers(pos);
+        }, 2500);
     }
     
     showShrineLocation(shrinePos) {
@@ -772,8 +782,8 @@ class TutorialEncounterSystem {
         
         const distance = this.calculateDistance(playerPos, shrinePos);
         
-        if (distance > 20) {
-            this.showTutorialMessage('You need to be closer to the shrine to meditate (within 20m)');
+        if (distance > 30) {
+            this.showTutorialMessage('You need to be closer to the shrine to meditate (within 30m)');
             return;
         }
         
@@ -1558,7 +1568,7 @@ class TutorialEncounterSystem {
             const distance = this.calculateDistance(position, markerPos);
             console.log(`🎯 Distance to ${objectId}: ${distance.toFixed(1)}m`);
             
-            if (distance < 20) { // Within 20 meters
+            if (distance < 40) { // Within 40 meters show hint
                 console.log(`🎯 Player is within 20m of ${objectId}`);
                 this.showProximityHint(objectId);
                 
@@ -1576,7 +1586,7 @@ class TutorialEncounterSystem {
                         `);
                         
                         // Auto-trigger shrine interaction if player is close enough
-                        if (distance < 10) { // Within 10 meters, auto-trigger
+                        if (distance < 25) { // Within 25 meters, auto-trigger (more forgiving for mobile GPS)
                             console.log('🧘‍♀️ Player is very close to shrine, auto-triggering meditation...');
                             setTimeout(() => {
                                 this.handleMeditationShrineClick(marker, shrineDef);
