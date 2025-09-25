@@ -74,6 +74,25 @@ class TutorialEncounterSystem {
                 message: 'You feel your wounds healing!'
             }
         });
+        
+        this.gameObjectsRegistry.set('meditation_shrine', {
+            type: 'shrine',
+            name: 'Meditation Shrine',
+            emoji: '🧘‍♀️',
+            description: 'A peaceful shrine for meditation and sanity restoration',
+            spawnRules: {
+                stage: 3,
+                flag: 'potion_used',
+                distance: 80,
+                maxCount: 1
+            },
+            interaction: {
+                type: 'meditate',
+                effect: 'sanity_restore',
+                value: 30,
+                message: 'You feel your mind clearing through meditation...'
+            }
+        });
 
         this.gameObjectsRegistry.set('health_shrine', {
             type: 'shrine',
@@ -450,7 +469,13 @@ class TutorialEncounterSystem {
         this.saveTutorialState();
         
         // Show pickup message
-        this.showTutorialMessage('🧪 Health potion added to your inventory! Open your inventory panel to use it and restore your health.');
+        this.showTutorialMessage(`
+            🧪 Health potion added to your inventory! 
+            <br><br>
+            Open your inventory panel (bottom tab) and tap the health potion to use it. 
+            <br><br>
+            <strong>Warning:</strong> This cosmic potion will restore your health to maximum, but it comes at a cost to your sanity...
+        `);
         
         // Remove from spawned objects
         this.spawnedObjects.delete('health_potion');
@@ -510,6 +535,89 @@ class TutorialEncounterSystem {
             this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${newHealth}/100. You feel much better!`);
             
             return true;
+        }
+    }
+
+    spawnMeditationShrine() {
+        const shrineDef = this.gameObjectsRegistry.get('meditation_shrine');
+        if (!shrineDef) return;
+
+        const position = this.getPlayerPosition();
+        if (!position) return;
+
+        // Calculate spawn position 80m from player
+        const spawnPos = this.calculateSpawnPosition(position, 80);
+        
+        const marker = this.createShrineMarker(spawnPos, shrineDef);
+        this.spawnedObjects.set('meditation_shrine', marker);
+        
+        console.log('🧘‍♀️ Meditation shrine spawned at:', spawnPos, 'Distance: 80m from player');
+        
+        // Add popup with meditation instructions
+        marker.bindPopup(`
+            <div style="text-align: center; font-family: 'Courier New', monospace;">
+                <h3 style="color: #4a9eff; margin: 0 0 10px 0;">🧘‍♀️ Meditation Shrine</h3>
+                <p style="margin: 0 0 10px 0; color: #00ff88;">${shrineDef.description}</p>
+                <p style="margin: 0; font-size: 12px; color: #888;">
+                    Click to meditate (within 20m)<br>
+                    Restores 30 sanity points
+                </p>
+            </div>
+        `);
+        
+        // Add click handler for meditation
+        marker.on('click', () => {
+            this.handleMeditationShrineClick(marker, shrineDef);
+        });
+    }
+    
+    handleMeditationShrineClick(marker, shrineDef) {
+        const playerPos = this.getPlayerPosition();
+        const shrinePos = marker.getLatLng();
+        
+        if (!playerPos || !shrinePos) return;
+        
+        const distance = this.calculateDistance(playerPos, shrinePos);
+        
+        if (distance > 20) {
+            this.showTutorialMessage('You need to be closer to the shrine to meditate (within 20m)');
+            return;
+        }
+        
+        // Restore sanity
+        if (window.encounterSystem && window.encounterSystem.playerStats) {
+            const beforeSanity = window.encounterSystem.playerStats.sanity;
+            window.encounterSystem.playerStats.sanity = Math.min(
+                window.encounterSystem.playerStats.maxSanity,
+                window.encounterSystem.playerStats.sanity + 30
+            );
+            const sanityGained = window.encounterSystem.playerStats.sanity - beforeSanity;
+            
+            this.showTutorialMessage(`🧘‍♀️ You meditate at the shrine and feel your mind clearing... +${sanityGained} sanity restored!`);
+            
+            // Update tutorial stage
+            this.tutorialStage = 4;
+            this.tutorialFlags.set('shrine_meditated', true);
+            this.saveTutorialState();
+            
+            // Show next tutorial message
+            setTimeout(() => {
+                this.showTutorialMessage(`
+                    🌟 Excellent! You have learned the basics of cosmic exploration:
+                    <br><br>
+                    • How to collect items and use them from your inventory
+                    • The cosmic cost of powerful potions (sanity loss)
+                    • How to restore your sanity through meditation
+                    <br><br>
+                    You are now ready to explore the cosmic realm! Look for more encounters, shrines, and mysteries in your journey.
+                `);
+                
+                // Remove the shrine
+                this.spawnedObjects.delete('meditation_shrine');
+                if (marker && marker.remove) {
+                    marker.remove();
+                }
+            }, 2000);
         }
     }
 

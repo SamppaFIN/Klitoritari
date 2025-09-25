@@ -353,8 +353,26 @@ class ItemSystem {
                 const ps = window.encounterSystem?.playerStats;
                 if (!ps) return false;
                 const before = ps.health;
-                ps.health = Math.min(ps.maxHealth, ps.health + (item.stats?.heal || 0));
-                this.feedback(`+${ps.health - before} health`, 'success', 'playSuccess');
+                const healAmount = item.stats?.heal || 50;
+                
+                // Restore health to maximum
+                ps.health = ps.maxHealth;
+                
+                // Reduce sanity by 30 points (cosmic cost)
+                const beforeSanity = ps.sanity;
+                ps.sanity = Math.max(0, ps.sanity - 30);
+                
+                // Show cosmic ghost effect
+                this.createCosmicGhostEffect();
+                
+                // Show feedback
+                this.feedback(`+${ps.health - before} health, -${beforeSanity - ps.sanity} sanity`, 'success', 'playSuccess');
+                
+                // Check if this is tutorial potion usage
+                if (window.tutorialEncounterSystem && window.tutorialEncounterSystem.tutorialStage === 2) {
+                    this.handleTutorialPotionUsage();
+                }
+                
                 return true;
             },
             sanity_elixir: (item) => {
@@ -387,6 +405,137 @@ class ItemSystem {
         try { if (window.soundManager && typeof window.soundManager[soundMethod] === 'function') window.soundManager[soundMethod](); } catch (_) {}
         try { window.encounterSystem?.updateSimpleStatsDisplay?.(); } catch (_) {}
         this.savePlayerInventory();
+    }
+    
+    createCosmicGhostEffect() {
+        console.log('👻 Creating cosmic ghost effect...');
+        
+        // Create cosmic ghost overlay
+        const ghostOverlay = document.createElement('div');
+        ghostOverlay.className = 'cosmic-ghost-overlay';
+        ghostOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, 
+                rgba(74, 158, 255, 0.3) 0%, 
+                rgba(0, 255, 136, 0.2) 30%, 
+                rgba(74, 158, 255, 0.1) 60%, 
+                transparent 100%);
+            pointer-events: none;
+            z-index: 10000;
+            animation: cosmicGhostPulse 3s ease-in-out;
+        `;
+        
+        document.body.appendChild(ghostOverlay);
+        
+        // Create floating cosmic particles
+        this.createCosmicGhostParticles();
+        
+        // Create cosmic notification
+        this.createCosmicGhostNotification();
+        
+        // Remove overlay after animation
+        setTimeout(() => {
+            if (ghostOverlay.parentNode) {
+                ghostOverlay.parentNode.removeChild(ghostOverlay);
+            }
+        }, 3000);
+    }
+    
+    createCosmicGhostParticles() {
+        const particleCount = 20;
+        for (let i = 0; i < particleCount; i++) {
+            setTimeout(() => {
+                const particle = document.createElement('div');
+                particle.className = 'cosmic-ghost-particle';
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    width: 8px;
+                    height: 8px;
+                    background: radial-gradient(circle, rgba(74, 158, 255, 0.8) 0%, transparent 70%);
+                    border-radius: 50%;
+                    pointer-events: none;
+                    z-index: 10001;
+                    animation: cosmicGhostFloat ${2 + Math.random() * 2}s ease-out forwards;
+                `;
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 4000);
+            }, i * 100);
+        }
+    }
+    
+    createCosmicGhostNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'cosmic-ghost-notification';
+        notification.innerHTML = `
+            <div style="text-align: center; font-family: 'Courier New', monospace;">
+                <h3 style="color: #4a9eff; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(74, 158, 255, 0.8);">👻 Cosmic Ghost Effect</h3>
+                <p style="margin: 0 0 10px 0; color: #00ff88; font-size: 1.1rem;">The potion's power courses through your veins...</p>
+                <p style="margin: 0; color: #ff6b6b; font-size: 0.9rem;">But at what cost to your sanity?</p>
+            </div>
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10, 10, 26, 0.95);
+            border: 2px solid rgba(74, 158, 255, 0.6);
+            border-radius: 20px;
+            padding: 30px;
+            z-index: 10002;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(74, 158, 255, 0.4);
+            animation: cosmicGhostNotification 4s ease-in-out;
+            max-width: 400px;
+            text-align: center;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 4000);
+    }
+    
+    handleTutorialPotionUsage() {
+        console.log('📚 Handling tutorial potion usage...');
+        
+        // Advance tutorial stage
+        if (window.tutorialEncounterSystem) {
+            window.tutorialEncounterSystem.tutorialStage = 3;
+            window.tutorialEncounterSystem.tutorialFlags.set('potion_used', true);
+            window.tutorialEncounterSystem.saveTutorialState();
+            
+            // Show tutorial message about sanity and shrine
+            setTimeout(() => {
+                window.tutorialEncounterSystem.showTutorialMessage(`
+                    👻 The cosmic potion has restored your health to maximum, but at a cost...
+                    <br><br>
+                    Your sanity has been reduced by 30 points. You feel the cosmic energy coursing through you, but it's taking a toll on your mind.
+                    <br><br>
+                    Look for a meditation shrine nearby to restore your sanity through peaceful contemplation.
+                `);
+                
+                // Spawn meditation shrine
+                setTimeout(() => {
+                    window.tutorialEncounterSystem.spawnMeditationShrine();
+                }, 2000);
+            }, 1000);
+        }
     }
 
     // Add an item to the system
