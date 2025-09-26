@@ -248,6 +248,23 @@ class WelcomeScreen {
                 `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
             ).join('');
         }
+        
+        // Load saved flag type or set default
+        const savedFlagType = localStorage.getItem('eldritch_player_flag_type') || 'cosmic';
+        const flagGrid = document.getElementById('flag-options');
+        if (flagGrid) {
+            // Select the saved flag type
+            const flagOption = flagGrid.querySelector(`[data-flag-type="${savedFlagType}"]`);
+            if (flagOption) {
+                flagOption.classList.add('selected');
+            } else {
+                // Default to cosmic if saved type not found
+                const cosmicOption = flagGrid.querySelector('[data-flag-type="cosmic"]');
+                if (cosmicOption) {
+                    cosmicOption.classList.add('selected');
+                }
+            }
+        }
     }
 
     setRGBValues(r, g, b) {
@@ -326,6 +343,20 @@ class WelcomeScreen {
                 }
             });
         }
+        
+        // Flag selection
+        const flagGrid = document.getElementById('flag-options');
+        if (flagGrid) {
+            flagGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('flag-option') || e.target.closest('.flag-option')) {
+                    const flagOption = e.target.classList.contains('flag-option') ? e.target : e.target.closest('.flag-option');
+                    // Remove previous selection
+                    flagGrid.querySelectorAll('.flag-option').forEach(opt => opt.classList.remove('selected'));
+                    // Add selection to clicked option
+                    flagOption.classList.add('selected');
+                }
+            });
+        }
     }
 
     updateColorFromSliders() {
@@ -358,20 +389,24 @@ class WelcomeScreen {
         const nameInput = document.getElementById('player-name-input');
         const colorInput = document.getElementById('path-color-input');
         const symbolGrid = document.getElementById('symbol-options');
+        const flagGrid = document.getElementById('flag-options');
         
         const name = (nameInput?.value || '').trim() || 'Cosmic Wanderer';
         const color = colorInput?.value || '#00ff88';
         const selectedSymbol = symbolGrid?.querySelector('.symbol-option.selected');
         const symbol = selectedSymbol?.dataset.symbol || '🌟';
+        const selectedFlag = flagGrid?.querySelector('.flag-option.selected');
+        const flagType = selectedFlag?.dataset.flagType || 'cosmic';
         
         // Save to localStorage
         localStorage.setItem('eldritch_player_name', name);
         localStorage.setItem('eldritch_player_color', color);
         localStorage.setItem('eldritch_player_symbol', symbol);
+        localStorage.setItem('eldritch_player_flag_type', flagType);
         
         // Update multiplayer profile if available
         if (window.multiplayerManager) {
-            window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color });
+            window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color, flagType: flagType });
         }
         
         // Hide modal

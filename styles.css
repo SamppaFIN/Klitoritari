@@ -739,6 +739,70 @@ html, body {
     box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
 }
 
+/* Flag Options Grid */
+.flag-options-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.flag-option {
+    padding: 12px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.flag-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #00ff88;
+    transform: scale(1.05);
+}
+
+.flag-option.selected {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.flag-preview {
+    width: 30px;
+    height: 18px;
+    margin-bottom: 4px;
+    border-radius: 2px;
+    border: 1px solid #333;
+}
+
+.finnish-flag {
+    background: linear-gradient(to right, #ffffff 0%, #ffffff 30%, #003580 30%, #003580 100%);
+}
+
+.cosmic-flag {
+    background: linear-gradient(45deg, #1a0033, #4d0099, #8000ff, #b366ff);
+}
+
+.eldritch-flag {
+    background: linear-gradient(45deg, #2d1b69, #8b5cf6, #a855f7, #c084fc);
+}
+
+.void-flag {
+    background: linear-gradient(45deg, #000000, #1a1a1a, #333333, #4d4d4d);
+}
+
+.rainbow-flag {
+    background: linear-gradient(to right, #ff0000, #ff8000, #ffff00, #00ff00, #0080ff, #8000ff);
+}
+
 /* Enhanced Input Styling */
 .cosmic-input {
     width: 100%;
