@@ -576,29 +576,29 @@ class EldritchSanctuaryApp {
             // Initialize core systems
             await this.initCoreSystems();
             
-        // Set up system integration
-        this.setupSystemIntegration();
-        
-        // Set up header buttons
-        this.setupHeaderButtons();
-
-        // Initialize docked/draggable panels (non-blocking)
-        this.initDockedPanels();
-        
-        if (this.sound) {
-            // Start subtle ambience pulse during exploration
-            try { this.sound.startAmbiencePulse({ intervalMs: 14000 }); } catch (e) {}
-        }
-        
-        // Initialize multiplayer manager
-        this.initMultiplayerManager();
-        
-        // Set up multiplayer status updates
-        this.setupMultiplayerStatusUpdates();
-        
-        // Load initial data
-        await this.loadInitialData();
+            // Set up system integration
+            this.setupSystemIntegration();
             
+            // Set up header buttons
+            this.setupHeaderButtons();
+
+            // Initialize docked/draggable panels (non-blocking)
+            this.initDockedPanels();
+            
+            if (this.sound) {
+                // Start subtle ambience pulse during exploration
+                try { this.sound.startAmbiencePulse({ intervalMs: 14000 }); } catch (e) {}
+            }
+            
+            // Initialize multiplayer manager
+            this.initMultiplayerManager();
+            
+            // Set up multiplayer status updates
+            this.setupMultiplayerStatusUpdates();
+            
+            // Load initial data
+            await this.loadInitialData();
+                
             // Hide particle loading screen immediately after initialization
             this.hideParticleLoadingScreen();
             
