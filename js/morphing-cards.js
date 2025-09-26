@@ -62,11 +62,11 @@ class MorphingCardsTechnique {
         element.addEventListener('touchstart', (e) => {
             e.preventDefault();
             morphingSystem.morphTo('touch');
-        });
+        }, { passive: false });
         
         element.addEventListener('touchend', () => {
             morphingSystem.morphTo('default');
-        });
+        }, { passive: true });
     }
     
     addStyles() {

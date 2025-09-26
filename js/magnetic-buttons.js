@@ -74,7 +74,7 @@ class MagneticButtonsTechnique {
             e.preventDefault();
             const touch = e.touches[0];
             magneticSystem.updatePosition(touch.clientX, touch.clientY);
-        });
+        }, { passive: false });
         
         element.addEventListener('touchend', () => {
             magneticSystem.deactivate();

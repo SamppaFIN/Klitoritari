@@ -55,7 +55,7 @@ class SacredGeometryLayer extends RenderLayer {
                 `;
                 clickArea.dataset.flagIndex = index;
                 clickArea.addEventListener('click', (event) => this.handleFlagClick(event, index));
-                clickArea.addEventListener('touchstart', (event) => this.handleFlagClick(event, index));
+                clickArea.addEventListener('touchstart', (event) => this.handleFlagClick(event, index), { passive: true });
                 
                 document.body.appendChild(clickArea);
             }

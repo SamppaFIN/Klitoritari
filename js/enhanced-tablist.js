@@ -132,7 +132,7 @@ class EnhancedTablist {
                     isLongPress = false;
                 }
             }
-        }, { passive: false });
+        }, { passive: true });
 
         button.addEventListener('touchend', (e) => {
             const touchDuration = Date.now() - touchStartTime;

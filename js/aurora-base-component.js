@@ -143,8 +143,8 @@ class AuroraBaseComponent {
         
         // Add touch event listeners if needed
         if (this.touchFriendly) {
-            this.element.addEventListener('touchstart', this.handleTouchStart.bind(this));
-            this.element.addEventListener('touchend', this.handleTouchEnd.bind(this));
+            this.element.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+            this.element.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
         }
     }
     

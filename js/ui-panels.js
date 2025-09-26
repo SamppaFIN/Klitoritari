@@ -641,7 +641,7 @@
                     navigator.vibrate(3);
                 }
             }
-        }, { passive: false });
+        }, { passive: true });
         
         // Touch end - Enhanced gesture handling for Samsung U23
         card.addEventListener('touchend', (e) => {

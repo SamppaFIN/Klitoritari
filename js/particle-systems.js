@@ -84,7 +84,7 @@ class ParticleSystemsTechnique {
             const x = touch.clientX - rect.left;
             const y = touch.clientY - rect.top;
             particleSystem.setMousePosition(x, y);
-        });
+        }, { passive: false });
         
         element.addEventListener('touchend', () => {
             particleSystem.setMouseActive(false);

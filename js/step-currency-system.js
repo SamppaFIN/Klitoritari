@@ -717,7 +717,7 @@ class StepCurrencySystem {
             const onDown = (e) => { e.preventDefault(); stop = startHold(direction); };
             const onUp = () => { if (stop) stop(); };
             button.addEventListener('mousedown', onDown);
-            button.addEventListener('touchstart', onDown, { passive: false });
+            button.addEventListener('touchstart', onDown, { passive: true });
             ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => button.addEventListener(evt, onUp));
         };
 

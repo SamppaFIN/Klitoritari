@@ -1306,7 +1306,7 @@ class EldritchSanctuaryApp {
                 };
 
                 el.addEventListener('mousedown', start);
-                el.addEventListener('touchstart', (e) => { e.preventDefault(); start(); }, { passive: false });
+                el.addEventListener('touchstart', (e) => { e.preventDefault(); start(); }, { passive: true });
                 ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => {
                     el.addEventListener(evt, clear);
                 });
