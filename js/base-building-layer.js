@@ -191,9 +191,26 @@ class BaseBuildingLayer extends RenderLayer {
 
     getSurroundingFlags(base) {
         return this.flags.filter(flag => {
-            const distance = Math.sqrt((flag.x - base.x) ** 2 + (flag.y - base.y) ** 2);
-            return distance <= 80; // Within 80 pixels of base
+            // Calculate distance using GPS coordinates (more accurate)
+            const distance = this.calculateDistance(base.lat, base.lng, flag.lat, flag.lng);
+            return distance <= 50; // Within 50 meters of base
         });
+    }
+    
+    // Calculate distance between two GPS coordinates in meters
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371e3; // Earth's radius in meters
+        const φ1 = lat1 * Math.PI/180;
+        const φ2 = lat2 * Math.PI/180;
+        const Δφ = (lat2-lat1) * Math.PI/180;
+        const Δλ = (lng2-lng1) * Math.PI/180;
+
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return R * c; // Distance in meters
     }
 
     growBase(base) {
@@ -210,6 +227,12 @@ class BaseBuildingLayer extends RenderLayer {
             this.baseStatsModal.remove();
         }
 
+        // Calculate stats
+        const surroundingFlags = this.getSurroundingFlags(base);
+        const totalSteps = this.steps || 0;
+        const antsCount = this.flags.filter(flag => flag.type === 'ant').length;
+        const areaTaken = this.calculateAreaTaken(base, surroundingFlags);
+
         this.baseStatsModal = document.createElement('div');
         this.baseStatsModal.className = 'base-stats-modal';
         this.baseStatsModal.style.cssText = `
@@ -217,56 +240,97 @@ class BaseBuildingLayer extends RenderLayer {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.95);
-            color: white;
-            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #8b5cf6;
             border-radius: 15px;
-            border: 3px solid ${base.color};
+            padding: 20px;
             z-index: 1000;
-            font-family: Arial, sans-serif;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             min-width: 300px;
-            box-shadow: 0 0 30px ${base.color}50;
+            max-width: 400px;
         `;
-
-        const surroundingFlags = this.getSurroundingFlags(base);
-        const ants = this.flags.filter(f => f.type === 'ant').length;
-
+        
         this.baseStatsModal.innerHTML = `
-            <h3 style="margin-top: 0; color: ${base.color}; text-align: center;">🏗️ Base Stats</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #8b5cf6; font-size: 18px;">🏗️ Base Statistics</h3>
+                <button id="close-base-stats" style="background: #ff4757; border: none; color: white; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 16px;">×</button>
+            </div>
+            
             <div style="margin-bottom: 15px;">
-                <strong>Level:</strong> ${base.level}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>🏗️ Base Level:</span>
+                    <span style="color: #8b5cf6; font-weight: bold;">${base.level || 1}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>🚩 Flags Around:</span>
+                    <span style="color: #ffd700; font-weight: bold;">${surroundingFlags.length}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>📏 Area Taken:</span>
+                    <span style="color: #00d2d3; font-weight: bold;">${areaTaken.toFixed(1)}m²</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>🐜 Ants (Steps):</span>
+                    <span style="color: #ff6b35; font-weight: bold;">${antsCount} (${totalSteps})</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>💰 Step Currency:</span>
+                    <span style="color: #2ed573; font-weight: bold;">${totalSteps} steps</span>
+                </div>
             </div>
-            <div style="margin-bottom: 15px;">
-                <strong>Size:</strong> ${base.size}px
+            
+            <div style="background: rgba(139, 92, 246, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="font-size: 12px; color: #a4b0be; margin-bottom: 5px;">Base Growth Progress:</div>
+                <div style="background: #2c2c54; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, #8b5cf6, #ffd700); height: 100%; width: ${Math.min((surroundingFlags.length / 3) * 100, 100)}%; transition: width 0.3s ease;"></div>
+                </div>
+                <div style="font-size: 11px; color: #a4b0be; margin-top: 5px;">
+                    ${surroundingFlags.length}/3 flags needed for next level
+                </div>
             </div>
-            <div style="margin-bottom: 15px;">
-                <strong>Flags Around Base:</strong> ${surroundingFlags.length}/${base.maxFlags}
+            
+            <div style="display: flex; gap: 10px;">
+                <button id="place-flag-btn" style="flex: 1; background: #8b5cf6; border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    🚩 Place Flag
+                </button>
+                <button id="upgrade-base-btn" style="flex: 1; background: #ffd700; border: none; color: #000; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    ⬆️ Upgrade
+                </button>
             </div>
-            <div style="margin-bottom: 15px;">
-                <strong>Total Flags:</strong> ${this.flags.length}
-            </div>
-            <div style="margin-bottom: 15px;">
-                <strong>Ants (Steps/50):</strong> ${ants}
-            </div>
-            <div style="margin-bottom: 15px;">
-                <strong>Total Steps:</strong> ${this.steps}
-            </div>
-            <div style="margin-bottom: 20px;">
-                <strong>Next Growth:</strong> ${base.maxFlags - surroundingFlags.length} more flags needed
-            </div>
-            <button onclick="this.parentElement.remove()" style="
-                background: ${base.color};
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                width: 100%;
-            ">Close</button>
         `;
-
+        
+        // Add to DOM
         document.body.appendChild(this.baseStatsModal);
+        
+        // Add event listeners
+        document.getElementById('close-base-stats').addEventListener('click', () => {
+            document.body.removeChild(this.baseStatsModal);
+            this.baseStatsModal = null;
+        });
+        
+        document.getElementById('place-flag-btn').addEventListener('click', () => {
+            this.placeFlagAtPosition();
+            document.body.removeChild(this.baseStatsModal);
+            this.baseStatsModal = null;
+            this.updateClickableAreas(); // Refresh the display
+        });
+        
+        document.getElementById('upgrade-base-btn').addEventListener('click', () => {
+            this.upgradeBase(base);
+            document.body.removeChild(this.baseStatsModal);
+            this.baseStatsModal = null;
+            this.updateClickableAreas(); // Refresh the display
+        });
+        
+        // Close on outside click
+        this.baseStatsModal.addEventListener('click', (e) => {
+            if (e.target === this.baseStatsModal) {
+                document.body.removeChild(this.baseStatsModal);
+                this.baseStatsModal = null;
+            }
+        });
     }
 
     handleFlagClick(flag) {
@@ -644,6 +708,46 @@ class BaseBuildingLayer extends RenderLayer {
         super.destroy();
     }
 
+    // Calculate area taken by flags around a base
+    calculateAreaTaken(base, surroundingFlags) {
+        if (surroundingFlags.length === 0) return 0;
+        
+        // Simple area calculation based on flag count and base size
+        const baseArea = Math.PI * Math.pow(base.size / 2, 2);
+        const flagArea = surroundingFlags.length * Math.PI * Math.pow(20 / 2, 2); // Assuming 20px flag radius
+        return baseArea + flagArea;
+    }
+    
+    // Upgrade base (if player has enough steps)
+    upgradeBase(base) {
+        const upgradeCost = base.level * 100; // 100 steps per level
+        const currentSteps = this.steps || 0;
+        
+        if (currentSteps < upgradeCost) {
+            if (window.log) {
+                window.log(`🏗️ Not enough steps to upgrade base. Need ${upgradeCost}, have ${currentSteps}`, 'warn');
+            }
+            return false;
+        }
+        
+        // Deduct steps
+        this.steps -= upgradeCost;
+        this.saveSteps();
+        
+        // Upgrade base
+        base.level = (base.level || 1) + 1;
+        base.size = Math.min(base.size + 10, 100); // Max size 100px
+        base.maxFlags = (base.maxFlags || 8) + 2; // Increase max flags
+        
+        this.saveBaseData();
+        
+        if (window.log) {
+            window.log(`🏗️ Base upgraded to level ${base.level}! Size: ${base.size}px, Max flags: ${base.maxFlags}`, 'success');
+        }
+        
+        return true;
+    }
+
     // Debug method to check base state
     debugBaseState() {
         console.log('🏗️ Base Building Layer Debug:');
@@ -658,8 +762,8 @@ class BaseBuildingLayer extends RenderLayer {
             const base = this.bases[0];
             console.log('- First base:', {
                 id: base.id,
-                x: base.x,
-                y: base.y,
+                lat: base.lat,
+                lng: base.lng,
                 size: base.size,
                 level: base.level
             });
