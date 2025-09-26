@@ -663,4 +663,4 @@ class SymbolCanvasLayer {
 }
 
 // Make it globally available
-window.FinnishFlagCanvasLayer = FinnishFlagCanvasLayer;
+window.SymbolCanvasLayer = SymbolCanvasLayer;
