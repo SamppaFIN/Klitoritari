@@ -197,10 +197,9 @@ class WelcomeScreen {
         // Reset all game state
         this.resetAllGameState();
         
-        // Skip player identity dialog when tutorial is active
-        // The tutorial will handle the initial setup
-        console.log('🚀 Fresh adventure mode - proceeding directly to game');
-        this.proceedWithGameStart();
+        // Show player identity dialog for fresh adventure
+        console.log('🚀 Fresh adventure mode - showing player creation');
+        this.showPlayerIdentityDialog();
     }
 
     showPlayerIdentityDialog() {

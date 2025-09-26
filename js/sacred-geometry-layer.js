@@ -149,8 +149,8 @@ class SacredGeometryLayer extends RenderLayer {
             type: type,
             energy: 0.5,
             weight: 0, // Start with no weight
-            baseSize: 20,
-            currentSize: 20,
+            baseSize: 7, // 1/3 of original size
+            currentSize: 7,
             maxSize: 100,
             connections: [],
             clickable: true,
@@ -306,8 +306,8 @@ class SacredGeometryLayer extends RenderLayer {
                 type: 'cosmic', // cosmic, finnish, eldritch, void, rainbow
                 energy: 0.8,
                 weight: 150, // ticks/weight for growth
-                baseSize: 20, // base flag size
-                currentSize: 20, // current rendered size
+                baseSize: 7, // base flag size (1/3 of 20)
+                currentSize: 7, // current rendered size
                 maxSize: 100, // maximum size achievable
                 connections: [],
                 clickable: true,
@@ -323,8 +323,8 @@ class SacredGeometryLayer extends RenderLayer {
                 type: 'eldritch',
                 energy: 0.6,
                 weight: 80,
-                baseSize: 20,
-                currentSize: 20,
+                baseSize: 7,
+                currentSize: 7,
                 maxSize: 100,
                 connections: [],
                 clickable: true,
@@ -340,8 +340,8 @@ class SacredGeometryLayer extends RenderLayer {
                 type: 'void',
                 energy: 0.9,
                 weight: 300,
-                baseSize: 20,
-                currentSize: 60, // larger due to more weight
+                baseSize: 7,
+                currentSize: 31, // larger due to more weight (7 + (300/10)*0.8 = 31)
                 maxSize: 100,
                 connections: [],
                 clickable: true,
@@ -357,8 +357,8 @@ class SacredGeometryLayer extends RenderLayer {
                 type: 'rainbow',
                 energy: 0.7,
                 weight: 200,
-                baseSize: 20,
-                currentSize: 40,
+                baseSize: 7,
+                currentSize: 23, // (7 + (200/10)*0.8 = 23)
                 maxSize: 100,
                 connections: [],
                 clickable: true,
