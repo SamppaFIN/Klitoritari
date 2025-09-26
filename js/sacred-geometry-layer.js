@@ -13,9 +13,256 @@ class SacredGeometryLayer extends RenderLayer {
         this.cosmicEffects = [];
         this.animationTime = 0;
         this.isInitialized = false;
+        this.selectedFlag = null;
+        this.statisticsModal = null;
         
         console.log('🔮 Initializing Sacred Geometry Layer...');
         this.init();
+        this.setupClickHandlers();
+    }
+    
+    setupClickHandlers() {
+        // Make the canvas clickable for flag interactions
+        this.canvas.style.pointerEvents = 'auto';
+        this.canvas.addEventListener('click', (event) => this.handleFlagClick(event));
+        this.canvas.addEventListener('touchstart', (event) => this.handleFlagClick(event));
+        
+        console.log('🔮 Flag click handlers setup complete');
+    }
+    
+    handleFlagClick(event) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        // Check if click is on any flag
+        for (const flag of this.flags) {
+            const flagWidth = flag.currentSize;
+            const flagHeight = flag.currentSize * 0.6;
+            
+            if (x >= flag.x - flagWidth/2 && x <= flag.x + flagWidth/2 &&
+                y >= flag.y - flagHeight/2 && y <= flag.y + flagHeight/2) {
+                
+                this.showFlagStatistics(flag);
+                break;
+            }
+        }
+    }
+    
+    showFlagStatistics(flag) {
+        // Create or update statistics modal
+        if (this.statisticsModal) {
+            this.statisticsModal.remove();
+        }
+        
+        this.statisticsModal = document.createElement('div');
+        this.statisticsModal.className = 'flag-statistics-modal';
+        this.statisticsModal.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #8b5cf6;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            min-width: 300px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        `;
+        
+        this.statisticsModal.innerHTML = `
+            <h3 style="margin-top: 0; color: #8b5cf6;">🏴 Flag Statistics</h3>
+            <div style="margin-bottom: 10px;">
+                <strong>Player:</strong> ${flag.playerName || 'Unknown'}
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>Player ID:</strong> ${flag.playerId}
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>Flag Type:</strong> ${flag.type.charAt(0).toUpperCase() + flag.type.slice(1)}
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>Weight (Ticks):</strong> ${Math.round(flag.weight)}
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>Size:</strong> ${Math.round(flag.currentSize)}px
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>Energy:</strong> ${(flag.energy * 100).toFixed(1)}%
+            </div>
+            <div style="margin-bottom: 15px;">
+                <strong>Growth Progress:</strong> ${((flag.currentSize / flag.maxSize) * 100).toFixed(1)}%
+            </div>
+            <button onclick="this.parentElement.remove()" style="
+                background: #8b5cf6;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 14px;
+            ">Close</button>
+        `;
+        
+        document.body.appendChild(this.statisticsModal);
+        
+        // Auto-close after 10 seconds
+        setTimeout(() => {
+            if (this.statisticsModal) {
+                this.statisticsModal.remove();
+                this.statisticsModal = null;
+            }
+        }, 10000);
+    }
+    
+    // Flag settings and customization methods
+    getAvailableFlagTypes() {
+        return [
+            { id: 'finnish', name: 'Finnish Flag', description: 'Classic Finnish cross design' },
+            { id: 'cosmic', name: 'Cosmic Flag', description: 'Starry nebula with cosmic colors' },
+            { id: 'eldritch', name: 'Eldritch Flag', description: 'Dark tentacles and glowing eyes' },
+            { id: 'void', name: 'Void Flag', description: 'Black hole with swirling patterns' },
+            { id: 'rainbow', name: 'Rainbow Flag', description: 'Vibrant rainbow stripes' }
+        ];
+    }
+    
+    changePlayerFlagType(playerId, newType) {
+        const flag = this.flags.find(f => f.playerId === playerId);
+        if (flag) {
+            flag.type = newType;
+            console.log(`🔮 Changed flag type for player ${playerId} to ${newType}`);
+            return true;
+        }
+        return false;
+    }
+    
+    addPlayerFlag(playerId, playerName, x, y, type = 'cosmic') {
+        const newFlag = {
+            id: `flag_${playerId}`,
+            playerId: playerId,
+            playerName: playerName,
+            x: x,
+            y: y,
+            type: type,
+            energy: 0.5,
+            weight: 0, // Start with no weight
+            baseSize: 20,
+            currentSize: 20,
+            maxSize: 100,
+            connections: [],
+            clickable: true,
+            lastProximityCheck: 0,
+            proximityDecayRate: 0.1
+        };
+        
+        this.flags.push(newFlag);
+        console.log(`🔮 Added new flag for player ${playerName} (${playerId})`);
+        return newFlag;
+    }
+    
+    removePlayerFlag(playerId) {
+        const index = this.flags.findIndex(f => f.playerId === playerId);
+        if (index !== -1) {
+            this.flags.splice(index, 1);
+            console.log(`🔮 Removed flag for player ${playerId}`);
+            return true;
+        }
+        return false;
+    }
+    
+    // Method to integrate with existing settings system
+    createFlagSettingsPanel() {
+        const panel = document.createElement('div');
+        panel.className = 'flag-settings-panel';
+        panel.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #8b5cf6;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            min-width: 250px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        `;
+        
+        panel.innerHTML = `
+            <h3 style="margin-top: 0; color: #8b5cf6;">🏴 Flag Settings</h3>
+            <div style="margin-bottom: 10px;">
+                <label style="display: block; margin-bottom: 5px;">Flag Type:</label>
+                <select id="flagTypeSelect" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #8b5cf6;">
+                    ${this.getAvailableFlagTypes().map(type => 
+                        `<option value="${type.id}">${type.name}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label style="display: block; margin-bottom: 5px;">Player ID:</label>
+                <input type="text" id="playerIdInput" placeholder="Enter player ID" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #8b5cf6;">
+            </div>
+            <button onclick="window.sacredGeometryLayer?.applyFlagSettings()" style="
+                background: #8b5cf6;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 14px;
+                width: 100%;
+                margin-bottom: 10px;
+            ">Apply Settings</button>
+            <button onclick="this.parentElement.remove()" style="
+                background: #666;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 14px;
+                width: 100%;
+            ">Close</button>
+        `;
+        
+        document.body.appendChild(panel);
+        
+        // Make sacred geometry layer globally available for settings
+        window.sacredGeometryLayer = this;
+        
+        // Add global function to open flag settings
+        window.openFlagSettings = () => {
+            if (window.sacredGeometryLayer) {
+                window.sacredGeometryLayer.createFlagSettingsPanel();
+            } else {
+                console.error('Sacred Geometry Layer not available');
+            }
+        };
+    }
+    
+    applyFlagSettings() {
+        const flagTypeSelect = document.getElementById('flagTypeSelect');
+        const playerIdInput = document.getElementById('playerIdInput');
+        
+        if (flagTypeSelect && playerIdInput) {
+            const newType = flagTypeSelect.value;
+            const playerId = playerIdInput.value.trim();
+            
+            if (playerId) {
+                if (this.changePlayerFlagType(playerId, newType)) {
+                    alert(`Flag type changed to ${newType} for player ${playerId}`);
+                } else {
+                    alert(`Player ${playerId} not found. Creating new flag...`);
+                    this.addPlayerFlag(playerId, `Player ${playerId}`, 400, 300, newType);
+                }
+            } else {
+                alert('Please enter a player ID');
+            }
+        }
     }
     
     init() {
@@ -48,28 +295,79 @@ class SacredGeometryLayer extends RenderLayer {
     }
     
     loadFlags() {
-        // TODO: Integrate with existing Finnish flag system
-        // For now, create some test flags
+        // Enhanced flag system with different types and customizable flags
         this.flags = [
             {
-                id: 'flag_1',
+                id: 'flag_player_1',
+                playerId: 'player_001',
+                playerName: 'Aurora',
                 x: 100,
                 y: 100,
-                type: 'finnish',
+                type: 'cosmic', // cosmic, finnish, eldritch, void, rainbow
                 energy: 0.8,
-                connections: []
+                weight: 150, // ticks/weight for growth
+                baseSize: 20, // base flag size
+                currentSize: 20, // current rendered size
+                maxSize: 100, // maximum size achievable
+                connections: [],
+                clickable: true,
+                lastProximityCheck: 0,
+                proximityDecayRate: 0.1 // weight loss per second when player nearby
             },
             {
-                id: 'flag_2', 
+                id: 'flag_player_2', 
+                playerId: 'player_002',
+                playerName: 'Sage',
                 x: 300,
                 y: 200,
-                type: 'finnish',
+                type: 'eldritch',
                 energy: 0.6,
-                connections: []
+                weight: 80,
+                baseSize: 20,
+                currentSize: 20,
+                maxSize: 100,
+                connections: [],
+                clickable: true,
+                lastProximityCheck: 0,
+                proximityDecayRate: 0.1
+            },
+            {
+                id: 'flag_player_3',
+                playerId: 'player_003',
+                playerName: 'Void Walker', 
+                x: 500,
+                y: 150,
+                type: 'void',
+                energy: 0.9,
+                weight: 300,
+                baseSize: 20,
+                currentSize: 60, // larger due to more weight
+                maxSize: 100,
+                connections: [],
+                clickable: true,
+                lastProximityCheck: 0,
+                proximityDecayRate: 0.1
+            },
+            {
+                id: 'flag_player_4',
+                playerId: 'player_004',
+                playerName: 'Rainbow Seeker',
+                x: 200,
+                y: 350,
+                type: 'rainbow',
+                energy: 0.7,
+                weight: 200,
+                baseSize: 20,
+                currentSize: 40,
+                maxSize: 100,
+                connections: [],
+                clickable: true,
+                lastProximityCheck: 0,
+                proximityDecayRate: 0.1
             }
         ];
         
-        console.log(`🔮 Loaded ${this.flags.length} flags`);
+        console.log(`🔮 Loaded ${this.flags.length} flags with customizable types`);
     }
     
     loadPaths() {
@@ -114,6 +412,10 @@ class SacredGeometryLayer extends RenderLayer {
         // Update animation time
         this.animationTime += 0.016; // ~60fps
         
+        // Update flag growth and proximity effects
+        this.updateFlagGrowth();
+        this.updateProximityEffects();
+        
         // Render territories first (background)
         this.renderTerritories();
         
@@ -128,6 +430,72 @@ class SacredGeometryLayer extends RenderLayer {
         
         // Render energy fields
         this.renderEnergyFields();
+    }
+    
+    updateFlagGrowth() {
+        // Update flag sizes based on weight (10x more ticks for bigger flags)
+        this.flags.forEach(flag => {
+            // Calculate size based on weight: baseSize + (weight / 10) * growthFactor
+            const growthFactor = 0.8; // How much size increases per 10 ticks
+            const newSize = Math.min(
+                flag.baseSize + (flag.weight / 10) * growthFactor,
+                flag.maxSize
+            );
+            flag.currentSize = newSize;
+            
+            // Update energy based on size (bigger flags have more energy)
+            flag.energy = Math.min(0.5 + (flag.currentSize / flag.maxSize) * 0.5, 1.0);
+        });
+    }
+    
+    updateProximityEffects() {
+        // Get player position (if available)
+        const playerPosition = this.getPlayerPosition();
+        if (!playerPosition) return;
+        
+        const currentTime = Date.now();
+        const proximityRadius = 100; // pixels
+        
+        this.flags.forEach(flag => {
+            // Calculate distance to player
+            const dx = flag.x - playerPosition.x;
+            const dy = flag.y - playerPosition.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // If player is nearby, reduce flag weight
+            if (distance < proximityRadius) {
+                const timeSinceLastCheck = (currentTime - flag.lastProximityCheck) / 1000; // seconds
+                if (timeSinceLastCheck > 0.1) { // Check every 100ms
+                    const weightLoss = flag.proximityDecayRate * timeSinceLastCheck;
+                    flag.weight = Math.max(0, flag.weight - weightLoss);
+                    flag.lastProximityCheck = currentTime;
+                    
+                    // Visual effect: flag flickers when losing weight
+                    flag.energy *= 0.95;
+                }
+            } else {
+                // Gradually restore energy when player moves away
+                flag.energy = Math.min(flag.energy * 1.01, 1.0);
+            }
+        });
+    }
+    
+    getPlayerPosition() {
+        // Try to get player position from various sources
+        if (window.mapEngine && window.mapEngine.playerPosition) {
+            const pos = window.mapEngine.playerPosition;
+            // Convert lat/lng to screen coordinates (simplified)
+            return {
+                x: (pos.lng + 180) * (this.canvas.width / 360),
+                y: (90 - pos.lat) * (this.canvas.height / 180)
+            };
+        }
+        
+        // Fallback: return center of screen
+        return {
+            x: this.canvas.width / 2,
+            y: this.canvas.height / 2
+        };
     }
     
     renderTerritories() {
@@ -204,7 +572,7 @@ class SacredGeometryLayer extends RenderLayer {
     }
     
     renderFlag(flag) {
-        const { x, y, energy, type } = flag;
+        const { x, y, energy, type, currentSize, weight, playerId, playerName } = flag;
         
         this.ctx.save();
         
@@ -212,30 +580,160 @@ class SacredGeometryLayer extends RenderLayer {
         const pulse = Math.sin(this.animationTime * 2) * 0.2 + 0.8;
         this.ctx.globalAlpha = energy * pulse * 0.9;
         
-        // Flag base
-        this.ctx.fillStyle = this.getCosmicColor(energy);
-        this.ctx.fillRect(x - 15, y - 10, 30, 20);
+        // Calculate flag dimensions based on current size
+        const flagWidth = currentSize;
+        const flagHeight = currentSize * 0.6;
+        const poleWidth = Math.max(2, currentSize * 0.1);
+        const poleHeight = currentSize * 1.5;
+        
+        // Render different flag types
+        this.renderFlagByType(flag, x, y, flagWidth, flagHeight);
         
         // Flag pole
         this.ctx.fillStyle = '#8B4513';
-        this.ctx.fillRect(x - 2, y - 10, 4, 30);
+        this.ctx.fillRect(x - poleWidth/2, y - flagHeight/2, poleWidth, poleHeight);
         
-        // Sacred geometry around flag
+        // Sacred geometry around flag (scales with flag size)
         this.ctx.strokeStyle = this.getCosmicColor(energy);
-        this.ctx.lineWidth = 1;
+        this.ctx.lineWidth = Math.max(1, currentSize * 0.05);
         this.ctx.globalAlpha = energy * 0.6;
         
-        // Draw sacred circle
-        this.renderSacredCircle(x, y, 25);
+        // Draw sacred circle (scales with flag size)
+        this.renderSacredCircle(x, y, currentSize * 1.5);
         
-        // Draw energy field
+        // Draw energy field (scales with flag size)
         this.ctx.globalAlpha = energy * 0.3;
         this.ctx.fillStyle = this.getCosmicColor(energy);
         this.ctx.beginPath();
-        this.ctx.arc(x, y, 35, 0, Math.PI * 2);
+        this.ctx.arc(x, y, currentSize * 2, 0, Math.PI * 2);
         this.ctx.fill();
         
+        // Add clickable indicator for flags with statistics
+        if (flag.clickable) {
+            this.ctx.globalAlpha = 0.8;
+            this.ctx.fillStyle = '#FFD700';
+            this.ctx.beginPath();
+            this.ctx.arc(x + flagWidth/2 + 5, y - flagHeight/2 - 5, 3, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+        
         this.ctx.restore();
+    }
+    
+    renderFlagByType(flag, x, y, width, height) {
+        const { type, energy, currentSize } = flag;
+        
+        switch (type) {
+            case 'finnish':
+                this.renderFinnishFlag(x, y, width, height);
+                break;
+            case 'cosmic':
+                this.renderCosmicFlag(x, y, width, height, energy);
+                break;
+            case 'eldritch':
+                this.renderEldritchFlag(x, y, width, height, energy);
+                break;
+            case 'void':
+                this.renderVoidFlag(x, y, width, height, energy);
+                break;
+            case 'rainbow':
+                this.renderRainbowFlag(x, y, width, height, energy);
+                break;
+            default:
+                this.renderCosmicFlag(x, y, width, height, energy);
+        }
+    }
+    
+    renderFinnishFlag(x, y, width, height) {
+        // Finnish flag colors
+        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillRect(x - width/2, y - height/2, width, height);
+        
+        // Finnish flag cross
+        this.ctx.fillStyle = '#003580';
+        this.ctx.fillRect(x - width/2, y - height/6, width, height/3);
+        this.ctx.fillRect(x - width/6, y - height/2, width/3, height);
+    }
+    
+    renderCosmicFlag(x, y, width, height, energy) {
+        // Cosmic flag with stars and nebula colors
+        const gradient = this.ctx.createLinearGradient(x - width/2, y - height/2, x + width/2, y + height/2);
+        gradient.addColorStop(0, '#1a1a2e');
+        gradient.addColorStop(0.5, '#16213e');
+        gradient.addColorStop(1, '#0f3460');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(x - width/2, y - height/2, width, height);
+        
+        // Stars
+        this.ctx.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 5; i++) {
+            const starX = x - width/2 + (width * i / 4);
+            const starY = y - height/2 + (height * Math.random());
+            this.ctx.beginPath();
+            this.ctx.arc(starX, starY, 1, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+    }
+    
+    renderEldritchFlag(x, y, width, height, energy) {
+        // Eldritch flag with tentacles and dark colors
+        this.ctx.fillStyle = '#2d1b69';
+        this.ctx.fillRect(x - width/2, y - height/2, width, height);
+        
+        // Tentacle pattern
+        this.ctx.strokeStyle = '#8b5cf6';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - width/3, y - height/2);
+        this.ctx.quadraticCurveTo(x, y, x + width/3, y + height/2);
+        this.ctx.stroke();
+        
+        // Eyes
+        this.ctx.fillStyle = '#ff6b6b';
+        this.ctx.beginPath();
+        this.ctx.arc(x - width/4, y - height/4, 2, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.beginPath();
+        this.ctx.arc(x + width/4, y + height/4, 2, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+    
+    renderVoidFlag(x, y, width, height, energy) {
+        // Void flag with black hole effect
+        const gradient = this.ctx.createRadialGradient(x, y, 0, x, y, width/2);
+        gradient.addColorStop(0, '#000000');
+        gradient.addColorStop(0.7, '#1a1a1a');
+        gradient.addColorStop(1, '#2d2d2d');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(x - width/2, y - height/2, width, height);
+        
+        // Void swirl
+        this.ctx.strokeStyle = '#4a4a4a';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+            const radius = (width/4) * (i + 1);
+            this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+        }
+        this.ctx.stroke();
+    }
+    
+    renderRainbowFlag(x, y, width, height, energy) {
+        // Rainbow flag with vibrant colors
+        const colors = ['#ff0000', '#ff8000', '#ffff00', '#00ff00', '#0080ff', '#8000ff'];
+        const stripeHeight = height / colors.length;
+        
+        colors.forEach((color, index) => {
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(
+                x - width/2, 
+                y - height/2 + (stripeHeight * index), 
+                width, 
+                stripeHeight
+            );
+        });
     }
     
     renderCosmicConnections() {
