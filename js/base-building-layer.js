@@ -480,47 +480,8 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     renderAnt(x, y, size) {
-        // Simple ant SVG-like rendering
-        this.ctx.fillStyle = '#8B4513'; // Brown color
-        
-        // Ant body (3 segments)
-        this.ctx.beginPath();
-        this.ctx.arc(x - size/3, y, size/4, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, size/3, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        this.ctx.beginPath();
-        this.ctx.arc(x + size/3, y, size/4, 0, Math.PI * 2);
-        this.ctx.fill();
-        
-        // Ant legs
-        this.ctx.strokeStyle = '#8B4513';
-        this.ctx.lineWidth = 1;
-        this.ctx.beginPath();
-        this.ctx.moveTo(x - size/3, y - size/4);
-        this.ctx.lineTo(x - size/2, y - size/2);
-        this.ctx.moveTo(x - size/3, y + size/4);
-        this.ctx.lineTo(x - size/2, y + size/2);
-        this.ctx.moveTo(x, y - size/4);
-        this.ctx.lineTo(x - size/6, y - size/2);
-        this.ctx.moveTo(x, y + size/4);
-        this.ctx.lineTo(x - size/6, y + size/2);
-        this.ctx.moveTo(x + size/3, y - size/4);
-        this.ctx.lineTo(x + size/2, y - size/2);
-        this.ctx.moveTo(x + size/3, y + size/4);
-        this.ctx.lineTo(x + size/2, y + size/2);
-        this.ctx.stroke();
-        
-        // Ant antennae
-        this.ctx.beginPath();
-        this.ctx.moveTo(x - size/3, y - size/4);
-        this.ctx.lineTo(x - size/2, y - size/2);
-        this.ctx.moveTo(x - size/3, y - size/4);
-        this.ctx.lineTo(x - size/2, y - size/2);
-        this.ctx.stroke();
+        // Use player's selected symbol for walking trail instead of ant
+        this.renderWalkingSymbol(x, y, size);
     }
 
     renderJointFlag(x, y, size) {
@@ -544,26 +505,48 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     renderFlagIcon(x, y, size) {
-        // Get player's selected flag type
-        const flagType = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
-        
-        // Simple flag rendering based on type
-        this.ctx.fillStyle = '#ffffff';
-        this.ctx.fillRect(x - size/2, y - size/2, size, size);
-        
-        this.ctx.strokeStyle = '#000000';
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(x - size/2, y - size/2, size, size);
-        
-        // Add flag type indicator
-        this.ctx.fillStyle = '#000000';
-        this.ctx.font = '10px Arial';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(flagType.charAt(0).toUpperCase(), x, y);
+        // Use player's selected walking symbol for regular flags
+        this.renderWalkingSymbol(x, y, size);
     }
 
-    // Render flag symbol for bases and flags
+    // Render walking symbol for player trail (from Symbol section)
+    renderWalkingSymbol(x, y, size) {
+        const symbolType = localStorage.getItem('eldritch_player_symbol') || 'sun';
+        
+        this.ctx.save();
+        
+        if (symbolType === 'sun') {
+            this.renderSunSymbol(x, y, size);
+        } else if (symbolType === 'star') {
+            this.renderStarSymbol(x, y, size);
+        } else if (symbolType === 'sparkle') {
+            this.renderSparkleSymbol(x, y, size);
+        } else if (symbolType === 'crescent') {
+            this.renderCrescentSymbol(x, y, size);
+        } else if (symbolType === 'diamond') {
+            this.renderDiamondSymbol(x, y, size);
+        } else if (symbolType === 'aurora') {
+            this.renderAuroraSymbol(x, y, size);
+        } else if (symbolType === 'lightning') {
+            this.renderLightningSymbol(x, y, size);
+        } else if (symbolType === 'flame') {
+            this.renderFlameSymbol(x, y, size);
+        } else if (symbolType === 'snowflake') {
+            this.renderSnowflakeSymbol(x, y, size);
+        } else if (symbolType === 'wave') {
+            this.renderWaveSymbol(x, y, size);
+        } else {
+            // Default to a simple circle
+            this.ctx.fillStyle = '#ff6b35';
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+        
+        this.ctx.restore();
+    }
+
+    // Render flag symbol for bases and flags (from Path Symbol section)
     renderFlagSymbol(x, y, size, context = 'flag') {
         const flagType = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
         
@@ -578,10 +561,16 @@ class BaseBuildingLayer extends RenderLayer {
             this.renderSwedishFlag(x, y, symbolSize);
         } else if (flagType === 'norwegian') {
             this.renderNorwegianFlag(x, y, symbolSize);
-        } else if (flagType === 'cosmic') {
-            this.renderCosmicSymbol(x, y, symbolSize);
-        } else if (flagType === 'eldritch') {
-            this.renderEldritchSymbol(x, y, symbolSize);
+        } else if (flagType === 'flower_of_life') {
+            this.renderFlowerOfLifeSymbol(x, y, symbolSize);
+        } else if (flagType === 'sacred_triangle') {
+            this.renderSacredTriangleSymbol(x, y, symbolSize);
+        } else if (flagType === 'hexagon') {
+            this.renderHexagonSymbol(x, y, symbolSize);
+        } else if (flagType === 'cosmic_spiral') {
+            this.renderCosmicSpiralSymbol(x, y, symbolSize);
+        } else if (flagType === 'star') {
+            this.renderStarSymbol(x, y, symbolSize);
         } else {
             // Default to a simple circle with symbol
             this.ctx.fillStyle = '#8b5cf6';
@@ -725,6 +714,242 @@ class BaseBuildingLayer extends RenderLayer {
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         this.ctx.fillText('👣', x, y);
+    }
+
+    // Walking symbol rendering methods (from Symbol section)
+    renderSunSymbol(x, y, size) {
+        // Yellow sunburst
+        this.ctx.fillStyle = '#ffd700';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Sun rays
+        this.ctx.strokeStyle = '#ffd700';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI) / 4;
+            const x1 = x + Math.cos(angle) * (size/2 + 2);
+            const y1 = y + Math.sin(angle) * (size/2 + 2);
+            const x2 = x + Math.cos(angle) * (size/2 + 6);
+            const y2 = y + Math.sin(angle) * (size/2 + 6);
+            
+            this.ctx.moveTo(x1, y1);
+            this.ctx.lineTo(x2, y2);
+        }
+        this.ctx.stroke();
+    }
+
+    renderStarSymbol(x, y, size) {
+        // Five-pointed star
+        this.ctx.fillStyle = '#ffd700';
+        this.ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+            const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+            const x1 = x + Math.cos(angle) * (size/2);
+            const y1 = y + Math.sin(angle) * (size/2);
+            if (i === 0) {
+                this.ctx.moveTo(x1, y1);
+            } else {
+                this.ctx.lineTo(x1, y1);
+            }
+        }
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+
+    renderSparkleSymbol(x, y, size) {
+        // Sparkling star
+        this.ctx.fillStyle = '#ff8c00';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/3, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Sparkle lines
+        this.ctx.strokeStyle = '#ffd700';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - size/2, y);
+        this.ctx.lineTo(x + size/2, y);
+        this.ctx.moveTo(x, y - size/2);
+        this.ctx.lineTo(x, y + size/2);
+        this.ctx.moveTo(x - size/3, y - size/3);
+        this.ctx.lineTo(x + size/3, y + size/3);
+        this.ctx.moveTo(x - size/3, y + size/3);
+        this.ctx.lineTo(x + size/3, y - size/3);
+        this.ctx.stroke();
+    }
+
+    renderCrescentSymbol(x, y, size) {
+        // Crescent moon
+        this.ctx.fillStyle = '#ffd700';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Cut out crescent shape
+        this.ctx.fillStyle = '#000000';
+        this.ctx.beginPath();
+        this.ctx.arc(x + size/4, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+
+    renderDiamondSymbol(x, y, size) {
+        // Diamond shape
+        this.ctx.fillStyle = '#87ceeb';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y - size/2);
+        this.ctx.lineTo(x + size/2, y);
+        this.ctx.lineTo(x, y + size/2);
+        this.ctx.lineTo(x - size/2, y);
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+
+    renderAuroraSymbol(x, y, size) {
+        // Aurora-like wavy lines
+        this.ctx.strokeStyle = '#8b5cf6';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+            const offset = (i - 1) * size/6;
+            this.ctx.moveTo(x - size/2, y + offset);
+            for (let j = 0; j <= 10; j++) {
+                const t = j / 10;
+                const waveX = x - size/2 + (size * t);
+                const waveY = y + offset + Math.sin(t * Math.PI * 3) * size/8;
+                this.ctx.lineTo(waveX, waveY);
+            }
+        }
+        this.ctx.stroke();
+    }
+
+    renderLightningSymbol(x, y, size) {
+        // Lightning bolt
+        this.ctx.fillStyle = '#ffd700';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - size/4, y - size/2);
+        this.ctx.lineTo(x + size/4, y - size/6);
+        this.ctx.lineTo(x - size/6, y);
+        this.ctx.lineTo(x + size/4, y + size/2);
+        this.ctx.lineTo(x - size/4, y + size/6);
+        this.ctx.lineTo(x + size/6, y);
+        this.ctx.closePath();
+        this.ctx.fill();
+    }
+
+    renderFlameSymbol(x, y, size) {
+        // Flame shape
+        this.ctx.fillStyle = '#ff6b35';
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y + size/2);
+        this.ctx.quadraticCurveTo(x - size/3, y - size/2, x, y - size/2);
+        this.ctx.quadraticCurveTo(x + size/3, y - size/2, x, y + size/2);
+        this.ctx.fill();
+    }
+
+    renderSnowflakeSymbol(x, y, size) {
+        // Snowflake
+        this.ctx.strokeStyle = '#87ceeb';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        // Main cross
+        this.ctx.moveTo(x, y - size/2);
+        this.ctx.lineTo(x, y + size/2);
+        this.ctx.moveTo(x - size/2, y);
+        this.ctx.lineTo(x + size/2, y);
+        // Diagonal lines
+        this.ctx.moveTo(x - size/3, y - size/3);
+        this.ctx.lineTo(x + size/3, y + size/3);
+        this.ctx.moveTo(x - size/3, y + size/3);
+        this.ctx.lineTo(x + size/3, y - size/3);
+        this.ctx.stroke();
+    }
+
+    renderWaveSymbol(x, y, size) {
+        // Wave
+        this.ctx.strokeStyle = '#87ceeb';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - size/2, y);
+        for (let i = 0; i <= 10; i++) {
+            const t = i / 10;
+            const waveX = x - size/2 + (size * t);
+            const waveY = y + Math.sin(t * Math.PI * 2) * size/4;
+            this.ctx.lineTo(waveX, waveY);
+        }
+        this.ctx.stroke();
+    }
+
+    // Path symbol rendering methods (from Path Symbol section)
+    renderFlowerOfLifeSymbol(x, y, size) {
+        // Flower of Life pattern (simplified)
+        this.ctx.strokeStyle = '#8b5cf6';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        
+        // Central circle
+        this.ctx.arc(x, y, size/4, 0, Math.PI * 2);
+        
+        // Six surrounding circles
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * Math.PI) / 3;
+            const circleX = x + Math.cos(angle) * size/3;
+            const circleY = y + Math.sin(angle) * size/3;
+            this.ctx.arc(circleX, circleY, size/6, 0, Math.PI * 2);
+        }
+        
+        this.ctx.stroke();
+    }
+
+    renderSacredTriangleSymbol(x, y, size) {
+        // Sacred triangle
+        this.ctx.strokeStyle = '#2ed573';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y - size/2);
+        this.ctx.lineTo(x - size/2, y + size/2);
+        this.ctx.lineTo(x + size/2, y + size/2);
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    renderHexagonSymbol(x, y, size) {
+        // Hexagon
+        this.ctx.strokeStyle = '#ff6b35';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * Math.PI) / 3;
+            const x1 = x + Math.cos(angle) * (size/2);
+            const y1 = y + Math.sin(angle) * (size/2);
+            if (i === 0) {
+                this.ctx.moveTo(x1, y1);
+            } else {
+                this.ctx.lineTo(x1, y1);
+            }
+        }
+        this.ctx.closePath();
+        this.ctx.stroke();
+    }
+
+    renderCosmicSpiralSymbol(x, y, size) {
+        // Cosmic spiral (infinity symbol)
+        this.ctx.strokeStyle = '#ff69b4';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        
+        const centerX = x;
+        const centerY = y;
+        const radius = size/3;
+        
+        // Left loop
+        this.ctx.arc(centerX - radius/2, centerY, radius/2, 0, Math.PI * 2);
+        // Right loop
+        this.ctx.arc(centerX + radius/2, centerY, radius/2, 0, Math.PI * 2);
+        
+        this.ctx.stroke();
     }
 
     // Public methods for external use
