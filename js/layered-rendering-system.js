@@ -224,8 +224,14 @@ class RenderLayer {
         // Set canvas size
         this.resizeCanvas();
         
-        // Add to DOM
-        document.body.appendChild(this.canvas);
+        // Add to map container instead of document.body
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+            mapContainer.appendChild(this.canvas);
+        } else {
+            console.warn(`🎨 Map container not found for layer ${this.name}, adding to body as fallback`);
+            document.body.appendChild(this.canvas);
+        }
         
         // Get context
         this.ctx = this.canvas.getContext('2d');
@@ -236,8 +242,16 @@ class RenderLayer {
     
     resizeCanvas() {
         if (this.canvas) {
-            this.canvas.width = window.innerWidth;
-            this.canvas.height = window.innerHeight;
+            const mapContainer = document.getElementById('map');
+            if (mapContainer) {
+                const rect = mapContainer.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+            } else {
+                // Fallback to window size
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
         }
     }
     
