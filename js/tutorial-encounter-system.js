@@ -271,8 +271,10 @@ class TutorialEncounterSystem {
         this.tutorialStage = 1;
         this.clearAllMarkers();
         
-        // Show welcome message and set up initial state
-        this.showWelcomeMessage();
+        // Show welcome message and set up initial state (with small delay)
+        setTimeout(() => {
+            this.showWelcomeMessage();
+        }, 1000); // 1 second delay to let intro screen show
         
         // Set player health to 50/100 (wounded state)
         this.setPlayerHealth(50);

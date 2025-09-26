@@ -21,6 +21,8 @@ class WelcomeScreen {
         if (tutorialActive) {
             console.log('🎓 Tutorial active - skipping welcome screen');
             this.hideWelcomeScreen();
+            // Initialize game for tutorial
+            this.initializeGame(true); // true = reset everything for tutorial
             return;
         }
         
