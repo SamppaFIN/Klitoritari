@@ -101,8 +101,10 @@ class LayeredRenderingSystem {
             'particles', 
             'mapBackground',
             'sacredGeometry',
+            'baseBuilding',
             'mapObjects',
             'ui',
+            'uiControls',
             'interaction',
             'notifications'
         ];
@@ -182,9 +184,10 @@ class LayeredRenderingSystem {
 
 // Base Layer Class
 class RenderLayer {
-    constructor(name, zIndex) {
+    constructor(name, zIndex, pointerEvents = 'none') {
         this.name = name;
         this.zIndex = zIndex;
+        this.pointerEvents = pointerEvents;
         this.canvas = null;
         this.ctx = null;
         this.visible = true;
@@ -204,7 +207,7 @@ class RenderLayer {
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
         this.canvas.style.zIndex = this.zIndex.toString();
-        this.canvas.style.pointerEvents = 'none';
+        this.canvas.style.pointerEvents = this.pointerEvents;
         
         // Set canvas size
         this.resizeCanvas();

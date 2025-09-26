@@ -274,7 +274,12 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     render() {
-        super.render(); // Clear canvas
+        if (!this.isInitialized || !this.visible) return;
+        
+        // Clear canvas
+        if (this.ctx) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
         
         // Debug logging
         if (this.bases.length > 0) {
