@@ -742,8 +742,14 @@ class UnifiedQuestSystem {
     // Returns true if shrine auto-triggering is enabled via localStorage
     isShrineAutoEnabled() {
         try {
-            return localStorage.getItem('enable_shrine_autotrigger') === 'true';
-        } catch (_) { return false; }
+            // Enable shrine auto-triggering by default for testing
+            const enabled = localStorage.getItem('enable_shrine_autotrigger');
+            if (enabled === null) {
+                localStorage.setItem('enable_shrine_autotrigger', 'true');
+                return true;
+            }
+            return enabled === 'true';
+        } catch (_) { return true; } // Default to enabled
     }
     
     checkAuroraProximity(playerPosition) {
@@ -999,6 +1005,47 @@ class UnifiedQuestSystem {
                 emoji: '🍀',
                 color: '#10b981',
                 description: 'Increases luck and rare item chances'
+            },
+            // Test shrines in Helsinki for easier testing
+            {
+                id: 'test_healing',
+                lat: 60.1699,
+                lng: 24.9384,
+                type: 'healing',
+                name: 'Test Healing Shrine',
+                emoji: '❤️',
+                color: '#ff0000',
+                description: 'Test shrine for healing'
+            },
+            {
+                id: 'test_power',
+                lat: 60.1700,
+                lng: 24.9400,
+                type: 'power',
+                name: 'Test Power Shrine',
+                emoji: '⚡',
+                color: '#ff8800',
+                description: 'Test shrine for power'
+            },
+            {
+                id: 'test_wisdom',
+                lat: 60.1680,
+                lng: 24.9360,
+                type: 'wisdom',
+                name: 'Test Wisdom Shrine',
+                emoji: '🧠',
+                color: '#0080ff',
+                description: 'Test shrine for wisdom'
+            },
+            {
+                id: 'test_luck',
+                lat: 60.1710,
+                lng: 24.9350,
+                type: 'luck',
+                name: 'Test Luck Shrine',
+                emoji: '🍀',
+                color: '#00ff88',
+                description: 'Test shrine for luck'
             }
         ];
         
@@ -1017,9 +1064,14 @@ class UnifiedQuestSystem {
                 
                 if (!lastVisit || now - lastVisit > 15000) { // 15 second cooldown
                     console.log(`⛩️ Player near ${shrine.name}! Distance: ${distance.toFixed(2)}m`);
+                    window.log(`⛩️ Player near ${shrine.name}! Distance: ${distance.toFixed(2)}m`);
                     this.activateShrine(shrine);
                     this[shrineKey] = now;
                 }
+            } else if (distance <= 100) {
+                // Log when player is getting close (within 100m)
+                console.log(`⛩️ Approaching ${shrine.name}, distance: ${distance.toFixed(2)}m`);
+                window.log(`⛩️ Approaching ${shrine.name}, distance: ${distance.toFixed(2)}m`);
             }
         });
     }

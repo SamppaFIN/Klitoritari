@@ -803,6 +803,48 @@ html, body {
     background: linear-gradient(to right, #ff0000, #ff8000, #ffff00, #00ff00, #0080ff, #8000ff);
 }
 
+/* Path Symbol Options Grid */
+.path-symbol-options-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.path-symbol-option {
+    padding: 12px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+.path-symbol-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #00ff88;
+    transform: scale(1.05);
+}
+
+.path-symbol-option.selected {
+    background: rgba(0, 255, 136, 0.2);
+    border-color: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.path-symbol-option svg {
+    margin-bottom: 4px;
+}
+
 /* Enhanced Input Styling */
 .cosmic-input {
     width: 100%;
@@ -7906,6 +7948,8 @@ input[type="range"]::-moz-range-thumb {
     margin-bottom: 20px;
     text-align: center;
     animation: gpsPulse 2s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 2000;
 }
 
 @keyframes gpsPulse {
@@ -7950,6 +7994,8 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
     font-size: 1.3rem;
     padding: 18px 35px;
+    position: relative;
+    z-index: 2001;
 }
 
 .welcome-btn.gps-btn:hover {

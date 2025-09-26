@@ -1,9 +1,9 @@
 /**
- * Finnish Flag Canvas Layer
- * Renders Finnish flags on a dedicated canvas layer with different sizes and rotations
+ * Symbol Canvas Layer
+ * Renders various symbols (flags, sacred geometry, etc.) on a dedicated canvas layer with different sizes and rotations
  */
 
-class FinnishFlagCanvasLayer {
+class SymbolCanvasLayer {
     constructor(mapEngine) {
         this.mapEngine = mapEngine;
         this.canvas = null;
@@ -281,15 +281,74 @@ class FinnishFlagCanvasLayer {
         };
     }
     
-    drawFinnishFlag(x, y, size, rotation) {
+    drawSymbol(x, y, size, rotation, symbolType = 'finnish') {
         const ctx = this.ctx;
         const halfSize = size / 2;
-        const crossWidth = Math.max(2, size / 8);
-        const colors = this.colorSchemes[this.currentColorScheme];
         
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(rotation);
+        
+        // Draw different symbols based on type
+        switch (symbolType) {
+            case 'finnish':
+                this.drawFinnishFlag(ctx, x, y, size, halfSize);
+                break;
+            case 'swedish':
+                this.drawSwedishFlag(ctx, x, y, size, halfSize);
+                break;
+            case 'norwegian':
+                this.drawNorwegianFlag(ctx, x, y, size, halfSize);
+                break;
+            case 'flower':
+                this.drawFlowerOfLife(ctx, x, y, size, halfSize);
+                break;
+            case 'triangle':
+                this.drawTriangle(ctx, x, y, size, halfSize);
+                break;
+            case 'hex':
+                this.drawHexagon(ctx, x, y, size, halfSize);
+                break;
+            case 'spiral':
+                this.drawSpiral(ctx, x, y, size, halfSize);
+                break;
+            case 'star':
+                this.drawStar(ctx, x, y, size, halfSize);
+                break;
+            case 'circle':
+                this.drawCircle(ctx, x, y, size, halfSize);
+                break;
+            case 'diamond':
+                this.drawDiamond(ctx, x, y, size, halfSize);
+                break;
+            case 'pentagram':
+                this.drawPentagram(ctx, x, y, size, halfSize);
+                break;
+            case 'infinity':
+                this.drawInfinity(ctx, x, y, size, halfSize);
+                break;
+            case 'yin-yang':
+                this.drawYinYang(ctx, x, y, size, halfSize);
+                break;
+            case 'cross':
+                this.drawCross(ctx, x, y, size, halfSize);
+                break;
+            case 'moon':
+                this.drawMoon(ctx, x, y, size, halfSize);
+                break;
+            case 'sun':
+                this.drawSun(ctx, x, y, size, halfSize);
+                break;
+            default:
+                this.drawFinnishFlag(ctx, x, y, size, halfSize);
+        }
+        
+        ctx.restore();
+    }
+    
+    drawFinnishFlag(ctx, x, y, size, halfSize) {
+        const crossWidth = Math.max(2, size / 8);
+        const colors = this.colorSchemes[this.currentColorScheme];
         
         // Draw white background
         ctx.fillStyle = colors.white;
@@ -313,8 +372,6 @@ class FinnishFlagCanvasLayer {
         ctx.strokeStyle = colors.blue;
         ctx.lineWidth = 0.5;
         ctx.strokeRect(-halfSize, -halfSize, size, size);
-        
-        ctx.restore();
     }
     
     render() {
@@ -342,31 +399,7 @@ class FinnishFlagCanvasLayer {
                 // Add rotation animation
                 const animatedRotation = pin.rotation + (this.rotationPhase * 0.1);
                 const sym = pin.symbol || 'finnish';
-                switch (sym) {
-                    case 'triangle':
-                        this.drawTriangle(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    case 'hex':
-                        this.drawHexagon(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    case 'star':
-                        this.drawStar(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    case 'spiral':
-                        this.drawSpiral(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    case 'flower':
-                        this.drawFlower(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    case 'swedish':
-                        this.drawSwedishFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    case 'norwegian':
-                        this.drawNorwegianFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                        break;
-                    default:
-                        this.drawFinnishFlag(canvasPos.x, canvasPos.y, pin.size, animatedRotation);
-                }
+                this.drawSymbol(canvasPos.x, canvasPos.y, pin.size, animatedRotation, sym);
             }
         });
     }

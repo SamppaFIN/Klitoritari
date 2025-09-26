@@ -2610,20 +2610,21 @@ class EldritchSanctuaryApp {
         }
 
         // Initialize quest system
-        this.systems.quest = new UnifiedQuestSystem();
-        this.systems.quest.init();
+        // DISABLED for base building focus
+        // this.systems.quest = new UnifiedQuestSystem();
+        // this.systems.quest.init();
         
-        // Initialize encounter system
-        this.systems.encounter = new EncounterSystem();
-        this.systems.encounter.init();
+        // DISABLED for base building focus
+        // this.systems.encounter = new EncounterSystem();
+        // this.systems.encounter.init();
         
-        // Initialize NPC system
-        try {
-            this.systems.npc = new NPCSystem();
-            this.systems.npc.init();
-        } catch (e) {
-            console.warn('👥 NPC system failed to initialize:', e?.message || e);
-        }
+        // DISABLED for base building focus
+        // try {
+        //     this.systems.npc = new NPCSystem();
+        //     this.systems.npc.init();
+        // } catch (e) {
+        //     console.warn('👥 NPC system failed to initialize:', e?.message || e);
+        // }
 
         // Initialize base system
         this.systems.base = new BaseSystem();
@@ -2644,6 +2645,24 @@ class EldritchSanctuaryApp {
         // Initialize step currency system
         this.systems.stepCurrency = new StepCurrencySystem();
         this.systems.stepCurrency.init();
+        
+        // Connect base building layer to step currency system
+        if (this.systems.layeredRendering) {
+            const baseBuildingLayer = this.systems.layeredRendering.getLayer('baseBuilding');
+            if (baseBuildingLayer) {
+                this.systems.stepCurrency.setBaseBuildingLayer(baseBuildingLayer);
+            }
+            
+            // Set up global logging functions using UI controls layer
+            const uiControlsLayer = this.systems.layeredRendering.getLayer('uiControls');
+            if (uiControlsLayer) {
+                window.log = (message, type = 'info') => uiControlsLayer.addLog(message, type);
+                window.logError = (message) => uiControlsLayer.addLog(message, 'error');
+                window.logWarn = (message) => uiControlsLayer.addLog(message, 'warn');
+                window.logInfo = (message) => uiControlsLayer.addLog(message, 'info');
+                console.log('📱 Global logging functions connected to UI Controls Layer');
+            }
+        }
         
         // Initialize session persistence
         this.systems.sessionPersistence = new SessionPersistenceManager();

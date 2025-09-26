@@ -249,19 +249,22 @@ class WelcomeScreen {
             ).join('');
         }
         
-        // Load saved flag type or set default
-        const savedFlagType = localStorage.getItem('eldritch_player_flag_type') || 'cosmic';
-        const flagGrid = document.getElementById('flag-options');
-        if (flagGrid) {
-            // Select the saved flag type
-            const flagOption = flagGrid.querySelector(`[data-flag-type="${savedFlagType}"]`);
-            if (flagOption) {
-                flagOption.classList.add('selected');
+        // Load saved path symbol or set default
+        const savedPathSymbol = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
+        const pathSymbolGrid = document.getElementById('path-symbol-options');
+        if (pathSymbolGrid) {
+            // Generate SVG symbol options
+            this.populatePathSymbolOptions(pathSymbolGrid);
+            
+            // Select the saved path symbol
+            const pathSymbolOption = pathSymbolGrid.querySelector(`[data-symbol="${savedPathSymbol}"]`);
+            if (pathSymbolOption) {
+                pathSymbolOption.classList.add('selected');
             } else {
-                // Default to cosmic if saved type not found
-                const cosmicOption = flagGrid.querySelector('[data-flag-type="cosmic"]');
-                if (cosmicOption) {
-                    cosmicOption.classList.add('selected');
+                // Default to finnish if saved symbol not found
+                const finnishOption = pathSymbolGrid.querySelector('[data-symbol="finnish"]');
+                if (finnishOption) {
+                    finnishOption.classList.add('selected');
                 }
             }
         }
@@ -287,6 +290,165 @@ class WelcomeScreen {
         const hexColor = this.rgbToHex(r, g, b);
         if (colorPreview) colorPreview.style.background = hexColor;
         if (colorPicker) colorPicker.value = hexColor;
+    }
+    
+    populatePathSymbolOptions(grid) {
+        const symbols = [
+            { id: 'finnish', label: 'Finnish Flag', svg: this.svgFinnishFlag(36) },
+            { id: 'swedish', label: 'Swedish Flag', svg: this.svgSwedishFlag(36) },
+            { id: 'norwegian', label: 'Norwegian Flag', svg: this.svgNorwegianFlag(36) },
+            { id: 'flower', label: 'Flower of Life', svg: this.svgFlowerOfLife(36) },
+            { id: 'triangle', label: 'Sacred Triangle', svg: this.svgTriangle(36) },
+            { id: 'hex', label: 'Hexagon', svg: this.svgHexagon(36) },
+            { id: 'spiral', label: 'Cosmic Spiral', svg: this.svgSpiral(36) },
+            { id: 'star', label: 'Star', svg: this.svgStar(36) },
+            { id: 'circle', label: 'Sacred Circle', svg: this.svgCircle(36) },
+            { id: 'diamond', label: 'Cosmic Diamond', svg: this.svgDiamond(36) },
+            { id: 'pentagram', label: 'Pentagram', svg: this.svgPentagram(36) },
+            { id: 'infinity', label: 'Infinity Symbol', svg: this.svgInfinity(36) },
+            { id: 'yin-yang', label: 'Yin Yang', svg: this.svgYinYang(36) },
+            { id: 'cross', label: 'Celtic Cross', svg: this.svgCross(36) },
+            { id: 'moon', label: 'Crescent Moon', svg: this.svgMoon(36) },
+            { id: 'sun', label: 'Solar Disc', svg: this.svgSun(36) }
+        ];
+        
+        grid.innerHTML = symbols.map(opt => `
+            <div class="path-symbol-option" data-symbol="${opt.id}" title="${opt.label}">
+                ${opt.svg}
+                <span>${opt.label}</span>
+            </div>
+        `).join('');
+    }
+    
+    // SVG generation methods (copied from tutorial system)
+    svgFinnishFlag(size) {
+        return `<svg width="${size}" height="${size*0.66}" viewBox="0 0 60 40">
+            <rect width="60" height="40" fill="#FFFFFF"/>
+            <rect x="0" y="16" width="60" height="8" fill="#003580"/>
+            <rect x="20" y="0" width="8" height="40" fill="#003580"/>
+        </svg>`;
+    }
+    
+    svgSwedishFlag(size) {
+        return `<svg width="${size}" height="${size*0.66}" viewBox="0 0 60 40">
+            <rect width="60" height="40" fill="#006AA7"/>
+            <rect x="0" y="16" width="60" height="8" fill="#FECC00"/>
+            <rect x="20" y="0" width="8" height="40" fill="#FECC00"/>
+        </svg>`;
+    }
+    
+    svgNorwegianFlag(size) {
+        return `<svg width="${size}" height="${size*0.66}" viewBox="0 0 60 40">
+            <rect width="60" height="40" fill="#EF2B2D"/>
+            <rect x="0" y="16" width="60" height="8" fill="#FFFFFF"/>
+            <rect x="20" y="0" width="8" height="40" fill="#FFFFFF"/>
+            <rect x="0" y="18" width="60" height="4" fill="#002868"/>
+            <rect x="22" y="0" width="4" height="40" fill="#002868"/>
+        </svg>`;
+    }
+    
+    svgFlowerOfLife(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="10" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+            <circle cx="20" cy="20" r="10" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+            <circle cx="40" cy="20" r="10" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+            <circle cx="20" cy="40" r="10" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+            <circle cx="40" cy="40" r="10" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+        </svg>`;
+    }
+    
+    svgTriangle(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <polygon points="30,10 50,45 10,45" fill="none" stroke="#00ff88" stroke-width="3"/>
+            <polygon points="30,20 45,40 15,40" fill="#00ff88" opacity="0.3"/>
+        </svg>`;
+    }
+    
+    svgHexagon(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <polygon points="30,5 50,20 50,40 30,55 10,40 10,20" fill="none" stroke="#ff8800" stroke-width="2"/>
+            <polygon points="30,15 45,25 45,35 30,45 15,35 15,25" fill="#ff8800" opacity="0.3"/>
+        </svg>`;
+    }
+    
+    svgSpiral(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M30,30 Q20,20 30,10 Q40,20 30,30 Q20,40 30,50 Q40,40 30,30" 
+                  fill="none" stroke="#ff69b4" stroke-width="2"/>
+        </svg>`;
+    }
+    
+    svgStar(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <polygon points="30,5 35,20 50,20 40,30 45,45 30,35 15,45 20,30 10,20 25,20" 
+                      fill="#ffff00" stroke="#ff8800" stroke-width="1"/>
+        </svg>`;
+    }
+    
+    svgCircle(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="25" fill="none" stroke="#0080ff" stroke-width="3"/>
+            <circle cx="30" cy="30" r="15" fill="#0080ff" opacity="0.3"/>
+        </svg>`;
+    }
+    
+    svgDiamond(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <polygon points="30,5 55,30 30,55 5,30" fill="none" stroke="#ff0040" stroke-width="2"/>
+            <polygon points="30,15 45,30 30,45 15,30" fill="#ff0040" opacity="0.3"/>
+        </svg>`;
+    }
+    
+    svgPentagram(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <polygon points="30,5 35,25 55,25 40,35 45,55 30,45 15,55 20,35 5,25 25,25" 
+                      fill="none" stroke="#6a0dad" stroke-width="2"/>
+        </svg>`;
+    }
+    
+    svgInfinity(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M15,30 Q15,15 30,15 Q45,15 45,30 Q45,45 30,45 Q15,45 15,30 Q15,15 30,15" 
+                  fill="none" stroke="#00ff88" stroke-width="3"/>
+        </svg>`;
+    }
+    
+    svgYinYang(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="25" fill="#000000"/>
+            <path d="M30,5 A25,25 0 0,1 30,55 A12.5,12.5 0 0,0 30,30 A12.5,12.5 0 0,1 30,5" fill="#ffffff"/>
+            <circle cx="30" cy="20" r="5" fill="#000000"/>
+            <circle cx="30" cy="40" r="5" fill="#ffffff"/>
+        </svg>`;
+    }
+    
+    svgCross(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <rect x="25" y="10" width="10" height="40" fill="#8b5cf6"/>
+            <rect x="10" y="25" width="40" height="10" fill="#8b5cf6"/>
+            <circle cx="30" cy="30" r="8" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+        </svg>`;
+    }
+    
+    svgMoon(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M30,10 A20,20 0 0,1 30,50 A15,15 0 0,0 30,20 A15,15 0 0,1 30,10" 
+                  fill="#c0c0c0" stroke="#808080" stroke-width="1"/>
+        </svg>`;
+    }
+    
+    svgSun(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="15" fill="#ffff00" stroke="#ff8800" stroke-width="2"/>
+            <line x1="30" y1="5" x2="30" y2="15" stroke="#ff8800" stroke-width="3"/>
+            <line x1="55" y1="30" x2="45" y2="30" stroke="#ff8800" stroke-width="3"/>
+            <line x1="30" y1="55" x2="30" y2="45" stroke="#ff8800" stroke-width="3"/>
+            <line x1="5" y1="30" x2="15" y2="30" stroke="#ff8800" stroke-width="3"/>
+            <line x1="45" y1="15" x2="40" y2="20" stroke="#ff8800" stroke-width="2"/>
+            <line x1="45" y1="45" x2="40" y2="40" stroke="#ff8800" stroke-width="2"/>
+            <line x1="15" y1="45" x2="20" y2="40" stroke="#ff8800" stroke-width="2"/>
+            <line x1="15" y1="15" x2="20" y2="20" stroke="#ff8800" stroke-width="2"/>
+        </svg>`;
     }
 
     rgbToHex(r, g, b) {
@@ -344,16 +506,16 @@ class WelcomeScreen {
             });
         }
         
-        // Flag selection
-        const flagGrid = document.getElementById('flag-options');
-        if (flagGrid) {
-            flagGrid.addEventListener('click', (e) => {
-                if (e.target.classList.contains('flag-option') || e.target.closest('.flag-option')) {
-                    const flagOption = e.target.classList.contains('flag-option') ? e.target : e.target.closest('.flag-option');
+        // Path symbol selection
+        const pathSymbolGrid = document.getElementById('path-symbol-options');
+        if (pathSymbolGrid) {
+            pathSymbolGrid.addEventListener('click', (e) => {
+                if (e.target.classList.contains('path-symbol-option') || e.target.closest('.path-symbol-option')) {
+                    const pathSymbolOption = e.target.classList.contains('path-symbol-option') ? e.target : e.target.closest('.path-symbol-option');
                     // Remove previous selection
-                    flagGrid.querySelectorAll('.flag-option').forEach(opt => opt.classList.remove('selected'));
+                    pathSymbolGrid.querySelectorAll('.path-symbol-option').forEach(opt => opt.classList.remove('selected'));
                     // Add selection to clicked option
-                    flagOption.classList.add('selected');
+                    pathSymbolOption.classList.add('selected');
                 }
             });
         }
@@ -389,24 +551,24 @@ class WelcomeScreen {
         const nameInput = document.getElementById('player-name-input');
         const colorInput = document.getElementById('path-color-input');
         const symbolGrid = document.getElementById('symbol-options');
-        const flagGrid = document.getElementById('flag-options');
+        const pathSymbolGrid = document.getElementById('path-symbol-options');
         
         const name = (nameInput?.value || '').trim() || 'Cosmic Wanderer';
         const color = colorInput?.value || '#00ff88';
         const selectedSymbol = symbolGrid?.querySelector('.symbol-option.selected');
         const symbol = selectedSymbol?.dataset.symbol || '🌟';
-        const selectedFlag = flagGrid?.querySelector('.flag-option.selected');
-        const flagType = selectedFlag?.dataset.flagType || 'cosmic';
+        const selectedPathSymbol = pathSymbolGrid?.querySelector('.path-symbol-option.selected');
+        const pathSymbol = selectedPathSymbol?.dataset.symbol || 'finnish';
         
         // Save to localStorage
         localStorage.setItem('eldritch_player_name', name);
         localStorage.setItem('eldritch_player_color', color);
         localStorage.setItem('eldritch_player_symbol', symbol);
-        localStorage.setItem('eldritch_player_flag_type', flagType);
+        localStorage.setItem('eldritch_player_path_symbol', pathSymbol);
         
         // Update multiplayer profile if available
         if (window.multiplayerManager) {
-            window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color, flagType: flagType });
+            window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color, pathSymbol: pathSymbol });
         }
         
         // Hide modal

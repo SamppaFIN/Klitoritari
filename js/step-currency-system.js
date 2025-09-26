@@ -30,7 +30,15 @@ class StepCurrencySystem {
         // Callback for step updates
         this.onStepUpdate = null;
         
+        // Base building integration
+        this.baseBuildingLayer = null;
+        
         this.init();
+    }
+    
+    setBaseBuildingLayer(layer) {
+        this.baseBuildingLayer = layer;
+        console.log('🏗️ Base building layer connected to step currency system');
     }
     
     init() {
@@ -456,6 +464,11 @@ class StepCurrencySystem {
         // Trigger step update callback
         if (this.onStepUpdate) {
             this.onStepUpdate();
+        }
+        
+        // Update base building system
+        if (this.baseBuildingLayer) {
+            this.baseBuildingLayer.addStepFromExternal();
         }
         
         // Sound feedback

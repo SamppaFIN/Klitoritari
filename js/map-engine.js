@@ -2047,6 +2047,13 @@ class MapEngine {
     // Read current symbol from profile
     getCurrentSymbol() {
         try {
+            // First try to get path symbol from localStorage
+            const pathSymbol = localStorage.getItem('eldritch_player_path_symbol');
+            if (pathSymbol) {
+                return pathSymbol;
+            }
+            
+            // Fallback to profile symbol
             const prof = window.sessionPersistence?.restoreProfile?.();
             return (prof && prof.symbol) ? prof.symbol : 'finnish';
         } catch (_) { return 'finnish'; }

@@ -53,8 +53,14 @@ class LayeredRenderingSystem {
         // Layer 6: UI Overlay (z-index: 30)
         this.layers.set('ui', new UIOverlayLayer());
         
+        // Layer 6.5: UI Controls (z-index: 35) - All floating buttons and controls
+        this.layers.set('uiControls', new UIControlsLayer());
+        
         // Layer 5: Map Objects (z-index: 20)
         this.layers.set('mapObjects', new MapObjectsLayer());
+        
+        // Layer 4.5: Base Building (z-index: 15)
+        this.layers.set('baseBuilding', new BaseBuildingLayer());
         
         // Layer 4: Sacred Geometry (z-index: 10) - OUR PRIORITY
         this.layers.set('sacredGeometry', new SacredGeometryLayer());
