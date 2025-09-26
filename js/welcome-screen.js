@@ -16,15 +16,7 @@ class WelcomeScreen {
     init() {
         console.log('🌟 Welcome screen initialized');
         
-        // Check if tutorial is active - if so, skip welcome screen
-        const tutorialActive = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
-        if (tutorialActive) {
-            console.log('🎓 Tutorial active - skipping welcome screen');
-            this.hideWelcomeScreen();
-            // Initialize game for tutorial
-            this.initializeGame(true); // true = reset everything for tutorial
-            return;
-        }
+        // Tutorial system disabled - proceed with normal welcome screen
         
         this.checkIfFirstVisit();
         this.setupEventListeners();
@@ -249,17 +241,12 @@ class WelcomeScreen {
         // Set default RGB values (0, 255, 136 = #00ff88)
         this.setRGBValues(0, 255, 136);
         
-        // Generate symbol options using tutorial system
+        // Generate symbol options (no tutorial dependency)
         if (symbolGrid) {
-            if (window.tutorialSystem && window.tutorialSystem.getSymbolOptionsHTML) {
-                symbolGrid.innerHTML = window.tutorialSystem.getSymbolOptionsHTML();
-            } else {
-                // Fallback to simple symbols if tutorial system not available
-                const symbols = ['🌟', '⭐', '✨', '💫', '🌙', '☀️', '🔮', '💎', '🌌', '🎭'];
-                symbolGrid.innerHTML = symbols.map(symbol => 
-                    `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
-                ).join('');
-            }
+            const symbols = ['🌟', '⭐', '✨', '💫', '🌙', '☀️', '🔮', '💎', '🌌', '🎭', '🏴', '⚡', '🔥', '❄️', '🌊'];
+            symbolGrid.innerHTML = symbols.map(symbol => 
+                `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
+            ).join('');
         }
     }
 

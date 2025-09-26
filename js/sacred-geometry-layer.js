@@ -307,7 +307,7 @@ class SacredGeometryLayer extends RenderLayer {
                 energy: 0.8,
                 weight: 150, // ticks/weight for growth
                 baseSize: 7, // base flag size (1/3 of 20)
-                currentSize: 7, // current rendered size
+                currentSize: 7.45, // current rendered size (7 + (150/100)*0.3 = 7.45)
                 maxSize: 100, // maximum size achievable
                 connections: [],
                 clickable: true,
@@ -324,7 +324,7 @@ class SacredGeometryLayer extends RenderLayer {
                 energy: 0.6,
                 weight: 80,
                 baseSize: 7,
-                currentSize: 7,
+                currentSize: 7.24, // (7 + (80/100)*0.3 = 7.24)
                 maxSize: 100,
                 connections: [],
                 clickable: true,
@@ -341,7 +341,7 @@ class SacredGeometryLayer extends RenderLayer {
                 energy: 0.9,
                 weight: 300,
                 baseSize: 7,
-                currentSize: 31, // larger due to more weight (7 + (300/10)*0.8 = 31)
+                currentSize: 7.9, // (7 + (300/100)*0.3 = 7.9)
                 maxSize: 100,
                 connections: [],
                 clickable: true,
@@ -358,7 +358,7 @@ class SacredGeometryLayer extends RenderLayer {
                 energy: 0.7,
                 weight: 200,
                 baseSize: 7,
-                currentSize: 23, // (7 + (200/10)*0.8 = 23)
+                currentSize: 7.6, // (7 + (200/100)*0.3 = 7.6)
                 maxSize: 100,
                 connections: [],
                 clickable: true,
@@ -433,12 +433,12 @@ class SacredGeometryLayer extends RenderLayer {
     }
     
     updateFlagGrowth() {
-        // Update flag sizes based on weight (10x more ticks for bigger flags)
+        // Update flag sizes based on weight (100x more ticks for bigger flags)
         this.flags.forEach(flag => {
-            // Calculate size based on weight: baseSize + (weight / 10) * growthFactor
-            const growthFactor = 0.8; // How much size increases per 10 ticks
+            // Calculate size based on weight: baseSize + (weight / 100) * growthFactor
+            const growthFactor = 0.3; // How much size increases per 100 ticks
             const newSize = Math.min(
-                flag.baseSize + (flag.weight / 10) * growthFactor,
+                flag.baseSize + (flag.weight / 100) * growthFactor,
                 flag.maxSize
             );
             flag.currentSize = newSize;
