@@ -263,23 +263,44 @@ class BaseSystem {
             window.stepCurrencySystem.subtractSteps(cost);
         }
 
-        // Create a base at the center of the screen (for now)
+        // Get player's current position
+        const playerPosition = window.geolocationManager ? window.geolocationManager.getCurrentPosition() : null;
+        if (!playerPosition) {
+            this.showNotification('Unable to get your location for base establishment', 'error');
+            return;
+        }
+
+        // Create a base at the player's current location
         const base = {
             id: 'player_base_' + Date.now(),
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            lat: playerPosition.lat,
+            lng: playerPosition.lng,
             size: 40,
             level: 1,
             flags: 0,
             steps: 0,
             maxFlags: 8,
             color: '#8b5cf6',
-            owner: 'player'
+            owner: 'player',
+            establishedAt: Date.now()
         };
 
         // Add base to the base building layer
         baseBuildingLayer.bases = [base];
         baseBuildingLayer.saveBaseData();
+
+        // Add a joint flag at the base location
+        const jointFlag = {
+            id: 'joint_flag_' + Date.now(),
+            lat: playerPosition.lat,
+            lng: playerPosition.lng,
+            type: 'joint',
+            size: 25,
+            color: '#ffd700',
+            timestamp: Date.now()
+        };
+        baseBuildingLayer.flags.push(jointFlag);
+        baseBuildingLayer.saveFlags();
 
         // Update UI
         this.updateBaseTabUI();
@@ -355,18 +376,12 @@ class BaseSystem {
         if (window.layeredRendering) {
             const baseBuildingLayer = window.layeredRendering.getLayer('baseBuilding');
             if (baseBuildingLayer) {
-                // Place a flag near the base
-                const base = baseBuildingLayer.bases[0];
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 60 + Math.random() * 20;
-                const x = base.x + Math.cos(angle) * distance;
-                const y = base.y + Math.sin(angle) * distance;
-                
-                if (baseBuildingLayer.placeFlagAtPosition(x, y)) {
-                    this.showNotification('Flag placed! 🏴', 'success');
+                const success = baseBuildingLayer.placeFlagAtPosition();
+                if (success) {
+                    this.showNotification('Flag placed successfully! 🚩', 'success');
                     this.updateBaseTabUI();
                 } else {
-                    this.showNotification('Cannot place flag: no joint flag nearby', 'warn');
+                    this.showNotification('Cannot place flag: No joint flag present', 'warn');
                 }
             }
         }

@@ -305,10 +305,32 @@ class BaseBuildingLayer extends RenderLayer {
         });
     }
 
+    // Convert GPS coordinates to screen coordinates using Leaflet map
+    gpsToScreen(lat, lng) {
+        if (!window.mapEngine || !window.mapEngine.map) {
+            console.warn('🏗️ Map engine not available for GPS conversion');
+            return null;
+        }
+
+        try {
+            const map = window.mapEngine.map;
+            const point = map.latLngToContainerPoint([lat, lng]);
+            return { x: point.x, y: point.y };
+        } catch (error) {
+            console.warn('🏗️ Error converting GPS to screen coordinates:', error);
+            return null;
+        }
+    }
+
     renderBase(base) {
-        const { x, y, size, color, level } = base;
+        // Convert GPS coordinates to screen coordinates
+        const screenPos = this.gpsToScreen(base.lat, base.lng);
+        if (!screenPos) return; // Skip if conversion failed
         
-        console.log(`🏗️ Rendering base at (${x}, ${y}) with size ${size}`);
+        const { x, y } = screenPos;
+        const { size, color, level } = base;
+        
+        console.log(`🏗️ Rendering base at GPS (${base.lat}, ${base.lng}) -> Screen (${x}, ${y}) with size ${size}`);
         
         this.ctx.save();
         
@@ -344,12 +366,19 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     renderFlag(flag) {
-        const { x, y, size, type } = flag;
+        // Convert GPS coordinates to screen coordinates
+        const screenPos = this.gpsToScreen(flag.lat, flag.lng);
+        if (!screenPos) return; // Skip if conversion failed
+        
+        const { x, y } = screenPos;
+        const { size, type } = flag;
         
         this.ctx.save();
         
         if (type === 'ant') {
             this.renderAnt(x, y, size);
+        } else if (type === 'joint') {
+            this.renderJointFlag(x, y, size);
         } else {
             this.renderFlagIcon(x, y, size);
         }
@@ -401,6 +430,26 @@ class BaseBuildingLayer extends RenderLayer {
         this.ctx.stroke();
     }
 
+    renderJointFlag(x, y, size) {
+        // Golden joint flag rendering
+        this.ctx.fillStyle = '#ffd700';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Add golden border
+        this.ctx.strokeStyle = '#ffed4e';
+        this.ctx.lineWidth = 3;
+        this.ctx.stroke();
+        
+        // Add "J" for joint
+        this.ctx.fillStyle = '#000000';
+        this.ctx.font = 'bold 12px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('J', x, y);
+    }
+
     renderFlagIcon(x, y, size) {
         // Get player's selected flag type
         const flagType = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
@@ -424,10 +473,88 @@ class BaseBuildingLayer extends RenderLayer {
     // Public methods for external use
     addStepFromExternal() {
         this.addStep();
+        console.log(`🏗️ Step added from external system. Total: ${this.steps}`);
+        
+        // Check if we should add an ant icon for every 50 steps
+        if (this.steps % 50 === 0) {
+            this.addAntIcon();
+        }
     }
 
-    placeFlagAtPosition(x, y) {
-        return this.placeFlag(x, y);
+    // Add ant icon when player reaches 50 steps
+    addAntIcon() {
+        const playerPosition = window.geolocationManager ? window.geolocationManager.getCurrentPosition() : null;
+        if (!playerPosition) return;
+
+        const ant = {
+            id: 'ant_' + Date.now(),
+            lat: playerPosition.lat,
+            lng: playerPosition.lng,
+            type: 'ant',
+            size: 15,
+            color: '#ff6b35',
+            timestamp: Date.now()
+        };
+
+        this.flags.push(ant);
+        this.saveFlags();
+        
+        console.log(`🐜 Ant icon added at step ${this.steps}`);
+        if (window.log) {
+            window.log(`🐜 Ant icon added at step ${this.steps}`, 'info');
+        }
+    }
+
+    placeFlagAtPosition() {
+        // Check if there's a joint flag present
+        const hasJointFlag = this.flags.some(flag => flag.type === 'joint');
+        if (!hasJointFlag) {
+            if (window.log) {
+                window.log('🚩 Cannot place flag: No joint flag present', 'warn');
+            }
+            return false;
+        }
+
+        const playerPosition = window.geolocationManager ? window.geolocationManager.getCurrentPosition() : null;
+        if (!playerPosition) {
+            if (window.log) {
+                window.log('🚩 Cannot place flag: No player position', 'warn');
+            }
+            return false;
+        }
+
+        const flag = {
+            id: 'flag_' + Date.now(),
+            lat: playerPosition.lat,
+            lng: playerPosition.lng,
+            type: 'player',
+            size: 20,
+            color: '#8b5cf6',
+            timestamp: Date.now()
+        };
+
+        this.flags.push(flag);
+        this.saveFlags();
+        
+        // Check if base should grow
+        this.checkBaseGrowth();
+        
+        console.log(`🚩 Flag placed at (${playerPosition.lat}, ${playerPosition.lng})`);
+        if (window.log) {
+            window.log(`🚩 Flag placed at (${playerPosition.lat}, ${playerPosition.lng})`, 'success');
+        }
+        
+        return true;
+    }
+
+    // Check if base should grow when surrounded by flags
+    checkBaseGrowth() {
+        this.bases.forEach(base => {
+            const surroundingFlags = this.getSurroundingFlags(base);
+            if (surroundingFlags.length >= 3) { // Base grows when surrounded by 3+ flags
+                this.growBase(base);
+            }
+        });
     }
 
     getStats() {
@@ -465,12 +592,16 @@ class BaseBuildingLayer extends RenderLayer {
         
         // Create clickable areas for each base
         this.bases.forEach((base, index) => {
+            // Convert GPS coordinates to screen coordinates
+            const screenPos = this.gpsToScreen(base.lat, base.lng);
+            if (!screenPos) return; // Skip if conversion failed
+            
             const clickableArea = document.createElement('div');
             clickableArea.className = 'base-clickable-area';
             clickableArea.style.cssText = `
                 position: absolute;
-                left: ${base.x - base.size/2}px;
-                top: ${base.y - base.size/2}px;
+                left: ${screenPos.x - base.size/2}px;
+                top: ${screenPos.y - base.size/2}px;
                 width: ${base.size}px;
                 height: ${base.size}px;
                 border-radius: 50%;
