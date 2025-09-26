@@ -5,13 +5,14 @@
 
 class BaseBuildingLayer extends RenderLayer {
     constructor() {
-        super('baseBuilding', 15, 'auto'); // Z-index 15, clickable
+        super('baseBuilding', 15, 'none'); // Z-index 15, non-interactive
         this.bases = [];
         this.flags = [];
         this.steps = 0;
         this.selectedBase = null;
         this.baseStatsModal = null;
         this.isInitialized = false;
+        this.clickableAreas = []; // Store clickable div elements
         
         console.log('🏗️ Initializing Base Building Layer...');
         this.init();
@@ -26,9 +27,9 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     setupEventListeners() {
-        // Click handler for base interactions
-        this.canvas.addEventListener('click', (event) => this.handleCanvasClick(event));
-        this.canvas.addEventListener('touchstart', (event) => this.handleCanvasClick(event));
+        // We'll create clickable div elements for each base instead of using canvas events
+        // This prevents blocking map interactions
+        console.log('🏗️ Base building layer setup complete (non-interactive canvas)');
     }
 
     handleCanvasClick(event) {
@@ -287,6 +288,7 @@ class BaseBuildingLayer extends RenderLayer {
         }
         
         this.renderContent();
+        this.updateClickableAreas();
     }
 
     renderContent() {
@@ -456,6 +458,61 @@ class BaseBuildingLayer extends RenderLayer {
         };
     }
 
+    // Create clickable areas for bases
+    createClickableAreas() {
+        // Remove existing clickable areas
+        this.removeClickableAreas();
+        
+        // Create clickable areas for each base
+        this.bases.forEach((base, index) => {
+            const clickableArea = document.createElement('div');
+            clickableArea.className = 'base-clickable-area';
+            clickableArea.style.cssText = `
+                position: absolute;
+                left: ${base.x - base.size/2}px;
+                top: ${base.y - base.size/2}px;
+                width: ${base.size}px;
+                height: ${base.size}px;
+                border-radius: 50%;
+                background: transparent;
+                cursor: pointer;
+                z-index: 16;
+                pointer-events: auto;
+            `;
+            
+            // Add click handler
+            clickableArea.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.showBaseStats(base);
+            });
+            
+            // Add to DOM
+            document.body.appendChild(clickableArea);
+            this.clickableAreas.push(clickableArea);
+        });
+    }
+    
+    // Remove all clickable areas
+    removeClickableAreas() {
+        this.clickableAreas.forEach(area => {
+            if (area.parentNode) {
+                area.parentNode.removeChild(area);
+            }
+        });
+        this.clickableAreas = [];
+    }
+    
+    // Update clickable areas when bases change
+    updateClickableAreas() {
+        this.createClickableAreas();
+    }
+    
+    // Cleanup method
+    destroy() {
+        this.removeClickableAreas();
+        super.destroy();
+    }
+
     // Debug method to check base state
     debugBaseState() {
         console.log('🏗️ Base Building Layer Debug:');
@@ -464,6 +521,7 @@ class BaseBuildingLayer extends RenderLayer {
         console.log('- Steps:', this.steps);
         console.log('- Canvas visible:', this.canvas.style.display !== 'none');
         console.log('- Canvas size:', this.canvas.width, 'x', this.canvas.height);
+        console.log('- Clickable areas:', this.clickableAreas.length);
         
         if (this.bases.length > 0) {
             const base = this.bases[0];

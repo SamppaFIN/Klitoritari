@@ -149,6 +149,18 @@ class LayeredRenderingSystem {
         console.log(`➕ Added layer: ${layerName}`);
     }
     
+    toggleLayer(layerName) {
+        const layer = this.layers.get(layerName);
+        if (layer) {
+            layer.visible = !layer.visible;
+            console.log(`🎨 Layer ${layerName} ${layer.visible ? 'shown' : 'hidden'}`);
+            return layer.visible;
+        } else {
+            console.warn(`🎨 Layer ${layerName} not found`);
+            return false;
+        }
+    }
+    
     removeLayer(layerName) {
         const layer = this.layers.get(layerName);
         if (layer) {

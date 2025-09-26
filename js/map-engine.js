@@ -23,7 +23,7 @@ class MapEngine {
         this.movementInterval = null; // For smooth movement animation
         this.pathwayMarkers = [];
         this.flagLayerVisible = true; // Start with flags visible by default
-        this.finnishFlagLayer = null; // Canvas-based flag layer
+        this.symbolCanvasLayer = null; // Canvas-based flag layer
         this.distortionEffectsLayer = null; // Canvas-based distortion effects layer
         this.distortionEffectsVisible = false; // Start with effects hidden by default
         this.lastPlayerPosition = null; // Track last position for path line
@@ -1810,8 +1810,8 @@ class MapEngine {
         // Add Finnish flag every few steps using canvas layer
         if (Math.floor(progress * 20) % 3 === 0) {
             console.log(`🎨 Adding Finnish flag at progress ${progress.toFixed(2)}`);
-            if (this.finnishFlagLayer) {
-                this.finnishFlagLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
+            if (this.symbolCanvasLayer) {
+                this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
                 // Give 50 cosmic steps for drawing a flag (async to not block movement)
                 setTimeout(() => {
                     this.giveFlagSteps();
@@ -1944,8 +1944,8 @@ class MapEngine {
     }
     
     clearPathwayMarkers() {
-        if (this.finnishFlagLayer) {
-            this.finnishFlagLayer.clearFlags();
+        if (this.symbolCanvasLayer) {
+            this.symbolCanvasLayer.clearFlags();
             console.log('🎮 Cleared canvas flag layer');
         }
         
@@ -1963,9 +1963,9 @@ class MapEngine {
     showFlagLayer() {
         console.log('🇫🇮 Showing flag layer...');
         
-        if (this.finnishFlagLayer) {
-            this.finnishFlagLayer.toggleVisibility();
-            console.log('🇫🇮 Canvas flag layer toggled, total flags:', this.finnishFlagLayer.getFlagCount());
+        if (this.symbolCanvasLayer) {
+            this.symbolCanvasLayer.toggleVisibility();
+            console.log('🇫🇮 Canvas flag layer toggled, total flags:', this.symbolCanvasLayer.getFlagCount());
         } else {
             // Fallback to old method
             console.log('🇫🇮 Pathway markers count:', this.pathwayMarkers ? this.pathwayMarkers.length : 0);
@@ -2025,8 +2025,8 @@ class MapEngine {
     }
     
     initFinnishFlagLayer() {
-        if (typeof FinnishFlagCanvasLayer !== 'undefined') {
-            this.finnishFlagLayer = new FinnishFlagCanvasLayer(this);
+        if (typeof SymbolCanvasLayer !== 'undefined') {
+            this.symbolCanvasLayer = new SymbolCanvasLayer(this);
             console.log('🇫🇮 Finnish flag canvas layer initialized');
             // Make it globally accessible for step system
             window.mapEngine = this;
@@ -2035,12 +2035,12 @@ class MapEngine {
             try {
                 window.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
-                        try { window.sessionPersistence?.saveFlags?.(this.finnishFlagLayer.flagPins); } catch (_) {}
+                        try { window.sessionPersistence?.saveFlags?.(this.symbolCanvasLayer.flagPins); } catch (_) {}
                     }
                 });
             } catch (_) {}
         } else {
-            console.warn('🇫🇮 FinnishFlagCanvasLayer not available');
+            console.warn('🇫🇮 SymbolCanvasLayer not available');
         }
     }
 
@@ -2069,10 +2069,10 @@ class MapEngine {
     }
     
     toggleFlagOpacity() {
-        if (this.finnishFlagLayer) {
-            const currentOpacity = this.finnishFlagLayer.opacity;
+        if (this.symbolCanvasLayer) {
+            const currentOpacity = this.symbolCanvasLayer.opacity;
             const newOpacity = currentOpacity === 0.5 ? 1.0 : currentOpacity === 1.0 ? 0.2 : 0.5;
-            this.finnishFlagLayer.setOpacity(newOpacity);
+            this.symbolCanvasLayer.setOpacity(newOpacity);
             console.log('🇫🇮 Flag opacity toggled to:', newOpacity);
         } else {
             console.log('🇫🇮 Finnish flag layer not available');
@@ -2080,18 +2080,18 @@ class MapEngine {
     }
     
     cycleFlagColors() {
-        if (this.finnishFlagLayer) {
-            this.finnishFlagLayer.cycleColorScheme();
-            console.log('🇫🇮 Flag colors cycled to:', this.finnishFlagLayer.currentColorScheme);
+        if (this.symbolCanvasLayer) {
+            this.symbolCanvasLayer.cycleColorScheme();
+            console.log('🇫🇮 Flag colors cycled to:', this.symbolCanvasLayer.currentColorScheme);
         } else {
             console.log('🇫🇮 Finnish flag layer not available');
         }
     }
     
     cycleFlagTheme() {
-        if (this.finnishFlagLayer) {
-            this.finnishFlagLayer.cycleColorScheme();
-            const currentTheme = this.finnishFlagLayer.currentColorScheme;
+        if (this.symbolCanvasLayer) {
+            this.symbolCanvasLayer.cycleColorScheme();
+            const currentTheme = this.symbolCanvasLayer.currentColorScheme;
             console.log('🇫🇮 Flag theme cycled to:', currentTheme);
             
             // Show notification of theme change
@@ -2109,12 +2109,12 @@ class MapEngine {
     }
 
     dropFlagHere(lat, lng) {
-        if (!this.finnishFlagLayer) {
-            console.warn('🇫🇮 Finnish flag layer not available');
+        if (!this.symbolCanvasLayer) {
+            console.warn('🇫🇮 Symbol canvas layer not available');
             return;
         }
         console.log(`🇫🇮 Dropping flag at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        this.finnishFlagLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
+        this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
         if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
             window.gruesomeNotifications.showNotification({
                 type: 'success',
@@ -2271,14 +2271,14 @@ class MapEngine {
             return;
         }
         
-        if (this.finnishFlagLayer) {
+        if (this.symbolCanvasLayer) {
             // Create 5 test flags in a line using canvas layer
             for (let i = 0; i < 5; i++) {
                 const testLat = playerPos.lat + (i * 0.0001);
                 const testLng = playerPos.lng + (i * 0.0001);
-                this.finnishFlagLayer.addFlagPin(testLat, testLng, null, null, this.getCurrentSymbol?.());
+                this.symbolCanvasLayer.addFlagPin(testLat, testLng, null, null, this.getCurrentSymbol?.());
             }
-            console.log('🇫🇮 Test flags created on canvas layer, total flags:', this.finnishFlagLayer.getFlagCount());
+            console.log('🇫🇮 Test flags created on canvas layer, total flags:', this.symbolCanvasLayer.getFlagCount());
         } else {
             // Fallback to old method
             for (let i = 0; i < 5; i++) {
@@ -2292,8 +2292,8 @@ class MapEngine {
     
     // Debug function to show flag statistics
     showFlagStatistics() {
-        if (this.finnishFlagLayer) {
-            const stats = this.finnishFlagLayer.getFlagStatistics();
+        if (this.symbolCanvasLayer) {
+            const stats = this.symbolCanvasLayer.getFlagStatistics();
             console.log('🇫🇮 Flag Statistics:', stats);
             
             // Show notification with flag stats
@@ -2370,7 +2370,7 @@ class MapEngine {
     
     // Add flag to path if player has moved significantly
     addFlagToPathIfMoved(position) {
-        if (!this.finnishFlagLayer) return;
+        if (!this.symbolCanvasLayer) return;
         
         if (this.lastPlayerPosition) {
             const distance = this.calculateDistance(
@@ -2381,7 +2381,7 @@ class MapEngine {
             // Drop flag every 10 meters of movement
             if (distance >= this.flagDropDistance) {
                 console.log(`🎨 Player moved ${distance.toFixed(1)}m - dropping flag`);
-                this.finnishFlagLayer.addFlagPin(position.lat, position.lng, null, null, this.getCurrentSymbol?.());
+                this.symbolCanvasLayer.addFlagPin(position.lat, position.lng, null, null, this.getCurrentSymbol?.());
                 
                 // Give steps for movement
                 if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {

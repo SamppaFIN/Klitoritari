@@ -550,8 +550,8 @@ class StepCurrencySystem {
             
             if (position && typeof position.lat === 'number' && typeof position.lng === 'number') {
                 console.log('🇫🇮 Using position for flag:', position);
-                if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
-                    const layer = window.mapEngine.finnishFlagLayer;
+                if (window.mapEngine && window.mapEngine.symbolCanvasLayer) {
+                    const layer = window.mapEngine.symbolCanvasLayer;
                     // Ensure visible
                     if (layer.canvas) {
                         layer.isVisible = true;

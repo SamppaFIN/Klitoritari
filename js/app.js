@@ -2207,9 +2207,9 @@ class EldritchSanctuaryApp {
         
         if (clearFlagsBtn) {
             clearFlagsBtn.addEventListener('click', () => {
-                if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
-                    window.mapEngine.finnishFlagLayer.flagPins = [];
-                    window.mapEngine.finnishFlagLayer.render();
+                if (window.mapEngine && window.mapEngine.symbolCanvasLayer) {
+                    window.mapEngine.symbolCanvasLayer.flagPins = [];
+                    window.mapEngine.symbolCanvasLayer.render();
                 }
             });
         }
@@ -2724,8 +2724,8 @@ class EldritchSanctuaryApp {
         this.systems.enhancedPathPainting.init();
         
         // Initialize Finnish flag canvas layer
-        this.systems.finnishFlagCanvasLayer = new FinnishFlagCanvasLayer();
-        this.systems.finnishFlagCanvasLayer.init();
+        this.systems.symbolCanvasLayer = new SymbolCanvasLayer();
+        this.systems.symbolCanvasLayer.init();
         
         // Initialize distortion effects canvas layer
         this.systems.distortionEffectsCanvasLayer = new DistortionEffectsCanvasLayer();
