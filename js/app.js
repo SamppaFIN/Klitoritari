@@ -24,7 +24,8 @@ class EldritchSanctuaryApp {
             npc: null,
             pathPainting: null,
             unifiedDebug: null,
-            unifiedQuest: null
+            unifiedQuest: null,
+            layeredRendering: null
         };
     }
     
@@ -2554,6 +2555,13 @@ class EldritchSanctuaryApp {
         
         // Start tracking automatically
         this.systems.geolocation.startTracking();
+        
+        // Initialize layered rendering system FIRST
+        this.systems.layeredRendering = new LayeredRenderingSystem();
+        console.log('🌌 Layered Rendering System initialized');
+        
+        // Make globally available
+        window.layeredRendering = this.systems.layeredRendering;
         
         // Initialize health bar system first
         this.systems.healthBar = new HealthBar();
