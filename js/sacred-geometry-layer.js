@@ -15,6 +15,13 @@ class SacredGeometryLayer extends RenderLayer {
         this.isInitialized = false;
         this.selectedFlag = null;
         this.statisticsModal = null;
+        this.baseInfo = {
+            totalFlags: 0,
+            totalWeight: 0,
+            averageWeight: 0,
+            largestFlag: null,
+            smallestFlag: null
+        };
         
         console.log('🔮 Initializing Sacred Geometry Layer...');
         this.init();
@@ -294,6 +301,7 @@ class SacredGeometryLayer extends RenderLayer {
         super.init();
         this.setupCosmicEffects();
         this.loadExistingData();
+        this.createFlagClickAreas(); // Create click areas immediately on init
         this.isInitialized = true;
         console.log('✅ Sacred Geometry Layer initialized');
     }
@@ -389,6 +397,23 @@ class SacredGeometryLayer extends RenderLayer {
                 clickable: true,
                 lastProximityCheck: 0,
                 proximityDecayRate: 0.1
+            },
+            {
+                id: 'flag_player_5',
+                playerId: 'player_005',
+                playerName: 'Finnish Explorer',
+                x: 150,
+                y: 250,
+                type: 'finnish',
+                energy: 0.75,
+                weight: 120,
+                baseSize: 7,
+                currentSize: 7.36, // (7 + (120/100)*0.3 = 7.36)
+                maxSize: 100,
+                connections: [],
+                clickable: true,
+                lastProximityCheck: 0,
+                proximityDecayRate: 0.1
             }
         ];
         
@@ -444,6 +469,9 @@ class SacredGeometryLayer extends RenderLayer {
         // Update click areas for flags
         this.updateFlagClickAreas();
         
+        // Update base statistics
+        this.updateBaseInfo();
+        
         // Render territories first (background)
         this.renderTerritories();
         
@@ -458,6 +486,9 @@ class SacredGeometryLayer extends RenderLayer {
         
         // Render energy fields
         this.renderEnergyFields();
+        
+        // Render base statistics
+        this.renderBaseInfo();
     }
     
     updateFlagGrowth() {
@@ -508,15 +539,96 @@ class SacredGeometryLayer extends RenderLayer {
         });
     }
     
+    updateBaseInfo() {
+        if (this.flags.length === 0) {
+            this.baseInfo = {
+                totalFlags: 0,
+                totalWeight: 0,
+                averageWeight: 0,
+                largestFlag: null,
+                smallestFlag: null
+            };
+            return;
+        }
+        
+        const totalWeight = this.flags.reduce((sum, flag) => sum + flag.weight, 0);
+        const largestFlag = this.flags.reduce((max, flag) => flag.weight > max.weight ? flag : max, this.flags[0]);
+        const smallestFlag = this.flags.reduce((min, flag) => flag.weight < min.weight ? flag : min, this.flags[0]);
+        
+        this.baseInfo = {
+            totalFlags: this.flags.length,
+            totalWeight: Math.round(totalWeight),
+            averageWeight: Math.round(totalWeight / this.flags.length),
+            largestFlag: largestFlag,
+            smallestFlag: smallestFlag
+        };
+    }
+    
+    renderBaseInfo() {
+        if (!this.ctx) return;
+        
+        const x = 20;
+        const y = 20;
+        const width = 300;
+        const height = 120;
+        
+        // Background
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        this.ctx.fillRect(x, y, width, height);
+        
+        // Border
+        this.ctx.strokeStyle = '#8b5cf6';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(x, y, width, height);
+        
+        // Text
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = '16px Arial';
+        this.ctx.textAlign = 'left';
+        
+        const info = this.baseInfo;
+        this.ctx.fillText(`🏴 Base Statistics`, x + 10, y + 25);
+        this.ctx.fillText(`Total Flags: ${info.totalFlags}`, x + 10, y + 45);
+        this.ctx.fillText(`Combined Weight: ${info.totalWeight}`, x + 10, y + 65);
+        this.ctx.fillText(`Average Weight: ${info.averageWeight}`, x + 10, y + 85);
+        
+        if (info.largestFlag) {
+            this.ctx.fillText(`Largest: ${info.largestFlag.playerName} (${Math.round(info.largestFlag.weight)})`, x + 10, y + 105);
+        }
+    }
+    
     getPlayerPosition() {
         // Try to get player position from various sources
         if (window.mapEngine && window.mapEngine.playerPosition) {
             const pos = window.mapEngine.playerPosition;
-            // Convert lat/lng to screen coordinates (simplified)
-            return {
-                x: (pos.lng + 180) * (this.canvas.width / 360),
-                y: (90 - pos.lat) * (this.canvas.height / 180)
-            };
+            // Convert lat/lng to screen coordinates using proper map projection
+            const mapContainer = document.querySelector('.leaflet-container');
+            if (mapContainer) {
+                const mapBounds = mapContainer.getBoundingClientRect();
+                // Use map center and zoom to calculate screen position
+                const mapCenter = window.mapEngine.map.getCenter();
+                const zoom = window.mapEngine.map.getZoom();
+                
+                // Simple conversion - in production this should use proper map projection
+                const scale = Math.pow(2, zoom);
+                const x = mapBounds.width / 2 + (pos.lng - mapCenter.lng) * scale * 100;
+                const y = mapBounds.height / 2 - (pos.lat - mapCenter.lat) * scale * 100;
+                
+                return { x, y };
+            }
+        }
+        
+        // Try geolocation system
+        if (window.geolocationManager && window.geolocationManager.currentPosition) {
+            const pos = window.geolocationManager.currentPosition;
+            const mapContainer = document.querySelector('.leaflet-container');
+            if (mapContainer) {
+                const mapBounds = mapContainer.getBoundingClientRect();
+                return {
+                    x: mapBounds.width / 2,
+                    y: mapBounds.height / 2
+                };
+            }
         }
         
         // Fallback: return center of screen
