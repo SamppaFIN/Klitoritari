@@ -2567,12 +2567,12 @@ class EldritchSanctuaryApp {
         this.systems.healthBar = new HealthBar();
         window.healthBar = this.systems.healthBar;
         
-        // Initialize tutorial encounter system
-        this.systems.tutorialEncounter = new TutorialEncounterSystem();
-        this.systems.tutorialEncounter.init();
+        // DISABLED: Tutorial encounter system for layered rendering testing
+        // this.systems.tutorialEncounter = new TutorialEncounterSystem();
+        // this.systems.tutorialEncounter.init();
         
         // Make globally available
-        window.tutorialEncounterSystem = this.systems.tutorialEncounter;
+        // window.tutorialEncounterSystem = this.systems.tutorialEncounter;
 
         // Initialize map engine
         this.systems.mapEngine = new EnhancedMapEngine();
@@ -2588,25 +2588,8 @@ class EldritchSanctuaryApp {
                 if (typeof previousOnMapReady === 'function') {
                     try { previousOnMapReady(); } catch (_) {}
                 }
-                try {
-                    const shouldStartTutorial = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
-                    const tutorialComplete = localStorage.getItem('eldritch_tutorial_state') && JSON.parse(localStorage.getItem('eldritch_tutorial_state')).flags?.some(([key, value]) => key === 'tutorial_complete' && value);
-                    console.log('🎓 Tutorial check:', { shouldStartTutorial, tutorialComplete, tutorialSystem: !!window.tutorialEncounterSystem, hasStartTutorial: !!(window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) });
-                    
-                    if (shouldStartTutorial && !tutorialComplete && window.tutorialEncounterSystem && window.tutorialEncounterSystem.startTutorial) {
-                        console.log('🎓 Starting tutorial from onMapReady callback');
-                        window.tutorialEncounterSystem.startTutorial();
-                        localStorage.removeItem('eldritch_start_tutorial_encounter');
-                    } else {
-                        console.log('🎓 Tutorial not started:', { shouldStartTutorial, tutorialComplete, tutorialSystem: !!window.tutorialEncounterSystem });
-                        // Clear the tutorial flag if tutorial is complete or shouldn't start
-                        if (tutorialComplete || !shouldStartTutorial) {
-                            localStorage.removeItem('eldritch_start_tutorial_encounter');
-                        }
-                    }
-                } catch (error) {
-                    console.warn('🎓 Failed to start tutorial:', error);
-                }
+                // DISABLED: Tutorial system for layered rendering testing
+                console.log('🎓 Tutorial system disabled for layered rendering testing');
             };
         } catch (error) {
             console.warn('🎓 Failed to set up tutorial callback:', error);

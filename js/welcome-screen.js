@@ -189,10 +189,9 @@ class WelcomeScreen {
         
         // Mark welcome as seen
         localStorage.setItem('eldritch_welcome_seen', 'true');
-        // Ensure tutorial/onboarding will be shown after map init
-        localStorage.setItem('eldritch_show_tutorial', 'true');
-        // Start tutorial encounter system
-        localStorage.setItem('eldritch_start_tutorial_encounter', 'true');
+        // DISABLED: Tutorial system for layered rendering testing
+        // localStorage.setItem('eldritch_show_tutorial', 'true');
+        // localStorage.setItem('eldritch_start_tutorial_encounter', 'true');
         this.hasSeenWelcome = true;
         
         // Reset all game state
