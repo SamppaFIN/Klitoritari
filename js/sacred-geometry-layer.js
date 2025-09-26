@@ -6,7 +6,7 @@
 
 class SacredGeometryLayer extends RenderLayer {
     constructor() {
-        super('sacredGeometry', 10);
+        super('sacredGeometry', 10, 'none'); // pointerEvents: 'none' to not block map interactions
         this.flags = [];
         this.paths = [];
         this.territories = [];
@@ -22,30 +22,55 @@ class SacredGeometryLayer extends RenderLayer {
     }
     
     setupClickHandlers() {
-        // Make the canvas clickable for flag interactions
-        this.canvas.style.pointerEvents = 'auto';
-        this.canvas.addEventListener('click', (event) => this.handleFlagClick(event));
-        this.canvas.addEventListener('touchstart', (event) => this.handleFlagClick(event));
-        
+        // Create invisible clickable areas for each flag instead of making entire canvas clickable
+        this.createFlagClickAreas();
         console.log('🔮 Flag click handlers setup complete');
     }
     
-    handleFlagClick(event) {
-        const rect = this.canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
+    createFlagClickAreas() {
+        // Remove existing click areas
+        this.removeFlagClickAreas();
         
-        // Check if click is on any flag
-        for (const flag of this.flags) {
-            const flagWidth = flag.currentSize;
-            const flagHeight = flag.currentSize * 0.6;
-            
-            if (x >= flag.x - flagWidth/2 && x <= flag.x + flagWidth/2 &&
-                y >= flag.y - flagHeight/2 && y <= flag.y + flagHeight/2) {
+        // Create clickable divs for each flag
+        this.flags.forEach((flag, index) => {
+            if (flag.clickable) {
+                const clickArea = document.createElement('div');
+                clickArea.className = 'flag-click-area';
+                clickArea.style.cssText = `
+                    position: absolute;
+                    left: ${flag.x - flag.currentSize/2}px;
+                    top: ${flag.y - flag.currentSize * 0.6/2}px;
+                    width: ${flag.currentSize}px;
+                    height: ${flag.currentSize * 0.6}px;
+                    z-index: 15;
+                    cursor: pointer;
+                    background: transparent;
+                `;
+                clickArea.dataset.flagIndex = index;
+                clickArea.addEventListener('click', (event) => this.handleFlagClick(event, index));
+                clickArea.addEventListener('touchstart', (event) => this.handleFlagClick(event, index));
                 
-                this.showFlagStatistics(flag);
-                break;
+                document.body.appendChild(clickArea);
             }
+        });
+    }
+    
+    removeFlagClickAreas() {
+        const existingAreas = document.querySelectorAll('.flag-click-area');
+        existingAreas.forEach(area => area.remove());
+    }
+    
+    updateFlagClickAreas() {
+        // Update click areas when flags move or resize
+        this.createFlagClickAreas();
+    }
+    
+    handleFlagClick(event, flagIndex) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        if (flagIndex !== undefined && this.flags[flagIndex]) {
+            this.showFlagStatistics(this.flags[flagIndex]);
         }
     }
     
@@ -415,6 +440,9 @@ class SacredGeometryLayer extends RenderLayer {
         // Update flag growth and proximity effects
         this.updateFlagGrowth();
         this.updateProximityEffects();
+        
+        // Update click areas for flags
+        this.updateFlagClickAreas();
         
         // Render territories first (background)
         this.renderTerritories();

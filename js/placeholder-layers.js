@@ -71,7 +71,7 @@ class UIOverlayLayer extends RenderLayer {
 // Layer 5: Map Objects (z-index: 20)
 class MapObjectsLayer extends RenderLayer {
     constructor() {
-        super('mapObjects', 20);
+        super('mapObjects', 20, 'auto'); // pointerEvents: 'auto' for clickable objects
         this.clickableObjects = [];
         this.init();
     }
