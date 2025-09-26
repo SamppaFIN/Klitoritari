@@ -199,7 +199,7 @@ class WelcomeScreen {
         
         // Skip player identity dialog when tutorial is active
         // The tutorial will handle the initial setup
-        console.log('🎓 Tutorial mode - skipping player identity dialog');
+        console.log('🚀 Fresh adventure mode - proceeding directly to game');
         this.proceedWithGameStart();
     }
 
@@ -588,6 +588,10 @@ class WelcomeScreen {
 
     proceedWithGameStart() {
         console.log('🌟 Starting game after identity setup...');
+        
+        // Hide welcome screen first
+        this.hideWelcomeScreen();
+        
         this.initializeGame(true); // true = reset everything
         
         // Start NPC simulation after welcome screen is dismissed
