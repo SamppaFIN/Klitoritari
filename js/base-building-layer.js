@@ -117,20 +117,55 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     addAnt() {
+        const playerPosition = window.geolocationManager ? window.geolocationManager.getCurrentPosition() : null;
+        if (!playerPosition) return;
+
         const ant = {
-            id: `ant_${Date.now()}`,
-            x: Math.random() * this.canvas.width,
-            y: Math.random() * this.canvas.height,
-            size: 8,
+            id: 'ant_' + Date.now(),
+            lat: playerPosition.lat,
+            lng: playerPosition.lng,
             type: 'ant',
+            size: 15,
+            color: '#ff6b35',
             timestamp: Date.now()
         };
-        
+
         this.flags.push(ant);
         this.saveFlags();
         
-        console.log(`🐜 Ant added! Total ants: ${this.flags.filter(f => f.type === 'ant').length}`);
-        window.log(`🐜 Ant added! Total ants: ${this.flags.filter(f => f.type === 'ant').length}`);
+        // Check if we should add a step icon (every 5 ants)
+        const antCount = this.flags.filter(flag => flag.type === 'ant').length;
+        if (antCount % 5 === 0) {
+            this.addStepIcon();
+        }
+        
+        console.log(`🐜 Ant added at step ${this.steps} (total ants: ${antCount})`);
+        if (window.log) {
+            window.log(`🐜 Ant added at step ${this.steps} (total ants: ${antCount})`, 'info');
+        }
+    }
+
+    addStepIcon() {
+        const playerPosition = window.geolocationManager ? window.geolocationManager.getCurrentPosition() : null;
+        if (!playerPosition) return;
+
+        const stepIcon = {
+            id: 'step_' + Date.now(),
+            lat: playerPosition.lat,
+            lng: playerPosition.lng,
+            type: 'step',
+            size: 12,
+            color: '#2ed573',
+            timestamp: Date.now()
+        };
+
+        this.flags.push(stepIcon);
+        this.saveFlags();
+        
+        console.log(`👣 Step icon added (every 5 ants)`);
+        if (window.log) {
+            window.log(`👣 Step icon added (every 5 ants)`, 'info');
+        }
     }
 
     canPlaceFlag(x, y) {
@@ -402,23 +437,15 @@ class BaseBuildingLayer extends RenderLayer {
         this.ctx.shadowColor = color;
         this.ctx.shadowBlur = 15;
         
-        // Base circle
-        this.ctx.fillStyle = color;
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, size / 2, 0, Math.PI * 2);
-        this.ctx.fill();
+        // Render base using player's selected flag symbol
+        this.renderFlagSymbol(x, y, size, 'base');
         
-        // Base border
-        this.ctx.strokeStyle = '#ffffff';
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
-        
-        // Level indicator
+        // Level indicator (smaller, positioned at bottom right)
         this.ctx.fillStyle = '#ffffff';
-        this.ctx.font = 'bold 16px Arial';
+        this.ctx.font = 'bold 12px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(level.toString(), x, y);
+        this.ctx.fillText(level.toString(), x + size/3, y + size/3);
         
         // Clickable indicator
         this.ctx.fillStyle = '#ffff00';
@@ -443,6 +470,8 @@ class BaseBuildingLayer extends RenderLayer {
             this.renderAnt(x, y, size);
         } else if (type === 'joint') {
             this.renderJointFlag(x, y, size);
+        } else if (type === 'step') {
+            this.renderStepIcon(x, y, size);
         } else {
             this.renderFlagIcon(x, y, size);
         }
@@ -534,40 +563,176 @@ class BaseBuildingLayer extends RenderLayer {
         this.ctx.fillText(flagType.charAt(0).toUpperCase(), x, y);
     }
 
+    // Render flag symbol for bases and flags
+    renderFlagSymbol(x, y, size, context = 'flag') {
+        const flagType = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
+        
+        // Base gets a larger, more prominent symbol
+        const symbolSize = context === 'base' ? size * 0.8 : size;
+        
+        this.ctx.save();
+        
+        if (flagType === 'finnish') {
+            this.renderFinnishFlag(x, y, symbolSize);
+        } else if (flagType === 'swedish') {
+            this.renderSwedishFlag(x, y, symbolSize);
+        } else if (flagType === 'norwegian') {
+            this.renderNorwegianFlag(x, y, symbolSize);
+        } else if (flagType === 'cosmic') {
+            this.renderCosmicSymbol(x, y, symbolSize);
+        } else if (flagType === 'eldritch') {
+            this.renderEldritchSymbol(x, y, symbolSize);
+        } else {
+            // Default to a simple circle with symbol
+            this.ctx.fillStyle = '#8b5cf6';
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, symbolSize/2, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = 'bold 12px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('?', x, y);
+        }
+        
+        this.ctx.restore();
+    }
+
+    // Render Finnish flag
+    renderFinnishFlag(x, y, size) {
+        // White background
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.fillRect(x - size/2, y - size/2, size, size);
+        
+        // Blue cross
+        this.ctx.fillStyle = '#003580';
+        const crossWidth = size * 0.15;
+        const crossHeight = size * 0.4;
+        
+        // Horizontal bar
+        this.ctx.fillRect(x - size/2, y - crossWidth/2, size, crossWidth);
+        // Vertical bar
+        this.ctx.fillRect(x - crossWidth/2, y - size/2, crossWidth, size);
+    }
+
+    // Render Swedish flag
+    renderSwedishFlag(x, y, size) {
+        // Blue background
+        this.ctx.fillStyle = '#006AA7';
+        this.ctx.fillRect(x - size/2, y - size/2, size, size);
+        
+        // Yellow cross
+        this.ctx.fillStyle = '#FECC00';
+        const crossWidth = size * 0.15;
+        const crossHeight = size * 0.4;
+        
+        // Horizontal bar
+        this.ctx.fillRect(x - size/2, y - crossWidth/2, size, crossWidth);
+        // Vertical bar
+        this.ctx.fillRect(x - crossWidth/2, y - size/2, crossWidth, size);
+    }
+
+    // Render Norwegian flag
+    renderNorwegianFlag(x, y, size) {
+        // Red background
+        this.ctx.fillStyle = '#EF2B2D';
+        this.ctx.fillRect(x - size/2, y - size/2, size, size);
+        
+        // White cross
+        this.ctx.fillStyle = '#ffffff';
+        const crossWidth = size * 0.12;
+        
+        // Horizontal bar
+        this.ctx.fillRect(x - size/2, y - crossWidth/2, size, crossWidth);
+        // Vertical bar
+        this.ctx.fillRect(x - crossWidth/2, y - size/2, crossWidth, size);
+        
+        // Blue cross on top
+        this.ctx.fillStyle = '#002868';
+        const blueCrossWidth = size * 0.08;
+        
+        // Horizontal bar
+        this.ctx.fillRect(x - size/2, y - blueCrossWidth/2, size, blueCrossWidth);
+        // Vertical bar
+        this.ctx.fillRect(x - blueCrossWidth/2, y - size/2, blueCrossWidth, size);
+    }
+
+    // Render cosmic symbol
+    renderCosmicSymbol(x, y, size) {
+        // Cosmic star symbol
+        this.ctx.fillStyle = '#8b5cf6';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Star points
+        this.ctx.strokeStyle = '#ffd700';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = (i * Math.PI) / 4;
+            const x1 = x + Math.cos(angle) * (size/2 - 2);
+            const y1 = y + Math.sin(angle) * (size/2 - 2);
+            const x2 = x + Math.cos(angle) * (size/2 + 2);
+            const y2 = y + Math.sin(angle) * (size/2 + 2);
+            
+            if (i === 0) {
+                this.ctx.moveTo(x1, y1);
+            } else {
+                this.ctx.lineTo(x1, y1);
+            }
+            this.ctx.lineTo(x2, y2);
+        }
+        this.ctx.stroke();
+    }
+
+    // Render eldritch symbol
+    renderEldritchSymbol(x, y, size) {
+        // Dark circle
+        this.ctx.fillStyle = '#2d1b69';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Tentacle-like lines
+        this.ctx.strokeStyle = '#ff6b35';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const angle = (i * Math.PI) / 3;
+            const x1 = x + Math.cos(angle) * (size/4);
+            const y1 = y + Math.sin(angle) * (size/4);
+            const x2 = x + Math.cos(angle) * (size/2 + 2);
+            const y2 = y + Math.sin(angle) * (size/2 + 2);
+            
+            this.ctx.moveTo(x1, y1);
+            this.ctx.quadraticCurveTo(x1 + (x2-x1)/2, y1 + (y2-y1)/2 + 3, x2, y2);
+        }
+        this.ctx.stroke();
+    }
+
+    // Render step icon (small footprint)
+    renderStepIcon(x, y, size) {
+        this.ctx.fillStyle = '#2ed573';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size/2, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Small footprint shape
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = '8px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('👣', x, y);
+    }
+
     // Public methods for external use
     addStepFromExternal() {
         this.addStep();
         console.log(`🏗️ Step added from external system. Total: ${this.steps}`);
-        
-        // Check if we should add an ant icon for every 50 steps
-        if (this.steps % 50 === 0) {
-            this.addAntIcon();
-        }
     }
 
-    // Add ant icon when player reaches 50 steps
-    addAntIcon() {
-        const playerPosition = window.geolocationManager ? window.geolocationManager.getCurrentPosition() : null;
-        if (!playerPosition) return;
-
-        const ant = {
-            id: 'ant_' + Date.now(),
-            lat: playerPosition.lat,
-            lng: playerPosition.lng,
-            type: 'ant',
-            size: 15,
-            color: '#ff6b35',
-            timestamp: Date.now()
-        };
-
-        this.flags.push(ant);
-        this.saveFlags();
-        
-        console.log(`🐜 Ant icon added at step ${this.steps}`);
-        if (window.log) {
-            window.log(`🐜 Ant icon added at step ${this.steps}`, 'info');
-        }
-    }
 
     placeFlagAtPosition() {
         // Check if there's a joint flag present
