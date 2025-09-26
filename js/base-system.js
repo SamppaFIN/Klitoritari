@@ -232,28 +232,143 @@ class BaseSystem {
         const establishNowBtn = document.getElementById('establish-base-now-btn');
         if (establishNowBtn) {
             establishNowBtn.addEventListener('click', () => {
-                const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
-                const cost = 1000;
-                if (steps < cost) {
-                    this.showNotification(`Not enough steps to establish a base (need ${cost})`, 'error');
-                    return;
-                }
-                // Deduct steps
-                if (window.stepCurrencySystem) {
-                    window.stepCurrencySystem.subtractSteps(cost);
-                }
-                // Use current position from geolocation manager
-                const pos = window.geolocationManager?.getCurrentPositionData?.() || window.geolocationManager?.currentPosition;
-                if (!pos) {
-                    this.showNotification('Location required to establish base. Please press LOCATE first.', 'error');
-                    return;
-                }
-                const name = 'Cosmic Sanctuary';
-                this.establishBase(name, pos);
-                // Hide the no-base section after establishing
-                const noBase = document.getElementById('no-base-section');
-                if (noBase) noBase.classList.add('hidden');
+                this.establishBaseWithNewSystem();
             });
+        }
+    }
+
+    establishBaseWithNewSystem() {
+        const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
+        const cost = 1000;
+        
+        if (steps < cost) {
+            this.showNotification(`Not enough steps to establish a base (need ${cost})`, 'error');
+            return;
+        }
+
+        // Check if base building layer is available
+        if (!window.layeredRendering) {
+            this.showNotification('Base building system not available', 'error');
+            return;
+        }
+
+        const baseBuildingLayer = window.layeredRendering.getLayer('baseBuilding');
+        if (!baseBuildingLayer) {
+            this.showNotification('Base building layer not found', 'error');
+            return;
+        }
+
+        // Deduct steps
+        if (window.stepCurrencySystem) {
+            window.stepCurrencySystem.subtractSteps(cost);
+        }
+
+        // Create a base at the center of the screen (for now)
+        const base = {
+            id: 'player_base_' + Date.now(),
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            size: 40,
+            level: 1,
+            flags: 0,
+            steps: 0,
+            maxFlags: 8,
+            color: '#8b5cf6',
+            owner: 'player'
+        };
+
+        // Add base to the base building layer
+        baseBuildingLayer.bases = [base];
+        baseBuildingLayer.saveBaseData();
+
+        // Update UI
+        this.updateBaseTabUI();
+        
+        // Hide the no-base section
+        const noBase = document.getElementById('no-base-section');
+        if (noBase) noBase.classList.add('hidden');
+
+        this.showNotification('Base established successfully! 🏗️', 'success');
+        
+        // Log the establishment
+        if (window.log) {
+            window.log('Base established at center of screen', 'success');
+        }
+    }
+
+    updateBaseTabUI() {
+        const baseManagementList = document.getElementById('base-management-list');
+        if (!baseManagementList) return;
+
+        if (window.layeredRendering) {
+            const baseBuildingLayer = window.layeredRendering.getLayer('baseBuilding');
+            if (baseBuildingLayer && baseBuildingLayer.bases.length > 0) {
+                const base = baseBuildingLayer.bases[0];
+                const stats = baseBuildingLayer.getStats();
+                
+                baseManagementList.innerHTML = `
+                    <div class="base-card">
+                        <div class="base-header">
+                            <h3>🏗️ Cosmic Sanctuary</h3>
+                            <span class="base-level">Level ${base.level}</span>
+                        </div>
+                        <div class="base-stats">
+                            <div class="stat">
+                                <span class="stat-label">Size:</span>
+                                <span class="stat-value">${base.size}px</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Flags:</span>
+                                <span class="stat-value">${stats.flagsAroundBase}/${base.maxFlags}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Ants:</span>
+                                <span class="stat-value">${stats.ants}</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-label">Steps:</span>
+                                <span class="stat-value">${stats.steps}</span>
+                            </div>
+                        </div>
+                        <div class="base-actions">
+                            <button class="base-btn" onclick="this.showBaseStats()">View Stats</button>
+                            <button class="base-btn" onclick="this.placeFlag()">Place Flag</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                baseManagementList.innerHTML = '<div class="base-empty">No base established</div>';
+            }
+        }
+    }
+
+    showBaseStats() {
+        if (window.layeredRendering) {
+            const baseBuildingLayer = window.layeredRendering.getLayer('baseBuilding');
+            if (baseBuildingLayer && baseBuildingLayer.bases.length > 0) {
+                baseBuildingLayer.showBaseStats(baseBuildingLayer.bases[0]);
+            }
+        }
+    }
+
+    placeFlag() {
+        if (window.layeredRendering) {
+            const baseBuildingLayer = window.layeredRendering.getLayer('baseBuilding');
+            if (baseBuildingLayer) {
+                // Place a flag near the base
+                const base = baseBuildingLayer.bases[0];
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 60 + Math.random() * 20;
+                const x = base.x + Math.cos(angle) * distance;
+                const y = base.y + Math.sin(angle) * distance;
+                
+                if (baseBuildingLayer.placeFlagAtPosition(x, y)) {
+                    this.showNotification('Flag placed! 🏴', 'success');
+                    this.updateBaseTabUI();
+                } else {
+                    this.showNotification('Cannot place flag: no joint flag nearby', 'warn');
+                }
+            }
         }
     }
 

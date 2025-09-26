@@ -58,22 +58,14 @@ class BaseBuildingLayer extends RenderLayer {
     }
 
     loadBaseData() {
-        // Create initial base at center of screen
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        // Load bases from localStorage
+        this.loadBasesFromStorage();
         
-        this.bases = [{
-            id: 'main_base',
-            x: centerX,
-            y: centerY,
-            size: 40,
-            level: 1,
-            flags: 0,
-            steps: 0,
-            maxFlags: 8, // Maximum flags around base
-            color: '#8b5cf6',
-            owner: 'player'
-        }];
+        // If no bases exist, don't create one automatically
+        // Bases will be created when user clicks "Establish Base"
+        if (this.bases.length === 0) {
+            this.bases = [];
+        }
 
         // Load flags from localStorage
         this.loadFlags();
@@ -97,6 +89,17 @@ class BaseBuildingLayer extends RenderLayer {
 
     saveSteps() {
         localStorage.setItem('base_steps', this.steps.toString());
+    }
+
+    saveBaseData() {
+        localStorage.setItem('base_bases', JSON.stringify(this.bases));
+    }
+
+    loadBasesFromStorage() {
+        const savedBases = localStorage.getItem('base_bases');
+        if (savedBases) {
+            this.bases = JSON.parse(savedBases);
+        }
     }
 
     addStep() {
@@ -270,6 +273,17 @@ class BaseBuildingLayer extends RenderLayer {
         window.log(`🏴 Flag clicked: ${flag.type}`);
     }
 
+    render() {
+        super.render(); // Clear canvas
+        
+        // Debug logging
+        if (this.bases.length > 0) {
+            console.log(`🏗️ Base Building Layer rendering ${this.bases.length} bases and ${this.flags.length} flags`);
+        }
+        
+        this.renderContent();
+    }
+
     renderContent() {
         if (!this.ctx) return;
 
@@ -286,6 +300,8 @@ class BaseBuildingLayer extends RenderLayer {
 
     renderBase(base) {
         const { x, y, size, color, level } = base;
+        
+        console.log(`🏗️ Rendering base at (${x}, ${y}) with size ${size}`);
         
         this.ctx.save();
         
@@ -409,6 +425,18 @@ class BaseBuildingLayer extends RenderLayer {
 
     getStats() {
         const mainBase = this.bases[0];
+        if (!mainBase) {
+            return {
+                steps: this.steps,
+                flags: this.flags.length,
+                ants: 0,
+                baseLevel: 0,
+                baseSize: 0,
+                flagsAroundBase: 0,
+                maxFlags: 0
+            };
+        }
+        
         const surroundingFlags = this.getSurroundingFlags(mainBase);
         const ants = this.flags.filter(f => f.type === 'ant').length;
         
@@ -421,6 +449,31 @@ class BaseBuildingLayer extends RenderLayer {
             flagsAroundBase: surroundingFlags.length,
             maxFlags: mainBase.maxFlags
         };
+    }
+
+    // Debug method to check base state
+    debugBaseState() {
+        console.log('🏗️ Base Building Layer Debug:');
+        console.log('- Bases:', this.bases.length);
+        console.log('- Flags:', this.flags.length);
+        console.log('- Steps:', this.steps);
+        console.log('- Canvas visible:', this.canvas.style.display !== 'none');
+        console.log('- Canvas size:', this.canvas.width, 'x', this.canvas.height);
+        
+        if (this.bases.length > 0) {
+            const base = this.bases[0];
+            console.log('- First base:', {
+                id: base.id,
+                x: base.x,
+                y: base.y,
+                size: base.size,
+                level: base.level
+            });
+        }
+        
+        if (window.log) {
+            window.log(`Base Building Debug: ${this.bases.length} bases, ${this.flags.length} flags, ${this.steps} steps`, 'info');
+        }
     }
 }
 

@@ -7939,6 +7939,88 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: none;
 }
 
+/* Base Management Styles */
+.base-card {
+    background: rgba(139, 92, 246, 0.1);
+    border: 2px solid #8b5cf6;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.base-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.base-header h3 {
+    margin: 0;
+    color: #8b5cf6;
+    font-size: 1.2rem;
+}
+
+.base-level {
+    background: rgba(139, 92, 246, 0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.base-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+}
+
+.stat-label {
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: #8b5cf6;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.base-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.base-btn {
+    flex: 1;
+    padding: 10px 15px;
+    background: linear-gradient(45deg, #8b5cf6, #a855f7);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.base-btn:hover {
+    background: linear-gradient(45deg, #a855f7, #8b5cf6);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+}
+
 /* GPS Permission Section */
 .gps-permission-section {
     background: rgba(0, 255, 255, 0.1);

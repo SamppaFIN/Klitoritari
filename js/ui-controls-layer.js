@@ -219,6 +219,7 @@ class UIControlsLayer extends RenderLayer {
             <button onclick="window.layeredRendering?.toggleLayer('sacredGeometry')" style="width: 100%; margin: 5px 0; padding: 8px; background: #444; color: white; border: none; border-radius: 5px; cursor: pointer;">Toggle Sacred Geometry</button>
             <button onclick="window.stepCurrencySystem?.addManualStep()" style="width: 100%; margin: 5px 0; padding: 8px; background: #444; color: white; border: none; border-radius: 5px; cursor: pointer;">Add Step</button>
             <button onclick="this.testBaseBuilding()" style="width: 100%; margin: 5px 0; padding: 8px; background: #444; color: white; border: none; border-radius: 5px; cursor: pointer;">Test Base Building</button>
+            <button onclick="this.debugBaseState()" style="width: 100%; margin: 5px 0; padding: 8px; background: #444; color: white; border: none; border-radius: 5px; cursor: pointer;">Debug Base State</button>
             <button onclick="this.clearAllLogs()" style="width: 100%; margin: 5px 0; padding: 8px; background: #444; color: white; border: none; border-radius: 5px; cursor: pointer;">Clear All Logs</button>
         `;
 
@@ -356,13 +357,55 @@ class UIControlsLayer extends RenderLayer {
         }, duration);
     }
 
+    // Debug base state
+    debugBaseState() {
+        if (window.layeredRendering) {
+            const baseLayer = window.layeredRendering.getLayer('baseBuilding');
+            if (baseLayer) {
+                baseLayer.debugBaseState();
+            } else {
+                this.showNotification('Base building layer not found!', 'error');
+            }
+        } else {
+            this.showNotification('Layered rendering system not available!', 'error');
+        }
+    }
+
     // Test function for base building
     testBaseBuilding() {
         if (window.layeredRendering) {
             const baseLayer = window.layeredRendering.getLayer('baseBuilding');
             if (baseLayer) {
+                // Add some steps first
                 baseLayer.addStepFromExternal();
-                this.showNotification('Step added to base building system!', 'success');
+                baseLayer.addStepFromExternal();
+                baseLayer.addStepFromExternal();
+                
+                // Create a test base if none exists
+                if (baseLayer.bases.length === 0) {
+                    const base = {
+                        id: 'test_base_' + Date.now(),
+                        x: window.innerWidth / 2,
+                        y: window.innerHeight / 2,
+                        size: 40,
+                        level: 1,
+                        flags: 0,
+                        steps: 0,
+                        maxFlags: 8,
+                        color: '#8b5cf6',
+                        owner: 'player'
+                    };
+                    baseLayer.bases = [base];
+                    baseLayer.saveBaseData();
+                    this.showNotification('Test base created! 🏗️', 'success');
+                } else {
+                    this.showNotification('Base already exists! Adding steps...', 'info');
+                }
+                
+                // Update base tab UI if available
+                if (window.baseSystem) {
+                    window.baseSystem.updateBaseTabUI();
+                }
             } else {
                 this.showNotification('Base building layer not found!', 'error');
             }
