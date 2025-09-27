@@ -459,6 +459,11 @@ class StepCurrencySystem {
         
         console.log(`🚶‍♂️ Step added! Total: ${this.totalSteps}, Session: ${this.sessionSteps}`);
         
+        // Debug: Check if we're at a 50-step milestone
+        if (this.totalSteps % 50 === 0) {
+            console.log(`🎯 50-step milestone reached! Total steps: ${this.totalSteps}`);
+        }
+        
         this.updateStepCounter();
         
         // Trigger step update callback
@@ -492,10 +497,49 @@ class StepCurrencySystem {
                     window.discordEffects.triggerNotificationPop(`${this.totalSteps} Steps!`, '#ffaa00');
                 } catch (e) {}
             }
+            
+            // Path markers are now created by the path painting system instead of step counting
+            console.log(`🎯 50-step milestone reached! Path markers are now created by movement, not step counting.`);
         }
         
         this.checkMilestones();
         this.saveSteps();
+    }
+    
+    createPathMarker() {
+        try {
+            console.log(`🐜 createPathMarker called at step ${this.totalSteps}`);
+            
+            // Get current player position
+            let playerPosition = null;
+            if (window.mapEngine && typeof window.mapEngine.getPlayerPosition === 'function') {
+                playerPosition = window.mapEngine.getPlayerPosition();
+                console.log('🐜 Got position from getPlayerPosition():', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            } else if (window.mapEngine && window.mapEngine.playerPosition) {
+                playerPosition = window.mapEngine.playerPosition;
+                console.log('🐜 Got position from playerPosition:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            } else if (window.geolocationManager && window.geolocationManager.currentPosition) {
+                playerPosition = window.geolocationManager.currentPosition;
+                console.log('🐜 Got position from geolocationManager:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            }
+            
+            console.log('🐜 Final player position:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            console.log('🐜 mapEngine available:', !!window.mapEngine);
+            console.log('🐜 dropFlagHere available:', !!(window.mapEngine && window.mapEngine.dropFlagHere));
+            
+            if (playerPosition && window.mapEngine && window.mapEngine.dropFlagHere) {
+                console.log(`🐜 Creating path marker at step ${this.totalSteps} at position:`, `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+                window.mapEngine.dropFlagHere(playerPosition.lat, playerPosition.lng);
+                console.log('🐜 Path marker creation completed');
+            } else {
+                console.log('🐜 Cannot create path marker - no position or mapEngine available');
+                console.log('🐜 playerPosition:', playerPosition ? `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}` : 'null');
+                console.log('🐜 mapEngine:', !!window.mapEngine);
+                console.log('🐜 dropFlagHere:', !!(window.mapEngine && window.mapEngine.dropFlagHere));
+            }
+        } catch (error) {
+            console.error('🐜 Error creating path marker:', error);
+        }
     }
 
     // Reset only the session step counter (used when starting a new adventure)
@@ -549,7 +593,7 @@ class StepCurrencySystem {
             }
             
             if (position && typeof position.lat === 'number' && typeof position.lng === 'number') {
-                console.log('🇫🇮 Using position for flag:', position);
+                console.log('🇫🇮 Using position for flag:', `lat: ${position.lat}, lng: ${position.lng}`);
                 if (window.mapEngine && window.mapEngine.symbolCanvasLayer) {
                     const layer = window.mapEngine.symbolCanvasLayer;
                     // Ensure visible

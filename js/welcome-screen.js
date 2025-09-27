@@ -45,7 +45,8 @@ class WelcomeScreen {
         if (enableGpsBtn) {
             console.log('🌟 GPS enable button found, adding event listener');
             enableGpsBtn.addEventListener('click', () => {
-                console.log('📍 GPS enable button clicked!');
+                console.log('📍 GPS enable button clicked! - Requesting GPS permission directly');
+                // Use direct GPS permission request (simpler approach)
                 this.requestGPSPermission();
             });
         } else {
@@ -181,17 +182,80 @@ class WelcomeScreen {
         
         // Mark welcome as seen
         localStorage.setItem('eldritch_welcome_seen', 'true');
-        // DISABLED: Tutorial system for layered rendering testing
-        // localStorage.setItem('eldritch_show_tutorial', 'true');
-        // localStorage.setItem('eldritch_start_tutorial_encounter', 'true');
         this.hasSeenWelcome = true;
         
         // Reset all game state
         this.resetAllGameState();
         
-        // Show player identity dialog for fresh adventure
-        console.log('🚀 Fresh adventure mode - showing player creation');
-        this.showPlayerIdentityDialog();
+        // Hide welcome screen
+        this.hideWelcomeScreen();
+        
+        // Use new Three.js UI system for player creation
+        console.log('🚀 Fresh adventure mode - using Three.js UI for player creation');
+        this.showThreeJSPlayerCreation();
+    }
+
+    showThreeJSPlayerCreation() {
+        console.log('🎮 Showing Three.js player creation UI');
+        
+        // Emit event to Three.js UI system to show player creation panel
+        if (window.eventBus) {
+            window.eventBus.emit('ui:show-player-creation', {
+                mode: 'fresh',
+                callback: (playerData) => {
+                    console.log('🎮 Player creation completed:', playerData);
+                    this.handlePlayerCreationComplete(playerData);
+                }
+            });
+        } else {
+            console.warn('⚠️ EventBus not available, falling back to old UI');
+            this.showPlayerIdentityDialog();
+        }
+    }
+
+    handlePlayerCreationComplete(playerData) {
+        console.log('🎮 Player creation completed, starting game with:', playerData);
+        
+        // Store player data
+        if (playerData.name) {
+            localStorage.setItem('eldritch_player_name', playerData.name);
+        }
+        if (playerData.pathColor) {
+            localStorage.setItem('eldritch_path_color', playerData.pathColor);
+        }
+        if (playerData.areaSymbol) {
+            localStorage.setItem('eldritch_area_symbol', playerData.areaSymbol);
+        }
+        if (playerData.baseSymbol) {
+            localStorage.setItem('eldritch_base_symbol', playerData.baseSymbol);
+        }
+        
+        // Start the game
+        this.startGame();
+    }
+
+    startGame() {
+        console.log('🎮 Starting the game...');
+        
+        // Show the game header
+        const gameHeader = document.getElementById('game-header');
+        if (gameHeader) {
+            gameHeader.style.display = 'flex';
+            console.log('🎮 Game header shown');
+        }
+        
+        // Emit event to start the main game
+        if (window.eventBus) {
+            window.eventBus.emit('game:start', {
+                mode: 'fresh',
+                playerData: {
+                    name: localStorage.getItem('eldritch_player_name') || 'Cosmic Explorer',
+                    pathColor: localStorage.getItem('eldritch_path_color') || '#3b82f6',
+                    areaSymbol: localStorage.getItem('eldritch_area_symbol') || 'circle',
+                    baseSymbol: localStorage.getItem('eldritch_base_symbol') || 'flag_finland'
+                }
+            });
+        }
     }
 
     showPlayerIdentityDialog() {
@@ -231,7 +295,6 @@ class WelcomeScreen {
     populateIdentityForm() {
         const nameInput = document.getElementById('player-name-input');
         const colorInput = document.getElementById('path-color-input');
-        const symbolGrid = document.getElementById('symbol-options');
         
         // Set default name
         if (nameInput) {
@@ -241,32 +304,30 @@ class WelcomeScreen {
         // Set default RGB values (0, 255, 136 = #00ff88)
         this.setRGBValues(0, 255, 136);
         
-        // Generate symbol options (no tutorial dependency)
-        if (symbolGrid) {
-            const symbols = ['🌟', '⭐', '✨', '💫', '🌙', '☀️', '🔮', '💎', '🌌', '🎭', '🏴', '⚡', '🔥', '❄️', '🌊'];
-            symbolGrid.innerHTML = symbols.map(symbol => 
-                `<div class="symbol-option" data-symbol="${symbol}">${symbol}</div>`
-            ).join('');
+        // Load saved symbols or set defaults
+        const savedBaseLogo = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+        const savedAreaSymbol = localStorage.getItem('eldritch_player_area_symbol') || 'finnish';
+        const savedPathSymbol = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
+        
+        // Initialize base logo options
+        const baseLogoGrid = document.getElementById('base-logo-options');
+        if (baseLogoGrid) {
+            this.populateBaseLogoOptions(baseLogoGrid);
+            this.selectSymbolOption(baseLogoGrid, savedBaseLogo, 'finnish');
         }
         
-        // Load saved path symbol or set default
-        const savedPathSymbol = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
+        // Initialize area symbol options
+        const areaSymbolGrid = document.getElementById('area-symbol-options');
+        if (areaSymbolGrid) {
+            this.populateAreaSymbolOptions(areaSymbolGrid);
+            this.selectSymbolOption(areaSymbolGrid, savedAreaSymbol, 'finnish');
+        }
+        
+        // Initialize path symbol options
         const pathSymbolGrid = document.getElementById('path-symbol-options');
         if (pathSymbolGrid) {
-            // Generate SVG symbol options
             this.populatePathSymbolOptions(pathSymbolGrid);
-            
-            // Select the saved path symbol
-            const pathSymbolOption = pathSymbolGrid.querySelector(`[data-symbol="${savedPathSymbol}"]`);
-            if (pathSymbolOption) {
-                pathSymbolOption.classList.add('selected');
-            } else {
-                // Default to finnish if saved symbol not found
-                const finnishOption = pathSymbolGrid.querySelector('[data-symbol="finnish"]');
-                if (finnishOption) {
-                    finnishOption.classList.add('selected');
-                }
-            }
+            this.selectSymbolOption(pathSymbolGrid, savedPathSymbol, 'sun');
         }
     }
 
@@ -292,28 +353,75 @@ class WelcomeScreen {
         if (colorPicker) colorPicker.value = hexColor;
     }
     
-    populatePathSymbolOptions(grid) {
+    selectSymbolOption(grid, savedSymbol, defaultSymbol) {
+        const symbolOption = grid.querySelector(`[data-symbol="${savedSymbol}"]`);
+        if (symbolOption) {
+            symbolOption.classList.add('selected');
+        } else {
+            // Default to fallback if saved symbol not found
+            const defaultOption = grid.querySelector(`[data-symbol="${defaultSymbol}"]`);
+            if (defaultOption) {
+                defaultOption.classList.add('selected');
+            }
+        }
+    }
+
+    populateBaseLogoOptions(grid) {
         const symbols = [
             { id: 'finnish', label: 'Finnish Flag', svg: this.svgFinnishFlag(36) },
             { id: 'swedish', label: 'Swedish Flag', svg: this.svgSwedishFlag(36) },
             { id: 'norwegian', label: 'Norwegian Flag', svg: this.svgNorwegianFlag(36) },
-            { id: 'flower', label: 'Flower of Life', svg: this.svgFlowerOfLife(36) },
-            { id: 'triangle', label: 'Sacred Triangle', svg: this.svgTriangle(36) },
-            { id: 'hex', label: 'Hexagon', svg: this.svgHexagon(36) },
-            { id: 'spiral', label: 'Cosmic Spiral', svg: this.svgSpiral(36) },
-            { id: 'star', label: 'Star', svg: this.svgStar(36) },
-            { id: 'circle', label: 'Sacred Circle', svg: this.svgCircle(36) },
-            { id: 'diamond', label: 'Cosmic Diamond', svg: this.svgDiamond(36) },
-            { id: 'pentagram', label: 'Pentagram', svg: this.svgPentagram(36) },
-            { id: 'infinity', label: 'Infinity Symbol', svg: this.svgInfinity(36) },
-            { id: 'yin-yang', label: 'Yin Yang', svg: this.svgYinYang(36) },
-            { id: 'cross', label: 'Celtic Cross', svg: this.svgCross(36) },
-            { id: 'moon', label: 'Crescent Moon', svg: this.svgMoon(36) },
-            { id: 'sun', label: 'Solar Disc', svg: this.svgSun(36) }
+            { id: 'flower_of_life', label: 'Flower of Life', svg: this.svgFlowerOfLife(36) },
+            { id: 'sacred_triangle', label: 'Sacred Triangle', svg: this.svgTriangle(36) },
+            { id: 'hexagon', label: 'Hexagon', svg: this.svgHexagon(36) },
+            { id: 'cosmic_spiral', label: 'Cosmic Spiral', svg: this.svgSpiral(36) },
+            { id: 'star', label: 'Star', svg: this.svgStar(36) }
         ];
         
         grid.innerHTML = symbols.map(opt => `
-            <div class="path-symbol-option" data-symbol="${opt.id}" title="${opt.label}">
+            <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}">
+                ${opt.svg}
+                <span>${opt.label}</span>
+            </div>
+        `).join('');
+    }
+
+    populateAreaSymbolOptions(grid) {
+        const symbols = [
+            { id: 'finnish', label: 'Finnish Flag', svg: this.svgFinnishFlag(24) },
+            { id: 'swedish', label: 'Swedish Flag', svg: this.svgSwedishFlag(24) },
+            { id: 'norwegian', label: 'Norwegian Flag', svg: this.svgNorwegianFlag(24) },
+            { id: 'flower_of_life', label: 'Flower of Life', svg: this.svgFlowerOfLife(24) },
+            { id: 'sacred_triangle', label: 'Sacred Triangle', svg: this.svgTriangle(24) },
+            { id: 'hexagon', label: 'Hexagon', svg: this.svgHexagon(24) },
+            { id: 'cosmic_spiral', label: 'Cosmic Spiral', svg: this.svgSpiral(24) },
+            { id: 'star', label: 'Star', svg: this.svgStar(24) }
+        ];
+        
+        grid.innerHTML = symbols.map(opt => `
+            <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}">
+                ${opt.svg}
+                <span>${opt.label}</span>
+            </div>
+        `).join('');
+    }
+
+    populatePathSymbolOptions(grid) {
+        const symbols = [
+            { id: 'sun', label: 'Sun', svg: this.svgSun(24) },
+            { id: 'star', label: 'Star', svg: this.svgStar(24) },
+            { id: 'sparkle', label: 'Sparkle', svg: this.svgSparkle(24) },
+            { id: 'crescent', label: 'Crescent', svg: this.svgMoon(24) },
+            { id: 'diamond', label: 'Diamond', svg: this.svgDiamond(24) },
+            { id: 'aurora', label: 'Aurora', svg: this.svgAurora(24) },
+            { id: 'lightning', label: 'Lightning', svg: this.svgLightning(24) },
+            { id: 'flame', label: 'Flame', svg: this.svgFlame(24) },
+            { id: 'snowflake', label: 'Snowflake', svg: this.svgSnowflake(24) },
+            { id: 'wave', label: 'Wave', svg: this.svgWave(24) }
+        ];
+        
+        grid.innerHTML = symbols.map(opt => `
+            <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}">
                 ${opt.svg}
                 <span>${opt.label}</span>
             </div>
@@ -493,15 +601,48 @@ class WelcomeScreen {
             colorPicker.addEventListener('change', () => this.updateColorFromPicker());
         }
         
-        // Symbol selection
-        const symbolGrid = document.getElementById('symbol-options');
-        if (symbolGrid) {
-            symbolGrid.addEventListener('click', (e) => {
-                if (e.target.classList.contains('symbol-option')) {
+        // Base logo symbol selection
+        const baseLogoGrid = document.getElementById('base-logo-options');
+        if (baseLogoGrid) {
+            baseLogoGrid.addEventListener('click', (e) => {
+                const option = e.target.closest('.symbol-option');
+                if (option) {
                     // Remove previous selection
-                    symbolGrid.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
+                    baseLogoGrid.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
                     // Add selection to clicked option
-                    e.target.classList.add('selected');
+                    option.classList.add('selected');
+                    
+                    // Store selection in localStorage
+                    const logoType = option.dataset.logoType;
+                    localStorage.setItem('eldritch_player_base_logo', logoType);
+                    console.log('🏗️ Base logo selected:', logoType);
+                    
+                    // Update base marker if it exists
+                    if (window.mapEngine && window.mapEngine.updateBaseMarker) {
+                        window.mapEngine.updateBaseMarker();
+                    }
+                    
+                    // Refresh base building layer rendering
+                    if (window.layeredRenderingSystem && window.layeredRenderingSystem.layers) {
+                        const baseBuildingLayer = window.layeredRenderingSystem.layers.find(layer => layer.name === 'baseBuilding');
+                        if (baseBuildingLayer && baseBuildingLayer.refreshBaseRendering) {
+                            baseBuildingLayer.refreshBaseRendering();
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Area symbol selection
+        const areaSymbolGrid = document.getElementById('area-symbol-options');
+        if (areaSymbolGrid) {
+            areaSymbolGrid.addEventListener('click', (e) => {
+                const option = e.target.closest('.symbol-option');
+                if (option) {
+                    // Remove previous selection
+                    areaSymbolGrid.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
+                    // Add selection to clicked option
+                    option.classList.add('selected');
                 }
             });
         }
@@ -510,12 +651,12 @@ class WelcomeScreen {
         const pathSymbolGrid = document.getElementById('path-symbol-options');
         if (pathSymbolGrid) {
             pathSymbolGrid.addEventListener('click', (e) => {
-                if (e.target.classList.contains('path-symbol-option') || e.target.closest('.path-symbol-option')) {
-                    const pathSymbolOption = e.target.classList.contains('path-symbol-option') ? e.target : e.target.closest('.path-symbol-option');
+                const option = e.target.closest('.symbol-option');
+                if (option) {
                     // Remove previous selection
-                    pathSymbolGrid.querySelectorAll('.path-symbol-option').forEach(opt => opt.classList.remove('selected'));
+                    pathSymbolGrid.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
                     // Add selection to clicked option
-                    pathSymbolOption.classList.add('selected');
+                    option.classList.add('selected');
                 }
             });
         }
@@ -550,25 +691,32 @@ class WelcomeScreen {
         
         const nameInput = document.getElementById('player-name-input');
         const colorInput = document.getElementById('path-color-input');
-        const symbolGrid = document.getElementById('symbol-options');
+        const baseLogoGrid = document.getElementById('base-logo-options');
+        const areaSymbolGrid = document.getElementById('area-symbol-options');
         const pathSymbolGrid = document.getElementById('path-symbol-options');
         
         const name = (nameInput?.value || '').trim() || 'Cosmic Wanderer';
         const color = colorInput?.value || '#00ff88';
-        const selectedSymbol = symbolGrid?.querySelector('.symbol-option.selected');
-        const symbol = selectedSymbol?.dataset.symbol || '🌟';
-        const selectedPathSymbol = pathSymbolGrid?.querySelector('.path-symbol-option.selected');
-        const pathSymbol = selectedPathSymbol?.dataset.symbol || 'finnish';
+        const selectedBaseLogo = baseLogoGrid?.querySelector('.symbol-option.selected');
+        const baseLogo = selectedBaseLogo?.dataset.symbol || 'finnish';
+        const selectedAreaSymbol = areaSymbolGrid?.querySelector('.symbol-option.selected');
+        const areaSymbol = selectedAreaSymbol?.dataset.symbol || 'finnish';
+        const selectedPathSymbol = pathSymbolGrid?.querySelector('.symbol-option.selected');
+        const pathSymbol = selectedPathSymbol?.dataset.symbol || 'sun';
+        
+        console.log('🎭 Selected symbols:', { baseLogo, areaSymbol, pathSymbol });
         
         // Save to localStorage
         localStorage.setItem('eldritch_player_name', name);
         localStorage.setItem('eldritch_player_color', color);
-        localStorage.setItem('eldritch_player_symbol', symbol);
+        localStorage.setItem('eldritch_player_base_logo', baseLogo);
+        localStorage.setItem('eldritch_player_area_symbol', areaSymbol);
+        localStorage.setItem('eldritch_player_symbol', pathSymbol); // Keep for backward compatibility
         localStorage.setItem('eldritch_player_path_symbol', pathSymbol);
         
         // Update multiplayer profile if available
         if (window.multiplayerManager) {
-            window.multiplayerManager.updateLocalProfile({ name, symbol, pathColor: color, pathSymbol: pathSymbol });
+            window.multiplayerManager.updateLocalProfile({ name, symbol: pathSymbol, pathColor: color, pathSymbol: pathSymbol });
         }
         
         // Hide modal
@@ -1164,6 +1312,54 @@ class WelcomeScreen {
         }
 
         console.log('🎮 Game buttons enabled');
+    }
+
+    // Additional SVG methods for new symbols
+    svgSparkle(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="8" fill="#ff8c00"/>
+            <path d="M30,5 L30,15 M30,45 L30,55 M5,30 L15,30 M45,30 L55,30 M10,10 L18,18 M42,42 L50,50 M10,50 L18,42 M42,18 L50,10" 
+                  stroke="#ffd700" stroke-width="2"/>
+        </svg>`;
+    }
+
+    svgAurora(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M5,20 Q15,10 25,20 Q35,30 45,20 Q50,25 55,20" 
+                  stroke="#8b5cf6" stroke-width="3" fill="none"/>
+            <path d="M5,30 Q15,25 25,35 Q35,40 45,30 Q50,35 55,30" 
+                  stroke="#8b5cf6" stroke-width="3" fill="none"/>
+            <path d="M5,40 Q15,35 25,45 Q35,50 45,40 Q50,45 55,40" 
+                  stroke="#8b5cf6" stroke-width="3" fill="none"/>
+        </svg>`;
+    }
+
+    svgLightning(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <polygon points="25,10 35,25 30,25 40,50 30,35 35,35" 
+                      fill="#ffd700" stroke="#ff8800" stroke-width="1"/>
+        </svg>`;
+    }
+
+    svgFlame(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M30,50 Q20,40 25,30 Q20,25 30,20 Q40,25 35,30 Q40,40 30,50" 
+                  fill="#ff6b35" stroke="#ff4500" stroke-width="1"/>
+        </svg>`;
+    }
+
+    svgSnowflake(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M30,10 L30,50 M10,30 L50,30 M20,20 L40,40 M20,40 L40,20" 
+                  stroke="#87ceeb" stroke-width="2"/>
+        </svg>`;
+    }
+
+    svgWave(size) {
+        return `<svg width="${size}" height="${size}" viewBox="0 0 60 60">
+            <path d="M5,30 Q15,20 25,30 Q35,40 45,30 Q50,35 55,30" 
+                  stroke="#87ceeb" stroke-width="3" fill="none"/>
+        </svg>`;
     }
 }
 

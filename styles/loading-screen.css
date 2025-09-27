@@ -1,0 +1,286 @@
+/**
+ * Loading Screen Styles
+ * Beautiful animated loading screen for Eldritch Sanctuary
+ */
+
+#loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial', sans-serif;
+}
+
+.loading-overlay {
+    text-align: center;
+    color: #ffffff;
+    max-width: 500px;
+    width: 90%;
+    padding: 2rem;
+}
+
+.loading-logo h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+    background: linear-gradient(45deg, #6a0dad, #8b5cf6, #a78bfa);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 3s ease-in-out infinite;
+}
+
+.loading-logo p {
+    font-size: 1.1rem;
+    color: #cccccc;
+    margin: 0 0 2rem 0;
+    opacity: 0.8;
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Spinner Animation */
+.loading-spinner {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 2rem auto;
+}
+
+.spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+}
+
+.spinner-ring:nth-child(1) {
+    border-top-color: #6a0dad;
+    animation-delay: 0s;
+}
+
+.spinner-ring:nth-child(2) {
+    border-right-color: #8b5cf6;
+    animation-delay: 0.3s;
+    width: 60px;
+    height: 60px;
+    top: 10px;
+    left: 10px;
+}
+
+.spinner-ring:nth-child(3) {
+    border-bottom-color: #a78bfa;
+    animation-delay: 0.6s;
+    width: 40px;
+    height: 40px;
+    top: 20px;
+    left: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Progress Bar */
+.loading-progress {
+    margin: 2rem 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6a0dad, #8b5cf6, #a78bfa);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: progress-shimmer 2s ease-in-out infinite;
+}
+
+@keyframes progress-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.progress-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #6a0dad;
+    margin-bottom: 1rem;
+}
+
+/* Status Text */
+.loading-status {
+    font-size: 1.1rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    min-height: 1.5rem;
+}
+
+/* Loading Details */
+.loading-details {
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.loading-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.loading-item.loading {
+    color: #f59e0b;
+}
+
+.loading-item.loaded {
+    color: #10b981;
+}
+
+.loading-item.error {
+    color: #ef4444;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .loading-logo h1 {
+        font-size: 2rem;
+    }
+    
+    .loading-logo p {
+        font-size: 1rem;
+    }
+    
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .spinner-ring:nth-child(2) {
+        width: 45px;
+        height: 45px;
+        top: 7.5px;
+        left: 7.5px;
+    }
+    
+    .spinner-ring:nth-child(3) {
+        width: 30px;
+        height: 30px;
+        top: 15px;
+        left: 15px;
+    }
+    
+    .loading-details {
+        max-width: 250px;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .loading-logo h1 {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    #loading-container {
+        background: linear-gradient(135deg, #000000 0%, #1a0a2e 50%, #0f172a 100%);
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .spinner-ring,
+    .progress-fill,
+    .loading-logo h1 {
+        animation: none;
+    }
+    
+    .spinner-ring {
+        border-color: #6a0dad;
+        animation: none;
+    }
+}
+
+/* Loading Complete Animation */
+.loading-complete {
+    animation: loading-complete 0.5s ease-out forwards;
+}
+
+@keyframes loading-complete {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+/* Error State */
+.loading-error {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.loading-error h3 {
+    margin: 0 0 0.5rem 0;
+    color: #ef4444;
+}
+
+.loading-error p {
+    margin: 0;
+    color: #fca5a5;
+    font-size: 0.9rem;
+}
+
+/* Success State */
+.loading-success {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.loading-success h3 {
+    margin: 0 0 0.5rem 0;
+    color: #10b981;
+}
+
+.loading-success p {
+    margin: 0;
+    color: #6ee7b7;
+    font-size: 0.9rem;
+}

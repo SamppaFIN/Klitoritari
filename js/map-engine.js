@@ -30,6 +30,7 @@ class MapEngine {
         this.pathLine = null; // Leaflet polyline for path visualization
         this.pathLineEnabled = false; // Toggleable path rendering
         this.otherPlayerMarkers = new Map(); // playerId -> marker
+        this.baseMarker = null; // Player's base marker
         this.flagDropDistance = 10; // Drop flag every 10 meters
     }
 
@@ -310,7 +311,68 @@ class MapEngine {
             // Update fallback position with the new position
             geolocation.updateFallbackPosition();
             
-            console.log('📍 Updated geolocation system with new position:', position);
+            console.log('📍 Updated geolocation system with new position:', `lat: ${position.lat}, lng: ${position.lng}`);
+        }
+    }
+
+    // Create base marker with Norwegian flag styling
+    createBaseMarker(position) {
+        if (!this.map) return null;
+
+        const latlng = [position.lat, position.lng];
+        
+        // Get the player's selected base logo
+        const baseLogoType = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+        console.log('🏗️ Creating base marker with logo type:', baseLogoType);
+        
+        // Create base marker HTML using player's selected logo
+        const baseIconHtml = this.createBaseMarkerHTML(baseLogoType);
+        
+        const baseIcon = L.divIcon({
+            className: 'base-marker-icon',
+            html: baseIconHtml,
+            iconSize: [80, 80],
+            iconAnchor: [40, 40]
+        });
+        
+        console.log('🏗️ Base icon created with className: base-marker-icon');
+        
+        const baseMarker = L.marker(latlng, { icon: baseIcon }).addTo(this.map);
+        baseMarker.bindPopup('<b>🏗️ My Base</b><br>Your established base in the cosmic realm');
+        
+        console.log('🏗️ Base marker created at:', latlng);
+        
+        // Ensure base marker is visible and on top
+        baseMarker.setOpacity(1);
+        baseMarker.setZIndexOffset(2000); // Higher than player marker
+        
+        console.log('🏗️ Base marker z-index set to 2000, opacity set to 1');
+        
+        return baseMarker;
+    }
+
+    // Update or create base marker
+    updateBaseMarker(position) {
+        if (!this.map) return;
+
+        const latlng = [position.lat, position.lng];
+        
+        if (this.baseMarker) {
+            // Update existing base marker position
+            this.baseMarker.setLatLng(latlng);
+            console.log('🏗️ Base marker updated to:', latlng);
+        } else {
+            // Create new base marker
+            this.baseMarker = this.createBaseMarker(position);
+        }
+    }
+
+    // Remove base marker
+    removeBaseMarker() {
+        if (this.baseMarker && this.map) {
+            this.map.removeLayer(this.baseMarker);
+            this.baseMarker = null;
+            console.log('🏗️ Base marker removed');
         }
     }
 
@@ -877,7 +939,7 @@ class MapEngine {
 
     // Initialize map with a specific position
     initializeWithPosition(position) {
-        console.log('🗺️ Initializing map with position:', position);
+        console.log('🗺️ Initializing map with position:', `lat: ${position.lat}, lng: ${position.lng}`);
         
         if (!this.map) {
             console.error('🗺️ Map not initialized');
@@ -903,7 +965,7 @@ class MapEngine {
         // If we have a current position, create the player marker
         if (window.eldritchApp && window.eldritchApp.systems.geolocation && window.eldritchApp.systems.geolocation.currentPosition) {
             const position = window.eldritchApp.systems.geolocation.currentPosition;
-            console.log('📍 Ensuring player marker is visible at:', position);
+            console.log('📍 Ensuring player marker is visible at:', `lat: ${position.lat}, lng: ${position.lng}`);
             this.updatePlayerPosition(position);
         } else {
             // Create a default player marker at a known location
@@ -1023,118 +1085,11 @@ class MapEngine {
 
         console.log('🏗️ Adding base marker for:', base);
         
-        // Prevent duplicate base marker creation
-        if (this.playerBaseMarker) {
-            console.log('🏗️ Base marker already exists, skipping duplicate creation');
-            return;
-        }
+        // Use the new base marker system
+        const position = { lat: base.lat, lng: base.lng };
+        this.updateBaseMarker(position);
         
-        const latlng = [base.lat, base.lng];
-        console.log('🏗️ Base marker coordinates:', latlng);
-
-        // Create multilayered base marker with proper click handling
-        const baseIcon = L.divIcon({
-            className: 'base-marker multilayered',
-            html: `
-                <div style="position: relative; width: 50px; height: 50px; cursor: pointer; z-index: 1000;">
-                    <!-- Outer energy field -->
-                    <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(255, 0, 0, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite; pointer-events: none;"></div>
-                    <!-- Middle ring -->
-                    <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: #ff0000; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); pointer-events: none;"></div>
-                    <!-- Inner star -->
-                    <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; background: linear-gradient(45deg, #ff0000, #cc0000); border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(255, 0, 0, 0.8); pointer-events: none;">⭐</div>
-                    <!-- Clickable overlay -->
-                    <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: transparent; cursor: pointer; z-index: 1001;"></div>
-                </div>
-            `,
-            iconSize: [50, 50],
-            iconAnchor: [25, 25]
-        });
-        
-        this.playerBaseMarker = L.marker(latlng, { 
-            icon: baseIcon,
-            interactive: true,
-            clickable: true
-        }).addTo(this.map);
-        
-        console.log('🏗️ Created multilayered base marker');
-        
-        console.log('🏗️ Base marker created and added to map:', this.playerBaseMarker);
-        console.log('🏗️ Base marker position:', this.playerBaseMarker.getLatLng());
-        console.log('🏗️ Base marker is on map?', this.map.hasLayer(this.playerBaseMarker));
-        console.log('🏗️ Base marker icon element:', this.playerBaseMarker.getElement());
-
-        // Add pulsing animation
-        this.animateBaseMarker();
-
-        // Add popup with base info
-        const popupContent = `
-            <div class="base-popup">
-                <div class="popup-header">
-                    <h4>🏗️ ${base.name}</h4>
-                </div>
-                <div class="base-info">
-                    <div><strong>Owner:</strong> Cosmic Explorer</div>
-                    <div><strong>Established:</strong> ${base.establishedAt ? new Date(base.establishedAt).toLocaleDateString() : 'Unknown'}</div>
-                    <div><strong>Territory:</strong> ${base.radius}m radius</div>
-                </div>
-                <div class="base-actions">
-                    <button onclick="window.mapEngine.openBaseManagement()" 
-                            class="sacred-button" style="margin-top: 10px; width: 100%;">
-                        Manage Base
-                    </button>
-                    <button onclick="window.baseSystem.confirmDeleteBase()" 
-                            class="sacred-button" style="background: var(--cosmic-red); margin-top: 5px; width: 100%;">
-                        🗑️ Delete Base
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        console.log('🏗️ Binding popup to base marker:', popupContent);
-        this.playerBaseMarker.bindPopup(popupContent);
-        
-        // Add click event to open base management with delay to prevent immediate triggering
-        setTimeout(() => {
-            if (this.playerBaseMarker) {
-        this.playerBaseMarker.on('click', (e) => {
-            console.log('🏗️ Base marker clicked! Opening base management...');
-            console.log('🏗️ Click event details:', e);
-            console.log('🏗️ Event target:', e.target);
-            console.log('🏗️ Event originalEvent:', e.originalEvent);
-            
-            e.originalEvent.preventDefault();
-            e.originalEvent.stopPropagation();
-            e.originalEvent.stopImmediatePropagation();
-            
-            // Close any open popup first
-            this.playerBaseMarker.closePopup();
-            
-            // Open base management modal
-            this.openBaseManagement();
-        });
-            }
-        }, 2000); // 2 second delay to prevent immediate triggering after creation
-
-        // Note: Removed duplicate mousedown event listener to prevent multiple modal opens
-        
-        // Check if marker is interactive
-        console.log('🏗️ Base marker interactive?', this.playerBaseMarker.options.interactive);
-        console.log('🏗️ Base marker clickable?', this.playerBaseMarker.options.clickable);
-
-        // Create territory circle (temporarily disabled for testing)
-        // this.createTerritoryCircle(latlng, base.radius);
-        console.log('🏗️ Territory circle disabled for testing');
-        
-        // Marker showcase removed - using WebGL rendering instead
-        
-        // Temporarily disabled for tutorial-first approach
-        // Generate legendary encounters
-        // this.generateLegendaryEncounters();
-        
-        // Generate map content
-        // this.generatePointsOfInterest();
-        // this.generateMonsters();
+        console.log('🏗️ Base marker created using new system');
     }
 
     openBaseManagement() {
@@ -1811,7 +1766,7 @@ class MapEngine {
         if (Math.floor(progress * 20) % 3 === 0) {
             console.log(`🎨 Adding Finnish flag at progress ${progress.toFixed(2)}`);
             if (this.symbolCanvasLayer) {
-                this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
+                this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getPathMarkerSymbol?.());
                 // Give 50 cosmic steps for drawing a flag (async to not block movement)
                 setTimeout(() => {
                     this.giveFlagSteps();
@@ -1943,6 +1898,147 @@ class MapEngine {
         this.map.setView([lat, lng], this.map.getZoom());
     }
     
+    // Create base marker HTML with player's selected symbol
+    createBaseMarkerHTML(baseLogoType) {
+        console.log('🏗️ createBaseMarkerHTML called with baseLogoType:', baseLogoType);
+        const symbolHTML = this.getBaseSymbolHTML(baseLogoType);
+        console.log('🏗️ Generated symbolHTML:', symbolHTML);
+        
+        return `
+            <div style="position: relative; width: 50px; height: 50px; cursor: pointer; z-index: 1000;">
+                <!-- Outer energy field -->
+                <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite; pointer-events: none;"></div>
+                <!-- Middle ring -->
+                <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: #8b5cf6; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); pointer-events: none;"></div>
+                <!-- Player's selected symbol -->
+                <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; pointer-events: none;">
+                    ${symbolHTML}
+                </div>
+                <!-- Clickable overlay -->
+                <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: transparent; cursor: pointer; z-index: 1001;"></div>
+            </div>
+        `;
+    }
+    
+    // Get HTML for base symbol based on type
+    getBaseSymbolHTML(baseLogoType) {
+        console.log('🏗️ getBaseSymbolHTML called with baseLogoType:', baseLogoType);
+        switch (baseLogoType) {
+            case 'finnish':
+                console.log('🏗️ Using Finnish flag');
+                return this.getFinnishFlagHTML();
+            case 'swedish':
+                console.log('🏗️ Using Swedish flag');
+                return this.getSwedishFlagHTML();
+            case 'norwegian':
+                console.log('🏗️ Using Norwegian flag');
+                return this.getNorwegianFlagHTML();
+            case 'flower_of_life':
+                return this.getFlowerOfLifeHTML();
+            case 'sacred_triangle':
+                return this.getSacredTriangleHTML();
+            case 'hexagon':
+                return this.getHexagonHTML();
+            case 'cosmic_spiral':
+                return this.getCosmicSpiralHTML();
+            case 'star':
+                return this.getStarHTML();
+            default:
+                return this.getDefaultSymbolHTML();
+        }
+    }
+    
+    // Flag HTML generators
+    getFinnishFlagHTML() {
+        return `
+            <div style="width: 20px; height: 20px; background: white; border: 1px solid #ccc; position: relative;">
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: #003580; transform: translateY(-50%);"></div>
+                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; background: #003580; transform: translateX(-50%);"></div>
+            </div>
+        `;
+    }
+    
+    getSwedishFlagHTML() {
+        return `
+            <div style="width: 20px; height: 20px; background: #006AA7; border: 1px solid #ccc; position: relative;">
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 3px; background: #FECC00; transform: translateY(-50%);"></div>
+                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; background: #FECC00; transform: translateX(-50%);"></div>
+            </div>
+        `;
+    }
+    
+    getNorwegianFlagHTML() {
+        return `
+            <div style="width: 20px; height: 20px; background: #EF2B2D; border: 1px solid #ccc; position: relative;">
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: white; transform: translateY(-50%);"></div>
+                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: white; transform: translateX(-50%);"></div>
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #002868; transform: translateY(-50%);"></div>
+                <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #002868; transform: translateX(-50%);"></div>
+            </div>
+        `;
+    }
+    
+    getFlowerOfLifeHTML() {
+        return `
+            <div style="width: 20px; height: 20px; border: 2px solid #8b5cf6; border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 8px; height: 8px; border: 1px solid #8b5cf6; border-radius: 50%;"></div>
+            </div>
+        `;
+    }
+    
+    getSacredTriangleHTML() {
+        return `
+            <div style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 17px solid #2ed573;"></div>
+        `;
+    }
+    
+    getHexagonHTML() {
+        return `
+            <div style="width: 20px; height: 20px; background: #ff6b35; clip-path: polygon(30% 0%, 70% 0%, 100% 50%, 70% 100%, 30% 100%, 0% 50%);"></div>
+        `;
+    }
+    
+    getCosmicSpiralHTML() {
+        return `
+            <div style="width: 20px; height: 20px; border: 2px solid #ff69b4; border-radius: 50%; position: relative;">
+                <div style="position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border: 1px solid #ff69b4; border-radius: 50%;"></div>
+            </div>
+        `;
+    }
+    
+    getStarHTML() {
+        return `
+            <div style="width: 20px; height: 20px; background: #ffd700; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);"></div>
+        `;
+    }
+    
+    getDefaultSymbolHTML() {
+        return `
+            <div style="width: 20px; height: 20px; background: #8b5cf6; border: 2px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">?</div>
+        `;
+    }
+    
+    // Update base marker with new symbol
+    updateBaseMarker() {
+        if (!this.playerBaseMarker) {
+            console.log('🏗️ No base marker to update');
+            return;
+        }
+        
+        const baseLogoType = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+        console.log('🏗️ Updating base marker with logo type:', baseLogoType);
+        
+        const baseIcon = L.divIcon({
+            className: 'base-marker multilayered',
+            html: this.createBaseMarkerHTML(baseLogoType),
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
+        });
+        
+        this.playerBaseMarker.setIcon(baseIcon);
+        console.log('🏗️ Base marker updated successfully');
+    }
+    
     clearPathwayMarkers() {
         if (this.symbolCanvasLayer) {
             this.symbolCanvasLayer.clearFlags();
@@ -2049,14 +2145,52 @@ class MapEngine {
         try {
             // First try to get path symbol from localStorage
             const pathSymbol = localStorage.getItem('eldritch_player_path_symbol');
+            console.log('🔍 getCurrentSymbol - pathSymbol from localStorage:', pathSymbol);
+            
             if (pathSymbol) {
+                console.log('🔍 getCurrentSymbol - returning pathSymbol:', pathSymbol);
                 return pathSymbol;
             }
             
             // Fallback to profile symbol
             const prof = window.sessionPersistence?.restoreProfile?.();
-            return (prof && prof.symbol) ? prof.symbol : 'finnish';
-        } catch (_) { return 'finnish'; }
+            const profileSymbol = (prof && prof.symbol) ? prof.symbol : 'finnish';
+            console.log('🔍 getCurrentSymbol - using profile symbol:', profileSymbol);
+            return profileSymbol;
+        } catch (error) { 
+            console.log('🔍 getCurrentSymbol - error, returning finnish:', error);
+            return 'finnish'; 
+        }
+    }
+
+    // Get symbol for path markers with alternating pattern
+    getPathMarkerSymbol() {
+        try {
+            console.log('🔍 getPathMarkerSymbol called');
+            console.log('🔍 symbolCanvasLayer available:', !!this.symbolCanvasLayer);
+            
+            // Get current flag count to determine which symbol to use
+            let flagCount = 0;
+            if (this.symbolCanvasLayer && typeof this.symbolCanvasLayer.getFlagCount === 'function') {
+                flagCount = this.symbolCanvasLayer.getFlagCount();
+                console.log('🔍 getPathMarkerSymbol - flag count from canvas layer:', flagCount);
+            } else {
+                console.log('🔍 getPathMarkerSymbol - canvas layer not available, using flagCount = 0');
+            }
+            
+            // Every 5th marker (0, 5, 10, 15...) should be aurora (path marker)
+            // Every 4th marker (1, 2, 3, 4, 6, 7, 8, 9, 11...) should be ant
+            if (flagCount % 5 === 0) {
+                console.log('🔍 getPathMarkerSymbol - using aurora (path marker) for flag count:', flagCount);
+                return 'aurora';
+            } else {
+                console.log('🔍 getPathMarkerSymbol - using ant for flag count:', flagCount);
+                return 'ant';
+            }
+        } catch (error) {
+            console.log('🔍 getPathMarkerSymbol - error, returning aurora:', error);
+            return 'aurora';
+        }
     }
     
     initDistortionEffectsLayer() {
@@ -2114,7 +2248,7 @@ class MapEngine {
             return;
         }
         console.log(`🇫🇮 Dropping flag at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-        this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getCurrentSymbol?.());
+        this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getPathMarkerSymbol?.());
         if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
             window.gruesomeNotifications.showNotification({
                 type: 'success',
@@ -2276,7 +2410,7 @@ class MapEngine {
             for (let i = 0; i < 5; i++) {
                 const testLat = playerPos.lat + (i * 0.0001);
                 const testLng = playerPos.lng + (i * 0.0001);
-                this.symbolCanvasLayer.addFlagPin(testLat, testLng, null, null, this.getCurrentSymbol?.());
+                this.symbolCanvasLayer.addFlagPin(testLat, testLng, null, null, this.getPathMarkerSymbol?.());
             }
             console.log('🇫🇮 Test flags created on canvas layer, total flags:', this.symbolCanvasLayer.getFlagCount());
         } else {
@@ -2322,7 +2456,7 @@ class MapEngine {
             // First try to get current GPS position
             const position = geolocation.getCurrentPositionSafe();
             if (position) {
-                console.log('📍 Using GPS position:', position);
+                console.log('📍 Using GPS position:', `lat: ${position.lat}, lng: ${position.lng}`);
                 return {
                     lat: position.lat,
                     lng: position.lng
@@ -2331,7 +2465,7 @@ class MapEngine {
             
             // If no GPS position, try to get the last valid position
             if (geolocation.lastValidPosition) {
-                console.log('📍 Using last valid position:', geolocation.lastValidPosition);
+                console.log('📍 Using last valid position:', `lat: ${geolocation.lastValidPosition.lat}, lng: ${geolocation.lastValidPosition.lng}`);
                 return {
                     lat: geolocation.lastValidPosition.lat,
                     lng: geolocation.lastValidPosition.lng
@@ -2381,7 +2515,7 @@ class MapEngine {
             // Drop flag every 10 meters of movement
             if (distance >= this.flagDropDistance) {
                 console.log(`🎨 Player moved ${distance.toFixed(1)}m - dropping flag`);
-                this.symbolCanvasLayer.addFlagPin(position.lat, position.lng, null, null, this.getCurrentSymbol?.());
+                this.symbolCanvasLayer.addFlagPin(position.lat, position.lng, null, null, this.getPathMarkerSymbol?.());
                 
                 // Give steps for movement
                 if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {

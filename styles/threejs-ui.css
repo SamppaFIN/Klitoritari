@@ -1,0 +1,309 @@
+/**
+ * Three.js UI Styles
+ * Modern styling for Three.js UI elements
+ */
+
+/* Three.js Canvas Container */
+#threejs-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none; /* Allow clicks to pass through to underlying layers */
+}
+
+#threejs-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto; /* Re-enable pointer events for the canvas */
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    #threejs-container {
+        /* Reduce quality on mobile for better performance */
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    #threejs-container canvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Performance Mode Indicators */
+.performance-mode-low {
+    /* Reduce visual effects for low-end devices */
+    filter: contrast(1.2) brightness(1.1);
+}
+
+.performance-mode-high {
+    /* Full visual effects for high-end devices */
+    filter: none;
+}
+
+/* Loading States */
+.threejs-loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    color: #6a0dad;
+    font-family: 'Arial', sans-serif;
+    font-size: 18px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.threejs-loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #6a0dad;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: threejs-spin 1s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+@keyframes threejs-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error States */
+.threejs-error {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1001;
+    color: #ff4444;
+    font-family: 'Arial', sans-serif;
+    font-size: 16px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid #ff4444;
+}
+
+/* Debug Overlay */
+.threejs-debug-overlay {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1002;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #6a0dad;
+    pointer-events: none;
+}
+
+.threejs-debug-overlay h4 {
+    margin: 0 0 5px 0;
+    color: #6a0dad;
+    font-size: 14px;
+}
+
+.threejs-debug-overlay p {
+    margin: 2px 0;
+    color: #cccccc;
+}
+
+/* Performance Metrics */
+.threejs-performance {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 1002;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ffffff;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #10b981;
+    pointer-events: none;
+}
+
+.threejs-performance .fps {
+    color: #10b981;
+}
+
+.threejs-performance .memory {
+    color: #f59e0b;
+}
+
+.threejs-performance .draw-calls {
+    color: #3b82f6;
+}
+
+/* Touch Indicators */
+.touch-indicator {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(106, 13, 173, 0.6);
+    border: 2px solid #6a0dad;
+    pointer-events: none;
+    z-index: 1003;
+    animation: touch-pulse 0.3s ease-out;
+}
+
+@keyframes touch-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+/* Magnetic Button Hover Effects */
+.magnetic-button-hover {
+    animation: magnetic-pulse 0.3s ease-out;
+}
+
+@keyframes magnetic-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1.05);
+    }
+}
+
+/* Particle Effect Overlays */
+.particle-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* UI Panel Animations */
+.ui-panel-enter {
+    animation: panel-enter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ui-panel-exit {
+    animation: panel-exit 0.3s cubic-bezier(0.4, 0, 1, 1);
+}
+
+@keyframes panel-enter {
+    0% {
+        transform: scale(0) translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes panel-exit {
+    0% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0) translateY(-20px);
+        opacity: 0;
+    }
+}
+
+/* Mobile Touch Feedback */
+@media (max-width: 768px) {
+    .touch-feedback {
+        position: fixed;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(106, 13, 173, 0.3) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 1003;
+        animation: touch-ripple 0.6s ease-out;
+    }
+    
+    @keyframes touch-ripple {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(3);
+            opacity: 0;
+        }
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .threejs-loading::after,
+    .touch-indicator,
+    .magnetic-button-hover,
+    .ui-panel-enter,
+    .ui-panel-exit,
+    .touch-feedback {
+        animation: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    #threejs-container canvas {
+        filter: contrast(1.5) brightness(1.2);
+    }
+    
+    .threejs-debug-overlay,
+    .threejs-performance {
+        background: rgba(0, 0, 0, 0.95);
+        border-width: 2px;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .threejs-loading {
+        color: #a78bfa;
+    }
+    
+    .threejs-loading::after {
+        border-color: #a78bfa;
+        border-top-color: transparent;
+    }
+    
+    .threejs-debug-overlay {
+        background: rgba(0, 0, 0, 0.9);
+        border-color: #a78bfa;
+    }
+    
+    .threejs-debug-overlay h4 {
+        color: #a78bfa;
+    }
+}

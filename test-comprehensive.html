@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Test Suite - Layered Architecture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #test-canvas {
+            width: 100vw;
+            height: 100vh;
+            background: #111;
+            border: 1px solid #333;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        #test-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.9);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .test-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        .test-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status-running { background: #ffaa00; color: #000; }
+        .status-completed { background: #00ff00; color: #000; }
+        .status-failed { background: #ff0000; color: #fff; }
+        .test-results {
+            margin-top: 20px;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #333;
+        }
+        .test-item.pass {
+            background: rgba(0,255,0,0.1);
+            border-left-color: #00ff00;
+        }
+        .test-item.fail {
+            background: rgba(255,0,0,0.1);
+            border-left-color: #ff0000;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-message {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .test-duration {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .test-summary {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background: #00ff00;
+            color: #000;
+        }
+        .btn-secondary {
+            background: #666;
+            color: #fff;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="test-canvas"></canvas>
+    <div id="test-panel">
+        <div class="test-header">
+            <div class="test-title">🧪 Test Suite</div>
+            <div id="test-status" class="test-status status-running">Running...</div>
+        </div>
+        
+        <div id="test-results" class="test-results">
+            <div>Initializing tests...</div>
+        </div>
+        
+        <div id="test-summary" class="test-summary" style="display: none;">
+            <h3>Test Summary</h3>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <div id="total-tests" class="stat-value">0</div>
+                    <div class="stat-label">Total Tests</div>
+                </div>
+                <div class="stat-item">
+                    <div id="passed-tests" class="stat-value">0</div>
+                    <div class="stat-label">Passed</div>
+                </div>
+                <div class="stat-item">
+                    <div id="failed-tests" class="stat-value">0</div>
+                    <div class="stat-label">Failed</div>
+                </div>
+                <div class="stat-item">
+                    <div id="success-rate" class="stat-value">0%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="run-tests-btn" class="btn btn-primary" onclick="runTests()">Run Tests</button>
+            <button id="clear-results-btn" class="btn btn-secondary" onclick="clearResults()">Clear Results</button>
+        </div>
+    </div>
+
+    <!-- Core Architecture -->
+    <script src="js/core/event-bus.js"></script>
+    <script src="js/core/game-state.js"></script>
+    <script src="js/core/base-layer.js"></script>
+    <script src="js/core/layer-manager.js"></script>
+    
+    <!-- Layer System -->
+    <script src="js/layers/background-layer.js"></script>
+    <script src="js/layers/terrain-layer.js"></script>
+    <script src="js/layers/territory-layer.js"></script>
+    <script src="js/layers/path-layer.js"></script>
+    <script src="js/layers/map-layer.js"></script>
+    <script src="js/layers/interaction-layer.js"></script>
+    <script src="js/layers/player-layer.js"></script>
+    <script src="js/layers/information-layer.js"></script>
+    <script src="js/layers/ui-layer.js"></script>
+    <script src="js/layers/debug-layer.js"></script>
+    
+    <!-- Data Models -->
+    <script src="js/models/player-model.js"></script>
+    <script src="js/models/base-model.js"></script>
+    <script src="js/models/quest-model.js"></script>
+    <script src="js/models/npc-model.js"></script>
+    
+    <!-- Mobile Optimization Utilities -->
+    <script src="js/utils/mobile-optimizer.js"></script>
+    <script src="js/utils/viewport-culler.js"></script>
+    <script src="js/utils/memory-manager.js"></script>
+    
+    <!-- Test Suite -->
+    <script src="js/testing/layer-tests.js"></script>
+    
+    <!-- Main App -->
+    <script src="js/core/app.js"></script>
+
+    <script>
+        let testSuite = null;
+        let isRunning = false;
+
+        // Initialize test suite
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🧪 Initializing comprehensive test suite...');
+            testSuite = new LayerTests();
+            
+            // Auto-run tests
+            setTimeout(() => {
+                runTests();
+            }, 1000);
+        });
+
+        // Run tests
+        async function runTests() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            const runBtn = document.getElementById('run-tests-btn');
+            const statusEl = document.getElementById('test-status');
+            const resultsEl = document.getElementById('test-results');
+            
+            runBtn.disabled = true;
+            runBtn.textContent = 'Running...';
+            statusEl.textContent = 'Running...';
+            statusEl.className = 'test-status status-running';
+            
+            resultsEl.innerHTML = '<div>Running comprehensive tests...</div>';
+            
+            try {
+                const report = await testSuite.runAllTests();
+                displayResults(report);
+                
+                statusEl.textContent = report.summary.failed === 0 ? 'Completed' : 'Failed';
+                statusEl.className = report.summary.failed === 0 ? 'test-status status-completed' : 'test-status status-failed';
+                
+            } catch (error) {
+                console.error('🧪 Test suite failed:', error);
+                resultsEl.innerHTML = `<div style="color: #ff0000;">Test suite failed: ${error.message}</div>`;
+                statusEl.textContent = 'Failed';
+                statusEl.className = 'test-status status-failed';
+            } finally {
+                isRunning = false;
+                runBtn.disabled = false;
+                runBtn.textContent = 'Run Tests';
+            }
+        }
+
+        // Display test results
+        function displayResults(report) {
+            const resultsEl = document.getElementById('test-results');
+            const summaryEl = document.getElementById('test-summary');
+            
+            // Display individual test results
+            resultsEl.innerHTML = report.results.map(result => `
+                <div class="test-item ${result.status.toLowerCase()}">
+                    <div class="test-name">${result.test}</div>
+                    <div class="test-message">${result.message}</div>
+                    <div class="test-duration">${result.duration}ms</div>
+                </div>
+            `).join('');
+            
+            // Display summary
+            document.getElementById('total-tests').textContent = report.summary.total;
+            document.getElementById('passed-tests').textContent = report.summary.passed;
+            document.getElementById('failed-tests').textContent = report.summary.failed;
+            document.getElementById('success-rate').textContent = `${report.summary.successRate.toFixed(1)}%`;
+            
+            summaryEl.style.display = 'block';
+            
+            // Update success rate color
+            const successRateEl = document.getElementById('success-rate');
+            if (report.summary.successRate >= 90) {
+                successRateEl.style.color = '#00ff00';
+            } else if (report.summary.successRate >= 70) {
+                successRateEl.style.color = '#ffaa00';
+            } else {
+                successRateEl.style.color = '#ff0000';
+            }
+        }
+
+        // Clear results
+        function clearResults() {
+            const resultsEl = document.getElementById('test-results');
+            const summaryEl = document.getElementById('test-summary');
+            const statusEl = document.getElementById('test-status');
+            
+            resultsEl.innerHTML = '<div>Results cleared. Click "Run Tests" to start.</div>';
+            summaryEl.style.display = 'none';
+            statusEl.textContent = 'Ready';
+            statusEl.className = 'test-status';
+        }
+    </script>
+</body>
+</html>

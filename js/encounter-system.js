@@ -14,6 +14,9 @@ class EncounterSystem {
         this.encounters = new Map();
         this.activeEncounter = null;
         this.proximityCheckInterval = null;
+        
+        // Quest completion handler
+        this.onQuestComplete = null;
         // Step calculation now based on distance moved
         this.lastPosition = null;
         // Debounce/cooldown controls to prevent burst encounters
@@ -5212,6 +5215,13 @@ class EncounterSystem {
         for (let i = 0; i < 5; i++) {
             setTimeout(() => this.loseSanity(10, 'Chaos mode'), i * 1000);
         }
+    }
+    
+    // Handle quest completion
+    onQuestComplete(quest) {
+        console.log('🎭 Quest completed, updating encounter system:', quest.name);
+        // Add any quest completion logic here if needed
+        // For example, unlock new encounters, update difficulty, etc.
     }
 }
 

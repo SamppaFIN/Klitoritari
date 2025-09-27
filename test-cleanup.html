@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanup Test - Layered Architecture</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #test-canvas {
+            width: 100vw;
+            height: 100vh;
+            background: #111;
+            border: 1px solid #333;
+        }
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .status {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .success { background: rgba(0,255,0,0.2); }
+        .error { background: rgba(255,0,0,0.2); }
+        .warning { background: rgba(255,255,0,0.2); }
+    </style>
+</head>
+<body>
+    <canvas id="test-canvas"></canvas>
+    <div id="debug-info">
+        <h3>🧪 Cleanup Test Results</h3>
+        <div id="status-container">
+            <div class="status">Initializing...</div>
+        </div>
+    </div>
+
+    <!-- Core Architecture -->
+    <script src="js/core/event-bus.js"></script>
+    <script src="js/core/game-state.js"></script>
+    <script src="js/core/base-layer.js"></script>
+    <script src="js/core/layer-manager.js"></script>
+    
+    <!-- Layer System -->
+    <script src="js/layers/background-layer.js"></script>
+    <script src="js/layers/terrain-layer.js"></script>
+    <script src="js/layers/territory-layer.js"></script>
+    <script src="js/layers/path-layer.js"></script>
+    <script src="js/layers/map-layer.js"></script>
+    <script src="js/layers/interaction-layer.js"></script>
+    <script src="js/layers/player-layer.js"></script>
+    <script src="js/layers/information-layer.js"></script>
+    <script src="js/layers/ui-layer.js"></script>
+    <script src="js/layers/debug-layer.js"></script>
+    
+    <!-- Data Models -->
+    <script src="js/models/player-model.js"></script>
+    <script src="js/models/base-model.js"></script>
+    <script src="js/models/quest-model.js"></script>
+    <script src="js/models/npc-model.js"></script>
+
+    <script>
+        // Test the cleaned up system
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🧪 Starting cleanup test...');
+            
+            const statusContainer = document.getElementById('status-container');
+            const canvas = document.getElementById('test-canvas');
+            
+            function addStatus(message, type = 'success') {
+                const div = document.createElement('div');
+                div.className = `status ${type}`;
+                div.textContent = message;
+                statusContainer.appendChild(div);
+            }
+            
+            try {
+                // Test 1: Core systems
+                addStatus('Testing core systems...');
+                
+                if (typeof EventBus === 'undefined') {
+                    throw new Error('EventBus not found');
+                }
+                addStatus('✅ EventBus loaded');
+                
+                if (typeof GameState === 'undefined') {
+                    throw new Error('GameState not found');
+                }
+                addStatus('✅ GameState loaded');
+                
+                if (typeof LayerManager === 'undefined') {
+                    throw new Error('LayerManager not found');
+                }
+                addStatus('✅ LayerManager loaded');
+                
+                if (typeof BaseLayer === 'undefined') {
+                    throw new Error('BaseLayer not found');
+                }
+                addStatus('✅ BaseLayer loaded');
+                
+                // Test 2: Data models
+                addStatus('Testing data models...');
+                
+                if (typeof PlayerModel === 'undefined') {
+                    throw new Error('PlayerModel not found');
+                }
+                addStatus('✅ PlayerModel loaded');
+                
+                if (typeof BaseModel === 'undefined') {
+                    throw new Error('BaseModel not found');
+                }
+                addStatus('✅ BaseModel loaded');
+                
+                if (typeof QuestModel === 'undefined') {
+                    throw new Error('QuestModel not found');
+                }
+                addStatus('✅ QuestModel loaded');
+                
+                if (typeof NPCModel === 'undefined') {
+                    throw new Error('NPCModel not found');
+                }
+                addStatus('✅ NPCModel loaded');
+                
+                // Test 3: Layer system
+                addStatus('Testing layer system...');
+                
+                const layerClasses = [
+                    'BackgroundLayer', 'TerrainLayer', 'TerritoryLayer', 'PathLayer',
+                    'MapLayer', 'InteractionLayer', 'PlayerLayer', 'InformationLayer',
+                    'UILayer', 'DebugLayer'
+                ];
+                
+                layerClasses.forEach(className => {
+                    if (typeof window[className] === 'undefined') {
+                        throw new Error(`${className} not found`);
+                    }
+                    addStatus(`✅ ${className} loaded`);
+                });
+                
+                // Test 4: System initialization
+                addStatus('Testing system initialization...');
+                
+                const eventBus = new EventBus();
+                eventBus.setDebugMode(true);
+                addStatus('✅ EventBus initialized');
+                
+                const gameState = new GameState();
+                addStatus('✅ GameState initialized');
+                
+                const layerManager = new LayerManager(eventBus, gameState);
+                layerManager.init(canvas);
+                addStatus('✅ LayerManager initialized');
+                
+                // Test 5: Model creation
+                addStatus('Testing model creation...');
+                
+                const player = new PlayerModel({
+                    position: { lat: 61.472768, lng: 23.724032 },
+                    stats: { health: 100, steps: 0 }
+                });
+                addStatus('✅ PlayerModel created');
+                
+                const base = new BaseModel({
+                    position: { lat: 61.472768, lng: 23.724032 },
+                    name: 'Test Base'
+                });
+                addStatus('✅ BaseModel created');
+                
+                const quest = new QuestModel({
+                    title: 'Test Quest',
+                    description: 'A test quest',
+                    objectives: [{ description: 'Test objective', type: 'collect', target: 1 }]
+                });
+                addStatus('✅ QuestModel created');
+                
+                const npc = new NPCModel({
+                    name: 'Test NPC',
+                    position: { lat: 61.472768, lng: 23.724032 }
+                });
+                addStatus('✅ NPCModel created');
+                
+                // Test 6: Layer integration
+                addStatus('Testing layer integration...');
+                
+                const layers = [
+                    new BackgroundLayer(),
+                    new TerrainLayer(),
+                    new TerritoryLayer(),
+                    new PathLayer(),
+                    new MapLayer(),
+                    new InteractionLayer(),
+                    new PlayerLayer(),
+                    new InformationLayer(),
+                    new UILayer(),
+                    new DebugLayer()
+                ];
+                
+                layers.forEach(layer => {
+                    layerManager.addLayer(layer);
+                });
+                
+                addStatus(`✅ All ${layers.length} layers added`);
+                
+                // Test 7: System integration
+                addStatus('Testing system integration...');
+                
+                gameState.addBase(base);
+                gameState.addQuest(quest);
+                gameState.addNPC(npc);
+                addStatus('✅ Models integrated with GameState');
+                
+                // Final status
+                addStatus('🎉 All tests passed! System is working correctly.', 'success');
+                addStatus(`📊 Total layers: ${layerManager.layers.size}`, 'success');
+                addStatus(`📊 FPS: ${layerManager.getStats().currentFPS}`, 'success');
+                
+                console.log('🧪 Cleanup test completed successfully!');
+                
+            } catch (error) {
+                console.error('🧪 Cleanup test failed:', error);
+                addStatus(`❌ Test failed: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

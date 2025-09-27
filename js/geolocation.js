@@ -588,7 +588,9 @@ class GeolocationManager {
         }
         
         // Log why we're using fallback
-        console.log('📍 No valid position available. Current position:', this.currentPosition);
+        console.log('📍 No valid position available. Current position:', this.currentPosition ? 
+            `lat: ${this.currentPosition.lat || this.currentPosition.coords?.latitude}, lng: ${this.currentPosition.lng || this.currentPosition.coords?.longitude}` : 
+            'null');
         console.log('📍 Is tracking:', this.isTracking);
         console.log('📍 Device GPS enabled:', this.deviceGPSEnabled);
         
@@ -597,7 +599,7 @@ class GeolocationManager {
             // Update fallback position with last known position if available
             this.updateFallbackPosition();
             
-            console.log('📍 Using fallback position:', this.fixedPosition);
+            console.log('📍 Using fallback position:', `lat: ${this.fixedPosition.lat}, lng: ${this.fixedPosition.lng}`);
             return {
                 lat: this.fixedPosition.lat,
                 lng: this.fixedPosition.lng,
@@ -753,7 +755,7 @@ class GeolocationManager {
                 lat: this.lastValidPosition.lat,
                 lng: this.lastValidPosition.lng
             };
-            console.log('📍 Updated fallback position to last known position:', this.fixedPosition);
+            console.log('📍 Updated fallback position to last known position:', `lat: ${this.fixedPosition.lat}, lng: ${this.fixedPosition.lng}`);
         }
     }
 

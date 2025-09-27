@@ -7284,6 +7284,8 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     margin-top: 20px;
+    display: flex;
+    flex-direction: row;
 }
 
 @keyframes welcomeGlow {
@@ -7727,10 +7729,14 @@ input[type="range"]::-moz-range-thumb {
 
 .welcome-body {
     margin-bottom: 40px;
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
 }
 
 .welcome-section {
     margin-bottom: 40px;
+    flex: 1;
 }
 
 .welcome-section h2 {
@@ -7739,6 +7745,213 @@ input[type="range"]::-moz-range-thumb {
     margin-bottom: 20px;
     text-align: center;
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, rgba(30, 30, 50, 0.9), rgba(50, 30, 70, 0.9));
+    border: 2px solid #4a90e2;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: 0 8px 32px rgba(74, 144, 226, 0.3);
+    text-align: center;
+}
+
+.welcome-card h2 {
+    color: #ffd700;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
+.welcome-description {
+    color: #87ceeb;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    text-align: center;
+    margin-bottom: 25px;
+    text-shadow: 0 0 10px rgba(135, 206, 235, 0.6);
+}
+
+.welcome-controls {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.welcome-controls p {
+    color: #ffd700;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.welcome-controls ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.welcome-controls li {
+    color: #87ceeb;
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 8px;
+    text-align: left;
+    padding-left: 20px;
+    position: relative;
+}
+
+.welcome-controls li:before {
+    content: "▶";
+    color: #4a90e2;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* GPS Status Section */
+.gps-status-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.gps-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.gps-icon {
+    font-size: 2rem;
+    color: #ff6b6b;
+}
+
+.gps-text {
+    color: #87ceeb;
+}
+
+.gps-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #ffd700;
+    margin-bottom: 5px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.gps-subtitle {
+    font-size: 0.9rem;
+    color: #87ceeb;
+    opacity: 0.8;
+}
+
+.gps-active-btn {
+    background: linear-gradient(45deg, #00ff88, #00ffff);
+    color: #000;
+    box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+    font-size: 1.3rem;
+    padding: 18px 35px;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.gps-active-btn:hover {
+    background: linear-gradient(45deg, #00ffff, #00ff88);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.6);
+}
+
+.gps-check {
+    font-size: 1.2rem;
+}
+
+/* Action Buttons - Using original welcome button styles */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.continue-btn, .start-btn {
+    flex: 1;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    min-height: 50px;
+    text-decoration: none;
+    text-align: center;
+}
+
+.continue-btn {
+    background: transparent;
+    color: #87ceeb;
+    border: 2px solid #87ceeb;
+}
+
+.continue-btn:hover {
+    background: rgba(135, 206, 235, 0.1);
+    color: #ffffff;
+    border-color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(135, 206, 235, 0.3);
+}
+
+.start-btn {
+    background: linear-gradient(45deg, #ffd700, #ffed4e);
+    color: #000;
+    box-shadow: 0 5px 20px rgba(255, 215, 0, 0.4);
+}
+
+.start-btn:hover {
+    background: linear-gradient(45deg, #ffed4e, #ffd700);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 215, 0, 0.6);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+/* Mobile responsiveness for action buttons */
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .gps-status-section {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .gps-status {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
 .tutorial-steps {
@@ -8126,6 +8339,17 @@ input[type="range"]::-moz-range-thumb {
     .welcome-content {
         padding: 20px;
         margin: 0;
+        flex-direction: column !important;
+    }
+    
+    .welcome-body {
+        flex-direction: column !important;
+        gap: 20px;
+    }
+    
+    .welcome-section {
+        width: 100% !important;
+        margin-bottom: 20px;
     }
     
     .welcome-title {
@@ -8137,8 +8361,15 @@ input[type="range"]::-moz-range-thumb {
     }
     
     .tutorial-steps {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
         gap: 10px;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .tutorial-step {
+        width: 100% !important;
+        margin-bottom: 10px;
     }
     
     .quest-preview {
@@ -11204,4 +11435,480 @@ input[type="range"]::-moz-range-thumb {
         transform: scale(1);
         filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
     }
+}
+/* Compact User Settings Modal - No Scrollbars */
+.user-settings-modal-compact {
+    max-width: 90vw;
+    max-height: 90vh;
+    width: 800px;
+    height: 600px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body-compact {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.settings-row-top {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.settings-row-bottom {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    min-height: 0;
+}
+
+.setting-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.symbol-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+}
+
+.symbol-group label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #00ffff;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.cosmic-input-compact {
+    padding: 8px 12px;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    background: rgba(0, 255, 255, 0.1);
+    color: #fff;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.color-input-compact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-picker-compact {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.color-swatch-compact {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    background: #00ff88;
+}
+
+.symbol-grid-compact {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 5px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.symbol-grid-compact .symbol-option {
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    background: rgba(0, 255, 255, 0.1);
+}
+
+.symbol-grid-compact .symbol-option:hover {
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.symbol-grid-compact .symbol-option.selected {
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.modal-actions-compact {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-shrink: 0;
+}
+
+.sacred-button-compact {
+    padding: 12px 24px;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 136, 0.2));
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.sacred-button-compact:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(0, 255, 136, 0.4));
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.sacred-button-compact.secondary {
+    border-color: #666;
+    background: linear-gradient(135deg, rgba(102, 102, 102, 0.2), rgba(102, 102, 102, 0.1));
+}
+
+.sacred-button-compact.secondary:hover {
+    background: linear-gradient(135deg, rgba(102, 102, 102, 0.4), rgba(102, 102, 102, 0.2));
+    box-shadow: 0 0 10px rgba(102, 102, 102, 0.3);
+}
+
+/* Mobile-First User Settings Modal */
+.user-settings-mobile {
+    max-width: 95vw;
+    max-height: 95vh;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-body-mobile {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 20px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, rgba(0, 20, 40, 0.95), rgba(0, 40, 60, 0.95));
+}
+
+.setting-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-section label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #00ffff;
+    margin-bottom: 4px;
+}
+
+.cosmic-input-mobile {
+    padding: 12px 16px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 255, 255, 0.05);
+    color: #fff;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.cosmic-input-mobile:focus {
+    outline: none;
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+}
+
+/* Color Picker Mobile */
+.color-picker-mobile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 255, 255, 0.05);
+}
+
+.color-input-mobile {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+}
+
+.color-preview-mobile {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #00ffff;
+    border-radius: 8px;
+    background: #00ff88;
+    box-shadow: 0 2px 8px rgba(0, 255, 136, 0.3);
+}
+
+.color-label {
+    font-size: 14px;
+    color: #00ffff;
+    font-family: monospace;
+    font-weight: 500;
+}
+
+/* Dropdown Components */
+.dropdown-container {
+    position: relative;
+    width: 100%;
+}
+
+.dropdown-button {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(0, 255, 255, 0.05);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    text-align: left;
+}
+
+.dropdown-button:hover {
+    border-color: #00ffff;
+    background: rgba(0, 255, 255, 0.1);
+}
+
+.dropdown-button:focus {
+    outline: none;
+    border-color: #00ffff;
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.2);
+}
+
+.dropdown-arrow {
+    margin-left: auto;
+    font-size: 12px;
+    color: #00ffff;
+    transition: transform 0.3s ease;
+}
+
+.dropdown-button.open .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(0, 20, 40, 0.98);
+    border: 2px solid rgba(0, 255, 255, 0.3);
+    border-radius: 12px;
+    margin-top: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dropdown-menu.hidden {
+    display: none;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s ease;
+    border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+}
+
+.dropdown-item.selected {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+}
+
+.flag-preview {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.symbol-preview {
+    font-size: 20px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Action Buttons */
+.modal-actions-mobile {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #00ffff, #00ff88);
+    color: #000;
+    box-shadow: 0 4px 12px rgba(0, 255, 255, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 255, 255, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(102, 102, 102, 0.2);
+    color: #ccc;
+    border: 2px solid rgba(102, 102, 102, 0.5);
+}
+
+.btn-secondary:hover {
+    background: rgba(102, 102, 102, 0.3);
+    color: #fff;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    .tutorial-steps {
+        grid-template-columns: 1fr !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px;
+    }
+    
+    .tutorial-step {
+        width: 100% !important;
+        margin-bottom: 8px;
+        padding: 12px;
+    }
+    
+    .step-icon {
+        font-size: 1.5rem;
+        margin-right: 8px;
+    }
+    
+    .step-content h3 {
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+    
+    .step-content p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .user-settings-mobile {
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+        margin: 0;
+    }
+    
+    .modal-body-mobile {
+        padding: 20px;
+        gap: 16px;
+    }
+    
+    .modal-actions-mobile {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+    }
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+    .user-settings-mobile {
+        max-width: 500px;
+    }
+    
+    .modal-body-mobile {
+        padding: 32px;
+    }
+}
+
+/* Fix for nested flag preview structure */
+.flag-preview img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.flag-preview .symbol-preview {
+    font-size: 20px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

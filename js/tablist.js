@@ -491,6 +491,17 @@ class Tablist {
         const hasBase = localStorage.getItem('playerBase') !== null;
         const baseData = hasBase ? JSON.parse(localStorage.getItem('playerBase')) : null;
         
+        // Initialize simple base system when base tab is opened
+        if (hasBase && window.SimpleBaseInit) {
+            console.log('🏗️ Base tab opened - initializing simple base system...');
+            const simpleBase = new window.SimpleBaseInit();
+            simpleBase.init().then(() => {
+                console.log('🏗️ Simple base initialized from base tab');
+            }).catch((error) => {
+                console.error('🏗️ Failed to initialize simple base from base tab:', error);
+            });
+        }
+        
         container.innerHTML = `
             <div class="base-management-content">
                 <h3>🏠 Base Management</h3>
@@ -508,7 +519,7 @@ class Tablist {
                                 <span class="value">${new Date(baseData.timestamp).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        <button class="establish-base-btn" onclick="window.tablist.establishBase()">Relocate Base</button>
+                        <button class="establish-base-btn" onclick="window.tablist.relocateBase()">Relocate Base</button>
                         <button class="abandon-base-btn" onclick="window.tablist.abandonBase()">Abandon Base</button>
                     ` : `
                         <p>No base established yet.</p>
@@ -534,8 +545,47 @@ class Tablist {
         `;
     }
     
+    relocateBase() {
+        console.log('🏠 Relocating base to current location');
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const baseData = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        timestamp: Date.now(),
+                        level: 1
+                    };
+                    
+                    // Save new base location
+                    localStorage.setItem('playerBase', JSON.stringify(baseData));
+                    
+                    // Use simple base system to create marker
+                    if (window.SimpleBaseInit) {
+                        const simpleBase = new window.SimpleBaseInit();
+                        simpleBase.createNewBase({ lat: baseData.lat, lng: baseData.lng });
+                    }
+                    
+                    // Refresh base panel
+                    this.populateBasePanel();
+                    
+                    // Show notification
+                    this.showBaseNotification('Base relocated successfully!', 'success');
+                    
+                    console.log('✅ Base relocated to:', baseData);
+                },
+                (error) => {
+                    console.error('❌ Error getting location for base relocation:', error);
+                    this.showBaseNotification('Failed to get location for base relocation', 'error');
+                }
+            );
+        }
+    }
+
     establishBase() {
         console.log('🏠 Establishing base at current location');
+        console.log('🏠 tablist.establishBase called');
         
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -549,14 +599,83 @@ class Tablist {
                     
                     localStorage.setItem('playerBase', JSON.stringify(baseData));
                     
-                    // Add base marker to map
-                    this.addBaseMarker(baseData);
+                    // Base marker will be handled by BaseBuildingLayer
+                    // this.addBaseMarker(baseData);
+                    
+                    // Center map on the new base location
+                    this.centerMapOnBase(baseData);
                     
                     // Refresh base panel
                     this.populateBasePanel();
                     
-                    // Show success notification
-                    this.showBaseNotification('Base established successfully!', 'success');
+                    // Show enhanced success notification
+                    this.showBaseNotification('Base established successfully! Your cosmic sanctuary is ready.', 'success');
+                    
+                    // Refresh base building layer to show the new base
+                    if (window.layeredRenderingSystem && window.layeredRenderingSystem.layers) {
+                        const baseBuildingLayer = window.layeredRenderingSystem.layers.find(layer => layer.name === 'baseBuilding');
+                        if (baseBuildingLayer) {
+                            baseBuildingLayer.loadBaseData();
+                            baseBuildingLayer.refreshBaseRendering();
+                            console.log('🏗️ Refreshed base building layer with new base');
+                        }
+                    }
+                    
+                    // Create base marker using the new Leaflet-based system
+                    if (window.mapEngine && window.mapEngine.updateBaseMarker) {
+                        console.log('🏗️ Creating base marker...');
+                        // Convert baseData to position format expected by updateBaseMarker
+                        const position = { lat: baseData.lat, lng: baseData.lng };
+                        window.mapEngine.updateBaseMarker(position);
+                        console.log('🏗️ Base marker created successfully!');
+                    } else {
+                        console.error('🏗️ MapEngine updateBaseMarker method not available');
+                    }
+                    
+                    // Force refresh the base building layer to ensure Norwegian flag is visible
+                    setTimeout(() => {
+                        if (window.layeredRenderingSystem && window.layeredRenderingSystem.layers) {
+                            const baseBuildingLayer = window.layeredRenderingSystem.layers.find(layer => layer.name === 'baseBuilding');
+                            if (baseBuildingLayer) {
+                                baseBuildingLayer.loadBasesFromStorage();
+                                baseBuildingLayer.refreshBaseRendering();
+                                console.log('🏗️ Force refreshed base building layer for Norwegian flag');
+                                
+                                // Force the canvas to be on top of Leaflet markers
+                                const canvas = baseBuildingLayer.canvas;
+                                if (canvas) {
+                                    canvas.style.zIndex = '1000';
+                                    canvas.style.pointerEvents = 'none';
+                                    console.log('🏗️ Set base building canvas z-index to 1000');
+                                }
+                            }
+                        }
+                    }, 500);
+                    
+                    // Additional cleanup after a longer delay
+                    setTimeout(() => {
+                        // Remove any remaining other player markers
+                        const otherPlayerElements = document.querySelectorAll('.other-player-icon, .other-player-marker, [class*="other-player"]');
+                        otherPlayerElements.forEach(element => {
+                            element.remove();
+                            console.log('🏗️ Removed remaining other player marker from DOM');
+                        });
+                    }, 1000);
+
+                    // Initialize game state to ensure all markers are properly loaded
+                    if (window.eldritchApp && typeof window.eldritchApp.initializeGameState === 'function') {
+                        console.log('🎮 Initializing game state after base establishment...');
+                        window.eldritchApp.initializeGameState().then(() => {
+                            console.log('🎮 Game state initialized successfully after base establishment');
+                        }).catch((error) => {
+                            console.error('🎮 Failed to initialize game state after base establishment:', error);
+                        });
+                    }
+
+                    // Show base management modal after a short delay
+                    setTimeout(() => {
+                        this.showBaseManagementModal();
+                    }, 1000);
                     
                     console.log('✅ Base established at:', baseData);
                 },
@@ -1161,6 +1280,39 @@ Location: ${stats.location}`);
         if (window.itemSystem) {
             window.itemSystem.addToInventory('health_potion', 1);
             this.populateInventoryPanel();
+        }
+    }
+    
+    // Center map on base location
+    centerMapOnBase(baseData) {
+        if (!baseData || !baseData.lat || !baseData.lng) {
+            console.warn('🏗️ Cannot center map: invalid base coordinates');
+            return;
+        }
+
+        console.log(`🏗️ Centering map on base: ${baseData.lat}, ${baseData.lng}`);
+        
+        // Try multiple approaches to center the map
+        if (window.mapEngine && window.mapEngine.centerOnLocation) {
+            window.mapEngine.centerOnLocation(baseData.lat, baseData.lng);
+        } else if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.mapEngine) {
+            window.eldritchApp.systems.mapEngine.centerOnLocation(baseData.lat, baseData.lng);
+        } else if (window.mapEngine && window.mapEngine.map) {
+            window.mapEngine.map.setView([baseData.lat, baseData.lng], window.mapEngine.map.getZoom());
+        } else {
+            console.warn('🏗️ Map engine not available for centering');
+        }
+    }
+    
+    // Show base management modal
+    showBaseManagementModal() {
+        // Check if base system is available and has a showBaseManagementModal method
+        if (window.baseSystem && typeof window.baseSystem.showBaseManagementModal === 'function') {
+            window.baseSystem.showBaseManagementModal();
+        } else {
+            console.log('🏗️ Base management modal not available, showing base panel instead');
+            // Fallback to showing the base panel
+            this.showBasePanel();
         }
     }
 }

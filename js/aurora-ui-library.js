@@ -1523,7 +1523,7 @@ class AuroraUILibrary {
      */
     registerTechniques() {
         // Animation Techniques
-        this.techniques.set('magnetic-buttons', new MagneticButtonsTechnique());
+        // this.techniques.set('magnetic-buttons', new MagneticButtonsTechnique()); // Disabled - using Three.js magnetic buttons instead
         this.techniques.set('morphing-cards', new MorphingCardsTechnique());
         this.techniques.set('liquid-animations', new LiquidAnimationsTechnique());
         this.techniques.set('parallax-scrolling', new ParallaxScrollingTechnique());

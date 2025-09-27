@@ -7,38 +7,691 @@
     <meta name="description" content="Explore cosmic mysteries and paranormal phenomena in an infinite scrolling map">
     <meta name="theme-color" content="#1a0a2e">
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="144x144" href="icons/icon-144x144.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+    <link rel="shortcut icon" href="icons/icon-144x144.png">
+    
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r158/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/PointerLockControls.js"></script>
+    
+    <!-- Ensure OrbitControls is available -->
+    <script>
+        // Wait for Three.js to load, then make OrbitControls available
+        window.addEventListener('load', function() {
+            if (typeof THREE !== 'undefined' && typeof THREE.OrbitControls === 'undefined') {
+                console.warn('⚠️ OrbitControls not loaded, creating fallback');
+                THREE.OrbitControls = function() {
+                    console.log('🎮 Using fallback OrbitControls');
+                    this.enableDamping = true;
+                    this.dampingFactor = 0.05;
+                    this.enableZoom = true;
+                    this.enablePan = true;
+                    this.enableRotate = true;
+                    this.update = function() {};
+                };
+            }
+        });
+    </script>
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Ensure GSAP is loaded properly -->
+    <script>
+        // Try to load GSAP if not already loaded
+        if (typeof GSAP === 'undefined') {
+            console.log('🔄 Loading GSAP...');
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js';
+            script.onload = function() {
+                console.log('✅ GSAP loaded successfully');
+            };
+            script.onerror = function() {
+                console.warn('⚠️ GSAP failed to load from CDN, trying alternative...');
+                // Try alternative CDN
+                const altScript = document.createElement('script');
+                altScript.src = 'https://unpkg.com/gsap@3.12.2/dist/gsap.min.js';
+                altScript.onload = function() {
+                    console.log('✅ GSAP loaded from alternative CDN');
+                };
+                altScript.onerror = function() {
+                    console.warn('⚠️ GSAP failed to load from all sources, using fallbacks');
+                };
+                document.head.appendChild(altScript);
+            };
+            document.head.appendChild(script);
+        } else {
+            console.log('✅ GSAP already loaded');
+        }
+    </script>
+    
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="multiplayer-styles.css">
+    <link rel="stylesheet" href="styles/threejs-ui.css">
+    <link rel="stylesheet" href="styles/loading-screen.css">
     
-    <!-- Asset Manager -->
-    <script src="js/asset-manager.js"></script>
-    <script src="js/mobile-wake-lock.js"></script>
+    <!-- Debug Logger (load early) -->
+    <script src="js/debug-logger.js"></script>
     
-    <!-- Layered Rendering System -->
-    <script src="js/layered-rendering-system.js"></script>
-    <script src="js/sacred-geometry-layer.js"></script>
-    <script src="js/base-building-layer.js"></script>
-    <script src="js/ui-controls-layer.js"></script>
-    <script src="js/placeholder-layers.js"></script>
+    <!-- LEGACY DEBUG BUTTONS - COMMENTED OUT (Using Three.js UI) -->
+    <!--
+    <div id="refresh-base-marker-btn" onclick="refreshBaseMarker()" style="position: fixed; top: 260px; right: 10px; z-index: 10000; background: #9C27B0; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🏗️ Refresh Base Marker
+    </div>
     
-    <!-- Device Testing Suite -->
-    <script src="js/device-testing-suite.js"></script>
+    <div id="load-base-btn" onclick="loadPlayerBase()" style="position: fixed; top: 460px; right: 10px; z-index: 10000; background: #FF6B6B; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🏗️ Load Base
+    </div>
     
-    <!-- GLMatrix for WebGL math operations (load first) -->
-    <script src="https://unpkg.com/gl-matrix@3.4.3/gl-matrix-min.js"></script>
+    <div id="debug-app-btn" onclick="debugAppState()" style="position: fixed; top: 510px; right: 10px; z-index: 10000; background: #9C27B0; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🔍 Debug App
+    </div>
     
-    <!-- Three.js for WebGL effects -->
-    <script type="module">
-        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-        window.THREE = THREE;
-    </script>
+    <div id="force-init-btn" onclick="forceGameInit()" style="position: fixed; top: 560px; right: 10px; z-index: 10000; background: #FF9800; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🚀 Force Init
+    </div>
+    <div id="init-game-state-btn" onclick="initGameState()" style="position: fixed; top: 660px; right: 10px; z-index: 10000; background: #2196F3; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🎮 Init Game State
+    </div>
+    <div id="simple-base-btn" onclick="testSimpleBase()" style="position: fixed; top: 710px; right: 10px; z-index: 10000; background: #00BCD4; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🏗️ Simple Base
+    </div>
+    <div id="clear-base-btn" onclick="clearBaseData()" style="position: fixed; top: 760px; right: 10px; z-index: 10000; background: #F44336; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🗑️ Clear Base
+    </div>
+    <div id="test-new-arch-btn" onclick="testNewArchitecture()" style="position: fixed; top: 810px; right: 10px; z-index: 10000; background: #9C27B0; color: white; padding: 10px; border-radius: 5px; cursor: pointer; display: block; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+        🏗️ Test New Arch
+    </div>
+    -->
+    
+    <script>
+        function createDirectBaseMarker() {
+            console.log('🏗️ Direct Base Marker button clicked');
+            
+            // Check if map is available
+            if (!window.mapEngine || !window.mapEngine.map) {
+                console.error('🏗️ Map engine or map not available');
+                alert('❌ Map engine or map not available');
+                return;
+            }
+            
+            // Get base data from localStorage
+            let baseData = null;
+            const playerBase = localStorage.getItem('playerBase');
+            const baseBases = localStorage.getItem('base_bases');
+            const eldritchBase = localStorage.getItem('eldritch-player-base');
+            
+            console.log('🏗️ Checking localStorage for base data...');
+            console.log('🏗️ playerBase:', playerBase);
+            console.log('🏗️ base_bases:', baseBases);
+            console.log('🏗️ eldritch-player-base:', eldritchBase);
+            
+            // Try to parse base data
+            if (playerBase) {
+                try {
+                    baseData = JSON.parse(playerBase);
+                    console.log('🏗️ Parsed playerBase:', baseData);
+                } catch (e) {
+                    console.error('🏗️ Failed to parse playerBase:', e);
+                }
+            }
+            
+            if (!baseData && baseBases) {
+                try {
+                    const bases = JSON.parse(baseBases);
+                    if (Array.isArray(bases) && bases.length > 0) {
+                        baseData = bases[0];
+                        console.log('🏗️ Parsed base_bases:', baseData);
+                    }
+                } catch (e) {
+                    console.error('🏗️ Failed to parse base_bases:', e);
+                }
+            }
+            
+            if (!baseData && eldritchBase) {
+                try {
+                    baseData = JSON.parse(eldritchBase);
+                    console.log('🏗️ Parsed eldritch-player-base:', baseData);
+                } catch (e) {
+                    console.error('🏗️ Failed to parse eldritch-player-base:', e);
+                }
+            }
+            
+            if (!baseData) {
+                console.error('🏗️ No base data found in localStorage');
+                alert('❌ No base data found in localStorage');
+                return;
+            }
+            
+            // Check if base has position data
+            if (!baseData.position && !baseData.lat) {
+                console.error('🏗️ Base data missing position information');
+                alert('❌ Base data missing position information');
+                return;
+            }
+            
+            // Get position
+            const position = baseData.position || { lat: baseData.lat, lng: baseData.lng };
+            console.log('🏗️ Base position:', position);
+            
+            // Get base logo type
+            const baseLogoType = baseData.logo || localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+            console.log('🏗️ Base logo type:', baseLogoType);
+            
+            // Create base marker directly
+            console.log('🏗️ Creating base marker directly...');
+            createBaseMarkerDirect(position, baseLogoType);
+        }
+        
+        function forceGameInit() {
+            console.log('🚀 Force Game Init button clicked');
+            
+            // Check if eldritchApp exists
+            if (!window.eldritchApp) {
+                console.error('🚀 eldritchApp not available');
+                alert('❌ eldritchApp not available');
+                return;
+            }
+            
+            // Force initialize the game
+            console.log('🚀 Forcing game initialization...');
+            try {
+                window.eldritchApp.initializeGame().then(() => {
+                    console.log('🚀 Game initialization completed');
+                    alert('✅ Game initialization completed!');
+                }).catch((error) => {
+                    console.error('🚀 Game initialization failed:', error);
+                    alert('❌ Game initialization failed: ' + error.message);
+                });
+            } catch (error) {
+                console.error('🚀 Error calling initializeGame:', error);
+                alert('❌ Error calling initializeGame: ' + error.message);
+            }
+        }
+        
+        function debugAppState() {
+            console.log('🔍 Debug App State button clicked');
+            
+            // Check eldritchApp
+            console.log('🔍 window.eldritchApp:', !!window.eldritchApp);
+            if (window.eldritchApp) {
+                console.log('🔍 eldritchApp.systems:', !!window.eldritchApp.systems);
+                if (window.eldritchApp.systems) {
+                    console.log('🔍 Available systems:', Object.keys(window.eldritchApp.systems));
+                }
+            }
+            
+            // Check mapEngine
+            console.log('🔍 window.mapEngine:', !!window.mapEngine);
+            if (window.mapEngine) {
+                console.log('🔍 mapEngine.map:', !!window.mapEngine.map);
+                console.log('🔍 mapEngine.isInitialized:', window.mapEngine.isInitialized);
+            }
+            
+            // Check localStorage
+            console.log('🔍 localStorage keys:', Object.keys(localStorage));
+            console.log('🔍 playerBase:', localStorage.getItem('playerBase'));
+            console.log('🔍 base_bases:', localStorage.getItem('base_bases'));
+            console.log('🔍 eldritch-player-base:', localStorage.getItem('eldritch-player-base'));
+            
+            // Get all localStorage data
+            const allLocalStorage = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                allLocalStorage[key] = localStorage.getItem(key);
+            }
+            
+            // Show alert with summary
+            const appAvailable = !!window.eldritchApp;
+            const systemsAvailable = !!(window.eldritchApp && window.eldritchApp.systems);
+            const baseSystemAvailable = !!(window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.base);
+            const mapEngineAvailable = !!window.mapEngine;
+            const mapAvailable = !!(window.mapEngine && window.mapEngine.map);
+            
+            // Show localStorage contents in console
+            console.log('🔍 All localStorage contents:', allLocalStorage);
+            
+            // Show base-related localStorage data
+            const baseData = {
+                'playerBase': localStorage.getItem('playerBase'),
+                'base_bases': localStorage.getItem('base_bases'),
+                'eldritch-player-base': localStorage.getItem('eldritch-player-base'),
+                'eldritch_player_base_logo': localStorage.getItem('eldritch_player_base_logo'),
+                'eldritch_player_path_symbol': localStorage.getItem('eldritch_player_path_symbol')
+            };
+            
+            console.log('🔍 Base-related localStorage:', baseData);
+            
+            alert(`🔍 Debug Results:
+eldritchApp: ${appAvailable}
+Systems: ${systemsAvailable}
+Base System: ${baseSystemAvailable}
+Map Engine: ${mapEngineAvailable}
+Map: ${mapAvailable}
+
+Base Data:
+playerBase: ${baseData.playerBase ? 'EXISTS' : 'MISSING'}
+base_bases: ${baseData.base_bases ? 'EXISTS' : 'MISSING'}
+eldritch-player-base: ${baseData.eldritch_player_base_logo ? 'EXISTS' : 'MISSING'}
+baseLogo: ${baseData.eldritch_player_base_logo || 'MISSING'}
+pathSymbol: ${baseData.eldritch_player_path_symbol || 'MISSING'}
+
+Check console for full localStorage contents.`);
+        }
+        
+        function loadPlayerBase() {
+            console.log('🏗️ Load base button clicked');
+            
+            // Check if eldritchApp is available
+            if (!window.eldritchApp) {
+                console.error('🏗️ eldritchApp not available');
+                alert('❌ eldritchApp not available');
+                return;
+            }
+            
+            // Check if systems are available
+            if (!window.eldritchApp.systems) {
+                console.error('🏗️ eldritchApp.systems not available');
+                alert('❌ eldritchApp.systems not available');
+                return;
+            }
+            
+            // Check if base system is available
+            if (!window.eldritchApp.systems.base) {
+                console.error('🏗️ Base system not available');
+                console.log('🏗️ Available systems:', Object.keys(window.eldritchApp.systems));
+                alert('❌ Base system not available. Available systems: ' + Object.keys(window.eldritchApp.systems).join(', '));
+                return;
+            }
+            
+            // Check if loadPlayerBase method exists
+            if (typeof window.eldritchApp.systems.base.loadPlayerBase !== 'function') {
+                console.error('🏗️ loadPlayerBase method not available');
+                alert('❌ loadPlayerBase method not available');
+                return;
+            }
+            
+            console.log('🏗️ Base system found, calling loadPlayerBase...');
+            window.eldritchApp.systems.base.loadPlayerBase();
+            
+            // Also check localStorage for base data
+            console.log('🏗️ Checking localStorage for base data...');
+            const playerBase = localStorage.getItem('playerBase');
+            const baseBases = localStorage.getItem('base_bases');
+            const eldritchBase = localStorage.getItem('eldritch-player-base');
+            
+            console.log('🏗️ playerBase:', playerBase);
+            console.log('🏗️ base_bases:', baseBases);
+            console.log('🏗️ eldritch-player-base:', eldritchBase);
+        }
+        
+        function establishBaseQuick() {
+            console.log('🏗️ Quick base establishment clicked (inline onclick)');
+            
+            // Get the player's selected base logo from localStorage
+            const baseLogoType = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+            console.log('🏗️ Using base logo type from localStorage:', baseLogoType);
+            // Don't overwrite path symbol - let user keep their selected path symbol
+            console.log('🏗️ Keeping existing path symbol:', localStorage.getItem('eldritch_player_path_symbol'));
+            
+            // Get player's current position using the map engine's method
+            let playerPosition = null;
+            if (window.mapEngine && typeof window.mapEngine.getPlayerPosition === 'function') {
+                playerPosition = window.mapEngine.getPlayerPosition();
+                console.log('🏗️ Using player position from mapEngine.getPlayerPosition():', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            } else if (window.mapEngine && window.mapEngine.playerPosition) {
+                playerPosition = window.mapEngine.playerPosition;
+                console.log('🏗️ Using player position from mapEngine.playerPosition:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            } else if (window.geolocationManager && window.geolocationManager.currentPosition) {
+                playerPosition = window.geolocationManager.currentPosition;
+                console.log('🏗️ Using player position from geolocationManager:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            } else {
+                // Fallback to Tampere coordinates if no player position available (same as geolocation system)
+                playerPosition = { lat: 61.472768, lng: 23.724032 };
+                console.log('🏗️ Using fallback position (Tampere):', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+            }
+            
+            // Create a simple base directly in localStorage
+            const baseData = {
+                id: 'player-base-' + Date.now(),
+                name: 'My Base',
+                position: playerPosition,
+                logo: baseLogoType,
+                established: new Date().toISOString(),
+                steps: 0
+            };
+            
+            // Save base to localStorage
+            localStorage.setItem('playerBase', JSON.stringify(baseData));
+            localStorage.setItem('base_bases', JSON.stringify([baseData]));
+            console.log('🏗️ Base data saved to localStorage:', baseData);
+            
+            // Create base marker directly using Leaflet
+            createBaseMarkerDirect(baseData.position);
+        }
+        
+               function createBaseMarkerDirect(position, baseLogoType = 'finnish') {
+                   console.log('🏗️ Creating base marker directly with Leaflet...');
+                   
+                   // Check if Leaflet is available
+                   if (typeof L === 'undefined') {
+                       console.error('🏗️ Leaflet not available');
+                       alert('❌ Leaflet not available');
+                       return;
+                   }
+                   
+                   // Check if map is available
+                   let map = null;
+                   if (window.mapEngine && window.mapEngine.map) {
+                       map = window.mapEngine.map;
+                       console.log('🏗️ Using mapEngine map');
+                   } else if (window.map) {
+                       map = window.map;
+                       console.log('🏗️ Using global map');
+                   } else {
+                       console.error('🏗️ No map available');
+                       alert('❌ No map available');
+                       return;
+                   }
+                   
+                   // Use the provided base logo type
+                   console.log('🏗️ Creating base marker with logo type:', baseLogoType);
+                   console.log('🏗️ All localStorage keys:', Object.keys(localStorage).filter(key => key.includes('logo') || key.includes('symbol')));
+                   console.log('🏗️ eldritch_player_base_logo value:', localStorage.getItem('eldritch_player_base_logo'));
+                   console.log('🏗️ eldritch_player_path_symbol value:', localStorage.getItem('eldritch_player_path_symbol'));
+                   
+                   // Use the proper base marker HTML generation
+                   let baseIconHtml;
+                   if (window.mapEngine && typeof window.mapEngine.createBaseMarkerHTML === 'function') {
+                       baseIconHtml = window.mapEngine.createBaseMarkerHTML(baseLogoType);
+                   } else {
+                       // Fallback to simple HTML if mapEngine method not available
+                       baseIconHtml = `
+                           <div style="
+                               width: 80px; 
+                               height: 80px; 
+                               border-radius: 50%; 
+                               border: 3px solid #fff; 
+                               box-shadow: 0 0 10px rgba(0,0,0,0.5);
+                               background: #8b5cf6;
+                               position: relative;
+                               display: flex;
+                               align-items: center;
+                               justify-content: center;
+                           ">
+                               <div style="color: white; font-size: 24px;">🏗️</div>
+                           </div>
+                       `;
+                   }
+            
+            const baseIcon = L.divIcon({
+                className: 'base-marker-icon',
+                html: baseIconHtml,
+                iconSize: [80, 80],
+                iconAnchor: [40, 40]
+            });
+            
+            const baseMarker = L.marker([position.lat, position.lng], { icon: baseIcon }).addTo(map);
+            baseMarker.bindPopup('<b>🏗️ My Base</b><br>Your established base in the cosmic realm');
+            
+                   console.log('🏗️ Base marker created successfully at:', `lat: ${position.lat}, lng: ${position.lng}`);
+                   alert(`🏗️ ${baseLogoType} flag base marker created!`);
+            
+            // Center map on base
+            map.setView([position.lat, position.lng], 18);
+            
+               return baseMarker;
+           }
+           
+               function clearAllFlags() {
+                   alert('🧹 Clearing all path flags...');
+                   console.log('🧹 Clear flags button clicked');
+                   
+                   // Clear flags from symbol canvas layer
+                   if (window.mapEngine && window.mapEngine.symbolCanvasLayer) {
+                       window.mapEngine.symbolCanvasLayer.clearFlags();
+                       console.log('🧹 Cleared flags from symbol canvas layer');
+                   } else {
+                       console.warn('🧹 Symbol canvas layer not available');
+                   }
+                   
+                   // Also clear from other flag systems if they exist
+                   if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
+                       window.mapEngine.finnishFlagLayer.clearFlags();
+                       console.log('🧹 Cleared flags from finnish flag layer');
+                   }
+                   
+                   alert('✅ All path flags cleared! New flags will now be small Norwegian flags.');
+               }
+               
+               function testPathMarkers() {
+                   console.log('🐜 Test path markers button clicked');
+                   alert('🐜 Testing path markers...');
+                   
+                   try {
+                       // Check if map engine is available
+                       if (!window.mapEngine) {
+                           alert('❌ Map engine not available');
+                           return;
+                       }
+                       
+                       // Get player position
+                       let playerPosition = null;
+                       if (window.mapEngine && typeof window.mapEngine.getPlayerPosition === 'function') {
+                           playerPosition = window.mapEngine.getPlayerPosition();
+                       } else if (window.mapEngine && window.mapEngine.playerPosition) {
+                           playerPosition = window.mapEngine.playerPosition;
+                       } else {
+                           // Fallback to Tampere coordinates
+                           playerPosition = { lat: 61.472768, lng: 23.724032 };
+                       }
+                       
+                       console.log('🐜 Using player position:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+                       
+                       // Create 5 test markers using the working dropFlagHere method
+                       for (let i = 0; i < 5; i++) {
+                           const testLat = playerPosition.lat + (i * 0.0001);
+                           const testLng = playerPosition.lng + (i * 0.0001);
+                           
+                           console.log(`🐜 Creating marker ${i} at (${testLat.toFixed(6)}, ${testLng.toFixed(6)})`);
+                           
+                           // Use the working dropFlagHere method
+                           window.mapEngine.dropFlagHere(testLat, testLng);
+                       }
+                       
+                       const totalFlags = window.mapEngine.symbolCanvasLayer ? window.mapEngine.symbolCanvasLayer.getFlagCount() : 0;
+                       console.log('🐜 Test markers created, total flags:', totalFlags);
+                       alert(`✅ Test path markers created! Total flags: ${totalFlags}. Check the map for ant and aurora symbols.`);
+                       
+                   } catch (error) {
+                       console.error('🐜 Error in testPathMarkers:', error);
+                       alert('❌ Error creating test markers: ' + error.message);
+                   }
+               }
+               
+               function simpleTest() {
+                   console.log('🔧 Simple test button clicked');
+                   alert('🔧 Running simple test...');
+                   
+                   try {
+                       // Check basic availability
+                       console.log('🔧 window.mapEngine:', !!window.mapEngine);
+                       
+                       if (window.mapEngine) {
+                           // Try to create a simple flag using the working method
+                           const testLat = 61.472768;
+                           const testLng = 23.724032;
+                           
+                           console.log('🔧 Creating simple flag at:', testLat, testLng);
+                           window.mapEngine.dropFlagHere(testLat, testLng);
+                           
+                           const count = window.mapEngine.symbolCanvasLayer ? window.mapEngine.symbolCanvasLayer.getFlagCount() : 0;
+                           console.log('🔧 Flag count after adding:', count);
+                           alert(`✅ Simple test completed! Flag count: ${count}`);
+                       } else {
+                           alert('❌ Map engine not available');
+                       }
+                       
+                   } catch (error) {
+                       console.error('🔧 Error in simple test:', error);
+                       alert('❌ Simple test error: ' + error.message);
+                   }
+               }
+               
+               function testPathMarkerCreation() {
+                   console.log('🐜 Test path marker creation button clicked');
+                   alert('🐜 Testing path marker creation...');
+                   
+                   try {
+                       // Check if step currency system is available
+                       if (window.stepCurrencySystem && typeof window.stepCurrencySystem.createPathMarker === 'function') {
+                           console.log('🐜 Calling createPathMarker directly...');
+                           window.stepCurrencySystem.createPathMarker();
+                           alert('✅ Path marker creation test completed! Check console for logs.');
+                       } else {
+                           console.log('🐜 Step currency system not available:', !!window.stepCurrencySystem);
+                           console.log('🐜 createPathMarker method available:', !!(window.stepCurrencySystem && typeof window.stepCurrencySystem.createPathMarker === 'function'));
+                           alert('❌ Step currency system or createPathMarker method not available');
+                       }
+                   } catch (error) {
+                       console.error('🐜 Error in path marker creation test:', error);
+                       alert('❌ Path marker creation test error: ' + error.message);
+                   }
+               }
+               
+               function refreshBaseMarker() {
+                   console.log('🏗️ Refresh base marker button clicked');
+                   alert('🏗️ Refreshing base marker...');
+                   
+                   try {
+                       // Check localStorage for base data
+                       const baseData = localStorage.getItem('eldritch-player-base') || 
+                                       localStorage.getItem('playerBase') || 
+                                       localStorage.getItem('base_bases');
+                       console.log('🏗️ Base data in localStorage:', baseData);
+                       
+                       // Check current base logo
+                       const baseLogo = localStorage.getItem('eldritch_player_base_logo');
+                       console.log('🏗️ Current base logo:', baseLogo);
+                       
+                       // Check if base marker exists
+                       console.log('🏗️ playerBaseMarker exists:', !!window.mapEngine?.playerBaseMarker);
+                       
+                       if (window.mapEngine && typeof window.mapEngine.updateBaseMarker === 'function') {
+                           console.log('🏗️ Calling updateBaseMarker...');
+                           window.mapEngine.updateBaseMarker();
+                           alert('✅ Base marker refreshed! Check if it shows the correct flag now.');
+                       } else {
+                           console.log('🏗️ MapEngine or updateBaseMarker not available');
+                           alert('❌ MapEngine or updateBaseMarker method not available');
+                       }
+                   } catch (error) {
+                       console.error('🏗️ Error refreshing base marker:', error);
+                       alert('❌ Base marker refresh error: ' + error.message);
+                   }
+               }
+               
+               function add50Steps() {
+                   console.log('🚶 Add 50 steps button clicked');
+                   alert('🚶 Adding 50 steps...');
+                   
+                   try {
+                       if (window.stepCurrencySystem && typeof window.stepCurrencySystem.addStep === 'function') {
+                           console.log('🚶 Adding 50 steps manually...');
+                           for (let i = 0; i < 50; i++) {
+                               window.stepCurrencySystem.addStep();
+                           }
+                           alert('✅ 50 steps added! Check console for path marker creation logs.');
+                       } else {
+                           console.log('🚶 Step currency system not available:', !!window.stepCurrencySystem);
+                           console.log('🚶 addStep method available:', !!(window.stepCurrencySystem && typeof window.stepCurrencySystem.addStep === 'function'));
+                           alert('❌ Step currency system or addStep method not available');
+                       }
+                   } catch (error) {
+                       console.error('🚶 Error adding steps:', error);
+                       alert('❌ Error adding steps: ' + error.message);
+                   }
+               }
+               
+               function testPathPainting() {
+                   console.log('🎨 Test path painting button clicked');
+                   alert('🎨 Testing path painting system...');
+                   
+                   try {
+                       // Check if path painting system is available
+                       console.log('🎨 Path painting system available:', !!window.eldritchApp?.systems?.pathPainting);
+                       console.log('🎨 eldritchApp available:', !!window.eldritchApp);
+                       console.log('🎨 geolocation system available:', !!window.eldritchApp?.systems?.geolocation);
+                       
+                       if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.pathPainting) {
+                           console.log('🎨 Calling updatePlayerPath manually...');
+                           window.eldritchApp.systems.pathPainting.updatePlayerPath();
+                           alert('✅ Path painting test completed! Check console for logs.');
+                       } else {
+                           console.log('🎨 Path painting system not available');
+                           alert('❌ Path painting system not available');
+                       }
+                   } catch (error) {
+                       console.error('🎨 Error testing path painting:', error);
+                       alert('❌ Path painting test error: ' + error.message);
+                   }
+               }
+               
+               function testPathMarkerSVG() {
+                   console.log('🐜 Test path marker SVG button clicked');
+                   alert('🐜 Testing path marker SVG creation...');
+                   
+                   try {
+                       if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.pathPainting) {
+                           // Get current player position
+                           let playerPosition = null;
+                           if (window.mapEngine && typeof window.mapEngine.getPlayerPosition === 'function') {
+                               playerPosition = window.mapEngine.getPlayerPosition();
+                           } else if (window.mapEngine && window.mapEngine.playerPosition) {
+                               playerPosition = window.mapEngine.playerPosition;
+                           } else if (window.geolocationManager && window.geolocationManager.currentPosition) {
+                               playerPosition = window.geolocationManager.currentPosition;
+                           } else {
+                               // Fallback to Tampere coordinates
+                               playerPosition = { lat: 61.472768, lng: 23.724032 };
+                           }
+                           
+                           console.log('🐜 Using position for test:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
+                           
+                           // Create test markers
+                           const testPoint1 = { lat: playerPosition.lat, lng: playerPosition.lng, color: '#FF6B6B', brushSize: 0.0001 };
+                           const testPoint2 = { lat: playerPosition.lat + 0.0001, lng: playerPosition.lng + 0.0001, color: '#FF6B6B', brushSize: 0.0001 };
+                           
+                           // Test aurora marker
+                           console.log('🐜 Creating test aurora marker...');
+                           window.eldritchApp.systems.pathPainting.createLeafletPathMarker(testPoint1);
+                           
+                           // Test ant marker
+                           console.log('🐜 Creating test ant marker...');
+                           window.eldritchApp.systems.pathPainting.createLeafletPathMarker(testPoint2);
+                           
+                           alert('✅ Path marker SVG test completed! Check the map for aurora and ant markers.');
+                       } else {
+                           console.log('🐜 Path painting system not available');
+                           alert('❌ Path painting system not available');
+                       }
+                   } catch (error) {
+                       console.error('🐜 Error testing path marker SVG:', error);
+                       alert('❌ Path marker SVG test error: ' + error.message);
+                   }
+               }
+       </script>
 </head>
 <body>
     <!-- Cosmic Background Canvas -->
@@ -49,8 +702,8 @@
         <div id="map"></div>
         
         <!-- UI Overlay -->
-        <div id="ui-overlay">
-            <!-- Header -->
+        <!-- LEGACY HEADER - HIDDEN (Using Three.js UI) -->
+        <div id="ui-overlay" style="display: none !important;">
             <header id="header">
                 <div class="header-top">
                     <h1>🌌 Eldritch Sanctuary</h1>
@@ -94,8 +747,181 @@
             
             <!-- Control Panel - Removed, moved to header -->
             
-            <!-- Investigation Panel -->
-            <div id="investigation-panel" class="control-panel hidden">
+            <!-- Investigation Panel (Hidden - Using Three.js UI) -->
+            <div id="investigation-panel" class="control-panel hidden" style="display: none !important;">
+                <h3>🔍 Active Investigation</h3>
+                <div id="investigation-info">
+                    <div class="investigation-title"></div>
+                    <div class="investigation-type"></div>
+                    <div class="investigation-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+                <button id="abandon-investigation" class="sacred-button secondary">
+                    Abandon Investigation
+                    }
+                }
+                
+                console.error('🏗️ No base establishment method available');
+                alert('❌ Base establishment not available. Check console for details.');
+                return false;
+            };
+            
+            // Try immediately, then with delays
+            if (!tryEstablishBase()) {
+                setTimeout(() => {
+                    if (!tryEstablishBase()) {
+                        setTimeout(() => {
+                            tryEstablishBase();
+                        }, 2000);
+                    }
+                }, 1000);
+            }
+            
+            // Also try to create base marker with delays in case mapEngine isn't ready
+            setTimeout(() => {
+                console.log('🏗️ Delayed base marker creation attempt...');
+                if (window.mapEngine && window.mapEngine.updateBaseMarker) {
+                    console.log('🏗️ Creating base marker with Norwegian flag (delayed)...');
+                    window.mapEngine.updateBaseMarker(baseData.position);
+                    console.log('🏗️ Base marker created successfully (delayed)!');
+                } else {
+                    console.error('🏗️ MapEngine still not available after delay');
+                }
+            }, 2000);
+            
+            setTimeout(() => {
+                console.log('🏗️ Final base marker creation attempt...');
+                if (window.mapEngine && window.mapEngine.updateBaseMarker) {
+                    console.log('🏗️ Creating base marker with Norwegian flag (final)...');
+                    window.mapEngine.updateBaseMarker(baseData.position);
+                    console.log('🏗️ Base marker created successfully (final)!');
+                } else {
+                    console.error('🏗️ MapEngine still not available after final delay');
+                }
+            }, 5000);
+            
+            // Additional test: Try to render Norwegian flag directly on canvas
+            setTimeout(() => {
+                console.log('🏗️ Testing direct Norwegian flag rendering...');
+                if (window.layeredRenderingSystem && window.layeredRenderingSystem.layers) {
+                    const baseBuildingLayer = window.layeredRenderingSystem.layers.find(layer => layer.name === 'baseBuilding');
+                    if (baseBuildingLayer && baseBuildingLayer.canvas) {
+                        console.log('🏗️ Testing direct flag rendering on canvas');
+                        const ctx = baseBuildingLayer.canvas.getContext('2d');
+                        
+                        // Clear canvas
+                        ctx.clearRect(0, 0, baseBuildingLayer.canvas.width, baseBuildingLayer.canvas.height);
+                        
+                        // Draw Norwegian flag at center
+                        const x = baseBuildingLayer.canvas.width / 2;
+                        const y = baseBuildingLayer.canvas.height / 2;
+                        const size = 50;
+                        
+                        // Red background
+                        ctx.fillStyle = '#EF2B2D';
+                        ctx.fillRect(x - size/2, y - size/2, size, size);
+                        
+                        // White cross
+                        ctx.fillStyle = '#ffffff';
+                        const crossWidth = size * 0.12;
+                        ctx.fillRect(x - size/2, y - crossWidth/2, size, crossWidth);
+                        ctx.fillRect(x - crossWidth/2, y - size/2, crossWidth, size);
+                        
+                        // Blue cross on top
+                        ctx.fillStyle = '#002868';
+                        const blueCrossWidth = size * 0.08;
+                        ctx.fillRect(x - size/2, y - blueCrossWidth/2, size, blueCrossWidth);
+                        ctx.fillRect(x - blueCrossWidth/2, y - size/2, blueCrossWidth, size);
+                        
+                        console.log('🏗️ Norwegian flag drawn directly on canvas at center');
+                        alert('🇳🇴 Norwegian flag test drawn on canvas!');
+                    }
+                }
+            }, 3000);
+        }
+    </script>
+    
+    <!-- Asset Manager -->
+    <script src="js/asset-manager.js"></script>
+    <script src="js/mobile-wake-lock.js"></script>
+    
+    <!-- Layered Rendering System -->
+    <script src="js/layered-rendering-system.js"></script>
+    <script src="js/sacred-geometry-layer.js"></script>
+    <script src="js/ui-controls-layer.js"></script>
+    
+    <!-- Device Testing Suite -->
+    <script src="js/device-testing-suite.js"></script>
+    
+    <!-- GLMatrix for WebGL math operations (load first) -->
+    <script src="https://unpkg.com/gl-matrix@3.4.3/gl-matrix-min.js"></script>
+    
+    <!-- Three.js for WebGL effects -->
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        window.THREE = THREE;
+    </script>
+</head>
+<body>
+    <!-- Cosmic Background Canvas -->
+    <canvas id="cosmic-canvas"></canvas>
+    
+    <!-- Main Map Container -->
+    <div id="map-container">
+        <div id="map"></div>
+        
+        <!-- UI Overlay -->
+        <!-- LEGACY HEADER - HIDDEN (Using Three.js UI) -->
+        <div id="ui-overlay" style="display: none !important;">
+            <header id="header">
+                <div class="header-top">
+                    <h1>🌌 Eldritch Sanctuary</h1>
+                    <div class="player-stats-compact">
+                        <div class="stat-item">
+                            <span class="stat-icon">❤️</span>
+                            <span id="health-value" class="stat-value">100</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-icon">🧠</span>
+                            <span id="sanity-value" class="stat-value">100</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-info-compact">
+                    <!-- Step Counter -->
+                    <div id="step-counter-container"></div>
+                    
+                    <!-- Location Info Compact -->
+                    <div class="location-info-compact">
+                        <span id="location-display-header">Getting location...</span>
+                        <span id="accuracy-display-header">Accuracy: --</span>
+                    </div>
+                    
+                    <!-- Locate Me Button -->
+                    <button id="locate-me-btn" class="header-btn locate-me-btn" title="Locate Me">
+                        <span class="btn-icon">📍</span>
+                        <span class="btn-text">LOCATE</span>
+                        <span class="btn-status" id="locate-status">GPS Ready</span>
+                    </button>
+                    
+                    
+                    
+                    <!-- Multiplayer Status -->
+                    <div id="multiplayerStatus" class="multiplayer-status disconnected">
+                        <div class="status-indicator"></div>
+                        <span id="multiplayerStatusText">Disconnected</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Control Panel - Removed, moved to header -->
+            
+            <!-- Investigation Panel (Hidden - Using Three.js UI) -->
+            <div id="investigation-panel" class="control-panel hidden" style="display: none !important;">
                 <h3>🔍 Active Investigation</h3>
                 <div id="investigation-info">
                     <div class="investigation-title"></div>
@@ -137,7 +963,8 @@
             </div>
         </div>
 
-        <!-- Inventory Modal -->
+        <!-- LEGACY INVENTORY MODAL - COMMENTED OUT (Using Three.js UI) -->
+        <!--
         <div id="inventory-modal" class="modal hidden">
             <div class="modal-content inventory-modal">
                 <div class="modal-header">
@@ -191,6 +1018,7 @@
                 </div>
             </div>
         </div>
+        -->
 
         <!-- Quest Log Modal -->
         <div id="quest-log-modal" class="modal hidden">
@@ -239,8 +1067,8 @@
         </div>
     </div>
     
-    <!-- Footer Tablist -->
-    <div class="footer-tablist" role="tablist" aria-orientation="horizontal">
+    <!-- Footer Tablist (Hidden - Using Three.js UI) -->
+    <div class="footer-tablist" role="tablist" aria-orientation="horizontal" style="display: none !important;">
         <button class="tab-button active" role="tab" aria-selected="true" aria-controls="panel-inventory" id="tab-inventory" tabindex="0">
             <span class="tab-icon">🎒</span>
             <span class="tab-label">Inventory</span>
@@ -263,9 +1091,9 @@
         </button>
     </div>
 
-    <!-- Tab Panels -->
+    <!-- LEGACY TAB PANELS - COMMENTED OUT (Using Three.js UI) -->
+    <!--
     <div class="tab-panels">
-        <!-- Inventory Panel -->
         <div class="tab-panel active" role="tabpanel" aria-labelledby="tab-inventory" id="panel-inventory">
             <div class="panel-header">
                 <div class="panel-title">
@@ -355,130 +1183,46 @@
             </div>
             
             <div class="welcome-body">
-                <div class="welcome-section">
-                    <h2>🎮 How to Play</h2>
-                    <div class="tutorial-steps">
-                        <div class="tutorial-step">
-                            <div class="step-icon">📍</div>
-                            <div class="step-content">
-                                <h3>Locate & Explore</h3>
-                                <p>Use <strong>LOCATE ME</strong> to center on your position. Walk IRL to explore; your trail and flags mark your path.</p>
+                <div class="welcome-card">
+                    <h2>🌟 Welcome to Your Cosmic Journey</h2>
+                    <p class="welcome-description">
+                        Explore the mysterious world where every step reveals new secrets and cosmic wonders await your discovery. 
+                        Use GPS tracking to navigate and discover hidden treasures in this immersive adventure.
+                    </p>
+                    
+                    <!-- GPS Status Section -->
+                    <div class="gps-status-section">
+                        <div class="gps-status">
+                            <div class="gps-icon">📍</div>
+                            <div class="gps-text">
+                                <div class="gps-title">GPS Enabled Successfully!</div>
+                                <div class="gps-subtitle">Location tracking is now active. You can continue your adventure.</div>
                             </div>
                         </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🧪</div>
-                            <div class="step-content">
-                                <h3>Health Potions & Cosmic Cost</h3>
-                                <p>Collect health potions and use them from your inventory. <strong>Warning:</strong> Cosmic potions restore full health but cost 30 sanity points!</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🧘‍♀️</div>
-                            <div class="step-content">
-                                <h3>Meditation Shrines</h3>
-                                <p>Find meditation shrines to restore your sanity through peaceful contemplation. Walk within 20m and click to meditate.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🎒</div>
-                            <div class="step-content">
-                                <h3>Inventory System</h3>
-                                <p>Use the bottom inventory tab to manage items. Tap items to use, swipe left to delete, long press for info. Toggle compact view with 📋 button.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🇫🇮</div>
-                            <div class="step-content">
-                                <h3>Steps & Flags</h3>
-                                <p>Every 50 steps drops a Finnish flag. Use the footer <strong>FLAGS</strong> button to cycle flag themes.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">📜</div>
-                            <div class="step-content">
-                                <h3>Quests & Gating</h3>
-                                <p>Intro quest unlocks after 100 steps. Objectives retarget on wrong answers; panels are docked & draggable.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🎲</div>
-                            <div class="step-content">
-                                <h3>Microgames & Combat</h3>
-                                <p>Play dice, trivia, and full <strong>Tetris</strong>. Combat is simplified to dice rolls.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">⚖️</div>
-                            <div class="step-content">
-                                <h3>Moral Choices</h3>
-                                <p>Non‑blocking overlays influence your alignment. Random moral now triggers correctly.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🔊</div>
-                            <div class="step-content">
-                                <h3>Audio & Effects</h3>
-                                <p>Built‑in demo sounds (no MP3s needed) and Discord‑style effects enhance feedback.</p>
-                            </div>
-                        </div>
-                        <div class="tutorial-step">
-                            <div class="step-icon">🔧</div>
-                            <div class="step-content">
-                                <h3>Dev Console</h3>
-                                <p>Use the header <strong>debug toggle</strong> to open tools. It’s now always clickable.</p>
-                            </div>
-                        </div>
+                        <button class="gps-active-btn">
+                            <span class="gps-check">✓</span>
+                            GPS ACTIVE
+                        </button>
                     </div>
-                </div>
-
-                <div class="welcome-section">
-                    <h2>🎯 Current Quest</h2>
-                    <div class="quest-preview">
-                        <div class="quest-icon">🌊</div>
-                        <div class="quest-info">
-                            <h3>The Corroding Lake</h3>
-                            <p>A mysterious fuming lake threatens the area. Follow the trail of purification to uncover ancient horrors.</p>
-                            <div class="quest-objectives">
-                                <span class="objective">🌊 Escape the Corroding Lake</span>
-                                <span class="objective">🌿 Find the Ancient Staff</span>
-                                <span class="objective">🧙 Meet the Lunatic Sage</span>
-                                <span class="objective">👹 Face the Troll Bridge</span>
-                                <span class="objective">🐙 Release Cthulhu</span>
-                            </div>
-                        </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button id="continue-adventure" class="continue-btn">
+                            <span class="btn-icon">🔄</span>
+                            CONTINUE ADVENTURE
+                        </button>
+                        <button id="start-fresh" class="start-btn">
+                            <span class="btn-icon">🚀</span>
+                            START FRESH ADVENTURE
+                        </button>
                     </div>
                 </div>
             </div>
+    </div>
+    
 
             <div class="welcome-footer">
-                <!-- GPS Permission Section -->
-                <div id="gps-permission-section" class="gps-permission-section">
-                    <div class="gps-status">
-                        <div id="gps-status-icon" class="gps-icon">📍</div>
-                        <div class="gps-info">
-                            <h3 id="gps-status-title">Enable Location Services</h3>
-                            <p id="gps-status-message">This game requires GPS tracking to work properly. Please allow location access to continue.</p>
-                        </div>
-                    </div>
-                    <button id="enable-gps-btn" class="welcome-btn gps-btn">
-                        📍 Allow GPS Tracking
-                    </button>
-                </div>
-
-                <!-- Game Actions (initially disabled) -->
-                <div id="game-actions-section" class="welcome-actions" style="display: none;">
-                    <button id="continue-adventure" class="welcome-btn secondary" disabled>
-                        🔄 Continue Old Adventure
-                    </button>
-                    <button id="start-fresh" class="welcome-btn primary" disabled>
-                        🚀 Start Fresh Adventure
-                    </button>
-                </div>
-                
-                <div class="welcome-tips">
-                    <p>💡 Tip: Use <strong>LOCATE ME</strong>, then long‑press on map for context actions.</p>
-                    <p>💡 Tip: Try <strong>FLAGS</strong> to cycle themes. Play <strong>Tetris</strong> from debug panel.</p>
-                </div>
+                <!-- All content moved to welcome-card above -->
             </div>
         </div>
     </div>
@@ -656,7 +1400,7 @@
     <!-- Aurora UI Library -->
     <script src="js/aurora-base-component.js"></script>
     <script src="js/aurora-ui-library.js"></script>
-    <script src="js/magnetic-buttons.js"></script>
+    <!-- <script src="js/magnetic-buttons.js"></script> -->
     <script src="js/morphing-cards.js"></script>
     <script src="js/particle-systems.js"></script>
     <script src="js/cosmic-animations.js"></script>
@@ -664,13 +1408,13 @@
     
     <script src="js/particle-loading.js"></script>
     <script src="js/cosmic-effects.js"></script>
-    <script src="js/geolocation.js"></script>
+    <!-- <script src="js/geolocation.js"></script> -->
     <script src="js/investigation-system.js"></script>
     <script src="js/websocket-client.js"></script>
     <script src="js/database-client.js"></script>
-    <script src="js/base-system.js"></script>
-    <script src="js/item-system.js"></script>
-    <script src="js/inventory-ui.js"></script>
+    <!-- <script src="js/base-system.js"></script> -->
+    <!-- <script src="js/item-system.js"></script> -->
+    <!-- <script src="js/inventory-ui.js"></script> -->
     <script src="js/quest-log-ui.js"></script>
     <script src="js/unified-quest-system.js"></script>
     <script src="js/simple-dice-combat.js"></script>
@@ -685,8 +1429,6 @@
     <script src="js/path-painting-system.js"></script>
     <script src="js/finnish-flag-generator.js"></script>
     <script src="js/webgl-vector-renderer.js"></script>
-    <script src="js/enhanced-path-painting-system.js"></script>
-    <script src="js/finnish-flag-canvas-layer.js"></script>
     <script src="js/distortion-effects-canvas-layer.js"></script>
     <script src="js/other-player-simulation.js"></script>
     <script src="js/sanity-distortion.js"></script>
@@ -695,16 +1437,60 @@
     <script src="js/tutorial-system.js"></script>
     <script src="js/tutorial-encounter-system.js"></script>
     <script src="js/health-bar.js"></script>
-    <script src="js/map-engine.js"></script>
+    <!-- Legacy map engine removed - using new MapLayer instead -->
+    <!-- <script src="js/map-engine.js"></script> -->
     <script src="js/webgl-map-renderer.js"></script>
     <script src="js/webgl-map-integration.js"></script>
-    <script src="js/enhanced-map-engine.js"></script>
     <script src="js/webgl-test.js"></script>
-    <script src="js/app.js"></script>
+    <!-- New Core Architecture -->
+    <script src="js/core/event-bus.js"></script>
+    <script src="js/core/game-state.js"></script>
+    <script src="js/core/base-layer.js"></script>
+    <script src="js/core/layer-manager.js"></script>
+    
+    <!-- Layer System -->
+    <script src="js/layers/background-layer.js"></script>
+    <script src="js/layers/terrain-layer.js"></script>
+    <script src="js/layers/territory-layer.js"></script>
+    <script src="js/layers/path-layer.js"></script>
+    <script src="js/layers/map-layer.js"></script>
+    <script src="js/layers/interaction-layer.js"></script>
+    <script src="js/layers/player-layer.js"></script>
+    <script src="js/layers/information-layer.js"></script>
+    <script src="js/layers/ui-layer.js"></script>
+    <script src="js/layers/debug-layer.js"></script>
+    <script src="js/layers/geolocation-layer.js?v=2"></script>
+    
+    <!-- Data Models -->
+    <script src="js/models/player-model.js"></script>
+    <script src="js/models/base-model.js"></script>
+    <script src="js/models/quest-model.js"></script>
+    <script src="js/models/npc-model.js"></script>
+    
+    <!-- Mobile Optimization Utilities -->
+    <script src="js/utils/mobile-optimizer.js"></script>
+    <script src="js/utils/viewport-culler.js"></script>
+    <script src="js/utils/memory-manager.js"></script>
+    
+    <!-- Three.js UI System -->
+    <script src="js/ui/threejs-scene-manager.js?v=2"></script>
+    <script src="js/ui/magnetic-button-system.js?v=2"></script>
+    <script src="js/ui/threejs-ui-panels.js?v=2"></script>
+    <script src="js/ui/particle-effects-system.js?v=2"></script>
+    <script src="js/ui/enhanced-threejs-ui.js?v=2"></script>
+    <script src="js/layers/threejs-ui-layer.js?v=2"></script>
+    
+    <!-- Loading System -->
+    <script src="js/ui/loading-system.js?v=2"></script>
+    
+    <script src="js/core/app.js"></script>
+    
+    <!-- Legacy Systems (temporary) -->
+    <!-- <script src="js/app.js"></script> -->
+    <!-- <script src="js/simple-base-init.js"></script> -->
     <script src="js/step-currency-system.js"></script>
-    <script src="js/tablist.js"></script>
-    <script src="js/enhanced-tablist.js"></script>
-    <script src="js/ui-panels.js"></script>
+    <!-- <script src="js/tablist.js"></script> -->
+    <!-- <script src="js/ui-panels.js"></script> -->
     
     
     <!-- Side Panel for Settings/Debug -->
@@ -741,61 +1527,81 @@
         </div>
     </div>
 
-    <!-- User Settings Modal -->
-    <div id="user-settings-modal" class="modal hidden">
-        <div class="modal-content user-settings-modal">
+    <!-- User Settings Modal - Mobile-First Design (Hidden - Using Three.js UI) -->
+    <div id="user-settings-modal" class="modal hidden" style="display: none !important;">
+        <div class="modal-content user-settings-mobile">
             <div class="modal-header">
                 <h2>⚙️ Player Settings</h2>
                 <button id="close-user-settings" class="close-btn">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="setting-row">
+            <div class="modal-body-mobile">
+                <!-- Player Name -->
+                <div class="setting-section">
                     <label for="player-name-input">Player Name</label>
-                    <div class="input-group">
-                        <input id="player-name-input" type="text" placeholder="Enter your cosmic name" maxlength="24" class="cosmic-input">
-                    </div>
+                    <input id="player-name-input" type="text" placeholder="Enter your cosmic name" maxlength="24" class="cosmic-input-mobile">
                 </div>
-                <div class="setting-row">
+                
+                <!-- Path Color -->
+                <div class="setting-section">
                     <label>Path Color</label>
-                    <div class="color-input-group">
-                        <div class="rgb-inputs">
-                            <div class="rgb-input">
-                                <label for="color-r">R</label>
-                                <input id="color-r" type="range" min="0" max="255" value="0" class="color-slider">
-                                <span id="color-r-value">0</span>
+                    <div class="color-picker-mobile">
+                        <input id="path-color-input" type="color" value="#00ff88" class="color-input-mobile">
+                        <div id="color-preview" class="color-preview-mobile"></div>
+                        <span class="color-label">#00ff88</span>
+                    </div>
+                </div>
+                
+                <!-- Base Logo Selection -->
+                <div class="setting-section">
+                    <label>Base Logo</label>
+                    <div class="dropdown-container">
+                        <button id="base-logo-dropdown" class="dropdown-button">
+                            <div id="base-logo-preview" class="flag-preview">
+                                <img src="assets/svg/flag_finland.svg" alt="Finland" class="flag-preview">
                             </div>
-                            <div class="rgb-input">
-                                <label for="color-g">G</label>
-                                <input id="color-g" type="range" min="0" max="255" value="255" class="color-slider">
-                                <span id="color-g-value">255</span>
-                            </div>
-                            <div class="rgb-input">
-                                <label for="color-b">B</label>
-                                <input id="color-b" type="range" min="0" max="255" value="136" class="color-slider">
-                                <span id="color-b-value">136</span>
-                            </div>
-                        </div>
-                        <div class="color-preview">
-                            <input id="path-color-input" type="color" value="#00ff88" class="color-picker">
-                            <div id="color-preview" class="color-swatch"></div>
+                            <span id="base-logo-text">Finland</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div id="base-logo-menu" class="dropdown-menu hidden">
+                            <!-- Populated by JavaScript -->
                         </div>
                     </div>
                 </div>
-                <div class="setting-row">
-                    <label>Symbol</label>
-                    <div id="symbol-options" class="symbol-options-grid">
-                        <!-- Filled by JS using tutorial-system generators when available -->
+                
+                <!-- Area Symbol Selection -->
+                <div class="setting-section">
+                    <label>Area Symbol</label>
+                    <div class="dropdown-container">
+                        <button id="area-symbol-dropdown" class="dropdown-button">
+                            <span id="area-symbol-preview" class="symbol-preview">🏴</span>
+                            <span id="area-symbol-text">Territory Flag</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div id="area-symbol-menu" class="dropdown-menu hidden">
+                            <!-- Populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
-                <div class="setting-row">
+                
+                <!-- Path Symbol Selection -->
+                <div class="setting-section">
                     <label>Path Symbol</label>
-                    <div id="path-symbol-options" class="path-symbol-options-grid">
-                        <!-- Filled by JS with SVG symbols -->
+                    <div class="dropdown-container">
+                        <button id="path-symbol-dropdown" class="dropdown-button">
+                            <span id="path-symbol-preview" class="symbol-preview">👣</span>
+                            <span id="path-symbol-text">Footprints</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div id="path-symbol-menu" class="dropdown-menu hidden">
+                            <!-- Populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
-                <div class="modal-actions">
-                    <button id="save-user-settings" class="sacred-button">Save</button>
-                    <button id="cancel-user-settings" class="sacred-button secondary">Cancel</button>
+                
+                <!-- Action Buttons -->
+                <div class="modal-actions-mobile">
+                    <button id="save-user-settings" class="btn-primary">Save Settings</button>
+                    <button id="cancel-user-settings" class="btn-secondary">Cancel</button>
                 </div>
             </div>
         </div>
@@ -805,5 +1611,528 @@
     
     <!-- Mobile Logger - Now integrated into UI Controls Layer -->
     <!-- <script src="js/mobile-logger.js"></script> -->
+    
+    <script>
+        // Symbol data for the compact user settings modal
+        const symbolData = {
+            baseLogos: [
+                { id: 'finnish', symbol: '🇫🇮', name: 'Finland', svg: 'assets/svg/flag_finland.svg' },
+                { id: 'norway', symbol: '🇳🇴', name: 'Norway', svg: 'assets/svg/flag_norway.svg' },
+                { id: 'sweden', symbol: '🇸🇪', name: 'Sweden', svg: 'assets/svg/flag_sweden.svg' },
+                { id: 'energy', symbol: '⚡', name: 'Energy Core', svg: null },
+                { id: 'star', symbol: '🌟', name: 'Cosmic Star', svg: null },
+                { id: 'fire', symbol: '🔥', name: 'Sacred Fire', svg: null },
+                { id: 'ice', symbol: '❄️', name: 'Frozen Crystal', svg: null },
+                { id: 'diamond', symbol: '💎', name: 'Sacred Diamond', svg: null }
+            ],
+            areaSymbols: [
+                { id: 'flag1', symbol: '🏴', name: 'Territory Flag' },
+                { id: 'flag2', symbol: '🏳️', name: 'Expansion Flag' },
+                { id: 'flag3', symbol: '🏁', name: 'Control Flag' },
+                { id: 'flag4', symbol: '🚩', name: 'Claim Flag' },
+                { id: 'flag5', symbol: '🏳️‍🌈', name: 'Rainbow Flag' },
+                { id: 'flag6', symbol: '🏴‍☠️', name: 'Pirate Flag' }
+            ],
+            pathSymbols: [
+                { id: 'footprint', symbol: '👣', name: 'Footprints' },
+                { id: 'walking', symbol: '🚶', name: 'Walking Trail' },
+                { id: 'running', symbol: '🏃', name: 'Running Path' },
+                { id: 'dots', symbol: '⋯', name: 'Dotted Trail' },
+                { id: 'arrows', symbol: '➤', name: 'Directional' },
+                { id: 'stars', symbol: '✨', name: 'Stardust Trail' }
+            ]
+        };
+
+        // Function to populate dropdown menus
+        function populateDropdowns() {
+            console.log('🎨 Populating dropdowns...');
+            
+            // Base Logo Dropdown
+            const baseMenu = document.getElementById('base-logo-menu');
+            if (baseMenu) {
+                console.log('🎨 Base menu found, populating with', symbolData.baseLogos.length, 'items');
+                console.log('🎨 Base logos data:', symbolData.baseLogos);
+                baseMenu.innerHTML = symbolData.baseLogos.map(symbol => {
+                    const icon = symbol.svg ? 
+                        `<img src="${symbol.svg}" alt="${symbol.name}" class="flag-preview">` : 
+                        `<span class="symbol-preview">${symbol.symbol}</span>`;
+                    console.log(`🎨 Creating dropdown item for ${symbol.name} (${symbol.id})`);
+                    return `<div class="dropdown-item" data-id="${symbol.id}" data-type="base">
+                        ${icon}
+                        <span>${symbol.name}</span>
+                    </div>`;
+                }).join('');
+            } else {
+                console.error('🎨 Base menu not found!');
+            }
+
+            // Area Symbol Dropdown
+            const areaMenu = document.getElementById('area-symbol-menu');
+            if (areaMenu) {
+                areaMenu.innerHTML = symbolData.areaSymbols.map(symbol => 
+                    `<div class="dropdown-item" data-id="${symbol.id}" data-type="area">
+                        <span class="symbol-preview">${symbol.symbol}</span>
+                        <span>${symbol.name}</span>
+                    </div>`
+                ).join('');
+            }
+
+            // Path Symbol Dropdown
+            const pathMenu = document.getElementById('path-symbol-menu');
+            if (pathMenu) {
+                pathMenu.innerHTML = symbolData.pathSymbols.map(symbol => 
+                    `<div class="dropdown-item" data-id="${symbol.id}" data-type="path">
+                        <span class="symbol-preview">${symbol.symbol}</span>
+                        <span>${symbol.name}</span>
+                    </div>`
+                ).join('');
+            }
+
+            // Add dropdown functionality
+            setupDropdowns();
+        }
+
+        // Function to setup dropdown interactions
+        function setupDropdowns() {
+            // Base Logo Dropdown
+            const baseDropdown = document.getElementById('base-logo-dropdown');
+            const baseMenu = document.getElementById('base-logo-menu');
+            if (baseDropdown && baseMenu) {
+                baseDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(baseDropdown, baseMenu);
+                });
+            }
+
+            // Area Symbol Dropdown
+            const areaDropdown = document.getElementById('area-symbol-dropdown');
+            const areaMenu = document.getElementById('area-symbol-menu');
+            if (areaDropdown && areaMenu) {
+                areaDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(areaDropdown, areaMenu);
+                });
+            }
+
+            // Path Symbol Dropdown
+            const pathDropdown = document.getElementById('path-symbol-dropdown');
+            const pathMenu = document.getElementById('path-symbol-menu');
+            if (pathDropdown && pathMenu) {
+                pathDropdown.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(pathDropdown, pathMenu);
+                });
+            }
+
+            // Add click handlers for dropdown items
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const id = this.dataset.id;
+                    
+                    console.log(`🎨 Dropdown item clicked: ${type} - ${id}`);
+                    
+                    // Handle different data structure names
+                    let symbolArray;
+                    if (type === 'base') {
+                        symbolArray = symbolData.baseLogos;
+                    } else if (type === 'area') {
+                        symbolArray = symbolData.areaSymbols;
+                    } else if (type === 'path') {
+                        symbolArray = symbolData.pathSymbols;
+                    }
+                    
+                    const selectedSymbol = symbolArray.find(s => s.id === id);
+                    console.log(`🎨 Found symbol:`, selectedSymbol);
+                    
+                    if (selectedSymbol) {
+                        updateDropdownPreview(type, selectedSymbol);
+                        closeAllDropdowns();
+                        localStorage.setItem(`eldritch_player_${type}_symbol`, id);
+                        console.log(`✅ Selected ${type} symbol:`, id, selectedSymbol);
+                    } else {
+                        console.error(`❌ Could not find symbol with id: ${id} in ${type} array`);
+                    }
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', closeAllDropdowns);
+        }
+
+        // Function to toggle dropdown
+        function toggleDropdown(button, menu) {
+            const isOpen = !menu.classList.contains('hidden');
+            closeAllDropdowns();
+            if (!isOpen) {
+                menu.classList.remove('hidden');
+                button.classList.add('open');
+            }
+        }
+
+        // Function to close all dropdowns
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+            document.querySelectorAll('.dropdown-button').forEach(button => {
+                button.classList.remove('open');
+            });
+        }
+
+        // Function to update dropdown preview
+        function updateDropdownPreview(type, symbol) {
+            // Handle different naming conventions for base logo vs other symbols
+            const previewId = type === 'base' ? `${type}-logo-preview` : `${type}-symbol-preview`;
+            const textId = type === 'base' ? `${type}-logo-text` : `${type}-symbol-text`;
+            
+            const preview = document.getElementById(previewId);
+            const text = document.getElementById(textId);
+            
+            if (preview && text) {
+                console.log(`🎨 Updating ${type} preview:`, symbol.name, symbol.svg);
+                
+                // Clear the preview element
+                preview.innerHTML = '';
+                
+                if (symbol.svg) {
+                    // Create new image element
+                    const img = document.createElement('img');
+                    img.src = symbol.svg;
+                    img.alt = symbol.name;
+                    img.className = 'flag-preview';
+                    
+                    // Add error handling for image loading
+                    img.onerror = function() {
+                        console.error(`❌ Failed to load image: ${symbol.svg}`);
+                        // Fallback to emoji symbol
+                        const span = document.createElement('span');
+                        span.className = 'symbol-preview';
+                        span.textContent = symbol.symbol;
+                        preview.innerHTML = '';
+                        preview.appendChild(span);
+                    };
+                    
+                    img.onload = function() {
+                        console.log(`✅ Successfully loaded image: ${symbol.svg}`);
+                    };
+                    
+                    preview.appendChild(img);
+                } else {
+                    // Create new span element
+                    const span = document.createElement('span');
+                    span.className = 'symbol-preview';
+                    span.textContent = symbol.symbol;
+                    preview.appendChild(span);
+                }
+                
+                text.textContent = symbol.name;
+                console.log(`🎨 Updated ${type} preview successfully`);
+            } else {
+                console.error(`🎨 Could not find elements: ${previewId} or ${textId}`);
+            }
+        }
+
+        // Function to load saved selections
+        function loadSavedSelections() {
+            console.log('🎨 Loading saved selections...');
+            
+            // Load base logo
+            const savedBase = localStorage.getItem('eldritch_player_base_symbol') || 'finnish';
+            console.log('🎨 Saved base logo ID:', savedBase);
+            const baseSymbol = symbolData.baseLogos.find(s => s.id === savedBase);
+            console.log('🎨 Found base symbol:', baseSymbol);
+            if (baseSymbol) {
+                updateDropdownPreview('base', baseSymbol);
+            }
+
+            // Load area symbol
+            const savedArea = localStorage.getItem('eldritch_player_area_symbol') || 'flag1';
+            const areaSymbol = symbolData.areaSymbols.find(s => s.id === savedArea);
+            if (areaSymbol) {
+                updateDropdownPreview('area', areaSymbol);
+            }
+
+            // Load path symbol
+            const savedPath = localStorage.getItem('eldritch_player_path_symbol') || 'footprint';
+            const pathSymbol = symbolData.pathSymbols.find(s => s.id === savedPath);
+            if (pathSymbol) {
+                updateDropdownPreview('path', pathSymbol);
+            }
+        }
+
+        // Function to setup color picker
+        function setupColorPicker() {
+            const colorInput = document.getElementById('path-color-input');
+            const colorPreview = document.getElementById('color-preview');
+            const colorLabel = document.querySelector('.color-label');
+            
+            if (colorInput && colorPreview && colorLabel) {
+                colorInput.addEventListener('input', function() {
+                    const color = this.value;
+                    colorPreview.style.background = color;
+                    colorLabel.textContent = color.toUpperCase();
+                });
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate dropdowns when user settings modal is opened
+            const userSettingsModal = document.getElementById('user-settings-modal');
+            if (userSettingsModal) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            if (!userSettingsModal.classList.contains('hidden')) {
+                                console.log('🎨 User settings modal opened, initializing...');
+                                populateDropdowns();
+                                loadSavedSelections();
+                                setupColorPicker();
+                            }
+                        }
+                    });
+                });
+                observer.observe(userSettingsModal, { attributes: true });
+            }
+        });
+
+        // Debug function to clear all settings
+        function clearAllSettings() {
+            localStorage.removeItem('eldritch_player_base_symbol');
+            localStorage.removeItem('eldritch_player_area_symbol');
+            localStorage.removeItem('eldritch_player_path_symbol');
+            console.log('🧹 Cleared all player settings');
+        }
+
+        // Make debug function available globally
+        window.clearAllSettings = clearAllSettings;
+    </script>
+    
+    <script>
+        function initGameState() {
+            console.log('🎮 Init Game State button clicked');
+            
+            // Check if eldritchApp is available
+            if (!window.eldritchApp) {
+                console.error('🎮 eldritchApp not available');
+                alert('❌ eldritchApp not available');
+                return;
+            }
+            
+            // Check if initializeGameState method exists
+            if (typeof window.eldritchApp.initializeGameState !== 'function') {
+                console.error('🎮 initializeGameState method not available');
+                alert('❌ initializeGameState method not available');
+                return;
+            }
+            
+            console.log('🎮 Calling initializeGameState...');
+            window.eldritchApp.initializeGameState().then(() => {
+                console.log('🎮 Game state initialization completed');
+                alert('✅ Game state initialization completed!');
+            }).catch((error) => {
+                console.error('🎮 Game state initialization failed:', error);
+                alert('❌ Game state initialization failed: ' + error.message);
+            });
+        }
+        
+        function testSimpleBase() {
+            console.log('🏗️ Simple Base button clicked');
+            
+            // Check if SimpleBaseInit is available
+            if (!window.SimpleBaseInit) {
+                console.error('🏗️ SimpleBaseInit not available');
+                alert('❌ SimpleBaseInit not available');
+                return;
+            }
+            
+            // Create instance and initialize
+            const simpleBase = new window.SimpleBaseInit();
+            simpleBase.init().then(() => {
+                console.log('🏗️ Simple base initialization completed');
+                alert('✅ Simple base initialization completed!');
+            }).catch((error) => {
+                console.error('🏗️ Simple base initialization failed:', error);
+                alert('❌ Simple base initialization failed: ' + error.message);
+            });
+        }
+        
+        function clearBaseData() {
+            console.log('🗑️ Clear Base Data button clicked');
+            
+            // Clear all base-related localStorage keys
+            const baseKeys = ['playerBase', 'base_bases', 'eldritch-player-base'];
+            let clearedCount = 0;
+            
+            baseKeys.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    clearedCount++;
+                    console.log('🗑️ Cleared localStorage key:', key);
+                }
+            });
+            
+            // Remove any existing base markers from the map
+            if (window.mapEngine && window.mapEngine.map) {
+                // Remove all markers with base-related classes
+                const baseMarkers = document.querySelectorAll('.simple-base-marker, .base-marker-icon');
+                baseMarkers.forEach(marker => {
+                    marker.remove();
+                    console.log('🗑️ Removed base marker from DOM');
+                });
+                
+                // Also try to remove Leaflet markers
+                window.mapEngine.map.eachLayer(layer => {
+                    if (layer.options && layer.options.icon && 
+                        (layer.options.icon.options.className === 'simple-base-marker' || 
+                         layer.options.icon.options.className === 'base-marker-icon')) {
+                        window.mapEngine.map.removeLayer(layer);
+                        console.log('🗑️ Removed base marker from map');
+                    }
+                });
+            }
+            
+            // Refresh the base tab if it's open
+            if (window.tablist && typeof window.tablist.populateBasePanel === 'function') {
+                window.tablist.populateBasePanel();
+                console.log('🗑️ Refreshed base panel');
+            }
+            
+            console.log('🗑️ Cleared', clearedCount, 'base data entries');
+            alert(`🗑️ Cleared ${clearedCount} base data entries! Refresh the base tab to see the clean state.`);
+        }
+        
+        function testNewArchitecture() {
+            console.log('🏗️ Test New Architecture button clicked');
+            
+            // Check if new architecture is available
+            if (!window.EldritchSanctuaryApp) {
+                console.error('🏗️ New architecture not available');
+                alert('❌ New architecture not available');
+                return;
+            }
+            
+            // Check if core systems are available
+            const coreSystems = {
+                EventBus: !!window.EventBus,
+                GameState: !!window.GameState,
+                BaseLayer: !!window.BaseLayer,
+                LayerManager: !!window.LayerManager,
+                EldritchSanctuaryApp: !!window.EldritchSanctuaryApp
+            };
+            
+            console.log('🏗️ Core systems availability:', coreSystems);
+            
+            // Test EventBus
+            if (window.EventBus) {
+                const eventBus = new EventBus();
+                eventBus.setDebugMode(true);
+                
+                // Test event emission
+                eventBus.on('test:event', (data) => {
+                    console.log('🏗️ EventBus test event received:', data);
+                });
+                
+                eventBus.emit('test:event', { message: 'Hello from new architecture!' });
+                
+                const stats = eventBus.getStats();
+                console.log('🏗️ EventBus stats:', stats);
+            }
+            
+            // Test GameState
+            if (window.GameState) {
+                const gameState = new GameState();
+                
+                // Test state update
+                gameState.update({
+                    player: {
+                        position: { lat: 61.472768, lng: 23.724032 },
+                        stats: { health: 100, steps: 0 }
+                    }
+                }, 'Test');
+                
+                const state = gameState.getState();
+                console.log('🏗️ GameState test state:', state);
+                
+                const stats = gameState.getStats();
+                console.log('🏗️ GameState stats:', stats);
+            }
+            
+            // Test BaseLayer
+            if (window.BaseLayer) {
+                class TestLayer extends BaseLayer {
+                    doRender() {
+                        console.log('🏗️ TestLayer rendering...');
+                    }
+                }
+                
+                const testLayer = new TestLayer('test');
+                testLayer.init();
+                
+                const stats = testLayer.getStats();
+                console.log('🏗️ BaseLayer test stats:', stats);
+            }
+            
+            // Show results
+            const availableSystems = Object.values(coreSystems).filter(Boolean).length;
+            const totalSystems = Object.keys(coreSystems).length;
+            
+            alert(`🏗️ New Architecture Test Results:
+            
+✅ Available Systems: ${availableSystems}/${totalSystems}
+${Object.entries(coreSystems).map(([name, available]) => 
+    `${available ? '✅' : '❌'} ${name}`
+).join('\n')}
+
+Check console for detailed test results.`);
+        }
+    </script>
+    
+    <!-- Three.js UI Container -->
+    <div id="threejs-container"></div>
+    
+    <!-- Game Header (Fixed HTML Overlay) - Hidden initially -->
+    <div id="game-header" style="position:fixed; top:0; left:0; right:0; height:70px; background:#222; border-bottom:1px solid #444; z-index:20; display:none; align-items:center; justify-content:space-between; padding: 0 12px; font-family: 'Arial', sans-serif; color:#eee;">
+        <!-- Steps Section -->
+        <div id="steps-section" style="display:flex; align-items:center; gap:6px;">
+            <div style="width:28px; height:28px; background:#0a84ff; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:16px;">👣</div>
+            <span id="step-count" style="font-size:18px; min-width:40px; text-align:right;">0</span>
+            <button id="add-steps-btn" style="background:#0a84ff; border:none; border-radius:6px; padding:6px 10px; color:#fff; font-weight:bold; font-size:14px; cursor:pointer;">
+                +50 Steps
+            </button>
+        </div>
+
+        <!-- Player Info Section -->
+        <div id="player-info" style="display:flex; align-items:center; gap:8px;">
+            <span id="player-name" style="font-size:18px; font-weight:600;">Cosmic Explorer</span>
+            <div style="width:32px; height:32px; background:#10b981; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:20px;">🏠</div>
+        </div>
+
+        <!-- Health & Sanity Bars -->
+        <div id="vitals" style="display:flex; align-items:center; gap:12px; font-size:14px; font-weight:500;">
+            <div id="health-bar" style="display:flex; align-items:center; gap:4px;">
+                <span>❤️</span>
+                <progress id="health-progress" max="100" value="100" style="width:80px; height:12px; border-radius:6px; background:#333;"></progress>
+                <span id="health-count">100/100</span>
+            </div>
+            <div id="sanity-bar" style="display:flex; align-items:center; gap:4px;">
+                <span>🧠</span>
+                <progress id="sanity-progress" max="100" value="100" style="width:80px; height:12px; border-radius:6px; background:#333;"></progress>
+                <span id="sanity-count">100/100</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Initialize the app with loading system -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌌 Initializing Eldritch Sanctuary with loading system...');
+            
+            // Initialize loading system
+            const loadingSystem = new LoadingSystem();
+            loadingSystem.init();
+        });
+    </script>
 </body>
 </html>

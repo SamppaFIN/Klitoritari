@@ -598,6 +598,18 @@ class EldritchSanctuaryApp {
             
             // Load initial data
             await this.loadInitialData();
+            
+            // Initialize game state after core systems are ready
+            // TEMPORARILY DISABLED - using SimpleBaseInit instead
+            // await this.initializeGameState();
+            
+            // Use simple base initialization
+            // DISABLED - only initialize when explicitly requested
+            // if (window.SimpleBaseInit) {
+            //     console.log('🏗️ Initializing simple base system...');
+            //     const simpleBase = new window.SimpleBaseInit();
+            //     await simpleBase.init();
+            // }
                 
             // Hide particle loading screen immediately after initialization
             this.hideParticleLoadingScreen();
@@ -615,17 +627,261 @@ class EldritchSanctuaryApp {
         }
     }
 
+    /**
+     * Initialize all game state elements after core systems are ready
+     */
+    async initializeGameState() {
+        console.log('🎮 Initializing game state...');
+        
+        try {
+            // 1. Load and validate player base
+            await this.loadPlayerBaseState();
+            
+            // 2. Load and validate path markers
+            await this.loadPathMarkersState();
+            
+            // 3. Load and validate quest markers
+            await this.loadQuestMarkersState();
+            
+            // 4. Load and validate other game elements
+            await this.loadOtherGameElements();
+            
+            console.log('✅ Game state initialization completed');
+        } catch (error) {
+            console.error('❌ Game state initialization failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Load and validate player base state
+     */
+    async loadPlayerBaseState() {
+        console.log('🏗️ Loading player base state...');
+        
+        try {
+            // Check if base system exists
+            if (!this.systems.base) {
+                console.warn('🏗️ Base system not available');
+                return;
+            }
+            
+            // Load base data
+            if (typeof this.systems.base.loadPlayerBase === 'function') {
+                this.systems.base.loadPlayerBase();
+            }
+            
+            // Validate base data structure
+            const baseData = this.getBaseDataFromStorage();
+            if (baseData) {
+                console.log('🏗️ Base data found:', baseData);
+                
+                // Handle both nested position format and direct lat/lng format
+                let position = null;
+                if (baseData.position && baseData.position.lat && baseData.position.lng) {
+                    position = baseData.position;
+                    console.log('🏗️ Base position from nested format:', position);
+                } else if (baseData.lat && baseData.lng) {
+                    position = { lat: baseData.lat, lng: baseData.lng };
+                    console.log('🏗️ Base position from direct format:', position);
+                }
+                
+                // Create base marker if position is valid and map is ready
+                if (position && this.systems.mapEngine && this.systems.mapEngine.map) {
+                    console.log('🏗️ Creating base marker on map...');
+                    this.systems.mapEngine.updateBaseMarker(position);
+                } else if (!position) {
+                    console.warn('🏗️ Base data missing valid position:', baseData);
+                } else {
+                    console.warn('🏗️ Map engine not ready for base marker creation');
+                }
+            } else {
+                console.log('🏗️ No base data found in storage - this is normal for new players');
+            }
+        } catch (error) {
+            console.error('❌ Failed to load player base state:', error);
+        }
+    }
+
+    /**
+     * Load and validate path markers state
+     */
+    async loadPathMarkersState() {
+        console.log('🛤️ Loading path markers state...');
+        
+        try {
+            // Check if path painting system exists
+            if (!this.systems.pathPainting) {
+                console.warn('🛤️ Path painting system not available');
+                return;
+            }
+            
+            // Load saved path data
+            if (typeof this.systems.pathPainting.loadSavedData === 'function') {
+                this.systems.pathPainting.loadSavedData();
+            }
+            
+            // Validate path markers data
+            const pathMarkers = this.getPathMarkersFromStorage();
+            if (pathMarkers && pathMarkers.length > 0) {
+                console.log('🛤️ Path markers found:', pathMarkers.length);
+                
+                // Recreate path markers on map
+                if (this.systems.mapEngine && this.systems.mapEngine.map) {
+                    console.log('🛤️ Recreating path markers on map...');
+                    pathMarkers.forEach(marker => {
+                        if (marker.position && marker.position.lat && marker.position.lng) {
+                            this.systems.mapEngine.addFlagPin(marker.position, marker.symbol || 'ant');
+                        }
+                    });
+                }
+            } else {
+                console.log('🛤️ No path markers found in storage');
+            }
+        } catch (error) {
+            console.error('❌ Failed to load path markers state:', error);
+        }
+    }
+
+    /**
+     * Load and validate quest markers state
+     */
+    async loadQuestMarkersState() {
+        console.log('🎭 Loading quest markers state...');
+        
+        try {
+            // Check if quest system exists
+            if (!this.systems.quest) {
+                console.warn('🎭 Quest system not available');
+                return;
+            }
+            
+            // Load quest data
+            if (typeof this.systems.quest.loadQuests === 'function') {
+                this.systems.quest.loadQuests();
+            }
+            
+            // Validate quest markers
+            const quests = this.getQuestsFromStorage();
+            if (quests && quests.length > 0) {
+                console.log('🎭 Quests found:', quests.length);
+                
+                // Recreate quest markers on map
+                if (this.systems.mapEngine && this.systems.mapEngine.map) {
+                    console.log('🎭 Recreating quest markers on map...');
+                    quests.forEach(quest => {
+                        if (quest.objectives) {
+                            quest.objectives.forEach(objective => {
+                                if (objective.location && objective.location.lat && objective.location.lng) {
+                                    this.systems.mapEngine.addQuestMarker(objective.location, objective.id, quest.id);
+                                }
+                            });
+                        }
+                    });
+                }
+            } else {
+                console.log('🎭 No quests found in storage');
+            }
+        } catch (error) {
+            console.error('❌ Failed to load quest markers state:', error);
+        }
+    }
+
+    /**
+     * Load other game elements
+     */
+    async loadOtherGameElements() {
+        console.log('🎨 Loading other game elements...');
+        
+        try {
+            // Load any other persistent game state
+            // This could include settings, achievements, etc.
+            
+            console.log('🎨 Other game elements loaded');
+        } catch (error) {
+            console.error('❌ Failed to load other game elements:', error);
+        }
+    }
+
+    /**
+     * Get base data from localStorage with validation
+     */
+    getBaseDataFromStorage() {
+        try {
+            // Try multiple storage keys
+            const keys = ['playerBase', 'base_bases', 'eldritch-player-base'];
+            
+            for (const key of keys) {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    
+                    // Handle array format
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed[0];
+                    }
+                    
+                    // Handle object format
+                    if (parsed && typeof parsed === 'object') {
+                        return parsed;
+                    }
+                }
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('❌ Failed to get base data from storage:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Get path markers from localStorage
+     */
+    getPathMarkersFromStorage() {
+        try {
+            const data = localStorage.getItem('pathMarkers');
+            if (data) {
+                return JSON.parse(data);
+            }
+            return [];
+        } catch (error) {
+            console.error('❌ Failed to get path markers from storage:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get quests from localStorage
+     */
+    getQuestsFromStorage() {
+        try {
+            const data = localStorage.getItem('quests');
+            if (data) {
+                return JSON.parse(data);
+            }
+            return [];
+        } catch (error) {
+            console.error('❌ Failed to get quests from storage:', error);
+            return [];
+        }
+    }
+
     // Initialize multiplayer manager
     initMultiplayerManager() {
-        if (window.MultiplayerManager) {
-            window.multiplayerManager = new MultiplayerManager();
-            window.multiplayerManager.initialize().catch(error => {
-                console.warn('🌐 Multiplayer initialization failed, continuing in single-player mode:', error);
-            });
-            console.log('🌐 Multiplayer manager initialized');
-        } else {
-            console.warn('🌐 MultiplayerManager not available');
-        }
+        // TEMPORARILY DISABLED for base flag testing
+        console.log('🌐 Multiplayer manager temporarily disabled for base flag testing');
+        return;
+        
+        // if (window.MultiplayerManager) {
+        //     window.multiplayerManager = new MultiplayerManager();
+        //     window.multiplayerManager.initialize().catch(error => {
+        //         console.warn('🌐 Multiplayer initialization failed, continuing in single-player mode:', error);
+        //     });
+        //     console.log('🌐 Multiplayer manager initialized');
+        // } else {
+        //     console.warn('🌐 MultiplayerManager not available');
+        // }
     }
     
     // Set up multiplayer status updates
@@ -2544,10 +2800,13 @@ class EldritchSanctuaryApp {
     
     async initCoreSystems() {
         // Check if systems are already initialized
-        if (this.systems.mapEngine && this.systems.mapEngine.isInitialized) {
+        if (this.systems.mapEngine && this.systems.mapEngine.isInitialized && 
+            this.systems.base && this.systems.geolocation) {
             console.log('🔧 Core systems already initialized, skipping');
             return;
         }
+        
+        console.log('🔧 Initializing core systems...');
         
         // Initialize geolocation manager
         this.systems.geolocation = new GeolocationManager();
@@ -2590,6 +2849,14 @@ class EldritchSanctuaryApp {
                 }
                 // DISABLED: Tutorial system for layered rendering testing
                 console.log('🎓 Tutorial system disabled for layered rendering testing');
+                
+                // Load player base when map is ready
+                if (this.systems.base && typeof this.systems.base.loadPlayerBase === 'function') {
+                    console.log('🏗️ Map is ready, loading player base...');
+                    this.systems.base.loadPlayerBase();
+                } else {
+                    console.warn('🏗️ Base system not available for loading player base');
+                }
             };
         } catch (error) {
             console.warn('🎓 Failed to set up tutorial callback:', error);
@@ -2627,8 +2894,20 @@ class EldritchSanctuaryApp {
         // }
 
         // Initialize base system
-        this.systems.base = new BaseSystem();
-        this.systems.base.init();
+        // TEMPORARILY DISABLED - using SimpleBaseInit instead
+        /*
+        if (!this.systems.base) {
+            console.log('🔧 Initializing base system...');
+            this.systems.base = new BaseSystem();
+            this.systems.base.init();
+        } else {
+            console.log('🔧 Base system already exists, ensuring it\'s loaded...');
+            // Even if base system exists, make sure it loads the player base
+            if (typeof this.systems.base.loadPlayerBase === 'function') {
+                this.systems.base.loadPlayerBase();
+            }
+        }
+        */
         
         // Initialize item system
         this.systems.item = new ItemSystem();
@@ -2668,13 +2947,14 @@ class EldritchSanctuaryApp {
         this.systems.sessionPersistence = new SessionPersistenceManager();
         this.systems.sessionPersistence.init();
         
-        // Initialize multiplayer manager (connect to WS)
-        this.systems.multiplayer = new MultiplayerManager();
-        try {
-            this.systems.multiplayer.initialize();
-        } catch (_) {
-            this.systems.multiplayer.init();
-        }
+        // Initialize multiplayer manager (connect to WS) - TEMPORARILY DISABLED
+        // this.systems.multiplayer = new MultiplayerManager();
+        // try {
+        //     this.systems.multiplayer.initialize();
+        // } catch (_) {
+        //     this.systems.multiplayer.init();
+        // }
+        console.log('🌐 Multiplayer system temporarily disabled for base flag testing');
         
         // Initialize moral choice system
         this.systems.moralChoice = new MoralChoiceSystem();
@@ -2697,8 +2977,17 @@ class EldritchSanctuaryApp {
         this.systems.npc.init();
         
         // Initialize path painting system
-        this.systems.pathPainting = new PathPaintingSystem();
-        this.systems.pathPainting.init();
+        if (!this.systems.pathPainting) {
+            console.log('🔧 Initializing path painting system...');
+            this.systems.pathPainting = new PathPaintingSystem();
+            this.systems.pathPainting.init();
+        } else {
+            console.log('🔧 Path painting system already exists, ensuring it\'s loaded...');
+            // Even if path painting system exists, make sure it loads saved data
+            if (typeof this.systems.pathPainting.loadSavedData === 'function') {
+                this.systems.pathPainting.loadSavedData();
+            }
+        }
         
         // Initialize Finnish flag generator
         this.systems.finnishFlagGenerator = new FinnishFlagGenerator();
@@ -2719,9 +3008,7 @@ class EldritchSanctuaryApp {
             this.systems.webglVectorRenderer = null;
         }
         
-        // Initialize enhanced path painting system
-        this.systems.enhancedPathPainting = new EnhancedPathPaintingSystem();
-        this.systems.enhancedPathPainting.init();
+        // Enhanced path painting system removed - using only PathPaintingSystem
         
         // Initialize Finnish flag canvas layer
         this.systems.symbolCanvasLayer = new SymbolCanvasLayer();
@@ -2735,9 +3022,10 @@ class EldritchSanctuaryApp {
         this.systems.tutorial = new TutorialSystem();
         this.systems.tutorial.init();
         
-        // Initialize other player simulation
-        this.systems.otherPlayerSimulation = new OtherPlayerSimulation();
-        this.systems.otherPlayerSimulation.init();
+        // Initialize other player simulation - TEMPORARILY DISABLED
+        // this.systems.otherPlayerSimulation = new OtherPlayerSimulation();
+        // this.systems.otherPlayerSimulation.init();
+        console.log('🌐 Other player simulation temporarily disabled for base flag testing');
         
         // Initialize sanity distortion
         this.systems.sanityDistortion = new SanityDistortion();
@@ -2806,6 +3094,7 @@ class EldritchSanctuaryApp {
         window.baseSystem = this.systems.base;
         window.encounterSystem = this.systems.encounter;
         window.npcSystem = this.systems.npc;
+        window.pathPaintingSystem = this.systems.pathPainting;
         window.app = this; // Make app instance globally available
     }
     
@@ -2857,10 +3146,11 @@ class EldritchSanctuaryApp {
             this.systems.quest.updateStepCount(steps);
         };
         
-        // Multiplayer Manager to Map Engine
-        this.systems.multiplayer.onPlayerUpdate = (player) => {
-            this.systems.mapEngine.updateOtherPlayer(player);
-        };
+        // Multiplayer Manager to Map Engine - TEMPORARILY DISABLED
+        // this.systems.multiplayer.onPlayerUpdate = (player) => {
+        //     this.systems.mapEngine.updateOtherPlayer(player);
+        // };
+        console.log('🌐 Multiplayer player updates temporarily disabled');
         
         // Moral Choice System to Quest System
         this.systems.moralChoice.onChoiceMade = (choice) => {
@@ -2906,10 +3196,7 @@ class EldritchSanctuaryApp {
             };
         }
         
-        // Enhanced Path Painting System to Map Engine
-        this.systems.enhancedPathPainting.onPathUpdate = (path) => {
-            this.systems.mapEngine.updateEnhancedPathDisplay(path);
-        };
+        // Enhanced path painting system removed - using only PathPaintingSystem
         
         // Finnish Flag Canvas Layer to Map Engine
         this.systems.finnishFlagCanvasLayer.onLayerUpdate = (layer) => {
@@ -3102,7 +3389,7 @@ class EldritchSanctuaryApp {
         if (this.systems.geolocation) {
             const position = this.systems.geolocation.getCurrentPositionSafe();
             if (position) {
-                console.log('📍 Current position:', position);
+                console.log('📍 Current position:', `lat: ${position.lat}, lng: ${position.lng}`);
                 this.systems.mapEngine.centerOnPosition(position);
                 this.showNotification('📍 Map centered on your location', 'success');
             } else {

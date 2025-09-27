@@ -1,0 +1,21 @@
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="swedenGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FECC00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#006AA7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Flag pole -->
+  <rect x="11" y="2" width="2" height="20" fill="#8B4513"/>
+  
+  <!-- Flag background -->
+  <rect x="13" y="3" width="8" height="6" fill="url(#swedenGradient)" stroke="#000" stroke-width="0.5"/>
+  
+  <!-- Cross on flag (Swedish flag) -->
+  <rect x="15" y="4.5" width="4" height="1" fill="#FFFFFF"/>
+  <rect x="16.5" y="3.5" width="1" height="4" fill="#FFFFFF"/>
+  
+  <!-- Base -->
+  <circle cx="12" cy="22" r="2" fill="#8B4513"/>
+</svg>

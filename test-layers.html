@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layer System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        #test-canvas {
+            width: 100vw;
+            height: 100vh;
+            background: #111;
+        }
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="test-canvas"></canvas>
+    <div id="debug-info">
+        <div>Layer System Test</div>
+        <div id="status">Initializing...</div>
+        <div id="fps">FPS: --</div>
+        <div id="layers">Layers: --</div>
+    </div>
+
+    <!-- Core Architecture -->
+    <script src="js/core/event-bus.js"></script>
+    <script src="js/core/game-state.js"></script>
+    <script src="js/core/base-layer.js"></script>
+    <script src="js/core/layer-manager.js"></script>
+    
+    <!-- Layer System -->
+    <script src="js/layers/background-layer.js"></script>
+    <script src="js/layers/terrain-layer.js"></script>
+    <script src="js/layers/territory-layer.js"></script>
+    <script src="js/layers/path-layer.js"></script>
+    <script src="js/layers/map-layer.js"></script>
+    <script src="js/layers/interaction-layer.js"></script>
+    <script src="js/layers/player-layer.js"></script>
+    <script src="js/layers/information-layer.js"></script>
+    <script src="js/layers/ui-layer.js"></script>
+    <script src="js/layers/debug-layer.js"></script>
+
+    <script>
+        // Test the layered rendering system
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🧪 Starting layer system test...');
+            
+            try {
+                // Initialize core systems
+                const eventBus = new EventBus();
+                eventBus.setDebugMode(true);
+                
+                const gameState = new GameState();
+                
+                // Get canvas
+                const canvas = document.getElementById('test-canvas');
+                
+                // Initialize layer manager
+                const layerManager = new LayerManager(eventBus, gameState);
+                layerManager.init(canvas);
+                
+                // Add all layers
+                const layers = [
+                    new BackgroundLayer(),
+                    new TerrainLayer(),
+                    new TerritoryLayer(),
+                    new PathLayer(),
+                    new MapLayer(),
+                    new InteractionLayer(),
+                    new PlayerLayer(),
+                    new InformationLayer(),
+                    new UILayer(),
+                    new DebugLayer()
+                ];
+                
+                layers.forEach(layer => {
+                    layerManager.addLayer(layer);
+                });
+                
+                // Update debug info
+                const statusEl = document.getElementById('status');
+                const fpsEl = document.getElementById('fps');
+                const layersEl = document.getElementById('layers');
+                
+                statusEl.textContent = 'System initialized successfully!';
+                layersEl.textContent = `Layers: ${layerManager.layers.size}`;
+                
+                // Update FPS
+                setInterval(() => {
+                    const stats = layerManager.getStats();
+                    fpsEl.textContent = `FPS: ${stats.currentFPS}`;
+                }, 1000);
+                
+                console.log('🧪 Layer system test completed successfully!');
+                
+            } catch (error) {
+                console.error('🧪 Layer system test failed:', error);
+                document.getElementById('status').textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -13,6 +13,7 @@ class PathPaintingSystem {
         this.lastPosition = null;
         this.minDistance = 0.00005; // ~5m minimum distance between points
         this.pathOpacity = 0.3;
+        this.isUpdating = false; // Safety flag to prevent infinite loops
         this.brushColors = [
             '#FF6B6B', // Red
             '#4ECDC4', // Teal
@@ -45,9 +46,23 @@ class PathPaintingSystem {
     }
 
     updatePlayerPath() {
-        if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) return;
+        console.log('🎨 updatePlayerPath called');
+        
+        // Safety check to prevent infinite loops
+        if (this.isUpdating) {
+            console.log('🎨 Path painting: Already updating, skipping...');
+            return;
+        }
+        this.isUpdating = true;
+        
+        try {
+            if (!window.eldritchApp || !window.eldritchApp.systems.geolocation) {
+                console.log('🎨 Path painting: eldritchApp or geolocation not available');
+                return;
+            }
 
-        const playerPos = window.eldritchApp.systems.geolocation.currentPosition;
+            const playerPos = window.eldritchApp.systems.geolocation.currentPosition;
+            console.log('🎨 Path painting: player position:', `lat: ${playerPos.lat}, lng: ${playerPos.lng}`);
         if (!playerPos) return;
 
         // Check if player has moved enough to add a new point
@@ -83,6 +98,10 @@ class PathPaintingSystem {
         }
 
         console.log(`🎨 Painted area at ${visitedPoint.lat.toFixed(6)}, ${visitedPoint.lng.toFixed(6)}`);
+        } finally {
+            // Always reset the updating flag
+            this.isUpdating = false;
+        }
     }
 
     paintArea(point) {
@@ -110,6 +129,146 @@ class PathPaintingSystem {
 
         // Add pulsing effect
         this.addPulsingEffect(paintedCircle);
+        
+        // Create path markers every few painted areas (using Leaflet markers like base markers)
+        this.createPathMarkerIfNeeded(point);
+    }
+    
+    createPathMarkerIfNeeded(point) {
+        try {
+            // Create a path marker every 5 painted areas (adjustable)
+            const markerInterval = 5;
+            const shouldCreateMarker = (this.paintedLayers.length % markerInterval === 0);
+            
+            if (shouldCreateMarker && window.eldritchApp && window.eldritchApp.systems.mapEngine && window.eldritchApp.systems.mapEngine.map) {
+                console.log(`🐜 Creating path marker at painted area ${this.paintedLayers.length} at:`, point);
+                this.createLeafletPathMarker(point);
+            }
+        } catch (error) {
+            console.error('🐜 Error creating path marker in path painting system:', error);
+        }
+    }
+    
+    createLeafletPathMarker(point) {
+        try {
+            const map = window.eldritchApp.systems.mapEngine.map;
+            
+            // Determine which symbol to use (alternating pattern)
+            const markerIndex = this.paintedLayers.length;
+            const isPathMarker = (markerIndex % 5 === 0); // Every 5th marker is a path marker (aurora)
+            const symbol = isPathMarker ? 'aurora' : 'ant';
+            
+            console.log(`🐜 Creating ${symbol} marker at index ${markerIndex}`);
+            
+            // Create the marker HTML (similar to base markers but smaller)
+            const markerHtml = this.createPathMarkerHTML(symbol);
+            
+            // Create Leaflet divIcon
+            const markerIcon = L.divIcon({
+                className: 'path-marker-icon',
+                html: markerHtml,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            // Create and add marker to map
+            const marker = L.marker([point.lat, point.lng], { icon: markerIcon }).addTo(map);
+            
+            // Store reference for potential cleanup
+            if (!this.pathMarkers) {
+                this.pathMarkers = [];
+            }
+            this.pathMarkers.push(marker);
+            
+            console.log(`🐜 Path marker created successfully: ${symbol}`);
+            
+        } catch (error) {
+            console.error('🐜 Error creating Leaflet path marker:', error);
+        }
+    }
+    
+    createPathMarkerHTML(symbol) {
+        if (symbol === 'aurora') {
+            return `
+                <div style="
+                    width: 20px; 
+                    height: 20px; 
+                    border-radius: 50%; 
+                    border: 2px solid #00FF88; 
+                    box-shadow: 0 0 8px rgba(0,255,136,0.6);
+                    background: #001122;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <svg width="16" height="16" viewBox="-8 -8 16 16" style="overflow: visible;">
+                        <defs>
+                            <style>
+                                .aurora-line { stroke: #00FF88; stroke-width: 1.5; fill: none; }
+                                .aurora-circle { fill: #00FF88; }
+                            </style>
+                        </defs>
+                        <!-- Aurora wavy line -->
+                        <path class="aurora-line" d="M 0,-6.4 
+                            Q -1.2,-4.8 0,-3.2 
+                            Q 1.2,-1.6 0,0 
+                            Q -1.2,1.6 0,3.2 
+                            Q 1.2,4.8 0,6.4" />
+                        <!-- Aurora circle at top -->
+                        <circle class="aurora-circle" cx="0" cy="-6.4" r="1.2" />
+                    </svg>
+                </div>
+            `;
+        } else { // ant
+            return `
+                <div style="
+                    width: 20px; 
+                    height: 20px; 
+                    border-radius: 50%; 
+                    border: 2px solid #8B4513; 
+                    box-shadow: 0 0 8px rgba(139,69,19,0.6);
+                    background: #654321;
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                ">
+                    <svg width="16" height="16" viewBox="-8 -8 16 16" style="overflow: visible;">
+                        <defs>
+                            <style>
+                                .ant-body { fill: #8B4513; stroke: #654321; stroke-width: 0.5; }
+                                .ant-head { fill: #8B4513; stroke: #654321; stroke-width: 0.5; }
+                                .ant-leg { stroke: #654321; stroke-width: 0.5; fill: none; }
+                            </style>
+                        </defs>
+                        <!-- Ant body (oval) -->
+                        <ellipse class="ant-body" cx="0" cy="0" rx="4.8" ry="2.4" />
+                        <!-- Ant head (circle) -->
+                        <circle class="ant-head" cx="-3.2" cy="0" r="1.6" />
+                        <!-- Ant legs (6 legs, 3 on each side) -->
+                        <line class="ant-leg" x1="-2.4" y1="-1.6" x2="-4.8" y2="-1.2" />
+                        <line class="ant-leg" x1="-2.4" y1="0" x2="-4.8" y2="0" />
+                        <line class="ant-leg" x1="-2.4" y1="1.6" x2="-4.8" y2="1.2" />
+                        <line class="ant-leg" x1="2.4" y1="-1.6" x2="4.8" y2="-1.2" />
+                        <line class="ant-leg" x1="2.4" y1="0" x2="4.8" y2="0" />
+                        <line class="ant-leg" x1="2.4" y1="1.6" x2="4.8" y2="1.2" />
+                    </svg>
+                </div>
+            `;
+        }
+    }
+    
+    clearPathMarkers() {
+        if (this.pathMarkers) {
+            this.pathMarkers.forEach(marker => {
+                if (marker && marker.remove) {
+                    marker.remove();
+                }
+            });
+            this.pathMarkers = [];
+            console.log('🐜 All path markers cleared');
+        }
     }
 
     addToPaintedGrid(point) {

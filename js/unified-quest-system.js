@@ -23,6 +23,9 @@ class UnifiedQuestSystem {
         this.questCooldowns = new Map(); // Track quest cooldowns
         this.dialogCooldowns = new Map(); // Track dialog cooldowns
         this.currentDialog = null; // Track current dialog
+        
+        // Callback for quest completion
+        this.onQuestComplete = null;
 
         // Restore adventure mode for session if present
         try {
@@ -690,7 +693,8 @@ class UnifiedQuestSystem {
         
         this.lastPlayerPosition = playerPosition;
         
-        console.log('🎭 Quest proximity check running for position:', playerPosition);
+        console.log('🎭 Quest proximity check running for position:', 
+            `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
         
         // Check Aurora proximity
         this.checkAuroraProximity(playerPosition);
@@ -863,6 +867,12 @@ class UnifiedQuestSystem {
     }
     
     checkQuestObjectiveProximity(playerPosition) {
+        // Skip quest proximity checks if base is being established
+        if (window.baseSystem && window.baseSystem.isEstablishingBase) {
+            console.log('🎭 Skipping quest proximity check - base establishment in progress');
+            return;
+        }
+        
         // Check proximity to quest objectives (both active and available quests)
         const allQuests = new Map([...this.activeQuests, ...this.availableQuests]);
         
@@ -871,16 +881,22 @@ class UnifiedQuestSystem {
             return;
         }
         
-        console.log(`🎭 Checking proximity for ${allQuests.size} quests at position:`, playerPosition);
+        console.log(`🎭 Checking proximity for ${allQuests.size} quests at position:`, 
+            `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
         allQuests.forEach((quest, questId) => {
             console.log(`🎭 Checking quest: ${questId} (${quest.name}) - Status: ${quest.status}`);
             quest.objectives.forEach((objective, objIndex) => {
-                console.log(`🎭 Objective ${objIndex + 1}: ${objective.id} - Type: ${objective.type}, Status: ${objective.status}, Distance: ${objective.distance}m`);
+                console.log(`🎭 Objective ${objIndex + 1}: ${objective.id} - Type: ${objective.type}, Status: ${objective.status}, Distance: ${objective.distance ? objective.distance + 'm' : 'N/A'}`);
                 
                 // Check proximity for both proximity-type objectives and quest objective markers
                 if (objective.status === 'incomplete') {
                     let questLat, questLng;
                     let distance;
+                    
+                    // Skip distance calculation for dialogue-type objectives
+                    if (objective.type === 'dialogue') {
+                        objective.distance = null; // No distance for dialogue objectives
+                    } else {
                     
                     if (objective.type === 'proximity') {
                         // For the new Corroding Lake quest, use the specific location
@@ -919,6 +935,9 @@ class UnifiedQuestSystem {
                         }
                     }
                     
+                    // Assign distance to objective for logging
+                    objective.distance = distance;
+                    
                     // Debug information - show distance every 5 seconds
                     if (!this.lastDistanceLog || Date.now() - this.lastDistanceLog > 5000) {
                         console.log(`🎭 Quest Distance Debug: ${distance.toFixed(2)}m to ${objective.id} at (${questLat}, ${questLng}) (trigger at 50m)`);
@@ -938,7 +957,7 @@ class UnifiedQuestSystem {
                         const cooldownKey = `${quest.id}_${objective.id}`;
                         const lastTrigger = this.dialogCooldowns.get(cooldownKey);
                         const now = Date.now();
-                        const cooldownTime = 10000; // 10 seconds cooldown
+                        const cooldownTime = 30000; // 30 seconds cooldown to prevent spam
                         
                         if (lastTrigger && (now - lastTrigger) < cooldownTime) {
                             console.log(`🎭 Dialog on cooldown for ${cooldownKey}, remaining: ${Math.ceil((cooldownTime - (now - lastTrigger)) / 1000)}s`);
@@ -957,6 +976,7 @@ class UnifiedQuestSystem {
                         // Show quest dialog instead of just completing objective
                         this.showQuestDialog(quest, objective);
                     }
+                    } // Close the else block for non-dialogue objectives
                 }
             });
         });
@@ -1465,6 +1485,11 @@ class UnifiedQuestSystem {
         
         console.log('🎭 Completed quest:', quest.name);
         
+        // Trigger quest completion callback
+        if (this.onQuestComplete) {
+            this.onQuestComplete(quest);
+        }
+        
         // Show quest completion celebration
         this.showQuestCompletionCelebration(quest);
         
@@ -1868,7 +1893,7 @@ class UnifiedQuestSystem {
         console.log('🎭 Testing quest trigger...');
         const playerPosition = this.getPlayerPosition();
         if (playerPosition) {
-            console.log('🎭 Player position:', playerPosition);
+            console.log('🎭 Player position:', `lat: ${playerPosition.lat}, lng: ${playerPosition.lng}`);
             this.checkQuestObjectiveProximity(playerPosition);
         } else {
             console.log('🎭 No player position available for test');
@@ -2050,7 +2075,7 @@ class UnifiedQuestSystem {
                 }
             });
         });
-        console.log('🎭 Objectives scattered within', radiusMeters, 'meters of starting position:', origin);
+        console.log('🎭 Objectives scattered within', radiusMeters, 'meters of starting position:', `lat: ${origin.lat}, lng: ${origin.lng}`);
     }
     
     // Move a specific objective to a new distinct nearby location
@@ -2186,7 +2211,7 @@ class UnifiedQuestSystem {
         this.aurora.lat = newPosition.lat;
         this.aurora.lng = newPosition.lng;
         
-        console.log('🎭 Aurora position updated to be 100m away from player:', newPosition);
+        console.log('🎭 Aurora position updated to be 100m away from player:', `lat: ${newPosition.lat}, lng: ${newPosition.lng}`);
     }
     
     // Calculate destination point given start point, bearing, and distance
@@ -3938,7 +3963,7 @@ class UnifiedQuestSystem {
             </div>
         `);
         
-        console.log('🎭 Quest objective marker created and added to map:', objective.id, 'at', position);
+        console.log('🎭 Quest objective marker created and added to map:', objective.id, 'at', `lat: ${position.lat}, lng: ${position.lng}`);
         
         return marker;
     }

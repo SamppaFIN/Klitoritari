@@ -9,6 +9,7 @@ class BaseSystem {
         this.territoryPoints = [];
         this.nearbyBases = [];
         this.isExpandingTerritory = false;
+        this.isEstablishingBase = false; // Flag to prevent quest triggering during base establishment
         this.territoryExpansionInterval = null;
         this.onBaseEstablished = null;
         this.onTerritoryUpdated = null;
@@ -238,11 +239,15 @@ class BaseSystem {
     }
 
     establishBaseWithNewSystem() {
+        // Set flag to prevent quest triggering during base establishment
+        this.isEstablishingBase = true;
+        
         const steps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
         const cost = 1000;
         
         if (steps < cost) {
             this.showNotification(`Not enough steps to establish a base (need ${cost})`, 'error');
+            this.isEstablishingBase = false; // Clear flag on error
             return;
         }
 
@@ -309,7 +314,32 @@ class BaseSystem {
         const noBase = document.getElementById('no-base-section');
         if (noBase) noBase.classList.add('hidden');
 
-        this.showNotification('Base established successfully! 🏗️', 'success');
+        // Show enhanced success notification
+        this.showNotification('Base established successfully! Your cosmic sanctuary is ready. 🏗️', 'success');
+        
+        // Clear the base establishment flag
+        this.isEstablishingBase = false;
+        
+        // Center map on the new base location
+        this.centerMapOnBase(base);
+        
+        // Update base marker to use correct symbol
+        if (window.mapEngine && window.mapEngine.updateBaseMarker) {
+            window.mapEngine.updateBaseMarker();
+        }
+        
+        // Refresh base building layer rendering
+        if (window.layeredRenderingSystem && window.layeredRenderingSystem.layers) {
+            const baseBuildingLayer = window.layeredRenderingSystem.layers.find(layer => layer.name === 'baseBuilding');
+            if (baseBuildingLayer && baseBuildingLayer.refreshBaseRendering) {
+                baseBuildingLayer.refreshBaseRendering();
+            }
+        }
+
+        // Show the base management modal after a short delay
+        setTimeout(() => {
+            this.showBaseManagementModal();
+        }, 1000);
         
         // Log the establishment
         if (window.log) {
@@ -461,7 +491,9 @@ class BaseSystem {
         }
         
         // Debug logging
-        console.log('Base establishment - current position:', currentPosition);
+        console.log('Base establishment - current position:', currentPosition ? 
+            `lat: ${currentPosition.lat || currentPosition.coords?.latitude}, lng: ${currentPosition.lng || currentPosition.coords?.longitude}` : 
+            'null');
         console.log('Geolocation manager:', window.geolocationManager);
         console.log('Database client:', window.databaseClient);
         console.log('Database client initialized:', window.databaseClient?.isInitialized);
@@ -482,7 +514,9 @@ class BaseSystem {
             // Check if geolocation manager has current position stored
             if (window.geolocationManager.currentPosition) {
                 currentPosition = window.geolocationManager.currentPosition;
-                console.log('Using geolocation manager current position:', currentPosition);
+                console.log('Using geolocation manager current position:', currentPosition ? 
+                    `lat: ${currentPosition.lat || currentPosition.coords?.latitude}, lng: ${currentPosition.lng || currentPosition.coords?.longitude}` : 
+                    'null');
             }
         }
         
@@ -492,7 +526,9 @@ class BaseSystem {
         }
 
         // Create base establishment modal
-        console.log('🏗️ Creating base establishment modal with position:', currentPosition);
+        console.log('🏗️ Creating base establishment modal with position:', currentPosition ? 
+            `lat: ${currentPosition.lat || currentPosition.coords?.latitude}, lng: ${currentPosition.lng || currentPosition.coords?.longitude}` : 
+            'null');
         this.createBaseEstablishmentModal(currentPosition);
     }
 
@@ -598,7 +634,7 @@ class BaseSystem {
                     accuracy: parseFloat(modal.dataset.accuracy) || 0
                 };
                 
-                console.log('🏗️ Establishing base:', baseName, 'at', position);
+                console.log('🏗️ Establishing base:', baseName, 'at', `lat: ${position.lat}, lng: ${position.lng}`);
                 this.establishBase(baseName, position);
                 modal.remove();
             });
@@ -619,6 +655,9 @@ class BaseSystem {
 
     async establishBase(name, position) {
         try {
+            // Set flag to prevent quest triggering during base establishment
+            this.isEstablishingBase = true;
+            
             // Show loading state
             this.showNotification('Establishing your cosmic base...', 'info');
 
@@ -672,8 +711,11 @@ class BaseSystem {
                 // Update UI
                 this.updateBaseUI();
                 
-                // Show success message
-                this.showNotification(`🏗️ Base "${name}" established successfully!`, 'success');
+                // Show success message with enhanced notification
+                this.showNotification(`🏗️ Base "${name}" established successfully! Your cosmic sanctuary is ready.`, 'success');
+                
+                // Center map on the new base location
+                this.centerMapOnBase(this.playerBase);
                 
                 // Trigger cosmic effect
                 if (window.cosmicEffects) {
@@ -689,8 +731,29 @@ class BaseSystem {
                     this.onBaseEstablished(this.playerBase);
                 }
 
-                // Show the base panel when first established
-                this.openBasePanel();
+                // Update base marker to use correct symbol
+                if (window.mapEngine && window.mapEngine.updateBaseMarker) {
+                    console.log('🏗️ Calling updateBaseMarker with position:', this.playerBase ? 
+                        `lat: ${this.playerBase.lat || this.playerBase.position?.lat}, lng: ${this.playerBase.lng || this.playerBase.position?.lng}` : 
+                        'null');
+                    console.log('🏗️ localStorage eldritch_player_base_logo:', localStorage.getItem('eldritch_player_base_logo'));
+                    console.log('🏗️ localStorage eldritch_player_path_symbol:', localStorage.getItem('eldritch_player_path_symbol'));
+                    console.log('🏗️ All localStorage keys:', Object.keys(localStorage).filter(key => key.includes('logo') || key.includes('symbol')));
+                    window.mapEngine.updateBaseMarker(this.playerBase);
+                }
+                
+                // Refresh base building layer rendering
+                if (window.layeredRenderingSystem && window.layeredRenderingSystem.layers) {
+                    const baseBuildingLayer = window.layeredRenderingSystem.layers.find(layer => layer.name === 'baseBuilding');
+                    if (baseBuildingLayer && baseBuildingLayer.refreshBaseRendering) {
+                        baseBuildingLayer.refreshBaseRendering();
+                    }
+                }
+
+                // Show the base management modal when first established
+                setTimeout(() => {
+                    this.showBaseManagementModal();
+                }, 1000); // Small delay to let the map center first
 
                 console.log('🏗️ Base established:', this.playerBase);
             } else {
@@ -737,11 +800,60 @@ class BaseSystem {
 
     loadPlayerBase() {
         try {
-            const savedBase = localStorage.getItem('eldritch-player-base');
+            // Try multiple localStorage keys for base data
+            let savedBase = localStorage.getItem('eldritch-player-base');
+            if (!savedBase) {
+                savedBase = localStorage.getItem('playerBase');
+                console.log('🏗️ Trying playerBase key...');
+            }
+            if (!savedBase) {
+                savedBase = localStorage.getItem('base_bases');
+                console.log('🏗️ Trying base_bases key...');
+            }
+            
             if (savedBase) {
                 this.playerBase = JSON.parse(savedBase);
+                // Handle array format from base_bases
+                if (Array.isArray(this.playerBase) && this.playerBase.length > 0) {
+                    this.playerBase = this.playerBase[0];
+                }
                 this.updateBaseUI();
+                
+                // Create the base marker on the map
+                if (this.playerBase && this.playerBase.position) {
+                    console.log('🏗️ Base data found, position:', this.playerBase.position ? 
+                        `lat: ${this.playerBase.position.lat}, lng: ${this.playerBase.position.lng}` : 
+                        'null');
+                    console.log('🏗️ Map engine available:', !!window.mapEngine);
+                    console.log('🏗️ Map available:', !!(window.mapEngine && window.mapEngine.map));
+                    
+                    if (window.mapEngine && window.mapEngine.map) {
+                        console.log('🏗️ Creating base marker for loaded base:', this.playerBase.position ? 
+                            `lat: ${this.playerBase.position.lat}, lng: ${this.playerBase.position.lng}` : 
+                            'null');
+                        window.mapEngine.updateBaseMarker(this.playerBase.position);
+                    } else {
+                        console.log('🏗️ Map engine not ready, retrying in 2 seconds...');
+                        // Retry after a delay if map engine isn't ready yet
+                        setTimeout(() => {
+                            if (window.mapEngine && window.mapEngine.map) {
+                                console.log('🏗️ Retry: Creating base marker for loaded base:', this.playerBase.position ? 
+                                    `lat: ${this.playerBase.position.lat}, lng: ${this.playerBase.position.lng}` : 
+                                    'null');
+                                window.mapEngine.updateBaseMarker(this.playerBase.position);
+                            } else {
+                                console.log('🏗️ Retry failed: Map engine still not ready');
+                            }
+                        }, 2000);
+                    }
+                } else {
+                    console.log('🏗️ Cannot create base marker - missing position data');
+                    console.log('🏗️ playerBase:', this.playerBase);
+                }
+                
                 console.log('🏗️ Loaded existing base:', this.playerBase);
+            } else {
+                console.log('🏗️ No base found in any localStorage key');
             }
         } catch (error) {
             console.error('Failed to load player base:', error);
@@ -1256,6 +1368,27 @@ class BaseSystem {
         const basePanel = document.getElementById('base-management-panel');
         if (basePanel) {
             basePanel.classList.remove('hidden');
+        }
+    }
+
+    // Center map on base location
+    centerMapOnBase(base) {
+        if (!base || !base.lat || !base.lng) {
+            console.warn('🏗️ Cannot center map: invalid base coordinates');
+            return;
+        }
+
+        console.log(`🏗️ Centering map on base: ${base.lat}, ${base.lng}`);
+        
+        // Try multiple approaches to center the map
+        if (window.mapEngine && window.mapEngine.centerOnLocation) {
+            window.mapEngine.centerOnLocation(base.lat, base.lng);
+        } else if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.mapEngine) {
+            window.eldritchApp.systems.mapEngine.centerOnLocation(base.lat, base.lng);
+        } else if (window.mapEngine && window.mapEngine.map) {
+            window.mapEngine.map.setView([base.lat, base.lng], window.mapEngine.map.getZoom());
+        } else {
+            console.warn('🏗️ Map engine not available for centering');
         }
     }
 

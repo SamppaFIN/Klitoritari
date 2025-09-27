@@ -252,7 +252,7 @@ class SacredGeometryLayer {
     }
     
     renderPaths() {
-        // Move path painting from enhanced-path-painting-system.js
+        // Path painting system (enhanced-path-painting-system.js was removed)
         // Add cosmic brush effects
         // Implement energy trails
     }

@@ -31,6 +31,22 @@ class EldritchSanctuaryServer {
         // Serve static files
         this.app.use(express.static(path.join(__dirname)));
         
+        // Add specific MIME type handling for icons
+        this.app.use('/icons', express.static(path.join(__dirname, 'icons'), {
+            setHeaders: (res, path) => {
+                if (path.endsWith('.png')) {
+                    res.setHeader('Content-Type', 'image/png');
+                    console.log(`🎨 Serving icon: ${path}`);
+                }
+            }
+        }));
+        
+        // Add favicon.ico handling
+        this.app.get('/favicon.ico', (req, res) => {
+            console.log('🎨 Serving favicon.ico');
+            res.sendFile(path.join(__dirname, 'icons', 'icon-144x144.png'));
+        });
+        
         // Health check endpoint
         this.app.get('/health', (req, res) => {
             res.json({
@@ -39,6 +55,44 @@ class EldritchSanctuaryServer {
                 investigations: this.investigations.size,
                 timestamp: Date.now()
             });
+        });
+        
+        // Debug logs endpoint
+        this.app.get('/debug-logs', (req, res) => {
+            res.json({ 
+                message: 'Debug logs endpoint - logs are stored in localStorage on client side',
+                instructions: 'Use window.exportDebugLogs() in browser console to get logs',
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // API endpoint to receive debug logs from client
+        this.app.post('/api/debug-logs', express.json(), (req, res) => {
+            try {
+                const logData = req.body;
+                console.log('🔍 Received debug logs from client:', {
+                    timestamp: logData.timestamp,
+                    totalLogs: logData.totalLogs,
+                    logCount: logData.logs ? logData.logs.length : 0
+                });
+                
+                // Store logs in memory for AI access
+                this.debugLogs = logData;
+                
+                res.json({ success: true, message: 'Debug logs received' });
+            } catch (error) {
+                console.error('Error processing debug logs:', error);
+                res.status(500).json({ error: 'Failed to process debug logs' });
+            }
+        });
+        
+        // Get debug logs endpoint
+        this.app.get('/api/debug-logs', (req, res) => {
+            if (this.debugLogs) {
+                res.json(this.debugLogs);
+            } else {
+                res.json({ message: 'No debug logs available yet' });
+            }
         });
 
         // API endpoints
@@ -442,3 +496,4 @@ process.on('SIGTERM', () => {
 });
 
 module.exports = EldritchSanctuaryServer;
+
