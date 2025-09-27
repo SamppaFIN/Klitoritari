@@ -686,8 +686,125 @@ class StepCurrencySystem {
     
     triggerAreaUnlock() {
         console.log('🌍 1000 steps reached - new area unlocked!');
-        // Implementation for area unlocking
+        console.log('🏗️ Base establishment now available!');
+        
+        // Play sound effect
         if (window.soundManager) window.soundManager.playTerrifyingBling();
+        
+        // Show base establishment notification
+        this.showBaseEstablishmentNotification();
+        
+        // Trigger base establishment dialog
+        this.triggerBaseEstablishmentDialog();
+    }
+    
+    showBaseEstablishmentNotification() {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.id = 'base-establishment-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #e94560;
+            padding: 16px 24px;
+            border-radius: 12px;
+            border: 2px solid #e94560;
+            box-shadow: 0 8px 32px rgba(233, 69, 96, 0.3);
+            z-index: 10000;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-align: center;
+            max-width: 400px;
+            animation: slideDown 0.5s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <div style="font-size: 18px; margin-bottom: 8px;">🏗️ BASE ESTABLISHMENT UNLOCKED</div>
+            <div style="font-size: 14px; color: #f0f0f0;">
+                The cosmic energies have aligned. You may now establish your eldritch sanctuary.
+            </div>
+        `;
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from { transform: translateX(-50%) translateY(-100px); opacity: 0; }
+                to { transform: translateX(-50%) translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideDown 0.5s ease-out reverse';
+                setTimeout(() => notification.remove(), 500);
+            }
+        }, 5000);
+    }
+    
+    triggerBaseEstablishmentDialog() {
+        // Check if base system is available
+        if (window.eldritchApp && window.eldritchApp.systems.base) {
+            console.log('🏗️ Triggering base establishment dialog...');
+            window.eldritchApp.systems.base.showBaseEstablishmentModal();
+        } else if (window.baseSystem) {
+            console.log('🏗️ Triggering base establishment dialog (legacy)...');
+            window.baseSystem.showBaseEstablishmentModal();
+        } else {
+            console.warn('⚠️ Base system not available for establishment dialog');
+        }
+    }
+    
+    // Test function to add steps (for development)
+    addTestSteps(amount = 1000) {
+        console.log(`🧪 Adding ${amount} test steps...`);
+        this.totalSteps += amount;
+        this.sessionSteps += amount;
+        this.saveSteps();
+        this.updateStepCounter();
+        console.log(`🧪 Total steps now: ${this.totalSteps}`);
+        
+        // Check for milestones
+        this.checkMilestones();
+    }
+    
+    // Add test button for development
+    addTestButton() {
+        // Check if test button already exists
+        if (document.getElementById('test-steps-btn')) return;
+        
+        const testBtn = document.createElement('button');
+        testBtn.id = 'test-steps-btn';
+        testBtn.innerHTML = '🧪 Add 1000 Steps';
+        testBtn.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #e94560, #f27121);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+        `;
+        
+        testBtn.addEventListener('click', () => {
+            this.addTestSteps(1000);
+        });
+        
+        document.body.appendChild(testBtn);
+        console.log('🧪 Test button added for development');
     }
     
     createStepCounter() {
@@ -697,6 +814,9 @@ class StepCurrencySystem {
             console.log('🚶‍♂️ Step counter already exists, removing duplicate');
             existingCounter.remove();
         }
+        
+        // Add test button for development
+        this.addTestButton();
 
         // Create step counter element
         const stepCounter = document.createElement('div');
