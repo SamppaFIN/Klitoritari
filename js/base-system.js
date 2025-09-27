@@ -51,7 +51,7 @@ class BaseSystem {
         const baseButton = document.createElement('button');
         baseButton.id = 'establish-base-btn';
         baseButton.className = 'sacred-button base-button';
-        baseButton.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE</span>';
+        baseButton.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE FOR 1000 STEPS</span>';
         baseButton.style.cssText = `
             background: linear-gradient(45deg, #4CAF50, #66BB6A);
             color: white;
@@ -957,7 +957,7 @@ class BaseSystem {
             
             // Reset establish button when no base exists
             if (establishBtn) {
-                establishBtn.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE</span>';
+                establishBtn.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE FOR 1000 STEPS</span>';
                 establishBtn.onclick = (e) => {
                     console.log('🏗️ Establish base button clicked');
                     e.stopPropagation();
