@@ -15,6 +15,9 @@ class StepCurrencySystem {
         this.minStepInterval = 1000; // Minimum 1 second between steps
         this.stepCooldown = 2000; // 2 second cooldown after each step
         
+        // Debug flag to disable automatic step detection
+        this.autoStepDetectionEnabled = false;
+        
         // Step milestones for rewards
         this.milestones = {
             flag: 50,      // Create flag every 50 steps
@@ -457,6 +460,12 @@ class StepCurrencySystem {
     }
     
     addStep() {
+        // Check if automatic step detection is disabled
+        if (!this.autoStepDetectionEnabled && this.stepDetectionActive) {
+            console.log('🚶‍♂️ Automatic step detection disabled - ignoring step');
+            return;
+        }
+        
         this.totalSteps++;
         this.sessionSteps++;
         
@@ -1048,9 +1057,8 @@ class StepCurrencySystem {
         this.stepDetectionActive = true;
         console.log('🚶‍♂️ Step detection started');
         
-        // Force enable fallback mode for testing
-        console.log('🧪 Forcing fallback mode for testing...');
-        this.enableFallbackMode();
+        // Fallback mode will be enabled automatically if device motion fails
+        // No need to force it for testing
     }
     
     stopStepDetection() {
@@ -1099,6 +1107,12 @@ class StepCurrencySystem {
         console.log('🧪 Testing milestone checking manually...');
         console.log(`Current state - Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
         this.checkMilestones();
+    }
+    
+    // Enable/disable automatic step detection
+    setAutoStepDetection(enabled) {
+        this.autoStepDetectionEnabled = enabled;
+        console.log(`🚶‍♂️ Automatic step detection ${enabled ? 'enabled' : 'disabled'}`);
     }
     
     subtractSteps(count) {
