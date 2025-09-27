@@ -675,7 +675,7 @@ class ThreeJSUILayer extends BaseLayer {
                                 box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
                             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'"
-                               onclick="window.eldritchApp?.layers?.threejsUI?.handlePlayerCreationComplete?.()">
+                               onclick="window.eldritchApp?.layerManager?.getLayer?.('threejs-ui')?.handlePlayerCreationComplete?.()">
                                 Create Player And Enter Sanctuary
                             </button>
                         </div>
