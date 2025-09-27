@@ -674,7 +674,8 @@ class ThreeJSUILayer extends BaseLayer {
                                 transition: all 0.2s ease;
                                 box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
                             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'"
+                               onclick="window.eldritchApp?.layers?.threejsUI?.handlePlayerCreationComplete?.()">
                                 Create Player And Enter Sanctuary
                             </button>
                         </div>
@@ -1106,6 +1107,20 @@ class ThreeJSUILayer extends BaseLayer {
         this.panelSystem.animatePanelIn(panel);
         
         console.log('🎮 Player creation panel created');
+    }
+    
+    handlePlayerCreationComplete() {
+        console.log('🎮 Player creation completed - closing settings tab');
+        
+        // Close the settings tab by switching to it again (toggle behavior)
+        if (this.enhancedUI && this.enhancedUI.switchTab) {
+            this.enhancedUI.switchTab('settings'); // This will toggle it off since it's already active
+        }
+        
+        // Also emit an event to start the game
+        if (this.eventBus) {
+            this.eventBus.emit('game:start');
+        }
     }
     
     createPlayerCreationForm(panel, data) {
