@@ -772,11 +772,14 @@ class StepCurrencySystem {
     // Test function to add steps (for development)
     addTestSteps(amount = 1000) {
         console.log(`🧪 Adding ${amount} test steps...`);
+        console.log(`🧪 Before: Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
+        
         this.totalSteps += amount;
         this.sessionSteps += amount;
         this.saveSteps();
         this.updateStepCounter();
-        console.log(`🧪 Total steps now: ${this.totalSteps}`);
+        
+        console.log(`🧪 After: Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
         
         // Check for milestones
         this.checkMilestones();
@@ -967,6 +970,8 @@ if (document.readyState === 'loading') {
     if (!window.stepCurrencySystem) {
         window.stepCurrencySystem = new StepCurrencySystem();
     }
+    // Make addTestSteps available globally for debugging
+    window.addTestSteps = (amount) => window.stepCurrencySystem.addTestSteps(amount);
 }
 
 // Export for use in other modules
