@@ -27,6 +27,9 @@ class MapLayer extends BaseLayer {
         super.init();
         console.log('🗺️ MapLayer: Initializing map system...');
         
+        // Store global reference for easy access
+        window.mapLayerInstance = this;
+        
         // Create map container
         this.createMapContainer();
         

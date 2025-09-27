@@ -844,22 +844,62 @@ class HeaderIntegration {
      * Find the MapLayer instance
      */
     findMapLayer() {
-        // Try to find MapLayer through the layer manager
+        console.log('🔧 Searching for MapLayer instance...');
+        
+        // Try to find through layer manager's getLayer method (most reliable)
+        if (window.eldritchApp && window.eldritchApp.layerManager && window.eldritchApp.layerManager.getLayer) {
+            console.log('🔧 Trying getLayer method...');
+            const mapLayer = window.eldritchApp.layerManager.getLayer('map');
+            if (mapLayer) {
+                console.log('🔧 Found MapLayer via getLayer');
+                return mapLayer;
+            }
+        }
+        
+        // Try to find MapLayer through the layer manager's layers Map
         if (window.eldritchApp && window.eldritchApp.layerManager) {
+            console.log('🔧 Found layer manager, checking layers Map...');
             const layers = window.eldritchApp.layerManager.layers;
-            for (const layer of layers) {
-                if (layer.constructor.name === 'MapLayer') {
+            console.log('🔧 Available layer keys:', Array.from(layers.keys()));
+            
+            const mapLayer = layers.get('map');
+            if (mapLayer) {
+                console.log('🔧 Found MapLayer in layers Map');
+                return mapLayer;
+            }
+        }
+        
+        // Try to find through global app instance
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.mapLayer) {
+            console.log('🔧 Found MapLayer in systems');
+            return window.eldritchApp.systems.mapLayer;
+        }
+        
+        // Fallback: try to find by iterating through layers
+        if (window.eldritchApp && window.eldritchApp.layerManager) {
+            console.log('🔧 Iterating through layers...');
+            const layers = window.eldritchApp.layerManager.layers;
+            for (const [name, layer] of layers) {
+                if (name === 'map' || layer.constructor.name === 'MapLayer') {
+                    console.log('🔧 Found MapLayer by iteration:', name);
                     return layer;
                 }
             }
         }
         
-        // Fallback: try to find it globally
-        if (window.MapLayer) {
-            // This won't work for instance access, but we can try
-            console.warn('🔧 MapLayer class found but no instance available');
+        // Final fallback: use global reference
+        if (window.mapLayerInstance) {
+            console.log('🔧 Found MapLayer via global reference');
+            return window.mapLayerInstance;
         }
         
+        console.warn('🔧 MapLayer instance not found through any method');
+        console.log('🔧 Available app structure:', {
+            hasApp: !!window.eldritchApp,
+            hasLayerManager: !!(window.eldritchApp && window.eldritchApp.layerManager),
+            hasLayers: !!(window.eldritchApp && window.eldritchApp.layerManager && window.eldritchApp.layerManager.layers),
+            hasGlobalInstance: !!window.mapLayerInstance
+        });
         return null;
     }
 }
