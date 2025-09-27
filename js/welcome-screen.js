@@ -85,7 +85,7 @@ class WelcomeScreen {
                 this.requestGPSPermission();
             });
         } else {
-            console.error('🌟 GPS enable button not found!');
+            console.log('🌟 GPS enable button not found - GPS functionality may not be available');
         }
 
         // Continue adventure button

@@ -80,6 +80,12 @@ class MapLayer extends BaseLayer {
             return;
         }
 
+        // Check if container already has a map instance
+        if (this.mapContainer._leaflet_id) {
+            console.log('🗺️ MapLayer: Container already has a map instance, skipping');
+            return;
+        }
+
         try {
             // Initialize Leaflet map
             this.map = L.map(this.mapContainer, {
