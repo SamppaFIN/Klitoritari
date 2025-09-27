@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="display: none;">
+  
+  <!-- Base Building Icons -->
+  
+  <!-- Step Booster Icon -->
+  <g id="step-booster-icon" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
+    <path d="M8 12l4 4 4-4" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M12 8v8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Cosmic Shrine Icon -->
+  <g id="shrine-icon" viewBox="0 0 24 24">
+    <path d="M12 2l3 3h6l-3 3 3 3h-6l-3-3-3 3H3l3-3-3-3h6l3-3z" fill="#8b5cf6" stroke="#7c3aed" stroke-width="1"/>
+    <circle cx="12" cy="12" r="3" fill="white" opacity="0.8"/>
+    <path d="M12 9v6M9 12h6" stroke="#8b5cf6" stroke-width="1"/>
+  </g>
+  
+  <!-- Defense Armoury Icon -->
+  <g id="armoury-icon" viewBox="0 0 24 24">
+    <rect x="4" y="6" width="16" height="12" rx="2" fill="#ef4444" stroke="#dc2626" stroke-width="2"/>
+    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#dc2626" stroke-width="2" fill="none"/>
+    <path d="M12 10v4M10 12h4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Defensive Walls Icon -->
+  <g id="walls-icon" viewBox="0 0 24 24">
+    <path d="M3 12h18M3 12v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6M3 12V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6" 
+          fill="#6b7280" stroke="#4b5563" stroke-width="2"/>
+    <rect x="6" y="8" width="3" height="4" fill="#9ca3af"/>
+    <rect x="15" y="8" width="3" height="4" fill="#9ca3af"/>
+    <rect x="10" y="6" width="4" height="2" fill="#9ca3af"/>
+  </g>
+  
+  <!-- Finnish Flag -->
+  <g id="finnish-flag" viewBox="0 0 24 16">
+    <rect width="24" height="16" fill="white"/>
+    <rect x="9.6" y="0" width="4.8" height="16" fill="#003580"/>
+    <rect x="0" y="6.4" width="24" height="3.2" fill="#003580"/>
+  </g>
+  
+  <!-- Swedish Flag -->
+  <g id="swedish-flag" viewBox="0 0 24 16">
+    <rect width="24" height="16" fill="white"/>
+    <rect x="8.4" y="0" width="7.2" height="16" fill="#006AA7"/>
+    <rect x="0" y="6.4" width="24" height="3.2" fill="#006AA7"/>
+  </g>
+  
+  <!-- Base Territory Circle (Animated) -->
+  <g id="territory-circle" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="40" fill="rgba(139, 92, 246, 0.3)" stroke="#8b5cf6" stroke-width="2">
+      <animate attributeName="r" values="40;48;40" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Base Center Circle -->
+  <g id="base-center" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="12" fill="#8b5cf6" stroke="#3b82f6" stroke-width="3"/>
+  </g>
+  
+  <!-- Particle Effect Template -->
+  <g id="particle-template" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="2" fill="#8b5cf6" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;0;0.8" dur="2s" repeatCount="1"/>
+      <animateTransform attributeName="transform" type="translate" values="0,0; 20,20" dur="2s" repeatCount="1"/>
+    </circle>
+  </g>
+  
+  <!-- Base Add-on Positions -->
+  <g id="addon-positions" viewBox="0 0 100 100">
+    <!-- Step Booster Position (Top) -->
+    <circle cx="50" cy="20" r="8" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>
+    
+    <!-- Shrine Position (Right) -->
+    <circle cx="80" cy="50" r="8" fill="none" stroke="#8b5cf6" stroke-width="1" opacity="0.5"/>
+    
+    <!-- Armoury Position (Bottom) -->
+    <circle cx="50" cy="80" r="8" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.5"/>
+    
+    <!-- Walls Position (Left) -->
+    <circle cx="20" cy="50" r="8" fill="none" stroke="#6b7280" stroke-width="1" opacity="0.5"/>
+  </g>
+  
+</svg>

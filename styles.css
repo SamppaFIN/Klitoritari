@@ -7311,6 +7311,120 @@ input[type="range"]::-moz-range-thumb {
     box-shadow: 0 0 30px rgba(255, 107, 53, 0.8);
 }
 
+/* SVG Base Graphics Styles */
+.svg-base-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.svg-base-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.svg-base-marker svg {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+}
+
+.svg-base-marker:hover svg {
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+    transform: scale(1.05);
+}
+
+.territory-circle {
+    animation: territory-pulse 2s ease-in-out infinite;
+}
+
+@keyframes territory-pulse {
+    0%, 100% {
+        r: 120;
+        opacity: 0.6;
+    }
+    50% {
+        r: 144;
+        opacity: 0.8;
+    }
+}
+
+.flag-container {
+    animation: flag-wave 3s ease-in-out infinite;
+}
+
+@keyframes flag-wave {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(0, 2px);
+    }
+}
+
+.addon-glow {
+    animation: addon-glow 1s ease-in-out infinite;
+}
+
+@keyframes addon-glow {
+    0%, 100% {
+        opacity: 0;
+        r: 16;
+    }
+    50% {
+        opacity: 0.6;
+        r: 20;
+    }
+}
+
+.particle-effect {
+    animation: particle-life 2s ease-out forwards;
+}
+
+@keyframes particle-life {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translate(20px, 20px);
+    }
+}
+
+/* Base Management Modal Styles */
+#base-info-modal {
+    z-index: 10000;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#base-info-modal h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+#base-info-modal p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+#base-info-modal button {
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#base-info-modal button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#base-info-modal button:active {
+    transform: translateY(0);
+}
+
 .pvp-header {
     background: linear-gradient(45deg, #ff6b35, #ff8c42);
     color: #fff;
