@@ -5,6 +5,18 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![Leaflet](https://img.shields.io/badge/Leaflet-1.9+-blue.svg)](https://leafletjs.com/)
 [![Three.js](https://img.shields.io/badge/Three.js-r150+-orange.svg)](https://threejs.org/)
+[![Migration Project](https://img.shields.io/badge/Status-Migration%20Project-yellow.svg)](docs/UI-System-Audit.md)
+
+## ⚠️ Migration Project Notice
+
+**This is an active migration project containing legacy code from multiple development phases. The codebase includes:**
+
+- **6+ separate UI systems** running simultaneously (HTML, Three.js, Legacy panels)
+- **Disabled systems** still referenced by other components
+- **Multiple implementations** of the same functionality
+- **Inconsistent access patterns** across different systems
+
+**Please refer to the [UI System Audit](docs/UI-System-Audit.md) for a complete breakdown of all systems and their interactions.**
 
 ## ✨ Overview
 
@@ -143,6 +155,16 @@ Eldritch Sanctuary is an immersive cosmic exploration platform that combines inf
 
 ## 🔧 Development
 
+### ⚠️ Working with Migration Project
+
+**This project contains legacy code from multiple development phases. When making changes:**
+
+1. **Check UI System Audit** - Always review [UI-System-Audit.md](docs/UI-System-Audit.md) before making UI changes
+2. **Update Architecture Docs** - Keep [Architecture.md](docs/Architecture.md) current with any architectural changes
+3. **Document in Aurora Log** - Record all changes and decisions in [aurora-log.md](docs/aurora-log.md)
+4. **Test Across Systems** - Changes may affect multiple UI systems simultaneously
+5. **Consolidate When Possible** - Remove duplicate systems and standardize patterns
+
 ### Project Structure
 ```
 ├── js/                    # JavaScript modules
@@ -185,12 +207,21 @@ Eldritch Sanctuary is built on sacred principles that guide every feature:
 
 ## 📚 Documentation
 
-- [Architecture Guide](docs/Architecture.md) - Technical architecture and design decisions
+**⚠️ Architecture documents are actively maintained and updated with each user request and feature implementation.**
+
+- [Architecture Guide](docs/Architecture.md) - **LIVE** Technical architecture and design decisions
+- [UI System Audit](docs/UI-System-Audit.md) - **CRITICAL** Complete breakdown of all UI systems and conflicts
+- [Aurora Log](docs/aurora-log.md) - **LIVE** Development journey, decisions, and session progress
 - [Database Schema](docs/database-schema.md) - Database structure and relationships
 - [Feature Plans](docs/Feature-Plan-Base-Building.md) - Detailed feature specifications
 - [Setup Guide](docs/Setup-Guide.md) - Development environment setup
 - [Testing Plan](docs/Testing-Plan.md) - Testing strategies and procedures
-- [Aurora Log](docs/aurora-log.md) - Development journey and decisions
+
+### 📝 Documentation Update Policy
+- **Architecture.md** - Updated with every architectural change
+- **UI-System-Audit.md** - Updated when UI systems are modified or consolidated
+- **aurora-log.md** - Updated with each development session and user request
+- **Feature Plans** - Updated when new features are implemented or modified
 
 ## 🤝 Community
 
