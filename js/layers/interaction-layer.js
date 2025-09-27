@@ -257,7 +257,8 @@ class InteractionLayer extends BaseLayer {
             }
         }
         
-        this.eventBus.emit('interaction:mouse:move', { x, y });
+        // Disabled mouse movement logging to reduce clutter
+        // this.eventBus.emit('interaction:mouse:move', { x, y });
     }
 
     handleMouseDown(event) {

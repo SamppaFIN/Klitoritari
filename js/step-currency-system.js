@@ -33,6 +33,9 @@ class StepCurrencySystem {
         // Base building integration
         this.baseBuildingLayer = null;
         
+        // Milestone tracking
+        this.areaUnlocked = false;
+        
         this.init();
     }
     
@@ -554,6 +557,8 @@ class StepCurrencySystem {
     }
     
     checkMilestones() {
+        console.log(`🎯 Checking milestones - Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
+        
         // Check for flag creation (every 50 steps)
         if (this.sessionSteps % this.milestones.flag === 0) {
             this.triggerFlagCreation();
@@ -569,8 +574,10 @@ class StepCurrencySystem {
             this.triggerQuestUnlock();
         }
         
-        // Check for area unlock (every 1000 steps)
-        if (this.totalSteps % this.milestones.area === 0) {
+        // Check for area unlock (reaching 1000 steps milestone)
+        if (this.totalSteps >= this.milestones.area && !this.areaUnlocked) {
+            console.log(`🎯 1000 steps milestone reached! Total: ${this.totalSteps}`);
+            this.areaUnlocked = true;
             this.triggerAreaUnlock();
         }
     }
@@ -775,37 +782,6 @@ class StepCurrencySystem {
         this.checkMilestones();
     }
     
-    // Add test button for development
-    addTestButton() {
-        // Check if test button already exists
-        if (document.getElementById('test-steps-btn')) return;
-        
-        const testBtn = document.createElement('button');
-        testBtn.id = 'test-steps-btn';
-        testBtn.innerHTML = '🧪 Add 1000 Steps';
-        testBtn.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: linear-gradient(135deg, #e94560, #f27121);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
-        `;
-        
-        testBtn.addEventListener('click', () => {
-            this.addTestSteps(1000);
-        });
-        
-        document.body.appendChild(testBtn);
-        console.log('🧪 Test button added for development');
-    }
     
     createStepCounter() {
         // Check if step counter already exists
@@ -815,8 +791,7 @@ class StepCurrencySystem {
             existingCounter.remove();
         }
         
-        // Add test button for development
-        this.addTestButton();
+        // Test button removed - using existing debug mechanism
 
         // Create step counter element
         const stepCounter = document.createElement('div');

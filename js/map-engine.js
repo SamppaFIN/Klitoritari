@@ -332,7 +332,7 @@ class MapEngine {
             className: 'base-marker-icon',
             html: baseIconHtml,
             iconSize: [240, 240], // 3x player icon size (80 * 3 = 240)
-            iconAnchor: [120, 120] // Center anchor for 240x240 icon
+            iconAnchor: [60, 120] // Center anchor for 240x240 icon
         });
         
         console.log('🏗️ Base icon created with className: base-marker-icon');
@@ -1905,17 +1905,17 @@ class MapEngine {
         console.log('🏗️ Generated symbolHTML:', symbolHTML);
         
         return `
-            <div style="position: relative; width: 150px; height: 150px; cursor: pointer; z-index: 1000;">
-                <!-- Outer energy field (3x scaled) -->
-                <div style="position: absolute; top: -24px; left: -24px; width: 198px; height: 198px; background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite; pointer-events: none;"></div>
-                <!-- Middle ring (3x scaled) -->
-                <div style="position: absolute; top: 15px; left: 15px; width: 120px; height: 120px; background: #8b5cf6; border: 12px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 60px rgba(139, 92, 246, 0.8); pointer-events: none;"></div>
-                <!-- Player's selected symbol (3x scaled) -->
-                <div style="position: absolute; top: 36px; left: 36px; width: 78px; height: 78px; display: flex; align-items: center; justify-content: center; pointer-events: none; font-size: 48px;">
+            <div style="position: relative; width: 50px; height: 50px; cursor: pointer; z-index: 1000;">
+                <!-- Outer energy field -->
+                <div style="position: absolute; top: -8px; left: -8px; width: 66px; height: 66px; background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%); border-radius: 50%; animation: baseEnergy 3s infinite; pointer-events: none;"></div>
+                <!-- Middle ring -->
+                <div style="position: absolute; top: 5px; left: 5px; width: 40px; height: 40px; background: #8b5cf6; border: 4px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px rgba(139, 92, 246, 0.8); pointer-events: none;"></div>
+                <!-- Player's selected symbol -->
+                <div style="position: absolute; top: 12px; left: 12px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; pointer-events: none;">
                     ${symbolHTML}
                 </div>
-                <!-- Clickable overlay (3x scaled) -->
-                <div style="position: absolute; top: 0; left: 0; width: 150px; height: 150px; background: transparent; cursor: pointer; z-index: 1001;"></div>
+                <!-- Clickable overlay -->
+                <div style="position: absolute; top: 0; left: 0; width: 50px; height: 50px; background: transparent; cursor: pointer; z-index: 1001;"></div>
             </div>
         `;
     }
