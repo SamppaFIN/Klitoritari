@@ -469,6 +469,12 @@ class MapLayer extends BaseLayer {
     handlePositionUpdate(position) {
         console.log('🗺️ MapLayer: Position update received:', position);
         
+        // Check if GPS tracking is disabled
+        if (this.isGPSTrackingDisabled()) {
+            console.log('🗺️ MapLayer: GPS tracking disabled, ignoring position update');
+            return;
+        }
+        
         if (this.map && this.mapReady) {
             this.updatePlayerMarker({
                 lat: position.latitude || position.lat,
@@ -595,6 +601,9 @@ class MapLayer extends BaseLayer {
     // Player Teleportation Methods
     teleportPlayer(targetPosition) {
         console.log('🚀 Teleporting player to:', targetPosition);
+        
+        // Disable GPS tracking on first teleportation
+        this.disableGPSTracking();
         
         // Get current player position
         const currentPosition = this.getCurrentPlayerPosition();
@@ -738,6 +747,68 @@ class MapLayer extends BaseLayer {
                 Math.sin(dLng/2) * Math.sin(dLng/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return R * c;
+    }
+
+    // GPS Tracking Control Methods
+    disableGPSTracking() {
+        console.log('📍 Disabling GPS tracking due to manual player movement');
+        
+        // Set flag to disable GPS updates
+        this.gpsTrackingDisabled = true;
+        
+        // Stop geolocation tracking if available
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
+            const geolocation = window.eldritchApp.systems.geolocation;
+            if (geolocation.pauseLocationUpdates) {
+                geolocation.pauseLocationUpdates();
+                console.log('📍 GPS tracking paused');
+            }
+        }
+        
+        // Update header GPS indicator
+        this.updateGPSIndicator(false);
+        
+        // Emit event for other systems
+        if (this.eventBus) {
+            this.eventBus.emit('gps:disabled', { reason: 'manual_movement' });
+        }
+    }
+
+    enableGPSTracking() {
+        console.log('📍 Re-enabling GPS tracking');
+        
+        // Set flag to enable GPS updates
+        this.gpsTrackingDisabled = false;
+        
+        // Resume geolocation tracking if available
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
+            const geolocation = window.eldritchApp.systems.geolocation;
+            if (geolocation.resumeLocationUpdates) {
+                geolocation.resumeLocationUpdates();
+                console.log('📍 GPS tracking resumed');
+            }
+        }
+        
+        // Update header GPS indicator
+        this.updateGPSIndicator(true);
+        
+        // Emit event for other systems
+        if (this.eventBus) {
+            this.eventBus.emit('gps:enabled', { reason: 'manual_toggle' });
+        }
+    }
+
+    updateGPSIndicator(enabled) {
+        // Update header GPS indicator if available
+        const gpsIndicator = document.querySelector('.gps-status');
+        if (gpsIndicator) {
+            gpsIndicator.textContent = enabled ? 'GPS: ON' : 'GPS: OFF';
+            gpsIndicator.style.color = enabled ? '#00ff00' : '#ff4444';
+        }
+    }
+
+    isGPSTrackingDisabled() {
+        return this.gpsTrackingDisabled || false;
     }
 }
 

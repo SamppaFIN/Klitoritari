@@ -668,8 +668,19 @@ class HeaderIntegration {
                 <button id="debug-zoom-in" style="padding: 8px 12px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Zoom In</button>
                 <button id="debug-zoom-out" style="padding: 8px 12px; background: #FF9800; color: white; border: none; border-radius: 5px; cursor: pointer;">Zoom Out</button>
                 <button id="debug-toggle-layers" style="padding: 8px 12px; background: #9C27B0; color: white; border: none; border-radius: 5px; cursor: pointer;">Toggle Layers</button>
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+                    <span style="color: #ffffff; font-size: 0.8rem;">GPS:</span>
+                    <button id="debug-toggle-gps" style="padding: 6px 10px; background: #00ff00; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">ON</button>
+                </div>
             </div>
         `;
+        
+        // Add event listeners
+        setTimeout(() => {
+            document.getElementById('debug-toggle-gps')?.addEventListener('click', () => {
+                this.toggleGPS();
+            });
+        }, 100);
         
         return container;
     }
@@ -798,6 +809,58 @@ class HeaderIntegration {
         };
         
         this.showNotification(`Performance: ${JSON.stringify(perf, null, 2)}`, 'info');
+    }
+
+    /**
+     * Toggle GPS tracking
+     */
+    toggleGPS() {
+        // Find the map layer to control GPS
+        const mapLayer = this.findMapLayer();
+        if (!mapLayer) {
+            console.error('🔧 MapLayer not found for GPS toggle');
+            return;
+        }
+
+        const isDisabled = mapLayer.isGPSTrackingDisabled();
+        const gpsButton = document.getElementById('debug-toggle-gps');
+        
+        if (isDisabled) {
+            // Enable GPS
+            mapLayer.enableGPSTracking();
+            gpsButton.textContent = 'ON';
+            gpsButton.style.background = '#00ff00';
+            console.log('🔧 GPS tracking enabled');
+        } else {
+            // Disable GPS
+            mapLayer.disableGPSTracking();
+            gpsButton.textContent = 'OFF';
+            gpsButton.style.background = '#ff4444';
+            console.log('🔧 GPS tracking disabled');
+        }
+    }
+
+    /**
+     * Find the MapLayer instance
+     */
+    findMapLayer() {
+        // Try to find MapLayer through the layer manager
+        if (window.eldritchApp && window.eldritchApp.layerManager) {
+            const layers = window.eldritchApp.layerManager.layers;
+            for (const layer of layers) {
+                if (layer.constructor.name === 'MapLayer') {
+                    return layer;
+                }
+            }
+        }
+        
+        // Fallback: try to find it globally
+        if (window.MapLayer) {
+            // This won't work for instance access, but we can try
+            console.warn('🔧 MapLayer class found but no instance available');
+        }
+        
+        return null;
     }
 }
 
