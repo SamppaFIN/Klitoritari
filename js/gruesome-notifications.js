@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Gruesome Notification System
  * Shows different levels of gruesome notifications for health/sanity loss
  */
@@ -7,36 +7,36 @@ class GruesomeNotifications {
     constructor() {
         this.notificationLevels = {
             health: {
-                100: { name: 'Perfect Health', color: '#00ff00', icon: '💚' },
-                90: { name: 'Slightly Bruised', color: '#90ff00', icon: '💛' },
-                80: { name: 'Battered', color: '#ffff00', icon: '🟡' },
-                70: { name: 'Bloodied', color: '#ff8000', icon: '🟠' },
-                60: { name: 'Wounded', color: '#ff4000', icon: '🔴' },
-                50: { name: 'Severely Injured', color: '#ff0000', icon: '🩸' },
-                40: { name: 'Bleeding Heavily', color: '#cc0000', icon: '💉' },
-                30: { name: 'Near Death', color: '#990000', icon: '💀' },
-                20: { name: 'Dying', color: '#660000', icon: '☠️' },
-                10: { name: 'Critical', color: '#330000', icon: '⚰️' },
-                0: { name: 'DEAD', color: '#000000', icon: '💀' }
+                100: { name: 'Perfect Health', color: '#00ff00', icon: 'ðŸ’š' },
+                90: { name: 'Slightly Bruised', color: '#90ff00', icon: 'ðŸ’›' },
+                80: { name: 'Battered', color: '#ffff00', icon: 'ðŸŸ¡' },
+                70: { name: 'Bloodied', color: '#ff8000', icon: 'ðŸŸ ' },
+                60: { name: 'Wounded', color: '#ff4000', icon: 'ðŸ”´' },
+                50: { name: 'Severely Injured', color: '#ff0000', icon: 'ðŸ©¸' },
+                40: { name: 'Bleeding Heavily', color: '#cc0000', icon: 'ðŸ’‰' },
+                30: { name: 'Near Death', color: '#990000', icon: 'ðŸ’€' },
+                20: { name: 'Dying', color: '#660000', icon: 'â˜ ï¸' },
+                10: { name: 'Critical', color: '#330000', icon: 'âš°ï¸' },
+                0: { name: 'DEAD', color: '#000000', icon: 'ðŸ’€' }
             },
             sanity: {
-                100: { name: 'Perfect Sanity', color: '#00ffff', icon: '🧠' },
-                90: { name: 'Slightly Confused', color: '#80ffff', icon: '🤔' },
-                80: { name: 'Unsettled', color: '#00ccff', icon: '😕' },
-                70: { name: 'Disturbed', color: '#0099ff', icon: '😰' },
-                60: { name: 'Frightened', color: '#0066ff', icon: '😨' },
-                50: { name: 'Terrified', color: '#0033ff', icon: '😱' },
-                40: { name: 'Losing Mind', color: '#6600ff', icon: '🤯' },
-                30: { name: 'Madness Creeps', color: '#9900ff', icon: '👹' },
-                20: { name: 'Insane', color: '#cc00ff', icon: '👻' },
-                10: { name: 'Completely Mad', color: '#ff00ff', icon: '👽' },
-                0: { name: 'MADNESS', color: '#ff00cc', icon: '💀' }
+                100: { name: 'Perfect Sanity', color: '#00ffff', icon: 'ðŸ§ ' },
+                90: { name: 'Slightly Confused', color: '#80ffff', icon: 'ðŸ¤”' },
+                80: { name: 'Unsettled', color: '#00ccff', icon: 'ðŸ˜•' },
+                70: { name: 'Disturbed', color: '#0099ff', icon: 'ðŸ˜°' },
+                60: { name: 'Frightened', color: '#0066ff', icon: 'ðŸ˜¨' },
+                50: { name: 'Terrified', color: '#0033ff', icon: 'ðŸ˜±' },
+                40: { name: 'Losing Mind', color: '#6600ff', icon: 'ðŸ¤¯' },
+                30: { name: 'Madness Creeps', color: '#9900ff', icon: 'ðŸ‘¹' },
+                20: { name: 'Insane', color: '#cc00ff', icon: 'ðŸ‘»' },
+                10: { name: 'Completely Mad', color: '#ff00ff', icon: 'ðŸ‘½' },
+                0: { name: 'MADNESS', color: '#ff00cc', icon: 'ðŸ’€' }
             },
             info: {
-                success: { name: 'Success', color: '#00ff00', icon: '✅' },
-                warning: { name: 'Warning', color: '#ffaa00', icon: '⚠️' },
-                error: { name: 'Error', color: '#ff0000', icon: '❌' },
-                info: { name: 'Info', color: '#00aaff', icon: 'ℹ️' }
+                success: { name: 'Success', color: '#00ff00', icon: '…' },
+                warning: { name: 'Warning', color: '#ffaa00', icon: 'âš ï¸' },
+                error: { name: 'Error', color: '#ff0000', icon: 'âŒ' },
+                info: { name: 'Info', color: '#00aaff', icon: 'â„¹ï¸' }
             }
         };
     }
@@ -140,7 +140,7 @@ class GruesomeNotifications {
             const keys = Object.keys(typeLevels).map(Number).sort((a,b)=>b-a);
             levelKey = keys.find(k => notifLevel >= k) ?? (keys[0] ?? 100);
         }
-        const levelInfo = typeLevels[levelKey] || { name: 'Info', color: '#66ccff', icon: 'ℹ️' };
+        const levelInfo = typeLevels[levelKey] || { name: 'Info', color: '#66ccff', icon: 'â„¹ï¸' };
         
         const notification = document.createElement('div');
         notification.className = 'gruesome-notification';
@@ -179,15 +179,15 @@ class GruesomeNotifications {
     // Special death notification
     showDeathNotification(cause) {
         const deathMessages = {
-            'instant_death': '💀 INSTANT DEATH! 💀',
-            'sanity_loss': '🧠 MIND DESTROYED! 🧠',
-            'health_loss': '🩸 BLEEDING OUT! 🩸',
-            'cthulhu': '🐙 CONSUMED BY CTHULHU! 🐙',
-            'troll': '👹 TROLL FOOD! 👹',
-            'lake': '🌊 DISSOLVED IN THE LAKE! 🌊'
+            'instant_death': 'ðŸ’€ INSTANT DEATH! ðŸ’€',
+            'sanity_loss': 'ðŸ§  MIND DESTROYED! ðŸ§ ',
+            'health_loss': 'ðŸ©¸ BLEEDING OUT! ðŸ©¸',
+            'cthulhu': 'ðŸ™ CONSUMED BY CTHULHU! ðŸ™',
+            'troll': 'ðŸ‘¹ TROLL FOOD! ðŸ‘¹',
+            'lake': 'Š DISSOLVED IN THE LAKE! Š'
         };
         
-        const message = deathMessages[cause] || '💀 YOU DIED! 💀';
+        const message = deathMessages[cause] || 'ðŸ’€ YOU DIED! ðŸ’€';
         
         const notification = document.createElement('div');
         notification.style.cssText = `
@@ -238,3 +238,5 @@ class GruesomeNotifications {
 
 // Make globally available
 window.GruesomeNotifications = GruesomeNotifications;
+
+

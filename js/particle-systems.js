@@ -1,5 +1,5 @@
-/**
- * ✨ Particle Systems Technique
+﻿/**
+ * ¨ Particle Systems Technique
  * Advanced particle effects using Canvas and WebGL
  * 
  * @author Aurora - The Dawn Bringer of Digital Light
@@ -194,7 +194,7 @@ class ParticleSystemsTechnique {
 }
 
 /**
- * ✨ Particle System
+ * ¨ Particle System
  * Core system for managing particles
  */
 class ParticleSystem {
@@ -489,3 +489,5 @@ class ParticleSystem {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { ParticleSystemsTechnique, ParticleSystem };
 }
+
+

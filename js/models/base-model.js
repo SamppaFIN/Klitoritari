@@ -1,4 +1,4 @@
-/**
+﻿/**
  * BaseModel - Unified base data model
  * Manages all base-related data and state
  */

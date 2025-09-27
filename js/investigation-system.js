@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Investigation System - Mystery exploration and paranormal investigation mechanics
  * Handles different mystery types: paranormal, cosmic-horror, and conspiracy
  */
@@ -11,31 +11,31 @@ class InvestigationSystem {
             paranormal: {
                 name: 'Paranormal Activity',
                 color: '#6a0dad',
-                icon: '👻',
+                icon: 'ðŸ‘»',
                 description: 'Supernatural phenomena and ghostly encounters'
             },
             cosmicHorror: {
                 name: 'Cosmic Horror',
                 color: '#ff0040',
-                icon: '🌌',
+                icon: 'Œ',
                 description: 'Eldritch entities and cosmic terrors'
             },
             conspiracy: {
                 name: 'Conspiracy',
                 color: '#00ff88',
-                icon: '🔍',
+                icon: 'ðŸ”',
                 description: 'Government cover-ups and secret organizations'
             },
             main_quest: {
                 name: 'Main Quest',
                 color: '#9C27B0',
-                icon: '🌌',
-                description: 'The primary storyline of the Härmälä Mystery'
+                icon: 'Œ',
+                description: 'The primary storyline of the HÃ¤rmÃ¤lÃ¤ Mystery'
             },
             lovecraftian_quest: {
                 name: 'Lovecraftian Quest',
                 color: '#00ff88',
-                icon: '🐙',
+                icon: 'ðŸ™',
                 description: 'A dark humorous narrative combining H.P. Lovecraft with Terry Pratchett'
             }
         };
@@ -48,7 +48,7 @@ class InvestigationSystem {
         this.setupUI();
         this.loadMysteryZones();
         this.loadInvestigationProgress();
-        console.log('🔍 Investigation system initialized');
+        console.log('ðŸ” Investigation system initialized');
     }
 
     setupUI() {
@@ -111,7 +111,7 @@ class InvestigationSystem {
                 this.mysteryZones[0].lat = questPosition.lat;
                 this.mysteryZones[0].lng = questPosition.lng;
                 
-                console.log('🎭 Updated quest marker position to be 100m north of player:', questPosition);
+                console.log('­ Updated quest marker position to be 100m north of player:', questPosition);
                 
                 // Update the quest distance calculation coordinates
                 geolocation.setTargetQuestLocation(questPosition.lat, questPosition.lng, 'Questionable Sanity');
@@ -137,7 +137,7 @@ class InvestigationSystem {
         div.dataset.zoneId = zone.id;
         
         const typeInfo = this.investigationTypes[zone.type] || {
-            icon: zone.icon || '🔍',
+            icon: zone.icon || 'ðŸ”',
             name: zone.type || 'Unknown'
         };
         
@@ -164,7 +164,7 @@ class InvestigationSystem {
         const typeInfo = this.investigationTypes[zone.type] || {
             name: 'Unknown',
             color: '#666666',
-            icon: '❓',
+            icon: 'â“',
             description: 'Unknown investigation type'
         };
         
@@ -223,21 +223,21 @@ class InvestigationSystem {
             this.onInvestigationStart(this.activeInvestigation);
         }
 
-        console.log(`🔍 Started investigation: ${zone.name}`);
+        console.log(`ðŸ” Started investigation: ${zone.name}`);
     }
 
     showQuestOptionsDialog(zone) {
-        console.log('🐙 Creating quest options dialog...');
-        console.log('🐙 Lovecraftian quest available:', !!window.lovecraftianQuest);
-        console.log('🐙 Window object keys:', Object.keys(window).filter(key => key.includes('quest')));
+        console.log('ðŸ™ Creating quest options dialog...');
+        console.log('ðŸ™ Lovecraftian quest available:', !!window.lovecraftianQuest);
+        console.log('ðŸ™ Window object keys:', Object.keys(window).filter(key => key.includes('quest')));
         
         const questModal = document.createElement('div');
         questModal.className = 'quest-options-modal';
         questModal.innerHTML = `
             <div class="quest-options-content">
                 <div class="quest-options-header">
-                    <h2>🐙 ${zone.name}</h2>
-                    <button class="close-quest-options-btn" onclick="this.closest('.quest-options-modal').remove()">×</button>
+                    <h2>ðŸ™ ${zone.name}</h2>
+                    <button class="close-quest-options-btn" onclick="this.closest('.quest-options-modal').remove()">Ã—</button>
                 </div>
                 <div class="quest-options-body">
                     <p>${zone.description}</p>
@@ -262,10 +262,10 @@ class InvestigationSystem {
                 manualBtn.addEventListener('click', () => {
                     questModal.remove();
                     if (window.lovecraftianQuest) {
-                        console.log('🐙 Starting manual quest...');
+                        console.log('ðŸ™ Starting manual quest...');
                         window.lovecraftianQuest.startQuest();
                     } else {
-                        console.error('🐙 Lovecraftian quest system not available');
+                        console.error('ðŸ™ Lovecraftian quest system not available');
                         alert('Quest system not available. Please refresh the page.');
                     }
                 });
@@ -275,11 +275,11 @@ class InvestigationSystem {
                 simulationBtn.addEventListener('click', () => {
                     questModal.remove();
                     if (window.lovecraftianQuest) {
-                        console.log('🐙 Starting quest simulation...');
-                        console.log('🐙 Quest simulation disabled - quests now trigger by proximity to markers');
-                        alert('🐙 Quest simulation disabled. Quests now trigger when you approach quest markers within 50m!');
+                        console.log('ðŸ™ Starting quest simulation...');
+                        console.log('ðŸ™ Quest simulation disabled - quests now trigger by proximity to markers');
+                        alert('ðŸ™ Quest simulation disabled. Quests now trigger when you approach quest markers within 50m!');
                     } else {
-                        console.error('🐙 Lovecraftian quest system not available');
+                        console.error('ðŸ™ Lovecraftian quest system not available');
                         alert('Quest system not available. Please refresh the page.');
                     }
                 });
@@ -407,7 +407,7 @@ class InvestigationSystem {
     completeInvestigation() {
         const investigation = this.activeInvestigation;
         
-        console.log(`🎉 Investigation completed: ${investigation.name}`);
+        console.log(`‰ Investigation completed: ${investigation.name}`);
         
         // Show completion effects
         if (window.cosmicEffects) {
@@ -431,7 +431,7 @@ class InvestigationSystem {
         if (!this.activeInvestigation) return;
 
         const investigation = this.activeInvestigation;
-        console.log(`❌ Investigation abandoned: ${investigation.name}`);
+        console.log(`âŒ Investigation abandoned: ${investigation.name}`);
         
         if (this.onInvestigationAbandon) {
             this.onInvestigationAbandon(investigation);
@@ -535,3 +535,5 @@ class InvestigationSystem {
 
 // Export for use in other modules
 window.InvestigationSystem = InvestigationSystem;
+
+

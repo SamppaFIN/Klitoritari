@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Step Currency System
  * Manages real-world step counting as the primary game currency
  */
@@ -770,29 +770,22 @@ class StepCurrencySystem {
     }
     
     updateStepCounter() {
-        const stepNumber = document.getElementById('step-number');
-        const stepSession = document.getElementById('step-session');
+        // Update header step counter
+        const stepCount = document.getElementById('step-count');
         
         console.log(`🚶‍♂️ Updating step counter: ${this.totalSteps} total, ${this.sessionSteps} session`);
         
-        if (stepNumber) {
-            stepNumber.textContent = this.totalSteps.toLocaleString();
+        if (stepCount) {
+            stepCount.textContent = this.totalSteps.toLocaleString();
             
             // Add pulse animation
-            stepNumber.style.animation = 'stepPulse 0.5s ease-out';
+            stepCount.style.animation = 'stepPulse 0.5s ease-out';
             setTimeout(() => {
-                stepNumber.style.animation = '';
+                stepCount.style.animation = '';
             }, 500);
-            console.log('🚶‍♂️ Step number updated');
+            console.log('🚶‍♂️ Step counter updated in header');
         } else {
-            console.error('🚶‍♂️ Step number element not found');
-        }
-        
-        if (stepSession) {
-            stepSession.textContent = `+${this.sessionSteps}`;
-            console.log('🚶‍♂️ Step session updated');
-        } else {
-            console.error('🚶‍♂️ Step session element not found');
+            console.warn('🚶‍♂️ Header step counter element not found');
         }
     }
     

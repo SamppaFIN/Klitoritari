@@ -1,11 +1,11 @@
-/**
+﻿/**
  * Database Client for Eldritch Sanctuary
  * Handles all Supabase database operations for player bases and territory
  */
 
 class DatabaseClient {
     constructor() {
-        console.log('🗄️ DatabaseClient constructor called');
+        console.log('ðŸ—„ï¸ DatabaseClient constructor called');
         this.supabase = null;
         this.isInitialized = false;
         this.init();
@@ -17,13 +17,13 @@ class DatabaseClient {
             if (typeof supabase !== 'undefined') {
                 this.supabase = supabase;
                 this.isInitialized = true;
-                console.log('🗄️ Database client initialized with Supabase');
+                console.log('ðŸ—„ï¸ Database client initialized with Supabase');
             } else {
-                console.warn('🗄️ Supabase not available - using local storage fallback');
+                console.warn('ðŸ—„ï¸ Supabase not available - using local storage fallback');
                 this.isInitialized = true; // Still functional with local storage
             }
         } catch (error) {
-            console.error('🗄️ Failed to initialize database client:', error);
+            console.error('ðŸ—„ï¸ Failed to initialize database client:', error);
             this.isInitialized = true; // Still functional with local storage
         }
     }
@@ -44,7 +44,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error creating player:', error);
+            console.error('ðŸ—„ï¸ Error creating player:', error);
             return this.createPlayerLocal(playerData);
         }
     }
@@ -64,7 +64,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error getting player:', error);
+            console.error('ðŸ—„ï¸ Error getting player:', error);
             return this.getPlayerLocal(playerId);
         }
     }
@@ -85,7 +85,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error creating base:', error);
+            console.error('ðŸ—„ï¸ Error creating base:', error);
             return this.createBaseLocal(baseData);
         }
     }
@@ -106,7 +106,7 @@ class DatabaseClient {
             if (error) throw error;
             return data || [];
         } catch (error) {
-            console.error('🗄️ Error getting player bases:', error);
+            console.error('ðŸ—„ï¸ Error getting player bases:', error);
             return this.getPlayerBasesLocal(playerId);
         }
     }
@@ -127,7 +127,7 @@ class DatabaseClient {
             if (error) throw error;
             return data || [];
         } catch (error) {
-            console.error('🗄️ Error getting nearby bases:', error);
+            console.error('ðŸ—„ï¸ Error getting nearby bases:', error);
             return this.getNearbyBasesLocal(latitude, longitude, radiusMeters);
         }
     }
@@ -148,7 +148,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error updating base:', error);
+            console.error('ðŸ—„ï¸ Error updating base:', error);
             return this.updateBaseLocal(baseId, updateData);
         }
     }
@@ -167,7 +167,7 @@ class DatabaseClient {
             if (error) throw error;
             return true;
         } catch (error) {
-            console.error('🗄️ Error deleting base:', error);
+            console.error('ðŸ—„ï¸ Error deleting base:', error);
             return this.deleteBaseLocal(baseId);
         }
     }
@@ -191,7 +191,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error adding territory point:', error);
+            console.error('ðŸ—„ï¸ Error adding territory point:', error);
             return this.addTerritoryPointLocal(baseId, pointData);
         }
     }
@@ -211,7 +211,7 @@ class DatabaseClient {
             if (error) throw error;
             return data || [];
         } catch (error) {
-            console.error('🗄️ Error getting territory points:', error);
+            console.error('ðŸ—„ï¸ Error getting territory points:', error);
             return this.getTerritoryPointsLocal(baseId);
         }
     }
@@ -232,7 +232,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error logging base activity:', error);
+            console.error('ðŸ—„ï¸ Error logging base activity:', error);
             return this.logBaseActivityLocal(activityData);
         }
     }
@@ -253,7 +253,7 @@ class DatabaseClient {
             if (error) throw error;
             return data;
         } catch (error) {
-            console.error('🗄️ Error creating sacred structure:', error);
+            console.error('ðŸ—„ï¸ Error creating sacred structure:', error);
             return this.createSacredStructureLocal(structureData);
         }
     }
@@ -274,7 +274,7 @@ class DatabaseClient {
             if (error) throw error;
             return data || [];
         } catch (error) {
-            console.error('🗄️ Error getting base structures:', error);
+            console.error('ðŸ—„ï¸ Error getting base structures:', error);
             return this.getBaseStructuresLocal(baseId);
         }
     }
@@ -294,7 +294,7 @@ class DatabaseClient {
             if (error) throw error;
             return data || [];
         } catch (error) {
-            console.error('🗄️ Error getting community healing metrics:', error);
+            console.error('ðŸ—„ï¸ Error getting community healing metrics:', error);
             return this.getCommunityHealingMetricsLocal();
         }
     }
@@ -417,7 +417,7 @@ class DatabaseClient {
             const data = localStorage.getItem(`eldritch_${key}`);
             return data ? JSON.parse(data) : defaultValue;
         } catch (error) {
-            console.error(`🗄️ Error getting local data for ${key}:`, error);
+            console.error(`ðŸ—„ï¸ Error getting local data for ${key}:`, error);
             return defaultValue;
         }
     }
@@ -426,7 +426,7 @@ class DatabaseClient {
         try {
             localStorage.setItem(`eldritch_${key}`, JSON.stringify(data));
         } catch (error) {
-            console.error(`🗄️ Error setting local data for ${key}:`, error);
+            console.error(`ðŸ—„ï¸ Error setting local data for ${key}:`, error);
         }
     }
 
@@ -447,10 +447,12 @@ class DatabaseClient {
 }
 
 // Make database client globally available
-console.log('🗄️ Creating database client...');
+console.log('ðŸ—„ï¸ Creating database client...');
 try {
     window.databaseClient = new DatabaseClient();
-    console.log('🗄️ Database client created successfully');
+    console.log('ðŸ—„ï¸ Database client created successfully');
 } catch (error) {
-    console.error('🗄️ Error creating database client:', error);
+    console.error('ðŸ—„ï¸ Error creating database client:', error);
 }
+
+

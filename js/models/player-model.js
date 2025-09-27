@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PlayerModel - Unified player data model
  * Manages all player-related data and state
  */

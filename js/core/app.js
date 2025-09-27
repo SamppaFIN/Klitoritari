@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Eldritch Sanctuary App - New Layered Architecture
  * Main application coordinator using the new layered rendering system
  */
@@ -40,6 +40,14 @@ class EldritchSanctuaryApp {
      * Initialize the application
      */
     async init() {
+        // Prevent multiple initializations
+        if (this.isInitialized) {
+            console.log('🌌 App already initialized, skipping duplicate initialization');
+            return;
+        }
+        
+        // Direct initialization - no loading system checks
+        
         const startTime = Date.now();
         console.log('🌌 STEP 1: Eldritch Sanctuary App: Starting initialization...');
         
@@ -386,10 +394,8 @@ class EldritchSanctuaryApp {
             this.enableCanvasInteractions();
         });
         
-        // Initialize welcome screen for GPS button (with delay to ensure layers are ready)
-        setTimeout(() => {
-            this.initWelcomeScreen();
-        }, 100);
+        // Initialize welcome screen
+        this.initWelcomeScreen();
         
         // Update game state
         this.gameState.update({
@@ -634,9 +640,9 @@ window.EldritchSanctuaryApp = EldritchSanctuaryApp;
 
 // Initialize the application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌌 Initializing Eldritch Sanctuary with new architecture...');
+    console.log('🌌 Initializing Eldritch Sanctuary with direct initialization...');
     
-    // Create and initialize the app
+    // Initialize app directly - no loading system complexity
     const app = new EldritchSanctuaryApp();
     app.init().then(() => {
         console.log('🌌 New architecture initialization complete');

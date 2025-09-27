@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Discord-Style Effects System - Visual overlays and atmospheric effects
  * Provides particle effects, screen shakes, glows, and other visual feedback
  */
@@ -16,7 +16,7 @@ class DiscordEffectsSystem {
     }
 
     init() {
-        console.log('✨ Discord Effects System initialized');
+        console.log('¨ Discord Effects System initialized');
         this.createEffectsContainer();
         this.setupEffectQueue();
     }
@@ -67,7 +67,7 @@ class DiscordEffectsSystem {
         const cooldown = options.cooldown || 1000; // 1 second default cooldown
         
         if (Date.now() - lastUsed < cooldown) {
-            console.log(`✨ Effect ${effectType} on cooldown, skipping`);
+            console.log(`¨ Effect ${effectType} on cooldown, skipping`);
             return;
         }
         
@@ -104,7 +104,7 @@ class DiscordEffectsSystem {
                 this.createParticleRain(effect.options);
                 break;
             default:
-                console.warn('✨ Unknown effect type:', effect.type);
+                console.warn('¨ Unknown effect type:', effect.type);
         }
         
         // Auto-cleanup after duration
@@ -533,3 +533,5 @@ class DiscordEffectsSystem {
 
 // Initialize global instance
 window.discordEffects = new DiscordEffectsSystem();
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * BackgroundLayer - Cosmic background with particle effects
  * 
  * This layer provides the foundational cosmic background with:

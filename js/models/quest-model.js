@@ -1,4 +1,4 @@
-/**
+﻿/**
  * QuestModel - Unified quest data model
  * Manages all quest-related data and state
  */

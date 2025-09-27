@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PlayerLayer - Handles player avatar and movement visualization
  * Manages player position, movement trails, and avatar rendering
  */

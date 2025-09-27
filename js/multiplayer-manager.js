@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Multiplayer Manager - WebSocket-based player synchronization
  * Handles real-time multiplayer features for Eldritch Sanctuary
  */
@@ -29,12 +29,12 @@ class MultiplayerManager {
             this.serverUrl = window.ELDRITCH_WS_URL;
         }
         
-        console.log('🌐 MultiplayerManager initialized, WS URL:', this.serverUrl);
+        console.log(' MultiplayerManager initialized, WS URL:', this.serverUrl);
     }
 
     init() {
         // Initialize multiplayer manager
-        console.log('🌐 Multiplayer Manager initialized');
+        console.log(' Multiplayer Manager initialized');
     }
     
     /**
@@ -48,7 +48,7 @@ class MultiplayerManager {
      * Initialize multiplayer connection
      */
     async initialize() {
-        console.log('🌐 Initializing multiplayer connection...');
+        console.log(' Initializing multiplayer connection...');
         
         try {
             await this.connect();
@@ -58,9 +58,9 @@ class MultiplayerManager {
                     try { this.requestAllFlags(); } catch (_) {}
                 }, 30000);
             }
-            console.log('🌐 Multiplayer initialized successfully');
+            console.log(' Multiplayer initialized successfully');
         } catch (error) {
-            console.warn('🌐 Multiplayer initialization failed:', error);
+            console.warn(' Multiplayer initialization failed:', error);
             // Continue in single-player mode
             this.isConnected = false;
         }
@@ -72,11 +72,11 @@ class MultiplayerManager {
     connect() {
         return new Promise((resolve, reject) => {
             try {
-                console.log('🌐 Attempting WebSocket connect to:', this.serverUrl);
+                console.log(' Attempting WebSocket connect to:', this.serverUrl);
                 this.websocket = new WebSocket(this.serverUrl);
                 
                 this.websocket.onopen = () => {
-                    console.log('🌐 WebSocket connected');
+                    console.log(' WebSocket connected');
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
                     
@@ -101,13 +101,13 @@ class MultiplayerManager {
                 };
                 
                 this.websocket.onclose = (ev) => {
-                    console.log('🌐 WebSocket disconnected', { code: ev.code, reason: ev.reason });
+                    console.log(' WebSocket disconnected', { code: ev.code, reason: ev.reason });
                     this.isConnected = false;
                     this.attemptReconnect();
                 };
                 
                 this.websocket.onerror = (error) => {
-                    console.error('🌐 WebSocket error (verify server reachable and WS path /ws):', error);
+                    console.error(' WebSocket error (verify server reachable and WS path /ws):', error);
                     reject(error);
                 };
                 
@@ -150,9 +150,9 @@ class MultiplayerManager {
                     }
                 });
             });
-            console.log(`🌐 Re-broadcasted ${pins.length} existing flags for owner ${ownerId}`);
+            console.log(` Re-broadcasted ${pins.length} existing flags for owner ${ownerId}`);
         } catch (e) {
-            console.warn('🌐 Failed to send existing flags:', e);
+            console.warn(' Failed to send existing flags:', e);
         }
     }
 
@@ -223,7 +223,7 @@ class MultiplayerManager {
                 // Heartbeat response
                 break;
             default:
-                console.log('🌐 Unknown message type:', data.type);
+                console.log(' Unknown message type:', data.type);
         }
     }
     
@@ -335,7 +335,7 @@ class MultiplayerManager {
             this.updatePlayerNamesDisplay();
             return;
         }
-        console.log('🌐 Player joined:', playerId);
+        console.log(' Player joined:', playerId);
         this.players.set(playerId, { ...playerData, lastSeen: Date.now() });
         try {
             const now = Date.now();
@@ -364,7 +364,7 @@ class MultiplayerManager {
      * Remove player
      */
     removePlayer(playerId) {
-        console.log('🌐 Player left:', playerId);
+        console.log(' Player left:', playerId);
         this.players.delete(playerId);
         this.removeOtherPlayerMarker(playerId);
         try {
@@ -396,7 +396,7 @@ class MultiplayerManager {
             markerConfig.color = '#666666';
         }
         if (!markerConfig.emoji) {
-            markerConfig.emoji = '👤';
+            markerConfig.emoji = 'ðŸ‘¤';
         }
         
         // Check if player is within sync radius
@@ -440,12 +440,12 @@ class MultiplayerManager {
                 const { lat, lng, size, rotation, symbol, ownerId, timestamp } = flagData;
                 // Apply without re-replicating, and persist locally for offline
                 window.mapEngine.finnishFlagLayer.addFlagPin(lat, lng, size, rotation, symbol, ownerId, true, timestamp);
-                console.log('🌐 Flag update applied:', flagId, flagData);
+                console.log(' Flag update applied:', flagId, flagData);
             } else {
-                console.log('🌐 Flag update received but layer unavailable');
+                console.log(' Flag update received but layer unavailable');
             }
         } catch (e) {
-            console.warn('🌐 Failed to apply flag update:', e);
+            console.warn(' Failed to apply flag update:', e);
         }
     }
     
@@ -463,12 +463,12 @@ class MultiplayerManager {
      */
     attemptReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.log('🌐 Max reconnection attempts reached');
+            console.log(' Max reconnection attempts reached');
             return;
         }
         
         this.reconnectAttempts++;
-        console.log(`🌐 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+        console.log(` Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
         
         setTimeout(() => {
             this.connect().catch(() => {
@@ -536,7 +536,7 @@ class MultiplayerManager {
             }
         }
         
-        console.log('🌐 Multiplayer disconnected');
+        console.log(' Multiplayer disconnected');
 
         // Reflect zero/one player state (just self disconnected)
         this.updatePlayerCountDisplay(1);
@@ -593,3 +593,5 @@ class MultiplayerManager {
 
 // Export for global access
 window.MultiplayerManager = MultiplayerManager;
+
+

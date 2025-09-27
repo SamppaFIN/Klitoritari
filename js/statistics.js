@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Statistics Manager
  * Lightweight event and morality logging for later AI analysis
  */
@@ -12,7 +12,7 @@ class StatisticsManager {
 
     init() {
         // Initialize statistics manager
-        console.log('📊 Statistics Manager initialized');
+        console.log('ðŸ“Š Statistics Manager initialized');
     }
 
     load() {
@@ -49,5 +49,7 @@ class StatisticsManager {
 }
 
 window.statistics = new StatisticsManager();
+
+
 
 

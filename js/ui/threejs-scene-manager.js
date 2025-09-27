@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Three.js Scene Manager
  * Handles 3D scene setup, lighting, camera, and mobile optimization
  */

@@ -1,4 +1,4 @@
-// UIPanels - lightweight modal/open handlers for Quest Log, Base, and User Settings
+﻿// UIPanels - lightweight modal/open handlers for Quest Log, Base, and User Settings
 (function () {
     const qs = (sel) => document.querySelector(sel);
 
@@ -126,7 +126,7 @@
 
     function wireButtons() {
         // DISABLED - Using new tablist.js instead
-        console.log('🎛️ Old UI panels disabled - using tablist.js');
+        console.log('›ï¸ Old UI panels disabled - using tablist.js');
         return;
         
         // Wire all toggle buttons using data-panel attributes (tablist behavior)
@@ -136,7 +136,7 @@
                 e.stopPropagation();
                 
                 const panelId = button.getAttribute('data-panel');
-                console.log(`🎛️ Toggle button clicked for panel: ${panelId}`);
+                console.log(`›ï¸ Toggle button clicked for panel: ${panelId}`);
                 togglePanel(panelId);
             });
         });
@@ -147,7 +147,7 @@
             inventoryRefresh.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('🔄 Manual inventory refresh clicked');
+                console.log('ðŸ”„ Manual inventory refresh clicked');
                 populateInventoryPanel();
             });
         }
@@ -169,35 +169,35 @@
                     if (debugContent) {
                         debugContent.style.display = 'block';
                     }
-                    console.log('🔧 Debug window opened');
+                    console.log('ðŸ”§ Debug window opened');
                 }
             } else if (e.target.classList.contains('dbg-heal')) {
-                console.log('🔧 Heal button clicked');
+                console.log('ðŸ”§ Heal button clicked');
                 if (window.encounterSystem && window.encounterSystem.healPlayer) {
                     window.encounterSystem.healPlayer();
                 } else {
-                    console.warn('🔧 Encounter system not available');
+                    console.warn('ðŸ”§ Encounter system not available');
                 }
             } else if (e.target.classList.contains('dbg-sanity')) {
-                console.log('🔧 Sanity button clicked');
+                console.log('ðŸ”§ Sanity button clicked');
                 if (window.encounterSystem && window.encounterSystem.restoreSanity) {
                     window.encounterSystem.restoreSanity();
                 } else {
-                    console.warn('🔧 Encounter system not available');
+                    console.warn('ðŸ”§ Encounter system not available');
                 }
             } else if (e.target.classList.contains('dbg-heavy')) {
-                console.log('🔧 HEVY button clicked');
+                console.log('ðŸ”§ HEVY button clicked');
                 if (window.encounterSystem && window.encounterSystem.testLegendaryEncounter) {
                     window.encounterSystem.testLegendaryEncounter('heavy');
                 } else {
-                    console.warn('🔧 Encounter system not available');
+                    console.warn('ðŸ”§ Encounter system not available');
                 }
             } else if (e.target.classList.contains('dbg-monster')) {
-                console.log('🔧 Monster button clicked');
+                console.log('ðŸ”§ Monster button clicked');
                 if (window.encounterSystem && window.encounterSystem.testLegendaryEncounter) {
                     window.encounterSystem.testLegendaryEncounter('eldritchMonster');
                 } else {
-                    console.warn('🔧 Encounter system not available');
+                    console.warn('ðŸ”§ Encounter system not available');
                 }
             }
         });
@@ -242,7 +242,7 @@
     }
 
     function togglePanel(panelId) {
-        console.log(`🎛️ Simple tablist toggle: ${panelId}`);
+        console.log(`›ï¸ Simple tablist toggle: ${panelId}`);
         
         // All tab panels
         const allTabs = [
@@ -266,7 +266,7 @@
             if (button) {
                 button.classList.remove('active');
                 const toggleText = button.querySelector('.toggle-text');
-                if (toggleText) toggleText.textContent = '⚡';
+                if (toggleText) toggleText.textContent = 'âš¡';
             }
         });
         
@@ -275,7 +275,7 @@
         const targetButton = document.querySelector(`[data-panel="${panelId}"]`);
         
         if (targetTab && targetButton) {
-            console.log(`🎛️ Opening tab: ${panelId}`);
+            console.log(`›ï¸ Opening tab: ${panelId}`);
             
             // Show the tab
             targetTab.style.display = 'block';
@@ -284,7 +284,7 @@
             // Highlight the button
             targetButton.classList.add('active');
             const toggleText = targetButton.querySelector('.toggle-text');
-            if (toggleText) toggleText.textContent = '⚡';
+            if (toggleText) toggleText.textContent = 'âš¡';
             
             // Populate content
             switch (panelId) {
@@ -371,31 +371,31 @@
     }
 
     function populateInventoryPanel() {
-        console.log('🎒 populateInventoryPanel called');
+        console.log('’ populateInventoryPanel called');
         const inventoryList = document.getElementById('inventory-list');
         if (!inventoryList) {
-            console.warn('🎒 inventory-list element not found');
+            console.warn('’ inventory-list element not found');
             return;
         }
         
         try {
             // Try to get inventory from encounter system first
             let items = [];
-            console.log('🎒 Checking encounter system inventory:', !!window.encounterSystem?.playerStats?.inventory);
-            console.log('🎒 Checking item system inventory:', !!window.itemSystem?.playerInventory);
+            console.log('’ Checking encounter system inventory:', !!window.encounterSystem?.playerStats?.inventory);
+            console.log('’ Checking item system inventory:', !!window.itemSystem?.playerInventory);
             
             if (window.encounterSystem && window.encounterSystem.playerStats && window.encounterSystem.playerStats.inventory) {
                 items = window.encounterSystem.playerStats.inventory;
-                console.log('🎒 Using encounter system inventory:', items.length, 'items');
+                console.log('’ Using encounter system inventory:', items.length, 'items');
             } else if (window.itemSystem && window.itemSystem.playerInventory) {
-                console.log('🎒 Item system inventory raw:', window.itemSystem.playerInventory);
+                console.log('’ Item system inventory raw:', window.itemSystem.playerInventory);
                 // Convert item system inventory to display format
                 items = window.itemSystem.playerInventory.map(invItem => {
                     const itemDef = window.itemSystem.getItem(invItem.id);
-                    console.log('🎒 Converting item:', invItem.id, '->', itemDef);
+                    console.log('’ Converting item:', invItem.id, '->', itemDef);
                     return {
                         id: invItem.id,
-                        emoji: itemDef?.emoji || '💠',
+                        emoji: itemDef?.emoji || 'ðŸ’ ',
                         name: itemDef?.name || 'Unknown Item',
                         description: itemDef?.description || 'Mysterious item',
                         type: itemDef?.type || 'item',
@@ -403,10 +403,10 @@
                         equipped: invItem.equipped
                     };
                 });
-                console.log('🎒 Converted items:', items);
+                console.log('’ Converted items:', items);
             }
             
-            console.log('🎒 Final items to display:', items.length, items);
+            console.log('’ Final items to display:', items.length, items);
             
             if (items && items.length > 0) {
                 inventoryList.innerHTML = `
@@ -414,16 +414,16 @@
                         ${items.map(item => createInventoryItemHTML(item)).join('')}
                     </div>
                 `;
-                console.log('🎒 Inventory panel updated with', items.length, 'items');
+                console.log('’ Inventory panel updated with', items.length, 'items');
                 
                 // Add click handlers for items
                 addInventoryItemHandlers();
             } else {
                 inventoryList.innerHTML = '<div class="inventory-empty">No items</div>';
-                console.log('🎒 Inventory panel shows "No items"');
+                console.log('’ Inventory panel shows "No items"');
             }
         } catch (e) {
-            console.error('🎒 Error populating inventory panel:', e);
+            console.error('’ Error populating inventory panel:', e);
             inventoryList.innerHTML = '<div class="inventory-empty">Error loading inventory</div>';
         }
     }
@@ -446,7 +446,7 @@
                         <img src="${item.image}" alt="${item.name}" class="item-image" loading="lazy">
                     ` : `
                         <div class="item-icon-placeholder">
-                            <span class="item-emoji">${item.emoji || '💠'}</span>
+                            <span class="item-emoji">${item.emoji || 'ðŸ’ '}</span>
                         </div>
                     `}
                     ${item.video ? `
@@ -500,20 +500,20 @@
                 <div class="item-actions">
                     ${isConsumable ? `
                         <button class="action-btn primary use-btn" data-action="use">
-                            <span class="btn-icon">⚡</span>
+                            <span class="btn-icon">âš¡</span>
                             <span class="btn-text">Use</span>
                         </button>
                         <button class="action-btn info-btn" data-action="info">
-                            <span class="btn-icon">ℹ️</span>
+                            <span class="btn-icon">â„¹ï¸</span>
                             <span class="btn-text">Info</span>
                         </button>
                     ` : `
                         <button class="action-btn equip-btn" data-action="equip">
-                            <span class="btn-icon">⚔️</span>
+                            <span class="btn-icon">âš”ï¸</span>
                             <span class="btn-text">Equip</span>
                         </button>
                         <button class="action-btn info-btn" data-action="info">
-                            <span class="btn-icon">ℹ️</span>
+                            <span class="btn-icon">â„¹ï¸</span>
                             <span class="btn-text">Info</span>
                         </button>
                     `}
@@ -521,8 +521,8 @@
                 
                 <!-- Swipe Indicators -->
                 <div class="swipe-indicators">
-                    <div class="swipe-left">🗑️</div>
-                    <div class="swipe-right">⚡</div>
+                    <div class="swipe-left">ðŸ—‘ï¸</div>
+                    <div class="swipe-right">âš¡</div>
                 </div>
             </div>
         `;
@@ -576,7 +576,7 @@
             // Long press detection for info
             longPressTimer = setTimeout(() => {
                 isLongPress = true;
-                console.log(`📱 Long press detected on ${itemId}`);
+                console.log(`ðŸ“± Long press detected on ${itemId}`);
                 // Enhanced haptic feedback for long press
                 if (navigator.vibrate) {
                     navigator.vibrate([10, 20, 10]);
@@ -675,7 +675,7 @@
                 // Swipe gesture - enhanced feedback
                 if (deltaX > 0) {
                     // Swipe right - use item
-                    console.log(`📱 Swipe right on ${itemId} - using item`);
+                    console.log(`ðŸ“± Swipe right on ${itemId} - using item`);
                     handleItemAction(itemId, 'use');
                     // Success haptic feedback
                     if (navigator.vibrate) {
@@ -683,7 +683,7 @@
                     }
                 } else {
                     // Swipe left - delete item
-                    console.log(`📱 Swipe left on ${itemId} - deleting item`);
+                    console.log(`ðŸ“± Swipe left on ${itemId} - deleting item`);
                     handleItemAction(itemId, 'delete');
                     // Warning haptic feedback
                     if (navigator.vibrate) {
@@ -692,11 +692,11 @@
                 }
             } else if (isLongPress) {
                 // Long press - show item info
-                console.log(`📱 Long press on ${itemId} - showing info`);
+                console.log(`ðŸ“± Long press on ${itemId} - showing info`);
                 handleItemAction(itemId, 'info');
             } else if (touchDuration < 300 && distance < 25) {
                 // Quick tap - use/equip item (increased tolerance for Samsung U23)
-                console.log(`📱 Tap on ${itemId} - using item`);
+                console.log(`ðŸ“± Tap on ${itemId} - using item`);
                 handleItemAction(itemId, 'use');
                 // Light haptic feedback
                 if (navigator.vibrate) {
@@ -739,16 +739,16 @@
     }
     
     function handleItemAction(itemId, action) {
-        console.log(`🎒 Item action: ${action} on ${itemId}`);
+        console.log(`’ Item action: ${action} on ${itemId}`);
         
         if (!window.itemSystem) {
-            console.warn('🎒 Item system not available');
+            console.warn('’ Item system not available');
             return;
         }
         
         const item = window.itemSystem.getItem(itemId);
         if (!item) {
-            console.warn(`🎒 Item ${itemId} not found`);
+            console.warn(`’ Item ${itemId} not found`);
             return;
         }
         
@@ -773,12 +773,12 @@
     }
     
     function deleteItem(itemId) {
-        console.log(`🗑️ Deleting item: ${itemId}`);
+        console.log(`ðŸ—‘ï¸ Deleting item: ${itemId}`);
         
         if (window.itemSystem && window.itemSystem.removeFromInventory) {
             const success = window.itemSystem.removeFromInventory(itemId, 1);
             if (success) {
-                console.log(`🗑️ Successfully deleted ${itemId}`);
+                console.log(`ðŸ—‘ï¸ Successfully deleted ${itemId}`);
                 // Refresh inventory display
                 populateInventoryPanel();
                 // Show notification
@@ -787,35 +787,35 @@
                     window.encounterSystem.showNotification(`Deleted ${item.name}!`, 'info');
                 }
             } else {
-                console.warn(`🗑️ Failed to delete ${itemId}`);
+                console.warn(`ðŸ—‘ï¸ Failed to delete ${itemId}`);
             }
         }
     }
     
     function useConsumableItem(itemId) {
-        console.log(`🧪 Using consumable: ${itemId}`);
-        console.log(`🧪 Item system available:`, !!window.itemSystem);
-        console.log(`🧪 Item system methods:`, window.itemSystem ? Object.getOwnPropertyNames(window.itemSystem) : 'N/A');
+        console.log(`ðŸ§ª Using consumable: ${itemId}`);
+        console.log(`ðŸ§ª Item system available:`, !!window.itemSystem);
+        console.log(`ðŸ§ª Item system methods:`, window.itemSystem ? Object.getOwnPropertyNames(window.itemSystem) : 'N/A');
         
         if (window.itemSystem && typeof window.itemSystem.useConsumable === 'function') {
-            console.log(`🧪 Calling useConsumable for ${itemId}`);
+            console.log(`ðŸ§ª Calling useConsumable for ${itemId}`);
             const success = window.itemSystem.useConsumable(itemId);
-            console.log(`🧪 Use result:`, success);
+            console.log(`ðŸ§ª Use result:`, success);
             
             if (success) {
-                console.log(`🧪 Successfully used ${itemId}`);
+                console.log(`ðŸ§ª Successfully used ${itemId}`);
                 // Refresh inventory display
                 populateInventoryPanel();
                 // Show visual feedback instead of notification
                 const item = window.itemSystem.getItem(itemId);
                 showItemUseFeedback(item);
             } else {
-                console.warn(`🧪 Failed to use ${itemId}`);
+                console.warn(`ðŸ§ª Failed to use ${itemId}`);
             }
         } else {
-            console.error(`🧪 Item system or useConsumable method not available`);
-            console.error(`🧪 Item system:`, window.itemSystem);
-            console.error(`🧪 useConsumable type:`, typeof window.itemSystem?.useConsumable);
+            console.error(`ðŸ§ª Item system or useConsumable method not available`);
+            console.error(`ðŸ§ª Item system:`, window.itemSystem);
+            console.error(`ðŸ§ª useConsumable type:`, typeof window.itemSystem?.useConsumable);
         }
     }
     
@@ -825,7 +825,7 @@
         feedback.className = 'item-use-feedback';
         feedback.innerHTML = `
             <div class="feedback-content">
-                <span class="feedback-icon">${item.emoji || '💠'}</span>
+                <span class="feedback-icon">${item.emoji || 'ðŸ’ '}</span>
                 <span class="feedback-text">Used ${item.name}!</span>
             </div>
         `;
@@ -850,7 +850,7 @@
     }
     
     function equipItem(itemId) {
-        console.log(`⚔️ Equipping item: ${itemId}`);
+        console.log(`âš”ï¸ Equipping item: ${itemId}`);
         // TODO: Implement equipment system
         if (window.encounterSystem && window.encounterSystem.showNotification) {
             const item = window.itemSystem.getItem(itemId);
@@ -859,7 +859,7 @@
     }
     
     function showItemInfo(item) {
-        console.log(`ℹ️ Showing info for: ${item.name}`);
+        console.log(`â„¹ï¸ Showing info for: ${item.name}`);
         
         // Create item info modal
         const modal = document.createElement('div');
@@ -873,7 +873,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="item-info-image">
-                        <span class="item-emoji-large">${item.emoji || '💠'}</span>
+                        <span class="item-emoji-large">${item.emoji || 'ðŸ’ '}</span>
                     </div>
                     <div class="item-info-details">
                         <p class="item-description">${item.description}</p>
@@ -930,8 +930,8 @@
             <div class="quest-log-content">
                 <h3>Active Quests</h3>
                 <div class="quest-item">
-                    <h4>🌌 The Cosmic Awakening</h4>
-                    <p>Discover the mysteries of the cosmic convergence in Härmälä.</p>
+                    <h4>Œ The Cosmic Awakening</h4>
+                    <p>Discover the mysteries of the cosmic convergence in HÃ¤rmÃ¤lÃ¤.</p>
                     <div class="quest-progress">
                         <div class="progress-bar">
                             <div class="progress-fill" style="width: 25%"></div>
@@ -940,9 +940,9 @@
                     </div>
                 </div>
                 <div class="quest-item">
-                    <h4>🧪 First Steps</h4>
+                    <h4>ðŸ§ª First Steps</h4>
                     <p>Collect your first health potion and learn the basics.</p>
-                    <div class="quest-status completed">✅ Completed</div>
+                    <div class="quest-status completed">… Completed</div>
                 </div>
             </div>
         `;
@@ -954,7 +954,7 @@
         
         baseList.innerHTML = `
             <div class="base-management-content">
-                <h3>🏠 Base Management</h3>
+                <h3>ðŸ  Base Management</h3>
                 <div class="base-info">
                     <h4>Current Base</h4>
                     <p>No base established yet.</p>
@@ -964,7 +964,7 @@
                     <h4>Base Statistics</h4>
                     <div class="stat-item">
                         <span class="stat-label">Territory Size:</span>
-                        <span class="stat-value">0 m²</span>
+                        <span class="stat-value">0 mÂ²</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Connected Bases:</span>
@@ -989,7 +989,7 @@
                 <div style="padding:4px; border-bottom:1px solid rgba(255,255,255,0.1);">
                     <div style="font-weight:bold;">${name}</div>
                     <div style="font-size:0.8em; opacity:0.8;">Symbol: ${symbol}</div>
-                    <div style="font-size:0.8em; opacity:0.8;">Color: <span style="color:${color};">●</span></div>
+                    <div style="font-size:0.8em; opacity:0.8;">Color: <span style="color:${color};">â—</span></div>
                     <button onclick="window.UIPanels.openUserSettings()" style="margin-top:4px; padding:2px 6px; font-size:0.7em;">Edit</button>
                 </div>
             `;
@@ -1006,10 +1006,10 @@
             debugList.innerHTML = `
                 <div style="display:grid; gap:6px; grid-template-columns: repeat(2, 1fr);">
                     <button class="debug-btn dbg-open-window" style="grid-column:1 / -1; font-size:0.8em;">Open Debug Window</button>
-                    <button class="debug-btn dbg-heal" style="font-size:0.8em;">❤️ Heal</button>
-                    <button class="debug-btn dbg-sanity" style="font-size:0.8em;">🧠 Sanity</button>
-                    <button class="debug-btn dbg-heavy" style="font-size:0.8em;">⚡ HEVY</button>
-                    <button class="debug-btn dbg-monster" style="font-size:0.8em;">👹 Monster</button>
+                    <button class="debug-btn dbg-heal" style="font-size:0.8em;">â¤ï¸ Heal</button>
+                    <button class="debug-btn dbg-sanity" style="font-size:0.8em;">ðŸ§  Sanity</button>
+                    <button class="debug-btn dbg-heavy" style="font-size:0.8em;">âš¡ HEVY</button>
+                    <button class="debug-btn dbg-monster" style="font-size:0.8em;">ðŸ‘¹ Monster</button>
                 </div>
             `;
         } catch (e) {
@@ -1051,5 +1051,7 @@
         populateDebugFooterPanel
     };
 })();
+
+
 
 

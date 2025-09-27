@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Layered Rendering System - Core Layer Management
  * Transforms chaos into cosmic order with proper layer separation
  * Based on ShadowComments rendering architecture
@@ -15,7 +15,7 @@ class LayeredRenderingSystem {
         this.targetFPS = 60;
         this.frameInterval = 1000 / this.targetFPS;
         
-        console.log('🌌 Initializing Layered Rendering System...');
+        console.log('Œ Initializing Layered Rendering System...');
         this.init();
     }
     
@@ -25,9 +25,9 @@ class LayeredRenderingSystem {
             this.initializeLayers();
             this.setupRenderLoop();
             this.isInitialized = true;
-            console.log('✅ Layered Rendering System initialized successfully');
+            console.log('… Layered Rendering System initialized successfully');
         } catch (error) {
-            console.error('❌ Failed to initialize Layered Rendering System:', error);
+            console.error('âŒ Failed to initialize Layered Rendering System:', error);
         }
     }
     
@@ -42,7 +42,7 @@ class LayeredRenderingSystem {
     }
     
     initializeLayers() {
-        console.log('🎨 Initializing rendering layers...');
+        console.log(' Initializing rendering layers...');
         
         // Layer 8: Notification System (z-index: 50)
         this.layers.set('notifications', new NotificationLayer());
@@ -74,7 +74,7 @@ class LayeredRenderingSystem {
         // Layer 1: Base Background (z-index: -1)
         this.layers.set('background', new BaseBackgroundLayer());
         
-        console.log(`✅ Initialized ${this.layers.size} rendering layers`);
+        console.log(`… Initialized ${this.layers.size} rendering layers`);
     }
     
     setupRenderLoop() {
@@ -91,7 +91,7 @@ class LayeredRenderingSystem {
         };
         
         this.animationId = requestAnimationFrame(animate);
-        console.log('🔄 Render loop started');
+        console.log('ðŸ”„ Render loop started');
     }
     
     render() {
@@ -127,7 +127,7 @@ class LayeredRenderingSystem {
             
             // Log performance every 5 seconds
             if (this.performanceMonitor.currentFPS % 5 === 0) {
-                console.log(`📊 Performance: ${this.performanceMonitor.currentFPS} FPS`);
+                console.log(`ðŸ“Š Performance: ${this.performanceMonitor.currentFPS} FPS`);
             }
         }
     }
@@ -146,17 +146,17 @@ class LayeredRenderingSystem {
     
     addLayer(layerName, layer) {
         this.layers.set(layerName, layer);
-        console.log(`➕ Added layer: ${layerName}`);
+        console.log(`âž• Added layer: ${layerName}`);
     }
     
     toggleLayer(layerName) {
         const layer = this.layers.get(layerName);
         if (layer) {
             layer.visible = !layer.visible;
-            console.log(`🎨 Layer ${layerName} ${layer.visible ? 'shown' : 'hidden'}`);
+            console.log(` Layer ${layerName} ${layer.visible ? 'shown' : 'hidden'}`);
             return layer.visible;
         } else {
-            console.warn(`🎨 Layer ${layerName} not found`);
+            console.warn(` Layer ${layerName} not found`);
             return false;
         }
     }
@@ -166,7 +166,7 @@ class LayeredRenderingSystem {
         if (layer) {
             layer.destroy();
             this.layers.delete(layerName);
-            console.log(`➖ Removed layer: ${layerName}`);
+            console.log(`âž– Removed layer: ${layerName}`);
         }
     }
     
@@ -190,7 +190,7 @@ class LayeredRenderingSystem {
         });
         
         this.layers.clear();
-        console.log('🧹 Layered Rendering System destroyed');
+        console.log('ðŸ§¹ Layered Rendering System destroyed');
     }
 }
 
@@ -229,7 +229,7 @@ class RenderLayer {
         if (mapContainer) {
             mapContainer.appendChild(this.canvas);
         } else {
-            console.warn(`🎨 Map container not found for layer ${this.name}, adding to body as fallback`);
+            console.warn(` Map container not found for layer ${this.name}, adding to body as fallback`);
             document.body.appendChild(this.canvas);
         }
         
@@ -295,4 +295,6 @@ class RenderLayer {
 window.LayeredRenderingSystem = LayeredRenderingSystem;
 window.RenderLayer = RenderLayer;
 
-console.log('🌌 Layered Rendering System loaded');
+console.log('Œ Layered Rendering System loaded');
+
+

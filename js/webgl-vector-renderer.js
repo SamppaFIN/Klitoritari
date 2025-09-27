@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WebGL Vector Graphics Renderer
  * Renders vector graphics (Finnish flags, boundaries) using WebGL
  */
@@ -26,7 +26,7 @@ class WebGLVectorRenderer {
         if (this.gl && this.gl.VERTEX_SHADER) {
             this.init();
         } else {
-            console.warn('🎨 WebGL context not available, skipping vector renderer initialization');
+            console.warn(' WebGL context not available, skipping vector renderer initialization');
         }
     }
 
@@ -38,9 +38,9 @@ class WebGLVectorRenderer {
             this.createShaderProgram();
             this.createBuffers();
             this.isInitialized = true;
-            console.log('🎨 WebGL Vector Renderer initialized');
+            console.log(' WebGL Vector Renderer initialized');
         } catch (error) {
-            console.error('🎨 Failed to initialize WebGL Vector Renderer:', error);
+            console.error(' Failed to initialize WebGL Vector Renderer:', error);
         }
     }
 
@@ -130,7 +130,7 @@ class WebGLVectorRenderer {
      */
     latLngToScreen(lat, lng) {
         if (!this.mapBounds) {
-            console.warn('🎨 No map bounds available for coordinate conversion');
+            console.warn(' No map bounds available for coordinate conversion');
             return { x: 0, y: 0 };
         }
 
@@ -141,7 +141,7 @@ class WebGLVectorRenderer {
         const south = this.mapBounds.getSouth();
         
         if (west === east || north === south) {
-            console.warn('🎨 Invalid map bounds:', { west, east, north, south });
+            console.warn(' Invalid map bounds:', { west, east, north, south });
             return { x: 0, y: 0 };
         }
 
@@ -154,7 +154,7 @@ class WebGLVectorRenderer {
         
         // Only log if coordinates are significantly outside normal range
         if (Math.abs(x) > 3 || Math.abs(y) > 3) {
-            console.warn('🎨 Coordinates outside normal range:', { lat, lng }, '->', { x, y }, 'clamped to:', { clampedX, clampedY });
+            console.warn(' Coordinates outside normal range:', { lat, lng }, '->', { x, y }, 'clamped to:', { clampedX, clampedY });
         }
         
         return { x: clampedX, y: clampedY };
@@ -165,13 +165,13 @@ class WebGLVectorRenderer {
      */
     renderFlagsAlongPath(pathPoints, flagSpacing = 15, scale = 1) {
         if (!this.isInitialized || pathPoints.length < 2) {
-            console.log('🎨 Cannot render flags: initialized:', this.isInitialized, 'points:', pathPoints.length);
+            console.log(' Cannot render flags: initialized:', this.isInitialized, 'points:', pathPoints.length);
             return;
         }
 
-        console.log('🎨 Generating flags for', pathPoints.length, 'path points');
+        console.log(' Generating flags for', pathPoints.length, 'path points');
         const flags = this.flagGenerator.generateFlagsAlongPath(pathPoints, flagSpacing, scale);
-        console.log('🎨 Generated', flags.length, 'flags');
+        console.log(' Generated', flags.length, 'flags');
         this.renderFlags(flags);
     }
 
@@ -193,10 +193,10 @@ class WebGLVectorRenderer {
                 flag.rotation
             );
 
-            console.log('🎨 Rendering flag at:', screenPos, 'scale:', flag.scale, 'rotation:', flag.rotation);
-            console.log('🎨 Background vertices:', webglData.background.vertices.length / 2, 'triangles');
-            console.log('🎨 Horizontal cross vertices:', webglData.horizontalCross.vertices.length / 2, 'triangles');
-            console.log('🎨 Vertical cross vertices:', webglData.verticalCross.vertices.length / 2, 'triangles');
+            console.log(' Rendering flag at:', screenPos, 'scale:', flag.scale, 'rotation:', flag.rotation);
+            console.log(' Background vertices:', webglData.background.vertices.length / 2, 'triangles');
+            console.log(' Horizontal cross vertices:', webglData.horizontalCross.vertices.length / 2, 'triangles');
+            console.log(' Vertical cross vertices:', webglData.verticalCross.vertices.length / 2, 'triangles');
 
             // Add background vertices first (renders behind) - only if there are vertices
             if (webglData.background.vertices.length > 0) {
@@ -240,7 +240,7 @@ class WebGLVectorRenderer {
      */
     renderBoundaryLine(boundaryPoints) {
         // Disabled to prevent large blue cross overlays
-        console.log('🎨 Boundary line rendering disabled to prevent large blue overlays');
+        console.log(' Boundary line rendering disabled to prevent large blue overlays');
         return;
     }
 
@@ -249,7 +249,7 @@ class WebGLVectorRenderer {
      */
     render() {
         if (!this.isInitialized || this.vertexArray.length === 0) {
-            console.log('🎨 Cannot render: initialized:', this.isInitialized, 'vertices:', this.vertexArray.length);
+            console.log(' Cannot render: initialized:', this.isInitialized, 'vertices:', this.vertexArray.length);
             return;
         }
 
@@ -263,11 +263,11 @@ class WebGLVectorRenderer {
         }
         
         if (hasInvalidCoordinates) {
-            console.warn('🎨 Skipping render due to invalid coordinates');
+            console.warn(' Skipping render due to invalid coordinates');
             return;
         }
 
-        console.log('🎨 Rendering', this.vertexArray.length / 2, 'triangles with', this.colorArray.length / 4, 'colors');
+        console.log(' Rendering', this.vertexArray.length / 2, 'triangles with', this.colorArray.length / 4, 'colors');
 
         this.gl.useProgram(this.program);
 
@@ -298,7 +298,7 @@ class WebGLVectorRenderer {
         // Disable blending
         this.gl.disable(this.gl.BLEND);
         
-        console.log('🎨 Render complete');
+        console.log(' Render complete');
     }
 
     createProjectionMatrix() {
@@ -347,3 +347,5 @@ class WebGLVectorRenderer {
 
 // Make it globally available
 window.WebGLVectorRenderer = WebGLVectorRenderer;
+
+

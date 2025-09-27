@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Enhanced Three.js UI System
  * Mobile-friendly UI with magnetic bottom tablist and game header integration
  */
@@ -23,6 +23,7 @@ class EnhancedThreeJSUI {
         // Animation
         this.clock = new THREE.Clock();
         this.isAnimating = false;
+        this.isInitialized = false;
         
         // Event handlers
         this.eventBus = null;
@@ -47,6 +48,7 @@ class EnhancedThreeJSUI {
         this.setupEventListeners();
         this.startAnimation();
         
+        this.isInitialized = true;
         console.log('🎮 Enhanced Three.js UI: Initialized successfully');
     }
     
@@ -65,8 +67,9 @@ class EnhancedThreeJSUI {
             0.1, 
             1000
         );
-        this.camera.position.set(0, 5, 10);
-        this.camera.lookAt(0, 0, 0);
+        // Position camera to look down at the magnetic tabs
+        this.camera.position.set(0, 0, 8);
+        this.camera.lookAt(0, -3, 0); // Look at the tabs at y: -3
     }
     
     setupRenderer(container) {
@@ -288,6 +291,31 @@ class EnhancedThreeJSUI {
     switchTab(tabId) {
         console.log('🎮 Switching to tab:', tabId);
         
+        // Check if the same tab is being clicked (toggle behavior)
+        if (this.activeTab === tabId) {
+            console.log('🎮 Toggling off active tab:', tabId);
+            this.hideAllPanels();
+            this.activeTab = null;
+            
+            // Reset all tabs to inactive state
+            this.magneticTabs.forEach(tab => {
+                tab.group.userData.isActive = false;
+                tab.group.userData.targetScale = 1.0;
+                
+                const card = tab.group.children[0];
+                if (card.material) {
+                    card.material.color.setHex(tab.group.userData.color);
+                }
+            });
+            
+            // Emit event for tab closed
+            if (this.eventBus) {
+                this.eventBus.emit('ui:tab:closed', { tabId });
+            }
+            
+            return;
+        }
+        
         // Update active tab
         this.magneticTabs.forEach(tab => {
             const isActive = tab.group.userData.id === tabId;
@@ -310,6 +338,16 @@ class EnhancedThreeJSUI {
         
         // Show corresponding panel
         this.showTabPanel(tabId);
+    }
+    
+    /**
+     * Hide all tab panels
+     */
+    hideAllPanels() {
+        console.log('🎮 Hiding all tab panels');
+        this.tabPanels.forEach((panel, id) => {
+            panel.visible = false;
+        });
     }
     
     showTabPanel(tabId) {
@@ -563,11 +601,22 @@ class EnhancedThreeJSUI {
      */
     showMagneticTabs() {
         console.log('🎮 Showing magnetic tabs...');
+        console.log('🎮 UI initialized:', this.isInitialized);
+        console.log('🎮 Number of magnetic tabs:', this.magneticTabs.length);
+        console.log('🎮 Scene children count:', this.scene ? this.scene.children.length : 'no scene');
+        console.log('🎮 Camera position:', this.camera ? this.camera.position : 'no camera');
+        
+        if (!this.isInitialized) {
+            console.warn('⚠️ Enhanced UI not fully initialized yet, waiting...');
+            setTimeout(() => this.showMagneticTabs(), 100);
+            return;
+        }
         
         // Make sure tabs are visible
-        this.magneticTabs.forEach(tab => {
-            if (tab.mesh) {
-                tab.mesh.visible = true;
+        this.magneticTabs.forEach((tab, index) => {
+            if (tab.group) {
+                tab.group.visible = true;
+                console.log(`🎮 Tab ${index} (${tab.group.userData.id}): visible=${tab.group.visible}, position=`, tab.group.position);
             }
         });
         

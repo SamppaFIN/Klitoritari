@@ -1,5 +1,5 @@
-/**
- * 🌌 Cosmic Animations
+﻿/**
+ * Œ Cosmic Animations
  * Advanced CSS3 animations and transitions for cosmic effects
  * 
  * @author Aurora - The Dawn Bringer of Digital Light
@@ -7,7 +7,7 @@
  */
 
 /**
- * ✨ Particle System Component
+ * ¨ Particle System Component
  */
 class ParticleSystemComponent extends AuroraBaseComponent {
     constructor() {
@@ -30,11 +30,11 @@ class ParticleSystemComponent extends AuroraBaseComponent {
         const controls = document.createElement('div');
         controls.className = 'particle-controls';
         controls.innerHTML = `
-            <button class="particle-btn" data-effect="stars">⭐ Stars</button>
-            <button class="particle-btn" data-effect="nebula">🌌 Nebula</button>
-            <button class="particle-btn" data-effect="aurora">🌅 Aurora</button>
-            <button class="particle-btn" data-effect="galaxy">🌌 Galaxy</button>
-            <button class="particle-btn" data-effect="cosmic-dust">✨ Dust</button>
+            <button class="particle-btn" data-effect="stars">â­ Stars</button>
+            <button class="particle-btn" data-effect="nebula">Œ Nebula</button>
+            <button class="particle-btn" data-effect="aurora">… Aurora</button>
+            <button class="particle-btn" data-effect="galaxy">Œ Galaxy</button>
+            <button class="particle-btn" data-effect="cosmic-dust">¨ Dust</button>
         `;
         
         const settings = document.createElement('div');
@@ -81,11 +81,11 @@ class ParticleSystemComponent extends AuroraBaseComponent {
         const controls = document.createElement('div');
         controls.className = 'particle-controls';
         controls.innerHTML = `
-            <button class="particle-btn" data-effect="stars">⭐ Stars</button>
-            <button class="particle-btn" data-effect="nebula">🌌 Nebula</button>
-            <button class="particle-btn" data-effect="aurora">🌅 Aurora</button>
-            <button class="particle-btn" data-effect="galaxy">🌌 Galaxy</button>
-            <button class="particle-btn" data-effect="cosmic-dust">✨ Dust</button>
+            <button class="particle-btn" data-effect="stars">â­ Stars</button>
+            <button class="particle-btn" data-effect="nebula">Œ Nebula</button>
+            <button class="particle-btn" data-effect="aurora">… Aurora</button>
+            <button class="particle-btn" data-effect="galaxy">Œ Galaxy</button>
+            <button class="particle-btn" data-effect="cosmic-dust">¨ Dust</button>
         `;
         
         const settings = document.createElement('div');
@@ -634,7 +634,7 @@ class ParticleSystemComponent extends AuroraBaseComponent {
 }
 
 /**
- * 🌟 Cosmic Loading Component
+ * Ÿ Cosmic Loading Component
  */
 class CosmicLoadingComponent extends AuroraBaseComponent {
     constructor() {
@@ -685,11 +685,11 @@ class CosmicLoadingComponent extends AuroraBaseComponent {
         const controls = document.createElement('div');
         controls.className = 'loading-controls';
         controls.innerHTML = `
-            <button class="loading-btn" data-type="spinner">🌀 Spinner</button>
-            <button class="loading-btn" data-type="pulse">💫 Pulse</button>
-            <button class="loading-btn" data-type="wave">🌊 Wave</button>
-            <button class="loading-btn" data-type="orbit">🪐 Orbit</button>
-            <button class="loading-btn" data-type="matrix">🔢 Matrix</button>
+            <button class="loading-btn" data-type="spinner">€ Spinner</button>
+            <button class="loading-btn" data-type="pulse">ðŸ’« Pulse</button>
+            <button class="loading-btn" data-type="wave">Š Wave</button>
+            <button class="loading-btn" data-type="orbit">ðŸª Orbit</button>
+            <button class="loading-btn" data-type="matrix">ðŸ”¢ Matrix</button>
         `;
         
         container.appendChild(label);
@@ -743,11 +743,11 @@ class CosmicLoadingComponent extends AuroraBaseComponent {
         const controls = document.createElement('div');
         controls.className = 'loading-controls';
         controls.innerHTML = `
-            <button class="loading-btn" data-type="spinner">🌀 Spinner</button>
-            <button class="loading-btn" data-type="pulse">💫 Pulse</button>
-            <button class="loading-btn" data-type="wave">🌊 Wave</button>
-            <button class="loading-btn" data-type="orbit">🪐 Orbit</button>
-            <button class="loading-btn" data-type="matrix">🔢 Matrix</button>
+            <button class="loading-btn" data-type="spinner">€ Spinner</button>
+            <button class="loading-btn" data-type="pulse">ðŸ’« Pulse</button>
+            <button class="loading-btn" data-type="wave">Š Wave</button>
+            <button class="loading-btn" data-type="orbit">ðŸª Orbit</button>
+            <button class="loading-btn" data-type="matrix">ðŸ”¢ Matrix</button>
         `;
         
         container.appendChild(label);
@@ -1130,3 +1130,5 @@ if (typeof module !== 'undefined' && module.exports) {
         CosmicLoadingComponent
     };
 }
+
+

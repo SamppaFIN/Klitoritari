@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MapLayer - Leaflet map rendering and display
  * 
  * This layer handles:
@@ -35,6 +35,15 @@ class MapLayer extends BaseLayer {
         
         console.log('🗺️ MapLayer: Map system initialized');
     }
+    
+    /**
+     * Set up layer transparency and pointer events
+     * MapLayer handles mouse events for map interactions
+     */
+    setupLayerTransparency() {
+        // MapLayer handles mouse events for map interactions (zoom, pan, click)
+        this.pointerEvents = 'auto';
+    }
 
     createMapContainer() {
         // Create a container for the Leaflet map
@@ -46,7 +55,7 @@ class MapLayer extends BaseLayer {
         this.mapContainer.style.width = '100%';
         this.mapContainer.style.height = '100%';
         this.mapContainer.style.zIndex = this.zIndex;
-        this.mapContainer.style.pointerEvents = 'auto';
+        this.mapContainer.style.pointerEvents = 'auto'; // MapLayer handles all mouse events
         
         // Add to canvas container
         if (this.canvas.parentNode) {

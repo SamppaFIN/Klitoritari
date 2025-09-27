@@ -1,4 +1,4 @@
-/**
+﻿/**
  * EventBus - Central event communication system for layered architecture
  * Handles all inter-layer communication through a clean event system
  */

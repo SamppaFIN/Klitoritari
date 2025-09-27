@@ -1,4 +1,4 @@
-class DistortionEffectsCanvasLayer {
+﻿class DistortionEffectsCanvasLayer {
     constructor(mapEngine) {
         this.mapEngine = mapEngine;
         this.canvas = null;
@@ -15,7 +15,7 @@ class DistortionEffectsCanvasLayer {
         this.effectTypes = {
             drippingBlood: {
                 name: 'Dripping Blood',
-                emoji: '🩸',
+                emoji: 'ðŸ©¸',
                 color: '#8B0000',
                 particles: 20,
                 speed: 0.5,
@@ -24,7 +24,7 @@ class DistortionEffectsCanvasLayer {
             },
             ghost: {
                 name: 'Ghost',
-                emoji: '👻',
+                emoji: 'ðŸ‘»',
                 color: '#E6E6FA',
                 particles: 15,
                 speed: 0.3,
@@ -33,7 +33,7 @@ class DistortionEffectsCanvasLayer {
             },
             cosmicDistortion: {
                 name: 'Cosmic Distortion',
-                emoji: '🌀',
+                emoji: '€',
                 color: '#FF1493',
                 particles: 25,
                 speed: 0.4,
@@ -42,7 +42,7 @@ class DistortionEffectsCanvasLayer {
             },
             shadowTendrils: {
                 name: 'Shadow Tendrils',
-                emoji: '🕷️',
+                emoji: 'ðŸ•·ï¸',
                 color: '#2F2F2F',
                 particles: 30,
                 speed: 0.2,
@@ -51,7 +51,7 @@ class DistortionEffectsCanvasLayer {
             },
             eldritchEyes: {
                 name: 'Eldritch Eyes',
-                emoji: '👁️',
+                emoji: 'ðŸ‘ï¸',
                 color: '#FFD700',
                 particles: 10,
                 speed: 0.1,
@@ -60,7 +60,7 @@ class DistortionEffectsCanvasLayer {
             },
             realisticSmoke: {
                 name: 'Realistic Smoke',
-                emoji: '💨',
+                emoji: 'ðŸ’¨',
                 color: '#808080',
                 particles: 50,
                 speed: 0.8,
@@ -71,7 +71,7 @@ class DistortionEffectsCanvasLayer {
             },
             waterRipple: {
                 name: 'Water Ripple',
-                emoji: '💧',
+                emoji: 'ðŸ’§',
                 color: '#4169E1',
                 particles: 30,
                 speed: 0.3,
@@ -82,7 +82,7 @@ class DistortionEffectsCanvasLayer {
             },
             fireSmoke: {
                 name: 'Fire Smoke',
-                emoji: '🔥',
+                emoji: 'ðŸ”¥',
                 color: '#FF4500',
                 particles: 40,
                 speed: 1.2,
@@ -93,7 +93,7 @@ class DistortionEffectsCanvasLayer {
             },
             mistyFog: {
                 name: 'Misty Fog',
-                emoji: '🌫️',
+                emoji: '«ï¸',
                 color: '#F0F8FF',
                 particles: 60,
                 speed: 0.4,
@@ -122,7 +122,7 @@ class DistortionEffectsCanvasLayer {
         if (this.mapEngine && this.mapEngine.map && this.mapEngine.map.getPane) {
             this.mapEngine.map.getPane('overlayPane').appendChild(this.canvas);
         } else {
-            console.warn('🌀 Map engine not available, skipping distortion effects initialization');
+            console.warn('€ Map engine not available, skipping distortion effects initialization');
             return;
         }
         this.ctx = this.canvas.getContext('2d');
@@ -130,7 +130,7 @@ class DistortionEffectsCanvasLayer {
         this.mapEngine.map.on('moveend zoomend resize', this.updateCanvasPositionAndSize.bind(this));
         this.updateCanvasPositionAndSize();
         this.startAnimationLoop();
-        console.log('🌀 DistortionEffectsCanvasLayer initialized and added to map.');
+        console.log('€ DistortionEffectsCanvasLayer initialized and added to map.');
     }
     
     updateCanvasPositionAndSize() {
@@ -144,7 +144,7 @@ class DistortionEffectsCanvasLayer {
         this.canvas.style.width = rect.width + 'px';
         this.canvas.style.height = rect.height + 'px';
         
-        console.log('🌀 Canvas resized to:', rect.width, 'x', rect.height);
+        console.log('€ Canvas resized to:', rect.width, 'x', rect.height);
     }
     
     startAnimationLoop() {
@@ -167,7 +167,7 @@ class DistortionEffectsCanvasLayer {
     
     addEffect(effectType, lat, lng, intensity = 1.0) {
         if (!this.effectTypes[effectType]) {
-            console.warn('🌀 Unknown effect type:', effectType);
+            console.warn('€ Unknown effect type:', effectType);
             return;
         }
         
@@ -195,7 +195,7 @@ class DistortionEffectsCanvasLayer {
             this.effects.splice(0, this.effects.length - this.maxEffects / 2);
         }
         
-        console.log('🌀 Added effect:', effectType, 'at', lat, lng, 'intensity:', intensity);
+        console.log('€ Added effect:', effectType, 'at', lat, lng, 'intensity:', intensity);
         this.render(); // Render immediately
     }
     
@@ -461,19 +461,19 @@ class DistortionEffectsCanvasLayer {
     toggleVisibility() {
         this.isVisible = !this.isVisible;
         this.canvas.style.opacity = this.isVisible ? this.opacity : 0;
-        console.log('🌀 Distortion effects visibility toggled:', this.isVisible);
+        console.log('€ Distortion effects visibility toggled:', this.isVisible);
     }
     
     setOpacity(opacity) {
         this.opacity = Math.max(0, Math.min(1, opacity));
         this.canvas.style.opacity = this.opacity;
-        console.log('🌀 Distortion effects opacity set to:', this.opacity);
+        console.log('€ Distortion effects opacity set to:', this.opacity);
     }
     
     clearEffects() {
         this.effects = [];
         this.render();
-        console.log('🌀 All distortion effects cleared');
+        console.log('€ All distortion effects cleared');
     }
     
     getEffectCount() {
@@ -486,10 +486,10 @@ class DistortionEffectsCanvasLayer {
     
     // Create test effects with all realistic types
     createTestRealisticEffects() {
-        console.log('🌀 Creating test realistic effects...');
+        console.log('€ Creating test realistic effects...');
         const playerPos = this.mapEngine.getPlayerPosition();
         if (!playerPos) {
-            console.log('🌀 No player position available for test effects');
+            console.log('€ No player position available for test effects');
             return;
         }
         
@@ -501,7 +501,7 @@ class DistortionEffectsCanvasLayer {
             this.addEffect(effectType, testLat, testLng, 0.8);
         });
         
-        console.log('🌀 Test realistic effects created, total effects:', this.effects.length);
+        console.log('€ Test realistic effects created, total effects:', this.effects.length);
     }
     
     // Realistic Smoke Effect
@@ -639,9 +639,11 @@ class DistortionEffectsCanvasLayer {
         if (this.canvas && this.canvas.parentNode) {
             this.canvas.parentNode.removeChild(this.canvas);
         }
-        console.log('🌀 DistortionEffectsCanvasLayer destroyed');
+        console.log('€ DistortionEffectsCanvasLayer destroyed');
     }
 }
 
 // Make it globally available
 window.DistortionEffectsCanvasLayer = DistortionEffectsCanvasLayer;
+
+

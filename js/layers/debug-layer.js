@@ -1,4 +1,4 @@
-/**
+﻿/**
  * DebugLayer - Handles development tools and debugging information
  * Manages debug overlays, performance metrics, and development utilities
  */

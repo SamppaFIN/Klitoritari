@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 🌟 AURORA UI LIBRARY
  * A comprehensive vanilla JavaScript UI library for cosmic web experiences
  * 

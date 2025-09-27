@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Finnish Flag Vector Graphics Generator
  * Creates SVG-based Finnish flag graphics for boundary visualization
  */
@@ -14,7 +14,7 @@ class FinnishFlagGenerator {
 
     init() {
         // Initialize Finnish flag generator
-        console.log('🇫🇮 Finnish Flag Generator initialized');
+        console.log('ðŸ‡«ðŸ‡® Finnish Flag Generator initialized');
     }
 
     /**
@@ -257,3 +257,5 @@ class FinnishFlagGenerator {
 
 // Make it globally available
 window.FinnishFlagGenerator = FinnishFlagGenerator;
+
+

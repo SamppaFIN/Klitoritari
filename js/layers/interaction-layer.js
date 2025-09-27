@@ -1,4 +1,4 @@
-/**
+﻿/**
  * InteractionLayer - Handles user input and UI interactions
  * 
  * This layer handles:

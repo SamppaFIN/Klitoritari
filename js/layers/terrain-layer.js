@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TerrainLayer - Ground textures and elevation data
  * 
  * This layer handles:

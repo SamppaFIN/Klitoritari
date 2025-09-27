@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WebGL Map Integration
  * Integrates WebGL renderer with existing Leaflet map system
  * Provides smooth transition from DOM-based to GPU-based rendering
@@ -21,7 +21,7 @@ class WebGLMapIntegration {
     }
     
     init() {
-        console.log('🌌 WebGL Map Integration initializing...');
+        console.log('Œ WebGL Map Integration initializing...');
         
         // Wait for map to be ready
         if (this.mapEngine.map) {
@@ -32,7 +32,7 @@ class WebGLMapIntegration {
     }
     
     setupIntegration() {
-        console.log('🌌 Setting up WebGL integration with Leaflet map...');
+        console.log('Œ Setting up WebGL integration with Leaflet map...');
         
         // Don't enable WebGL rendering yet - wait for map to be ready
         // this.enableWebGLRendering();
@@ -43,7 +43,7 @@ class WebGLMapIntegration {
         // Start render loop
         this.startRenderLoop();
         
-        console.log('🌌 WebGL integration ready (WebGL rendering disabled until map is ready)');
+        console.log('Œ WebGL integration ready (WebGL rendering disabled until map is ready)');
     }
     
     enableWebGLRendering() {
@@ -88,10 +88,10 @@ class WebGLMapIntegration {
                     marker.setStyle({ opacity: 0, fillOpacity: 0 });
                 } else if (marker) {
                     // Log unknown marker type for debugging
-                    console.warn('🌌 Unknown marker type in hideDOMMarkers:', typeof marker, marker);
+                    console.warn('Œ Unknown marker type in hideDOMMarkers:', typeof marker, marker);
                 }
             } catch (error) {
-                console.error('🌌 Error hiding marker:', error, marker);
+                console.error('Œ Error hiding marker:', error, marker);
             }
         };
 
@@ -100,22 +100,22 @@ class WebGLMapIntegration {
         }
 
         if (this.mapEngine.otherPlayerMarkers && typeof this.mapEngine.otherPlayerMarkers.forEach === 'function') {
-            console.log('🌌 Hiding otherPlayerMarkers:', this.mapEngine.otherPlayerMarkers.size || this.mapEngine.otherPlayerMarkers.length);
+            console.log('Œ Hiding otherPlayerMarkers:', this.mapEngine.otherPlayerMarkers.size || this.mapEngine.otherPlayerMarkers.length);
             this.mapEngine.otherPlayerMarkers.forEach(hideMarker);
         }
 
         if (this.mapEngine.investigationMarkers && typeof this.mapEngine.investigationMarkers.forEach === 'function') {
-            console.log('🌌 Hiding investigationMarkers:', this.mapEngine.investigationMarkers.size || this.mapEngine.investigationMarkers.length);
+            console.log('Œ Hiding investigationMarkers:', this.mapEngine.investigationMarkers.size || this.mapEngine.investigationMarkers.length);
             this.mapEngine.investigationMarkers.forEach(hideMarker);
         }
 
         if (this.mapEngine.mysteryZoneMarkers && typeof this.mapEngine.mysteryZoneMarkers.forEach === 'function') {
-            console.log('🌌 Hiding mysteryZoneMarkers:', this.mapEngine.mysteryZoneMarkers.size || this.mapEngine.mysteryZoneMarkers.length);
+            console.log('Œ Hiding mysteryZoneMarkers:', this.mapEngine.mysteryZoneMarkers.size || this.mapEngine.mysteryZoneMarkers.length);
             this.mapEngine.mysteryZoneMarkers.forEach(hideMarker);
         }
 
         if (this.mapEngine.testQuestMarkers && typeof this.mapEngine.testQuestMarkers.forEach === 'function') {
-            console.log('🌌 Hiding testQuestMarkers:', this.mapEngine.testQuestMarkers.size || this.mapEngine.testQuestMarkers.length);
+            console.log('Œ Hiding testQuestMarkers:', this.mapEngine.testQuestMarkers.size || this.mapEngine.testQuestMarkers.length);
             this.mapEngine.testQuestMarkers.forEach(hideMarker);
         }
 
@@ -124,22 +124,22 @@ class WebGLMapIntegration {
         }
 
         // DON'T hide important markers - they should always be visible
-        console.log('🌌 Keeping pathway markers, legendary markers, POI markers, NPCs, and quest markers visible (not hiding them)');
+        console.log('Œ Keeping pathway markers, legendary markers, POI markers, NPCs, and quest markers visible (not hiding them)');
         
         // Quest markers are handled by the quest system and should remain visible
         if (window.unifiedQuestSystem && window.unifiedQuestSystem.questMarkers) {
-            console.log('🌌 Quest markers managed by quest system, keeping visible');
-            console.log('🌌 Quest markers count:', window.unifiedQuestSystem.questMarkers.size);
+            console.log('Œ Quest markers managed by quest system, keeping visible');
+            console.log('Œ Quest markers count:', window.unifiedQuestSystem.questMarkers.size);
         }
         
         // Check for legendary markers
         if (this.mapEngine.legendaryMarkers) {
-            console.log('🌌 Legendary markers count:', this.mapEngine.legendaryMarkers.length);
+            console.log('Œ Legendary markers count:', this.mapEngine.legendaryMarkers.length);
         }
         
         // Check for NPC markers
         if (this.mapEngine.npcMarkers) {
-            console.log('🌌 NPC markers count:', this.mapEngine.npcMarkers.length);
+            console.log('Œ NPC markers count:', this.mapEngine.npcMarkers.length);
         }
     }
     
@@ -158,10 +158,10 @@ class WebGLMapIntegration {
                     marker.setStyle({ opacity: 1, fillOpacity: 0.8 });
                 } else if (marker) {
                     // Log unknown marker type for debugging
-                    console.warn('🌌 Unknown marker type in showDOMMarkers:', typeof marker, marker);
+                    console.warn('Œ Unknown marker type in showDOMMarkers:', typeof marker, marker);
                 }
             } catch (error) {
-                console.error('🌌 Error showing marker:', error, marker);
+                console.error('Œ Error showing marker:', error, marker);
             }
         };
 
@@ -170,22 +170,22 @@ class WebGLMapIntegration {
         }
 
         if (this.mapEngine.otherPlayerMarkers && typeof this.mapEngine.otherPlayerMarkers.forEach === 'function') {
-            console.log('🌌 Processing otherPlayerMarkers:', this.mapEngine.otherPlayerMarkers.size || this.mapEngine.otherPlayerMarkers.length);
+            console.log('Œ Processing otherPlayerMarkers:', this.mapEngine.otherPlayerMarkers.size || this.mapEngine.otherPlayerMarkers.length);
             this.mapEngine.otherPlayerMarkers.forEach(showMarker);
         }
 
         if (this.mapEngine.investigationMarkers && typeof this.mapEngine.investigationMarkers.forEach === 'function') {
-            console.log('🌌 Processing investigationMarkers:', this.mapEngine.investigationMarkers.size || this.mapEngine.investigationMarkers.length);
+            console.log('Œ Processing investigationMarkers:', this.mapEngine.investigationMarkers.size || this.mapEngine.investigationMarkers.length);
             this.mapEngine.investigationMarkers.forEach(showMarker);
         }
 
         if (this.mapEngine.mysteryZoneMarkers && typeof this.mapEngine.mysteryZoneMarkers.forEach === 'function') {
-            console.log('🌌 Processing mysteryZoneMarkers:', this.mapEngine.mysteryZoneMarkers.size || this.mapEngine.mysteryZoneMarkers.length);
+            console.log('Œ Processing mysteryZoneMarkers:', this.mapEngine.mysteryZoneMarkers.size || this.mapEngine.mysteryZoneMarkers.length);
             this.mapEngine.mysteryZoneMarkers.forEach(showMarker);
         }
 
         if (this.mapEngine.testQuestMarkers && typeof this.mapEngine.testQuestMarkers.forEach === 'function') {
-            console.log('🌌 Processing testQuestMarkers:', this.mapEngine.testQuestMarkers.size || this.mapEngine.testQuestMarkers.length);
+            console.log('Œ Processing testQuestMarkers:', this.mapEngine.testQuestMarkers.size || this.mapEngine.testQuestMarkers.length);
             this.mapEngine.testQuestMarkers.forEach(showMarker);
         }
 
@@ -195,17 +195,17 @@ class WebGLMapIntegration {
 
         // Ensure important markers are visible
         if (this.mapEngine.pathwayMarkers && this.mapEngine.pathwayMarkers.length > 0) {
-            console.log('🌌 Ensuring pathway markers are visible:', this.mapEngine.pathwayMarkers.length);
+            console.log('Œ Ensuring pathway markers are visible:', this.mapEngine.pathwayMarkers.length);
             this.mapEngine.pathwayMarkers.forEach(showMarker);
         }
         
         if (this.mapEngine.legendaryMarkers && this.mapEngine.legendaryMarkers.length > 0) {
-            console.log('🌌 Ensuring legendary markers are visible:', this.mapEngine.legendaryMarkers.length);
+            console.log('Œ Ensuring legendary markers are visible:', this.mapEngine.legendaryMarkers.length);
             this.mapEngine.legendaryMarkers.forEach(showMarker);
         }
         
         if (this.mapEngine.pointsOfInterest && this.mapEngine.pointsOfInterest.length > 0) {
-            console.log('🌌 Ensuring POI markers are visible:', this.mapEngine.pointsOfInterest.length);
+            console.log('Œ Ensuring POI markers are visible:', this.mapEngine.pointsOfInterest.length);
             this.mapEngine.pointsOfInterest.forEach(poi => {
                 if (poi.marker) showMarker(poi.marker);
             });
@@ -213,31 +213,31 @@ class WebGLMapIntegration {
         
         // Quest markers are handled by the quest system and should remain visible
         if (window.unifiedQuestSystem && window.unifiedQuestSystem.questMarkers) {
-            console.log('🌌 Ensuring quest markers are visible:', window.unifiedQuestSystem.questMarkers.size);
+            console.log('Œ Ensuring quest markers are visible:', window.unifiedQuestSystem.questMarkers.size);
             window.unifiedQuestSystem.questMarkers.forEach(showMarker);
         }
         
         // Ensure NPCs are visible (check if NPC system exists)
         if (window.eldritchApp && window.eldritchApp.systems.npc && window.eldritchApp.systems.npc.npcMarkers) {
-            console.log('🌌 Ensuring NPC markers are visible:', window.eldritchApp.systems.npc.npcMarkers.length);
+            console.log('Œ Ensuring NPC markers are visible:', window.eldritchApp.systems.npc.npcMarkers.length);
             window.eldritchApp.systems.npc.npcMarkers.forEach(showMarker);
         }
     }
     
     convertExistingMarkers() {
-        console.log('🌌 Converting existing markers to WebGL objects...');
-        console.log('🌌 Map engine player marker:', !!this.mapEngine.playerMarker);
-        console.log('🌌 Map engine other player markers:', this.mapEngine.otherPlayerMarkers?.size || 0);
-        console.log('🌌 Map engine investigation markers:', this.mapEngine.investigationMarkers?.size || 0);
-        console.log('🌌 Map engine test quest markers:', this.mapEngine.testQuestMarkers?.size || 0);
-        console.log('🌌 Map engine player base marker:', !!this.mapEngine.playerBaseMarker);
+        console.log('Œ Converting existing markers to WebGL objects...');
+        console.log('Œ Map engine player marker:', !!this.mapEngine.playerMarker);
+        console.log('Œ Map engine other player markers:', this.mapEngine.otherPlayerMarkers?.size || 0);
+        console.log('Œ Map engine investigation markers:', this.mapEngine.investigationMarkers?.size || 0);
+        console.log('Œ Map engine test quest markers:', this.mapEngine.testQuestMarkers?.size || 0);
+        console.log('Œ Map engine player base marker:', !!this.mapEngine.playerBaseMarker);
         
         // Convert player marker
         if (this.mapEngine.playerMarker) {
-            console.log('🌌 Converting player marker...');
+            console.log('Œ Converting player marker...');
             this.convertPlayerMarker();
         } else {
-            console.warn('🌌 No player marker found to convert');
+            console.warn('Œ No player marker found to convert');
         }
         
         // Convert other player markers
@@ -262,7 +262,7 @@ class WebGLMapIntegration {
         
         // Convert item markers (including tutorial items)
         if (this.mapEngine.itemMarkers && this.mapEngine.itemMarkers.size > 0) {
-            console.log('🌌 Converting item markers:', this.mapEngine.itemMarkers.size);
+            console.log('Œ Converting item markers:', this.mapEngine.itemMarkers.size);
             this.mapEngine.itemMarkers.forEach((itemData, key) => {
                 if (itemData.marker) {
                     this.convertItemMarker(itemData, key);
@@ -270,7 +270,7 @@ class WebGLMapIntegration {
             });
         }
         
-        console.log(`🌌 Converted ${this.objectMap.size} markers to WebGL objects`);
+        console.log(`Œ Converted ${this.objectMap.size} markers to WebGL objects`);
     }
     
     convertPlayerMarker() {
@@ -295,7 +295,7 @@ class WebGLMapIntegration {
         };
         
         const index = this.webglRenderer.addObject(webglObject);
-        console.log('🌌 Player marker converted to WebGL object:', { index, webglObject, normalizedPos });
+        console.log('Œ Player marker converted to WebGL object:', { index, webglObject, normalizedPos });
         this.objectMap.set('player', { index, marker: this.mapEngine.playerMarker });
     }
     
@@ -538,7 +538,7 @@ class WebGLMapIntegration {
         // Convert lat/lng to normalized coordinates (-1 to 1)
         // Use current map center and bounds for proper conversion
         if (!this.mapEngine.map) {
-            console.warn('🌌 Map not available for coordinate conversion');
+            console.warn('Œ Map not available for coordinate conversion');
             return { x: 0, y: 0 };
         }
         
@@ -552,7 +552,7 @@ class WebGLMapIntegration {
         const x = ((lng - mapCenter.lng) / (lngRange / 2)) * 0.8; // Scale to fit in view
         const y = ((lat - mapCenter.lat) / (latRange / 2)) * 0.8;
         
-        console.log('🌌 Converting coordinates:', { lat, lng, x, y, mapCenter, lngRange, latRange });
+        console.log('Œ Converting coordinates:', { lat, lng, x, y, mapCenter, lngRange, latRange });
         
         return { x, y };
     }
@@ -577,10 +577,10 @@ class WebGLMapIntegration {
     toggleWebGLRendering() {
         if (this.isEnabled) {
             this.disableWebGLRendering();
-            console.log('🌌 WebGL rendering disabled');
+            console.log('Œ WebGL rendering disabled');
         } else {
             this.enableWebGLRendering();
-            console.log('🌌 WebGL rendering enabled');
+            console.log('Œ WebGL rendering enabled');
         }
     }
     
@@ -606,9 +606,11 @@ class WebGLMapIntegration {
         };
         
         this.objectMap.set(`item_${index}`, webglObject);
-        console.log(`🌌 Item marker converted: ${itemData.itemDef?.name || 'Unknown'} at`, normalizedPos);
+        console.log(`Œ Item marker converted: ${itemData.itemDef?.name || 'Unknown'} at`, normalizedPos);
     }
 }
 
 // Export for use in other modules
 window.WebGLMapIntegration = WebGLMapIntegration;
+
+

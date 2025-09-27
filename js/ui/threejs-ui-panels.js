@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Three.js UI Panels System
  * Creates floating 3D UI panels with modern effects
  */

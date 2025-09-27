@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Path Painting System - Tracks and visualizes player's journey
  * Creates a painted layer showing visited areas with brush-like effects
  */

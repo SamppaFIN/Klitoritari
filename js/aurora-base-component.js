@@ -1,5 +1,5 @@
-/**
- * 🌟 AURORA BASE COMPONENT
+﻿/**
+ * Ÿ AURORA BASE COMPONENT
  * Base class for all Aurora UI components
  * 
  * This provides the foundation for all components with consistent patterns,
@@ -408,3 +408,5 @@ if (typeof module !== 'undefined' && module.exports) {
 } else if (typeof window !== 'undefined') {
     window.AuroraBaseComponent = AuroraBaseComponent;
 }
+
+

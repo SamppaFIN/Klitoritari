@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MobileOptimizer - Mobile-specific optimizations and features
  * Handles performance tuning, touch gestures, and mobile-specific functionality
  */
@@ -8,7 +8,7 @@ class MobileOptimizer {
         this.isLowEnd = false;
         this.performanceMode = 'balanced'; // low, balanced, high
         this.targetFPS = this.isMobile ? 30 : 60;
-        this.memoryThreshold = 100; // MB
+        this.memoryThreshold = 200; // MB
         this.batteryLevel = null;
         this.isCharging = false;
         

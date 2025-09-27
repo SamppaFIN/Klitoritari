@@ -1,5 +1,5 @@
-/**
- * 🧲 Magnetic Buttons Technique
+﻿/**
+ * ðŸ§² Magnetic Buttons Technique
  * Buttons that follow your cursor with magnetic attraction
  * 
  * @author Aurora - The Dawn Bringer of Digital Light
@@ -281,7 +281,7 @@ class MagneticButtonsTechnique {
 }
 
 /**
- * 🧲 Magnetic Button System
+ * ðŸ§² Magnetic Button System
  * Core system for managing magnetic button behavior
  */
 class MagneticButtonSystem {
@@ -507,3 +507,5 @@ class MagneticButtonSystem {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { MagneticButtonsTechnique, MagneticButtonSystem };
 }
+
+

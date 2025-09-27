@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Device Testing Suite - Comprehensive testing for Eldritch Sanctuary
  * Tests device compatibility, step detection, UI interactions, and game flows
  */
@@ -12,8 +12,8 @@ class DeviceTestingSuite {
         this.deviceInfo = this.detectDeviceInfo();
         this.testStartTime = null;
         
-        console.log('🧪 Device Testing Suite initialized');
-        console.log('📱 Device Info:', this.deviceInfo);
+        console.log('ðŸ§ª Device Testing Suite initialized');
+        console.log('ðŸ“± Device Info:', this.deviceInfo);
     }
     
     /**
@@ -87,7 +87,7 @@ class DeviceTestingSuite {
      */
     async runAllTests() {
         if (this.isRunning) {
-            console.warn('🧪 Tests already running');
+            console.warn('ðŸ§ª Tests already running');
             return;
         }
         
@@ -95,7 +95,7 @@ class DeviceTestingSuite {
         this.testStartTime = Date.now();
         this.testResults.clear();
         
-        console.log('🧪 Starting comprehensive device testing...');
+        console.log('ðŸ§ª Starting comprehensive device testing...');
         
         try {
             // Core functionality tests
@@ -126,7 +126,7 @@ class DeviceTestingSuite {
             this.generateTestReport();
             
         } catch (error) {
-            console.error('🧪 Test suite failed:', error);
+            console.error('ðŸ§ª Test suite failed:', error);
             this.testResults.set('test_suite_error', {
                 status: 'failed',
                 error: error.message,
@@ -134,7 +134,7 @@ class DeviceTestingSuite {
             });
         } finally {
             this.isRunning = false;
-            console.log('🧪 Device testing completed');
+            console.log('ðŸ§ª Device testing completed');
         }
     }
     
@@ -142,7 +142,7 @@ class DeviceTestingSuite {
      * Core functionality tests
      */
     async runCoreTests() {
-        console.log('🧪 Running core functionality tests...');
+        console.log('ðŸ§ª Running core functionality tests...');
         
         // Test 1: App initialization
         await this.runTest('app_initialization', async () => {
@@ -192,7 +192,7 @@ class DeviceTestingSuite {
      * UI/UX tests
      */
     async runUITests() {
-        console.log('🧪 Running UI/UX tests...');
+        console.log('ðŸ§ª Running UI/UX tests...');
         
         // Test 1: Header visibility
         await this.runTest('header_visibility', async () => {
@@ -287,7 +287,7 @@ class DeviceTestingSuite {
      * Performance tests
      */
     async runPerformanceTests() {
-        console.log('🧪 Running performance tests...');
+        console.log('ðŸ§ª Running performance tests...');
         
         // Test 1: Memory usage
         await this.runTest('memory_usage', async () => {
@@ -388,7 +388,7 @@ class DeviceTestingSuite {
      * Game flow tests
      */
     async runGameFlowTests() {
-        console.log('🧪 Running game flow tests...');
+        console.log('ðŸ§ª Running game flow tests...');
         
         // Test 1: Quest system initialization
         await this.runTest('quest_system_init', async () => {
@@ -432,7 +432,7 @@ class DeviceTestingSuite {
      * Step detection tests
      */
     async runStepDetectionTests() {
-        console.log('🧪 Running step detection tests...');
+        console.log('ðŸ§ª Running step detection tests...');
         
         // Test 1: Accelerometer support
         await this.runTest('accelerometer', async () => {
@@ -474,7 +474,7 @@ class DeviceTestingSuite {
      * Audio tests
      */
     async runAudioTests() {
-        console.log('🧪 Running audio tests...');
+        console.log('ðŸ§ª Running audio tests...');
         
         // Test 1: Web Audio API
         await this.runTest('web_audio', async () => {
@@ -522,7 +522,7 @@ class DeviceTestingSuite {
      * Map interaction tests
      */
     async runMapTests() {
-        console.log('🧪 Running map interaction tests...');
+        console.log('ðŸ§ª Running map interaction tests...');
         
         // Test 1: Map rendering
         await this.runTest('map_rendering', async () => {
@@ -568,7 +568,7 @@ class DeviceTestingSuite {
      * Multiplayer tests
      */
     async runMultiplayerTests() {
-        console.log('🧪 Running multiplayer tests...');
+        console.log('ðŸ§ª Running multiplayer tests...');
         
         // Test 1: WebSocket support
         await this.runTest('websocket_support', async () => {
@@ -593,7 +593,7 @@ class DeviceTestingSuite {
      * Run a single test
      */
     async runTest(testName, testFunction) {
-        console.log(`🧪 Running test: ${testName}`);
+        console.log(`ðŸ§ª Running test: ${testName}`);
         
         try {
             const startTime = performance.now();
@@ -606,7 +606,7 @@ class DeviceTestingSuite {
                 timestamp: Date.now()
             });
             
-            console.log(`✅ ${testName}: ${result.status} (${duration}ms)`);
+            console.log(`… ${testName}: ${result.status} (${duration}ms)`);
             return result;
             
         } catch (error) {
@@ -618,7 +618,7 @@ class DeviceTestingSuite {
             };
             
             this.testResults.set(testName, result);
-            console.error(`❌ ${testName}: ${error.message}`);
+            console.error(`âŒ ${testName}: ${error.message}`);
             return result;
         }
     }
@@ -656,9 +656,9 @@ class DeviceTestingSuite {
             recommendations: this.generateRecommendations()
         };
         
-        console.log('🧪 Test Report Generated:');
-        console.log(`📊 Total: ${totalTests} | ✅ Passed: ${passedTests} | ❌ Failed: ${failedTests} | ⚠️ Warnings: ${warningTests} | ⏭️ Skipped: ${skippedTests}`);
-        console.log(`⏱️ Duration: ${totalDuration}ms`);
+        console.log('ðŸ§ª Test Report Generated:');
+        console.log(`ðŸ“Š Total: ${totalTests} | … Passed: ${passedTests} | âŒ Failed: ${failedTests} | âš ï¸ Warnings: ${warningTests} | â­ï¸ Skipped: ${skippedTests}`);
+        console.log(`â±ï¸ Duration: ${totalDuration}ms`);
         
         // Store report globally for access
         window.deviceTestReport = report;
@@ -724,7 +724,7 @@ class DeviceTestingSuite {
     exportResults() {
         const report = window.deviceTestReport;
         if (!report) {
-            console.warn('🧪 No test report available');
+            console.warn('ðŸ§ª No test report available');
             return;
         }
         
@@ -743,3 +743,5 @@ class DeviceTestingSuite {
 
 // Export for global access
 window.DeviceTestingSuite = DeviceTestingSuite;
+
+

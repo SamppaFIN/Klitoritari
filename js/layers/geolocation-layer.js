@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GeolocationLayer - Handles GPS data and coordinate management
  * 
  * This layer handles:

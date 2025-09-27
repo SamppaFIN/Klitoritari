@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Tutorial Encounter System
  * Implements the incremental tutorial flow as outlined in the Perplexity plan
  * Starts with empty map and gradually introduces game elements
@@ -21,7 +21,7 @@ class TutorialEncounterSystem {
     }
 
     init() {
-        console.log('🎓 Tutorial Encounter System initialized');
+        console.log('“ Tutorial Encounter System initialized');
         this.setupEventListeners();
         
         // Make tutorial system globally accessible
@@ -35,10 +35,10 @@ class TutorialEncounterSystem {
                 const state = JSON.parse(saved);
                 this.tutorialStage = state.stage || 0;
                 this.tutorialFlags = new Map(state.flags || []);
-                console.log('🎓 Loaded tutorial state:', { stage: this.tutorialStage, flags: Array.from(this.tutorialFlags.entries()) });
+                console.log('“ Loaded tutorial state:', { stage: this.tutorialStage, flags: Array.from(this.tutorialFlags.entries()) });
             }
         } catch (e) {
-            console.warn('🎓 Failed to load tutorial state:', e);
+            console.warn('“ Failed to load tutorial state:', e);
         }
     }
 
@@ -50,7 +50,7 @@ class TutorialEncounterSystem {
             };
             localStorage.setItem('eldritch_tutorial_state', JSON.stringify(state));
         } catch (e) {
-            console.warn('🎓 Failed to save tutorial state:', e);
+            console.warn('“ Failed to save tutorial state:', e);
         }
     }
 
@@ -59,7 +59,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('health_potion', {
             type: 'consumable',
             name: 'Health Potion',
-            emoji: '🧪',
+            emoji: 'ðŸ§ª',
             description: 'A glowing red potion that restores health',
             spawnRules: {
                 stage: 1,
@@ -78,7 +78,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('meditation_shrine', {
             type: 'shrine',
             name: 'Meditation Shrine',
-            emoji: '🧘‍♀️',
+            emoji: 'ðŸ§˜â€â™€ï¸',
             description: 'A peaceful shrine for meditation and sanity restoration',
             spawnRules: {
                 stage: 3,
@@ -97,7 +97,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('health_shrine', {
             type: 'shrine',
             name: 'Health Shrine',
-            emoji: '❤️',
+            emoji: 'â¤ï¸',
             description: 'A mystical shrine that grants health blessings',
             spawnRules: {
                 stage: 2,
@@ -116,7 +116,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('wisdom_shrine', {
             type: 'shrine',
             name: 'Wisdom Shrine',
-            emoji: '📚',
+            emoji: 'ðŸ“š',
             description: 'A shrine of ancient knowledge',
             spawnRules: {
                 stage: 2,
@@ -135,7 +135,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('neutral_wolf', {
             type: 'monster',
             name: 'Neutral Wolf',
-            emoji: '🐺',
+            emoji: 'ðŸº',
             description: 'A cautious wolf that watches from a distance',
             spawnRules: {
                 stage: 3,
@@ -159,7 +159,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('diplomacy_goblin', {
             type: 'monster',
             name: 'Curious Goblin',
-            emoji: '👹',
+            emoji: 'ðŸ‘¹',
             description: 'A small goblin that seems more curious than hostile',
             spawnRules: {
                 stage: 3,
@@ -186,7 +186,7 @@ class TutorialEncounterSystem {
         this.gameObjectsRegistry.set('aurora_npc', {
             type: 'npc',
             name: 'Aurora',
-            emoji: '🌟',
+            emoji: 'Ÿ',
             description: 'A mysterious figure who seems to know much about this place',
             spawnRules: {
                 stage: 4,
@@ -213,16 +213,16 @@ class TutorialEncounterSystem {
     }
 
     setupEventListeners() {
-        console.log('🎓 Setting up tutorial event listeners...');
+        console.log('“ Setting up tutorial event listeners...');
         
         // Listen for player position updates to trigger proximity checks
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-            console.log('🎓 Setting up geolocation proximity listener');
+            console.log('“ Setting up geolocation proximity listener');
             window.eldritchApp.systems.geolocation.onPositionUpdate = (position) => {
                 this.checkProximityTriggers(position);
             };
         } else {
-            console.log('🎓 Geolocation system not available, setting up manual proximity checking');
+            console.log('“ Geolocation system not available, setting up manual proximity checking');
             // Fallback: check proximity every 2 seconds
             setInterval(() => {
                 if (this.isActive && this.spawnedObjects.size > 0) {
@@ -239,14 +239,14 @@ class TutorialEncounterSystem {
     }
     
     handleEncounterCompletion(detail) {
-        console.log('🎓 Encounter completed:', detail);
+        console.log('“ Encounter completed:', detail);
         // Handle encounter completion if needed
     }
 
     startTutorial() {
         // Check if tutorial is already complete
         if (this.tutorialFlags.get('tutorial_complete')) {
-            console.log('🎓 Tutorial already completed, not starting');
+            console.log('“ Tutorial already completed, not starting');
             return;
         }
         
@@ -257,16 +257,16 @@ class TutorialEncounterSystem {
                 const state = JSON.parse(saved);
                 const flags = new Map(state.flags || []);
                 if (flags.get('tutorial_complete')) {
-                    console.log('🎓 Tutorial already completed (from localStorage), not starting');
+                    console.log('“ Tutorial already completed (from localStorage), not starting');
                     this.tutorialFlags.set('tutorial_complete', true);
                     return;
                 }
             }
         } catch (e) {
-            console.warn('🎓 Failed to check localStorage tutorial state:', e);
+            console.warn('“ Failed to check localStorage tutorial state:', e);
         }
         
-        console.log('🎓 Starting tutorial encounter system');
+        console.log('“ Starting tutorial encounter system');
         this.isActive = true;
         this.tutorialStage = 1;
         this.clearAllMarkers();
@@ -285,7 +285,7 @@ class TutorialEncounterSystem {
     }
 
     showWelcomeMessage() {
-        console.log('🎓 Showing welcome message');
+        console.log('“ Showing welcome message');
         
         // Create a modal for the welcome message
         const modal = document.createElement('div');
@@ -316,7 +316,7 @@ class TutorialEncounterSystem {
                 color: #ffffff;
             ">
                 <h2 style="color: #4a9eff; margin-bottom: 20px; font-size: 24px;">
-                    🌌 Welcome to the Cosmic Realm
+                    Œ Welcome to the Cosmic Realm
                 </h2>
                 <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
                     You wake up in an unfamiliar place, feeling dizzy and disoriented. 
@@ -324,7 +324,7 @@ class TutorialEncounterSystem {
                     has wounded you deeply...
                 </p>
                 <p style="font-size: 14px; color: #ff6b6b; margin-bottom: 25px;">
-                    ⚠️ Your health is critically low! You need to find healing quickly.
+                    âš ï¸ Your health is critically low! You need to find healing quickly.
                 </p>
                 <button id="tutorial-welcome-continue" style="
                     background: linear-gradient(45deg, #4a9eff, #6bb6ff);
@@ -348,22 +348,22 @@ class TutorialEncounterSystem {
             const continueBtn = document.getElementById('tutorial-welcome-continue');
             if (continueBtn) {
                 continueBtn.addEventListener('click', () => {
-                    console.log('🎓 Tutorial welcome continue button clicked');
+                    console.log('“ Tutorial welcome continue button clicked');
                     modal.remove();
                     this.tutorialFlags.set('welcome_completed', true);
                     this.saveTutorialState();
                     // Proceed with tutorial stage 1
                     this.spawnTutorialStage1();
                 });
-                console.log('🎓 Tutorial welcome continue button event listener attached');
+                console.log('“ Tutorial welcome continue button event listener attached');
             } else {
-                console.error('🎓 Tutorial welcome continue button not found!');
+                console.error('“ Tutorial welcome continue button not found!');
             }
         }, 100);
     }
 
     setPlayerHealth(health) {
-        console.log(`🎓 Setting player health to ${health}/100`);
+        console.log(`“ Setting player health to ${health}/100`);
         
         // Set health in encounter system if available
         if (window.encounterSystem) {
@@ -380,9 +380,9 @@ class TutorialEncounterSystem {
             setTimeout(() => {
                 if (window.healthBar) {
                     window.healthBar.setHealth(health, 100);
-                    console.log(`🎓 Health bar updated: ${health}/100`);
+                    console.log(`“ Health bar updated: ${health}/100`);
                 } else {
-                    console.warn('🎓 Health bar system not available!');
+                    console.warn('“ Health bar system not available!');
                 }
             }, 100);
         }
@@ -396,7 +396,7 @@ class TutorialEncounterSystem {
     }
 
     clearAllMarkers() {
-        console.log('🎓 Clearing all existing markers for tutorial');
+        console.log('“ Clearing all existing markers for tutorial');
         
         // Clear special markers
         if (window.mapEngine) {
@@ -408,14 +408,14 @@ class TutorialEncounterSystem {
         if (window.unifiedQuestSystem && typeof window.unifiedQuestSystem.clearAllQuestMarkers === 'function') {
             window.unifiedQuestSystem.clearAllQuestMarkers();
         } else {
-            console.log('🎓 Skipping quest marker clear (API unavailable)');
+            console.log('“ Skipping quest marker clear (API unavailable)');
         }
 
         // Clear NPC markers (only if API exists)
         if (window.npcSystem && typeof window.npcSystem.clearAllNPCs === 'function') {
             window.npcSystem.clearAllNPCs();
         } else {
-            console.log('🎓 Skipping NPC clear (API unavailable)');
+            console.log('“ Skipping NPC clear (API unavailable)');
         }
 
         // Clear any spawned tutorial objects
@@ -425,7 +425,7 @@ class TutorialEncounterSystem {
     spawnNextStage() {
         if (!this.isActive) return;
 
-        console.log(`🎓 Spawning tutorial stage ${this.tutorialStage}`);
+        console.log(`“ Spawning tutorial stage ${this.tutorialStage}`);
 
         switch (this.tutorialStage) {
             case 1:
@@ -441,7 +441,7 @@ class TutorialEncounterSystem {
                 this.spawnAurora();
                 break;
             default:
-                console.log('🎓 Tutorial completed!');
+                console.log('“ Tutorial completed!');
                 this.completeTutorial();
         }
     }
@@ -459,7 +459,7 @@ class TutorialEncounterSystem {
         const marker = this.createItemMarker(spawnPos, potionDef);
         this.spawnedObjects.set('health_potion', marker);
         
-        console.log('🧪 Health potion spawned at:', spawnPos, 'Distance: 50m from player');
+        console.log('ðŸ§ª Health potion spawned at:', spawnPos, 'Distance: 50m from player');
         
         // Add pickup interaction
         this.setupPotionPickup(marker, potionDef);
@@ -476,7 +476,7 @@ class TutorialEncounterSystem {
             if (!playerPos || !potionPos) return;
             
             const distance = this.calculateDistance(playerPos, potionPos);
-            console.log(`🧪 Health potion clicked! Distance: ${distance.toFixed(1)}m`);
+            console.log(`ðŸ§ª Health potion clicked! Distance: ${distance.toFixed(1)}m`);
             
             if (distance <= 20) { // Pickup range: 20m
                 this.pickupHealthPotion(marker, potionDef);
@@ -488,7 +488,7 @@ class TutorialEncounterSystem {
         // Add popup with pickup instructions
         marker.bindPopup(`
             <div style="text-align: center; font-family: 'Courier New', monospace;">
-                <h3 style="color: #ff6b6b; margin: 0 0 10px 0;">🧪 Health Potion</h3>
+                <h3 style="color: #ff6b6b; margin: 0 0 10px 0;">ðŸ§ª Health Potion</h3>
                 <p style="margin: 0 0 10px 0; color: #4a9eff;">${potionDef.description}</p>
                 <p style="margin: 0; font-size: 12px; color: #888;">
                     Click to pick up (within 20m)<br>
@@ -499,7 +499,7 @@ class TutorialEncounterSystem {
     }
 
     pickupHealthPotion(marker, potionDef) {
-        console.log('🧪 Picking up health potion!');
+        console.log('ðŸ§ª Picking up health potion!');
         
         // Remove marker from map
         if (window.mapEngine && window.mapEngine.map) {
@@ -507,20 +507,20 @@ class TutorialEncounterSystem {
         }
         
         // Add to inventory using the main item system
-        console.log('🧪 Checking item system availability...');
-        console.log('🧪 window.itemSystem:', !!window.itemSystem);
-        console.log('🧪 window.itemSystem.addToInventory:', !!(window.itemSystem && window.itemSystem.addToInventory));
+        console.log('ðŸ§ª Checking item system availability...');
+        console.log('ðŸ§ª window.itemSystem:', !!window.itemSystem);
+        console.log('ðŸ§ª window.itemSystem.addToInventory:', !!(window.itemSystem && window.itemSystem.addToInventory));
         
         const addToInventory = () => {
             if (window.itemSystem && window.itemSystem.addToInventory) {
                 const itemId = 'health_potion';
-                console.log('🧪 Attempting to add health potion to inventory...');
+                console.log('ðŸ§ª Attempting to add health potion to inventory...');
                 const success = window.itemSystem.addToInventory(itemId, 1);
                 if (success) {
-                    console.log('🧪 Added health potion to main item system inventory');
+                    console.log('ðŸ§ª Added health potion to main item system inventory');
                     return true;
                 } else {
-                    console.warn('🧪 Failed to add health potion to main item system inventory');
+                    console.warn('ðŸ§ª Failed to add health potion to main item system inventory');
                     return false;
                 }
             }
@@ -528,19 +528,19 @@ class TutorialEncounterSystem {
         };
         
         if (!addToInventory()) {
-            console.warn('🧪 Main item system not available, trying fallback...');
+            console.warn('ðŸ§ª Main item system not available, trying fallback...');
             // Fallback: try encounter system item system
             if (window.encounterSystem && window.encounterSystem.itemSystem && window.encounterSystem.itemSystem.addToInventory) {
                 const itemId = 'health_potion';
                 const success = window.encounterSystem.itemSystem.addToInventory(itemId, 1);
                 if (success) {
-                    console.log('🧪 Added health potion to encounter system inventory (fallback)');
+                    console.log('ðŸ§ª Added health potion to encounter system inventory (fallback)');
                 } else {
-                    console.warn('🧪 Failed to add health potion to encounter system inventory');
+                    console.warn('ðŸ§ª Failed to add health potion to encounter system inventory');
                 }
             } else {
-                console.warn('🧪 No item system available for inventory');
-                console.warn('🧪 Available systems:', {
+                console.warn('ðŸ§ª No item system available for inventory');
+                console.warn('ðŸ§ª Available systems:', {
                     itemSystem: !!window.itemSystem,
                     encounterSystem: !!window.encounterSystem,
                     encounterItemSystem: !!(window.encounterSystem && window.encounterSystem.itemSystem)
@@ -556,7 +556,7 @@ class TutorialEncounterSystem {
         
         // Show pickup message
         this.showTutorialMessage(`
-            🧪 Health potion added to your inventory! 
+            ðŸ§ª Health potion added to your inventory! 
             <br><br>
             Open your inventory panel (bottom tab) and tap the health potion to use it. 
             <br><br>
@@ -572,7 +572,7 @@ class TutorialEncounterSystem {
     }
 
     useHealthPotion() {
-        console.log('🧪 Using health potion from inventory');
+        console.log('ðŸ§ª Using health potion from inventory');
         
         // Use the main item system (same as mobile UI)
         if (window.itemSystem) {
@@ -586,15 +586,15 @@ class TutorialEncounterSystem {
             // Try the primary path via item system
             let success = false;
             try {
-                console.log('🧪 Attempting window.itemSystem.useConsumable("health_potion")');
+                console.log('ðŸ§ª Attempting window.itemSystem.useConsumable("health_potion")');
                 success = !!window.itemSystem.useConsumable('health_potion');
             } catch (err) {
-                console.warn('🧪 useConsumable threw error, will attempt fallback', err);
+                console.warn('ðŸ§ª useConsumable threw error, will attempt fallback', err);
                 success = false;
             }
             
             if (!success) {
-                console.log('🧪 Primary consumable path returned false — applying robust fallback');
+                console.log('ðŸ§ª Primary consumable path returned false â€” applying robust fallback');
                 try {
                     // Ensure player stats exist
                     let ps = window.encounterSystem?.playerStats;
@@ -632,7 +632,7 @@ class TutorialEncounterSystem {
                             }
                         }
                     } catch (_) {
-                        console.warn('🧪 Fallback removal failed (non-fatal)');
+                        console.warn('ðŸ§ª Fallback removal failed (non-fatal)');
                     }
                     
                     // Tutorial progression
@@ -647,11 +647,11 @@ class TutorialEncounterSystem {
                     // Feedback
                     const healed = ps.health - beforeHealth;
                     const sanityLoss = beforeSanity - ps.sanity;
-                    this.showTutorialMessage(`🧪 You used the health potion! +${healed} health, -${sanityLoss} sanity.`);
+                    this.showTutorialMessage(`ðŸ§ª You used the health potion! +${healed} health, -${sanityLoss} sanity.`);
                     try { window.UIPanels?.populateInventoryPanel?.(); } catch(_) {}
                     return true;
                 } catch (fallbackErr) {
-                    console.error('🧪 Fallback application failed', fallbackErr);
+                    console.error('ðŸ§ª Fallback application failed', fallbackErr);
                     this.showTutorialMessage('Failed to use the health potion!');
                     return false;
                 }
@@ -661,7 +661,7 @@ class TutorialEncounterSystem {
             this.tutorialFlags.set('potion_used', true);
             this.saveTutorialState();
             const currentHealth = window.encounterSystem?.playerStats?.health || 100;
-            this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${currentHealth}/100. You feel much better!`);
+            this.showTutorialMessage(`ðŸ§ª You used the health potion! Your health is now ${currentHealth}/100. You feel much better!`);
             return true;
         } else {
             // Fallback to tutorial flags if item system not available
@@ -683,33 +683,33 @@ class TutorialEncounterSystem {
             this.saveTutorialState();
             
             // Show healing message
-            this.showTutorialMessage(`🧪 You used the health potion! Your health is now ${newHealth}/100. You feel much better!`);
+            this.showTutorialMessage(`ðŸ§ª You used the health potion! Your health is now ${newHealth}/100. You feel much better!`);
             
             return true;
         }
     }
 
     spawnMeditationShrine() {
-        console.log('🧘‍♀️ Attempting to spawn meditation shrine...');
-        console.log('🧘‍♀️ Map engine available:', !!window.mapEngine);
-        console.log('🧘‍♀️ Map available:', !!(window.mapEngine && window.mapEngine.map));
-        console.log('🧘‍♀️ Tutorial stage:', this.tutorialStage);
+        console.log('ðŸ§˜â€â™€ï¸ Attempting to spawn meditation shrine...');
+        console.log('ðŸ§˜â€â™€ï¸ Map engine available:', !!window.mapEngine);
+        console.log('ðŸ§˜â€â™€ï¸ Map available:', !!(window.mapEngine && window.mapEngine.map));
+        console.log('ðŸ§˜â€â™€ï¸ Tutorial stage:', this.tutorialStage);
         
         const shrineDef = this.gameObjectsRegistry.get('meditation_shrine');
         if (!shrineDef) {
-            console.error('🧘‍♀️ Meditation shrine definition not found');
+            console.error('ðŸ§˜â€â™€ï¸ Meditation shrine definition not found');
             return;
         }
 
         const position = this.getPlayerPosition();
         if (!position) {
-            console.error('🧘‍♀️ Player position not available');
+            console.error('ðŸ§˜â€â™€ï¸ Player position not available');
             return;
         }
 
         // Wait for map to be ready if not available
         if (!window.mapEngine || !window.mapEngine.map) {
-            console.log('🧘‍♀️ Map not ready, waiting...');
+            console.log('ðŸ§˜â€â™€ï¸ Map not ready, waiting...');
             setTimeout(() => {
                 this.spawnMeditationShrine();
             }, 1000);
@@ -718,23 +718,23 @@ class TutorialEncounterSystem {
 
         // Calculate spawn position 80m from player
         const spawnPos = this.calculateSpawnPosition(position, 80);
-        console.log('🧘‍♀️ Calculated spawn position:', spawnPos);
+        console.log('ðŸ§˜â€â™€ï¸ Calculated spawn position:', spawnPos);
         
         const marker = this.createShrineMarker(spawnPos, shrineDef);
         if (!marker) {
-            console.error('🧘‍♀️ Failed to create shrine marker');
+            console.error('ðŸ§˜â€â™€ï¸ Failed to create shrine marker');
             return;
         }
         
         this.spawnedObjects.set('meditation_shrine', marker);
         
-        console.log('🧘‍♀️ Meditation shrine spawned at:', spawnPos, 'Distance: 80m from player');
-        console.log('🧘‍♀️ Spawned objects count:', this.spawnedObjects.size);
+        console.log('ðŸ§˜â€â™€ï¸ Meditation shrine spawned at:', spawnPos, 'Distance: 80m from player');
+        console.log('ðŸ§˜â€â™€ï¸ Spawned objects count:', this.spawnedObjects.size);
         
         // Add popup with meditation instructions
         marker.bindPopup(`
             <div style="text-align: center; font-family: 'Courier New', monospace;">
-                <h3 style="color: #4a9eff; margin: 0 0 10px 0;">🧘‍♀️ Meditation Shrine</h3>
+                <h3 style="color: #4a9eff; margin: 0 0 10px 0;">ðŸ§˜â€â™€ï¸ Meditation Shrine</h3>
                 <p style="margin: 0 0 10px 0; color: #00ff88;">${shrineDef.description}</p>
                 <p style="margin: 0; font-size: 12px; color: #888;">
                     Click to meditate (within 20m)<br>
@@ -754,13 +754,13 @@ class TutorialEncounterSystem {
         // Force map update to ensure marker is visible
         if (window.mapEngine && window.mapEngine.map) {
             window.mapEngine.map.invalidateSize();
-            console.log('🧘‍♀️ Map invalidated to ensure marker visibility');
+            console.log('ðŸ§˜â€â™€ï¸ Map invalidated to ensure marker visibility');
         }
         
         // Trigger immediate proximity check and periodic proximity checks while shrine exists
         setTimeout(() => {
             const position = this.getPlayerPosition();
-            console.log('🧘‍♀️ Triggering immediate proximity check after shrine spawn');
+            console.log('ðŸ§˜â€â™€ï¸ Triggering immediate proximity check after shrine spawn');
             this.checkProximityTriggers(position);
         }, 800);
         
@@ -776,7 +776,7 @@ class TutorialEncounterSystem {
     }
     
     showShrineLocation(shrinePos) {
-        console.log('📍 Showing shrine location to player...');
+        console.log('ðŸ“ Showing shrine location to player...');
         
         // Center map on shrine location
         if (window.mapEngine && window.mapEngine.map) {
@@ -789,7 +789,7 @@ class TutorialEncounterSystem {
         // Show tutorial message with shrine location
         setTimeout(() => {
             this.showTutorialMessage(`
-                🧘‍♀️ <strong>Meditation Shrine Located!</strong><br><br>
+                ðŸ§˜â€â™€ï¸ <strong>Meditation Shrine Located!</strong><br><br>
                 A peaceful meditation shrine has appeared on your map. Walk to it and click to meditate to restore your sanity.<br><br>
                 <em>The shrine glows with a golden aura - you can't miss it!</em>
             `);
@@ -833,7 +833,7 @@ class TutorialEncounterSystem {
                 window.healthBar.setSanity(window.encounterSystem.playerStats.sanity, window.encounterSystem.playerStats.maxSanity);
             }
             
-            this.showTutorialMessage(`🧘‍♀️ You meditate at the shrine and feel your mind clearing... +${sanityGained} sanity restored! Your mind is now at peace.`);
+            this.showTutorialMessage(`ðŸ§˜â€â™€ï¸ You meditate at the shrine and feel your mind clearing... +${sanityGained} sanity restored! Your mind is now at peace.`);
             
             // Update tutorial stage
             this.tutorialStage = 4;
@@ -843,11 +843,11 @@ class TutorialEncounterSystem {
             // Show next tutorial message and trigger Aurora meeting
             setTimeout(() => {
                 this.showTutorialMessage(`
-                    🌟 Excellent! You have learned the basics of cosmic exploration:
+                    Ÿ Excellent! You have learned the basics of cosmic exploration:
                     <br><br>
-                    • How to collect items and use them from your inventory
-                    • The cosmic cost of powerful potions (sanity loss)
-                    • How to restore your sanity through meditation
+                    â€¢ How to collect items and use them from your inventory
+                    â€¢ The cosmic cost of powerful potions (sanity loss)
+                    â€¢ How to restore your sanity through meditation
                     <br><br>
                     <em>As you finish meditating, you sense a presence approaching...</em>
                 `);
@@ -867,7 +867,7 @@ class TutorialEncounterSystem {
     }
     
     triggerAuroraMeeting() {
-        console.log('👑 Triggering Aurora meeting...');
+        console.log('ðŸ‘‘ Triggering Aurora meeting...');
         
         // Create Aurora meeting dialog
         this.showAuroraMeetingDialog();
@@ -936,7 +936,7 @@ class TutorialEncounterSystem {
                         font-size: 30px;
                         box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
                         animation: auroraGlow 2s infinite;
-                    ">👑</div>
+                    ">ðŸ‘‘</div>
                     <div style="margin-top: 30px;">
                         Aurora - The Cosmic Navigator
                     </div>
@@ -949,7 +949,7 @@ class TutorialEncounterSystem {
                     </div>
                     
                     <div style="background: rgba(74, 158, 255, 0.1); border: 1px solid #4a9eff; border-radius: 10px; padding: 20px; margin: 20px 0;">
-                        <h3 style="color: #4a9eff; margin: 0 0 15px 0; text-align: center;">🌟 Main Quest: The Cosmic Convergence</h3>
+                        <h3 style="color: #4a9eff; margin: 0 0 15px 0; text-align: center;">Ÿ Main Quest: The Cosmic Convergence</h3>
                         <p style="color: #ffffff; line-height: 1.6; margin: 0 0 15px 0;">
                             The cosmic realm is in turmoil. Ancient forces are awakening, and the balance between light and shadow is shifting. 
                             As one who has proven their worth through trials of health, sanity, and wisdom, you are chosen to restore cosmic harmony.
@@ -959,7 +959,7 @@ class TutorialEncounterSystem {
                             There, you will find clues to the greater mystery that threatens all of existence.
                         </p>
                         <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                            <h4 style="color: #ffd700; margin: 0 0 10px 0; text-align: center;">🌐 Multiplayer Cosmic Realm</h4>
+                            <h4 style="color: #ffd700; margin: 0 0 10px 0; text-align: center;"> Multiplayer Cosmic Realm</h4>
                             <p style="color: #feca57; line-height: 1.5; margin: 0; font-size: 14px;">
                                 <strong>You are not alone in this cosmic journey!</strong> Other cosmic wanderers are exploring the realm simultaneously. 
                                 You may encounter them at sacred sites, trade cosmic artifacts, or join forces to face greater cosmic challenges together.
@@ -1039,11 +1039,11 @@ class TutorialEncounterSystem {
     }
     
     spawnAuroraMarker() {
-        console.log('👑 Spawning Aurora marker...');
+        console.log('ðŸ‘‘ Spawning Aurora marker...');
         
         // Check if tutorial is complete - if so, don't spawn tutorial Aurora
         if (this.tutorialFlags.get('tutorial_complete')) {
-            console.log('👑 Tutorial complete, not spawning tutorial Aurora');
+            console.log('ðŸ‘‘ Tutorial complete, not spawning tutorial Aurora');
             return;
         }
         
@@ -1054,7 +1054,7 @@ class TutorialEncounterSystem {
         const spawnPos = this.calculateSpawnPosition(position, 50);
         
         if (!window.mapEngine || !window.mapEngine.map) {
-            console.log('👑 Map not ready, waiting...');
+            console.log('ðŸ‘‘ Map not ready, waiting...');
             setTimeout(() => {
                 this.spawnAuroraMarker();
             }, 1000);
@@ -1066,7 +1066,7 @@ class TutorialEncounterSystem {
             html: `
                 <div style="position: relative; width: 60px; height: 60px;">
                     <div style="position: absolute; top: -5px; left: -5px; width: 70px; height: 70px; background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%); border-radius: 50%; animation: auroraMarkerGlow 3s infinite;"></div>
-                    <div style="position: absolute; top: 5px; left: 5px; width: 50px; height: 50px; background: linear-gradient(45deg, #ffd700, #ffed4e); border: 3px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);">👑</div>
+                    <div style="position: absolute; top: 5px; left: 5px; width: 50px; height: 50px; background: linear-gradient(45deg, #ffd700, #ffed4e); border: 3px solid #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);">ðŸ‘‘</div>
                 </div>
             `,
             iconSize: [60, 60],
@@ -1077,7 +1077,7 @@ class TutorialEncounterSystem {
         
         marker.bindPopup(`
             <div style="text-align: center; font-family: 'Courier New', monospace;">
-                <h3 style="color: #ffd700; margin: 0 0 10px 0;">👑 Aurora - The Cosmic Navigator</h3>
+                <h3 style="color: #ffd700; margin: 0 0 10px 0;">ðŸ‘‘ Aurora - The Cosmic Navigator</h3>
                 <p style="margin: 0 0 10px 0; color: #4ecdc4;">Lost star pilot with stellar wisdom</p>
                 <p style="margin: 0; font-size: 12px; color: #888;">
                     Walking towards you...<br>
@@ -1089,7 +1089,7 @@ class TutorialEncounterSystem {
         // Store marker reference
         this.spawnedObjects.set('aurora', marker);
         
-        console.log('👑 Aurora marker spawned at:', spawnPos);
+        console.log('ðŸ‘‘ Aurora marker spawned at:', spawnPos);
         
         // Start Aurora walking animation towards player
         this.startAuroraWalkingAnimation(marker, spawnPos, position);
@@ -1120,11 +1120,11 @@ class TutorialEncounterSystem {
     }
     
     startAuroraWalkingAnimation(marker, startPos, targetPos) {
-        console.log('👑 Starting Aurora walking animation...');
+        console.log('ðŸ‘‘ Starting Aurora walking animation...');
         
         // Show tutorial message about Aurora approaching
         this.showTutorialMessage(`
-            👑 <strong>Aurora Approaches!</strong><br><br>
+            ðŸ‘‘ <strong>Aurora Approaches!</strong><br><br>
             You see a golden figure walking towards you from the distance. 
             The cosmic navigator Aurora has detected your presence and is coming to meet you!<br><br>
             <em>She moves with purpose, her golden aura glowing brighter as she approaches...</em>
@@ -1157,7 +1157,7 @@ class TutorialEncounterSystem {
             
             if (currentStep >= steps || distance < 5) {
                 clearInterval(walkInterval);
-                console.log('👑 Aurora has reached the player!');
+                console.log('ðŸ‘‘ Aurora has reached the player!');
                 
                 // Stop walking animation
                 if (markerElement) {
@@ -1167,7 +1167,7 @@ class TutorialEncounterSystem {
                 // Update popup to show she's ready to talk
                 marker.bindPopup(`
                     <div style="text-align: center; font-family: 'Courier New', monospace;">
-                        <h3 style="color: #ffd700; margin: 0 0 10px 0;">👑 Aurora - The Cosmic Navigator</h3>
+                        <h3 style="color: #ffd700; margin: 0 0 10px 0;">ðŸ‘‘ Aurora - The Cosmic Navigator</h3>
                         <p style="margin: 0 0 10px 0; color: #4ecdc4;">Lost star pilot with stellar wisdom</p>
                         <p style="margin: 0; font-size: 12px; color: #888;">
                             Click to talk (within 20m)<br>
@@ -1184,7 +1184,7 @@ class TutorialEncounterSystem {
                 // Show final approach message
                 setTimeout(() => {
                     this.showTutorialMessage(`
-                        👑 <strong>Aurora has arrived!</strong><br><br>
+                        ðŸ‘‘ <strong>Aurora has arrived!</strong><br><br>
                         The cosmic navigator stands before you, her golden aura pulsing with ancient wisdom. 
                         She looks at you with knowing eyes, as if she's been waiting for this moment.<br><br>
                         <em>Click on her to begin your conversation...</em>
@@ -1233,13 +1233,13 @@ class TutorialEncounterSystem {
         
         dialog.innerHTML = `
             <div style="text-align: center; font-family: 'Courier New', monospace;">
-                <h3 style="color: #ffd700; margin: 0 0 15px 0; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);">👑 Aurora</h3>
+                <h3 style="color: #ffd700; margin: 0 0 15px 0; text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);">ðŸ‘‘ Aurora</h3>
                 <p style="margin: 0 0 15px 0; color: #4ecdc4; font-size: 16px; line-height: 1.6;">
                     "The cosmic realm needs your help, brave wanderer. The Corroding Lake holds the first key to understanding the great disturbance. 
                     Seek it out, and remember - trust in your cosmic intuition."
                 </p>
                 <p style="margin: 0 0 15px 0; color: #ffd700; font-size: 14px; line-height: 1.5;">
-                    <strong>🌐 Multiplayer Note:</strong> You are not alone in this cosmic realm. Other cosmic wanderers are exploring simultaneously. 
+                    <strong> Multiplayer Note:</strong> You are not alone in this cosmic realm. Other cosmic wanderers are exploring simultaneously. 
                     Look for golden markers on your map - these indicate areas where other players are active!
                 </p>
                 <p style="margin: 0; color: #feca57; font-size: 14px;">
@@ -1305,7 +1305,7 @@ class TutorialEncounterSystem {
             const marker = this.createShrineMarker(spawnPos, shrineDef);
             this.spawnedObjects.set(shrineDef.name.toLowerCase().replace(' ', '_'), marker);
             
-            console.log(`🏛️ ${shrineDef.name} spawned at:`, spawnPos);
+            console.log(`ðŸ›ï¸ ${shrineDef.name} spawned at:`, spawnPos);
         });
     }
 
@@ -1325,7 +1325,7 @@ class TutorialEncounterSystem {
             const marker = this.createMonsterMarker(spawnPos, monsterDef);
             this.spawnedObjects.set(monsterDef.name.toLowerCase().replace(' ', '_'), marker);
             
-            console.log(`👹 ${monsterDef.name} spawned at:`, spawnPos);
+            console.log(`ðŸ‘¹ ${monsterDef.name} spawned at:`, spawnPos);
         });
     }
 
@@ -1340,13 +1340,13 @@ class TutorialEncounterSystem {
         const marker = this.createNPCMarker(spawnPos, auroraDef);
         this.spawnedObjects.set('aurora', marker);
         
-        console.log('🌟 Aurora spawned at:', spawnPos);
+        console.log('Ÿ Aurora spawned at:', spawnPos);
     }
 
     createItemMarker(position, itemDef) {
-        console.log('🧪 createItemMarker called with:', { position, itemDef, mapEngine: !!window.mapEngine, map: !!(window.mapEngine && window.mapEngine.map) });
+        console.log('ðŸ§ª createItemMarker called with:', { position, itemDef, mapEngine: !!window.mapEngine, map: !!(window.mapEngine && window.mapEngine.map) });
         if (!window.mapEngine || !window.mapEngine.map) {
-            console.warn('🧪 Map engine or map not available');
+            console.warn('ðŸ§ª Map engine or map not available');
             return null;
         }
 
@@ -1363,7 +1363,7 @@ class TutorialEncounterSystem {
         });
 
         const marker = L.marker([position.lat, position.lng], { icon }).addTo(window.mapEngine.map);
-        console.log('🧪 Leaflet marker created and added to map:', marker);
+        console.log('ðŸ§ª Leaflet marker created and added to map:', marker);
         
         marker.bindPopup(`
             <div class="tutorial-popup">
@@ -1380,7 +1380,7 @@ class TutorialEncounterSystem {
             // Initialize itemMarkers array if it doesn't exist
             if (!window.mapEngine.itemMarkers) {
                 window.mapEngine.itemMarkers = [];
-                console.log('🧪 Initialized map engine itemMarkers array');
+                console.log('ðŸ§ª Initialized map engine itemMarkers array');
             }
 
             const itemData = {
@@ -1394,15 +1394,15 @@ class TutorialEncounterSystem {
             };
             
             window.mapEngine.itemMarkers.push(itemData);
-            console.log('🧪 Added tutorial item to map engine itemMarkers array, total items:', window.mapEngine.itemMarkers.length);
+            console.log('ðŸ§ª Added tutorial item to map engine itemMarkers array, total items:', window.mapEngine.itemMarkers.length);
         
             // Trigger WebGL conversion for the new item
             if (window.webglMapIntegration && window.webglMapIntegration.convertItemMarker) {
                 window.webglMapIntegration.convertItemMarker(itemData, `tutorial_${itemDef.name.toLowerCase().replace(' ', '_')}`);
-                console.log('🧪 Triggered WebGL conversion for tutorial item');
+                console.log('ðŸ§ª Triggered WebGL conversion for tutorial item');
             }
         } else {
-            console.warn('🧪 Map engine not available for item marker registration');
+            console.warn('ðŸ§ª Map engine not available for item marker registration');
         }
 
         return marker;
@@ -1525,7 +1525,7 @@ class TutorialEncounterSystem {
         const itemDef = this.gameObjectsRegistry.get(itemId);
         if (!itemDef) return;
 
-        console.log(`🎓 Interacting with ${itemDef.name}`);
+        console.log(`“ Interacting with ${itemDef.name}`);
         
         // Apply item effect
         if (itemDef.interaction.effect === 'heal' && window.encounterSystem) {
@@ -1551,7 +1551,7 @@ class TutorialEncounterSystem {
         const shrineDef = this.gameObjectsRegistry.get(shrineId);
         if (!shrineDef) return;
 
-        console.log(`🎓 Interacting with ${shrineDef.name}`);
+        console.log(`“ Interacting with ${shrineDef.name}`);
         
         // If this is the meditation shrine, use the dedicated meditation handler with distance check
         if (shrineId === 'meditation_shrine') {
@@ -1580,7 +1580,7 @@ class TutorialEncounterSystem {
         const monsterDef = this.gameObjectsRegistry.get(monsterId);
         if (!monsterDef) return;
 
-        console.log(`🎓 ${action} with ${monsterDef.name}`);
+        console.log(`“ ${action} with ${monsterDef.name}`);
 
         if (action === 'attack') {
             this.startCombatTutorial(monsterDef);
@@ -1593,7 +1593,7 @@ class TutorialEncounterSystem {
         const npcDef = this.gameObjectsRegistry.get(npcId);
         if (!npcDef) return;
 
-        console.log(`🎓 Talking to ${npcDef.name}`);
+        console.log(`“ Talking to ${npcDef.name}`);
         
         // Start quest dialogue
         this.startQuestDialogue(npcDef);
@@ -1678,31 +1678,31 @@ class TutorialEncounterSystem {
     }
 
     checkProximityTriggers(position) {
-        console.log('🎯 Checking proximity triggers...');
-        console.log('🎯 Player position:', position);
-        console.log('🎯 Spawned objects count:', this.spawnedObjects.size);
-        console.log('🎯 Spawned objects keys:', Array.from(this.spawnedObjects.keys()));
+        console.log('¯ Checking proximity triggers...');
+        console.log('¯ Player position:', position);
+        console.log('¯ Spawned objects count:', this.spawnedObjects.size);
+        console.log('¯ Spawned objects keys:', Array.from(this.spawnedObjects.keys()));
         
         // Check if player is near any tutorial objects
         this.spawnedObjects.forEach((marker, objectId) => {
-            console.log(`🎯 Checking object: ${objectId}`);
+            console.log(`¯ Checking object: ${objectId}`);
             const markerPos = marker.getLatLng();
             const distance = this.calculateDistance(position, markerPos);
-            console.log(`🎯 Distance to ${objectId}: ${distance.toFixed(1)}m`);
+            console.log(`¯ Distance to ${objectId}: ${distance.toFixed(1)}m`);
             
             if (distance < 40) { // Within 40 meters show hint
-                console.log(`🎯 Player is within 40m of ${objectId}`);
+                console.log(`¯ Player is within 40m of ${objectId}`);
                 this.showProximityHint(objectId);
                 
                 // Check if this is a shrine and trigger interaction
                 if (objectId === 'meditation_shrine') {
-                    console.log('🧘‍♀️ Found meditation shrine in proximity check!');
+                    console.log('ðŸ§˜â€â™€ï¸ Found meditation shrine in proximity check!');
                     const shrineDef = this.gameObjectsRegistry.get('meditation_shrine');
                     if (shrineDef) {
                         // Only show tutorial message once per shrine
                         if (!this.tutorialFlags.get('shrine_proximity_shown')) {
                             this.showTutorialMessage(`
-                                🧘‍♀️ <strong>Meditation Shrine Nearby!</strong><br><br>
+                                ðŸ§˜â€â™€ï¸ <strong>Meditation Shrine Nearby!</strong><br><br>
                                 You sense the peaceful energy of a meditation shrine. Click on it to restore your sanity and find inner peace.
                                 <br><br>
                                 <em>The shrine glows with golden light - you can't miss it!</em>
@@ -1712,7 +1712,7 @@ class TutorialEncounterSystem {
                         
                         // Auto-trigger shrine interaction if player is close enough
                         if (distance < 25 && !this.tutorialFlags.get('shrine_auto_triggered')) { // Within 25 meters, auto-trigger (more forgiving for mobile GPS)
-                            console.log('🧘‍♀️ Player is very close to shrine, auto-triggering meditation...');
+                            console.log('ðŸ§˜â€â™€ï¸ Player is very close to shrine, auto-triggering meditation...');
                             this.tutorialFlags.set('shrine_auto_triggered', true);
                             setTimeout(() => {
                                 this.handleMeditationShrineClick(marker, shrineDef);
@@ -1737,13 +1737,13 @@ class TutorialEncounterSystem {
 
     showProximityHint(objectId) {
         // Could show a subtle hint when player is near objects
-        console.log(`🎓 Player is near ${objectId}`);
+        console.log(`“ Player is near ${objectId}`);
     }
 
     setTutorialFlag(flag, value) {
         this.tutorialFlags.set(flag, value);
         this.saveTutorialState();
-        console.log(`🎓 Tutorial flag set: ${flag} = ${value}`);
+        console.log(`“ Tutorial flag set: ${flag} = ${value}`);
     }
 
     advanceTutorialStage() {
@@ -1756,7 +1756,7 @@ class TutorialEncounterSystem {
     }
 
     completeTutorial() {
-        console.log('🎓 Tutorial completed!');
+        console.log('“ Tutorial completed!');
         this.isActive = false;
         this.setTutorialFlag('tutorial_complete', true);
         
@@ -1778,29 +1778,29 @@ class TutorialEncounterSystem {
         
         // Initialize NPC system
         if (window.eldritchApp && window.eldritchApp.systems.npc) {
-            console.log('👥 Starting NPC system after tutorial completion');
+            console.log('ðŸ‘¥ Starting NPC system after tutorial completion');
             window.eldritchApp.systems.npc.startSimulation();
         }
         
         // Initialize quest system
         if (window.eldritchApp && window.eldritchApp.systems.quest) {
-            console.log('🎭 Starting quest system after tutorial completion');
+            console.log('­ Starting quest system after tutorial completion');
             window.eldritchApp.systems.quest.isPaused = false;
             window.eldritchApp.systems.quest.createQuestMarkers();
         }
     }
 
     showTutorialMessage(message) {
-        console.log(`🎓 Tutorial: ${message}`);
+        console.log(`“ Tutorial: ${message}`);
         
         // Create tutorial message overlay
         const tutorialOverlay = document.createElement('div');
         tutorialOverlay.className = 'tutorial-overlay';
         tutorialOverlay.innerHTML = `
             <div class="tutorial-message">
-                <div class="tutorial-icon">🎓</div>
+                <div class="tutorial-icon">“</div>
                 <div class="tutorial-text">${message}</div>
-                <button class="tutorial-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                <button class="tutorial-close" onclick="this.parentElement.parentElement.remove()">Ã—</button>
             </div>
         `;
         
@@ -1839,7 +1839,7 @@ class TutorialEncounterSystem {
         this.tutorialFlags.clear();
         this.spawnedObjects.clear();
         this.isActive = false;
-        console.log('🎓 Tutorial reset');
+        console.log('“ Tutorial reset');
     }
     
     // Clear tutorial flag and disable tutorial
@@ -1849,7 +1849,7 @@ class TutorialEncounterSystem {
         this.isActive = false;
         this.tutorialFlags.clear();
         this.tutorialStage = 0;
-        console.log('🎓 Tutorial disabled and state cleared');
+        console.log('“ Tutorial disabled and state cleared');
     }
     
     // Force complete tutorial to skip it
@@ -1857,7 +1857,7 @@ class TutorialEncounterSystem {
         this.tutorialFlags.set('tutorial_complete', true);
         this.saveTutorialState();
         this.isActive = false;
-        console.log('🎓 Tutorial force completed');
+        console.log('“ Tutorial force completed');
     }
 }
 
@@ -1868,7 +1868,7 @@ window.disableTutorial = function() {
     } else {
         localStorage.removeItem('eldritch_start_tutorial_encounter');
         localStorage.removeItem('eldritch_tutorial_state');
-        console.log('🎓 Tutorial disabled (system not available)');
+        console.log('“ Tutorial disabled (system not available)');
     }
 };
 
@@ -1880,7 +1880,7 @@ window.forceCompleteTutorial = function() {
             stage: 0,
             flags: [['tutorial_complete', true]]
         }));
-        console.log('🎓 Tutorial force completed (system not available)');
+        console.log('“ Tutorial force completed (system not available)');
     }
 };
 
@@ -1889,20 +1889,20 @@ window.clearTutorialModal = function() {
     const tutorialModal = document.getElementById('tutorial-welcome-modal');
     if (tutorialModal) {
         tutorialModal.remove();
-        console.log('🎓 Tutorial welcome modal removed');
+        console.log('“ Tutorial welcome modal removed');
     }
     
     // Remove any player identity modals
     const identityModal = document.getElementById('user-settings-modal');
     if (identityModal) {
         identityModal.classList.add('hidden');
-        console.log('🎓 Player identity modal hidden');
+        console.log('“ Player identity modal hidden');
     }
     
     // Clear tutorial flags
     localStorage.removeItem('eldritch_start_tutorial_encounter');
     localStorage.removeItem('eldritch_tutorial_state');
-    console.log('🎓 Tutorial state cleared');
+    console.log('“ Tutorial state cleared');
 };
 
 // Add CSS animations
@@ -2009,3 +2009,5 @@ document.head.appendChild(tutorialStyles);
 
 // Make globally available
 window.TutorialEncounterSystem = TutorialEncounterSystem;
+
+

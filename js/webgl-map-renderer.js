@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WebGL Map Object Renderer
  * High-performance GPU-based rendering for map objects with LOD support
  * Based on single Float32Array architecture for maximum performance
@@ -60,7 +60,7 @@ class WebGLMapRenderer {
         this.setupShaders();
         this.setupBuffers();
         this.setupObjectData();
-        console.log('🌌 WebGL Map Renderer initialized');
+        console.log('Œ WebGL Map Renderer initialized');
     }
     
     setupWebGLCanvas() {
@@ -86,7 +86,7 @@ class WebGLMapRenderer {
         // Get WebGL context
         this.gl = this.canvas.getContext('webgl2') || this.canvas.getContext('webgl');
         if (!this.gl) {
-            console.error('🌌 WebGL not supported');
+            console.error('Œ WebGL not supported');
             return;
         }
         
@@ -269,7 +269,7 @@ class WebGLMapRenderer {
         this.gl.linkProgram(this.program);
         
         if (!this.gl.getProgramParameter(this.program, this.gl.LINK_STATUS)) {
-            console.error('🌌 Shader program linking failed:', this.gl.getProgramInfoLog(this.program));
+            console.error('Œ Shader program linking failed:', this.gl.getProgramInfoLog(this.program));
         }
         
         // Get attribute and uniform locations
@@ -294,7 +294,7 @@ class WebGLMapRenderer {
         // Check for invalid attribute locations and disable WebGL if needed
         const invalidAttribs = Object.entries(this.attribLocations).filter(([name, location]) => location === -1);
         if (invalidAttribs.length > 0) {
-            console.warn('🌌 Invalid attribute locations detected:', invalidAttribs);
+            console.warn('Œ Invalid attribute locations detected:', invalidAttribs);
             this.isEnabled = false;
             return;
         }
@@ -315,7 +315,7 @@ class WebGLMapRenderer {
         this.gl.compileShader(shader);
         
         if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-            console.error('🌌 Shader compilation failed:', this.gl.getShaderInfoLog(shader));
+            console.error('Œ Shader compilation failed:', this.gl.getShaderInfoLog(shader));
             this.gl.deleteShader(shader);
             return null;
         }
@@ -342,7 +342,7 @@ class WebGLMapRenderer {
     // Add object to the render queue
     addObject(object) {
         if (this.objectCount >= this.maxObjects) {
-            console.warn('🌌 Maximum object count reached');
+            console.warn('Œ Maximum object count reached');
             return false;
         }
         
@@ -543,3 +543,5 @@ class WebGLMapRenderer {
 
 // Export for use in other modules
 window.WebGLMapRenderer = WebGLMapRenderer;
+
+

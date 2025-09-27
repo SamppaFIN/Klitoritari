@@ -1,4 +1,4 @@
-/**
+﻿/**
  * MemoryManager - Memory management and garbage collection optimization
  * Monitors memory usage and triggers cleanup when needed
  */

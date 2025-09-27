@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Base System - Player base establishment and territory management
  * Handles base creation, territory expansion, and community connections
  */

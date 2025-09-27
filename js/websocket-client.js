@@ -1,4 +1,4 @@
-/**
+﻿/**
  * WebSocket Client - Real-time multiplayer communication
  * Handles connection to server, position sharing, and investigation updates
  */
@@ -20,7 +20,7 @@ class WebSocketClient {
     init() {
         this.setupUI();
         this.connect();
-        console.log('🌐 WebSocket client initialized');
+        console.log(' WebSocket client initialized');
     }
 
     setupUI() {
@@ -36,7 +36,7 @@ class WebSocketClient {
         const host = window.location.hostname;
         const port = window.location.port || (protocol === 'wss:' ? '443' : '80');
         const wsUrl = `${protocol}//${host}:${port}/ws`;
-        console.log('🌐 WebSocketClient connecting to:', wsUrl);
+        console.log(' WebSocketClient connecting to:', wsUrl);
 
         try {
             this.socket = new WebSocket(wsUrl);
@@ -51,7 +51,7 @@ class WebSocketClient {
         if (!this.socket) return;
 
         this.socket.onopen = () => {
-            console.log('🌐 WebSocket connected');
+            console.log(' WebSocket connected');
             this.isConnected = true;
             this.reconnectAttempts = 0;
             this.reconnectDelay = 1000;
@@ -78,7 +78,7 @@ class WebSocketClient {
         };
 
         this.socket.onclose = (event) => {
-            console.log('🌐 WebSocket disconnected:', event.code, event.reason);
+            console.log(' WebSocket disconnected:', event.code, event.reason);
             this.isConnected = false;
             this.updateConnectionStatus('disconnected');
             
@@ -93,7 +93,7 @@ class WebSocketClient {
         };
 
         this.socket.onerror = (error) => {
-            console.error('🌐 WebSocket error:', error);
+            console.error(' WebSocket error:', error);
             this.handleConnectionError();
         };
     }
@@ -216,7 +216,7 @@ class WebSocketClient {
                 lastSeen: Date.now()
             });
             
-            console.log(`👤 Player joined: ${payload.name || payload.playerId}`);
+            console.log(`ðŸ‘¤ Player joined: ${payload.name || payload.playerId}`);
 
             // UI/list rendering handled by MultiplayerManager; do not mutate DOM here
         }
@@ -224,7 +224,7 @@ class WebSocketClient {
 
     handlePlayerLeave(payload) {
         this.otherPlayers.delete(payload.playerId);
-        console.log(`👤 Player left: ${payload.playerId}`);
+        console.log(`ðŸ‘¤ Player left: ${payload.playerId}`);
     }
 
     handlePositionUpdate(payload) {
@@ -246,7 +246,7 @@ class WebSocketClient {
             const player = this.otherPlayers.get(payload.playerId);
             if (player) {
                 player.investigation = payload.investigation;
-                console.log(`🔍 Player started investigation: ${payload.investigation.name}`);
+                console.log(`ðŸ” Player started investigation: ${payload.investigation.name}`);
             }
         }
     }
@@ -256,13 +256,13 @@ class WebSocketClient {
             const player = this.otherPlayers.get(payload.playerId);
             if (player) {
                 player.investigation = null;
-                console.log(`🎉 Player completed investigation: ${payload.investigation.name}`);
+                console.log(`‰ Player completed investigation: ${payload.investigation.name}`);
             }
         }
     }
 
     handleZoneEntry(payload) {
-        console.log(`🌙 Player entered zone: ${payload.zoneType}`);
+        console.log(`™ Player entered zone: ${payload.zoneType}`);
         
         if (this.onInvestigationUpdate) {
             this.onInvestigationUpdate(payload);
@@ -313,7 +313,7 @@ class WebSocketClient {
 
     attemptReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.log('🌐 Max reconnection attempts reached');
+            console.log(' Max reconnection attempts reached');
             this.updateConnectionStatus('error');
             return;
         }
@@ -321,7 +321,7 @@ class WebSocketClient {
         this.reconnectAttempts++;
         this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000); // Max 30 seconds
         
-        console.log(`🌐 Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${this.reconnectDelay}ms`);
+        console.log(` Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${this.reconnectDelay}ms`);
         this.updateConnectionStatus('connecting');
         
         setTimeout(() => {
@@ -444,3 +444,5 @@ class WebSocketClient {
 
 // Export for use in other modules
 window.WebSocketClient = WebSocketClient;
+
+

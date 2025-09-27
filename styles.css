@@ -88,7 +88,7 @@ html, body {
     position: relative;
     width: 100%;
     height: 100vh;
-    padding-top: 70px; /* Account for fixed header */
+    padding-top: var(--header-height); /* Account for fixed header */
     padding-bottom: 80px; /* Account for fixed footer */
 }
 
@@ -113,7 +113,7 @@ html, body {
     pointer-events: auto;
 }
 
-/* Header */
+/* NEW HEADER DESIGN - Modern Mobile-First UI */
 #header {
     position: fixed;
     top: 0;
@@ -121,15 +121,282 @@ html, body {
     right: 0;
     z-index: 1000;
     background: linear-gradient(135deg, rgba(15, 15, 35, 0.95), rgba(25, 25, 55, 0.95));
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
     border-bottom: 2px solid rgba(0, 255, 255, 0.3);
-    padding: 8px 16px;
+    padding: 12px 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 70px;
     height: auto;
-    min-height: 60px;
+}
+
+/* Header height variable for consistent positioning */
+:root {
+    --header-height: 70px;
+}
+
+/* Ensure all panels appear below header */
+.panel, .modal, .inventory-panel, .quest-panel, .base-panel, .settings-panel {
+    top: var(--header-height) !important;
+    z-index: 999 !important;
+}
+
+/* Three.js UI panels positioning */
+.threejs-panel {
+    top: var(--header-height) !important;
+    z-index: 999 !important;
+}
+
+/* Header notification styles */
+.header-notification {
+    position: fixed;
+    top: calc(var(--header-height) + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease-out;
+}
+
+.header-notification-success {
+    border: 1px solid rgba(76, 175, 80, 0.5);
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+}
+
+.header-notification-info {
+    border: 1px solid rgba(33, 150, 243, 0.5);
+    background: rgba(33, 150, 243, 0.1);
+    color: #2196F3;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes debugPanelSlideDown {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        max-height: 70vh;
+    }
+}
+
+@keyframes debugPanelSlideUp {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        max-height: 70vh;
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-30px);
+        max-height: 0;
+    }
+}
+
+/* Header Left - Game Logo and Title */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.game-logo {
+    font-size: 1.8rem;
+    filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.5));
+    animation: cosmic-pulse 2s ease-in-out infinite;
+}
+
+@keyframes cosmic-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.game-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    letter-spacing: 0.5px;
+}
+
+/* Header Center - Step Counter and Player Info */
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    justify-content: center;
+    min-width: 0; /* Allow flex shrinking */
+}
+
+.step-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 60px;
+    justify-content: center;
+}
+
+.step-section:hover {
+    background: rgba(0, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.step-icon {
+    font-size: 1rem;
+}
+
+.step-count {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #00ffff;
+    min-width: 20px;
+    text-align: center;
+}
+
+.player-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 60px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.base-flag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.base-flag:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.flag-icon {
+    width: 24px;
+    height: 18px;
+    object-fit: contain;
+}
+
+/* Header Right - Health, Sanity, Debug Toggle */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.health-section, .sanity-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 80px;
+}
+
+.health-icon, .sanity-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.health-bar, .sanity-bar {
+    width: 40px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff4444, #ff6666);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.sanity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4444ff, #6666ff);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.health-text, .sanity-text {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #ffffff;
+    min-width: 35px;
+    text-align: center;
+}
+
+.debug-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.debug-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.debug-icon {
+    font-size: 1.2rem;
 }
 
 .header-top {
@@ -1496,17 +1763,178 @@ html, body {
     transform: rotate(180deg);
 }
 
-/* Mobile Responsiveness */
+/* Mobile Responsiveness - Following Modern Mobile-First Principles */
 @media (max-width: 768px) {
-    #header {
-        top: 0;
-        left: 0;
-        right: 0;
-        padding: 8px 12px;
-        flex-direction: column;
-        gap: 10px;
-        min-height: 72px;
+    :root {
+        --header-height: 60px;
     }
+    
+    #header {
+        padding: 8px 12px;
+        min-height: 60px;
+        gap: 8px;
+    }
+    
+    .game-logo {
+        font-size: 1.5rem;
+    }
+    
+    .game-title {
+        font-size: 0.9rem;
+    }
+    
+    .header-center {
+        gap: 8px;
+    }
+    
+    .step-section {
+        padding: 4px 8px;
+        min-width: 50px;
+    }
+    
+    .step-count {
+        font-size: 0.8rem;
+    }
+    
+    .player-name {
+        font-size: 0.8rem;
+        padding: 3px 6px;
+        min-width: 50px;
+    }
+    
+    .base-flag {
+        width: 28px;
+        height: 20px;
+    }
+    
+    .flag-icon {
+        width: 20px;
+        height: 15px;
+    }
+    
+    .health-section, .sanity-section {
+        min-width: 60px;
+        gap: 4px;
+    }
+    
+    .health-bar, .sanity-bar {
+        width: 30px;
+        height: 5px;
+    }
+    
+    .health-text, .sanity-text {
+        font-size: 0.6rem;
+        min-width: 30px;
+    }
+    
+    .debug-toggle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .debug-icon {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --header-height: 55px;
+    }
+    
+    #header {
+        padding: 6px 8px;
+        min-height: 55px;
+        gap: 6px;
+    }
+    
+    .game-title {
+        display: none; /* Hide title on very small screens */
+    }
+    
+    .header-center {
+        gap: 6px;
+    }
+    
+    .step-section {
+        padding: 3px 6px;
+        min-width: 45px;
+    }
+    
+    .player-name {
+        min-width: 40px;
+        font-size: 0.7rem;
+    }
+    
+    .base-flag {
+        width: 24px;
+        height: 18px;
+    }
+    
+    .flag-icon {
+        width: 18px;
+        height: 13px;
+    }
+    
+    .health-section, .sanity-section {
+        min-width: 50px;
+    }
+    
+    .health-bar, .sanity-bar {
+        width: 25px;
+        height: 4px;
+    }
+    
+    .health-text, .sanity-text {
+        font-size: 0.5rem;
+        min-width: 25px;
+    }
+}
+
+/* Accessibility Features */
+@media (prefers-reduced-motion: reduce) {
+    .game-logo {
+        animation: none;
+    }
+    
+    .step-section:hover,
+    .base-flag:hover,
+    .debug-toggle:hover {
+        transform: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    #header {
+        background: rgba(0, 0, 0, 0.95);
+        border-bottom: 3px solid #00ffff;
+    }
+    
+    .game-title,
+    .step-count,
+    .player-name,
+    .health-text,
+    .sanity-text {
+        color: #ffffff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+    
+    .health-fill {
+        background: #ff0000;
+    }
+    
+    .sanity-fill {
+        background: #0000ff;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    #header {
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 40, 0.95));
+    }
+}
     
     .header-top h1 {
         font-size: 1rem;

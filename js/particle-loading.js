@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Particle Loading Screen - Animated particle effects for map loading
  * Creates beautiful cosmic particle animations during game initialization
  */
@@ -11,18 +11,18 @@ class ParticleLoadingScreen {
         this.animationId = null;
         this.isActive = false;
         this.loadingSteps = [
-            '🌌 Initializing cosmic effects...',
-            '🗺️ Loading map engine...',
-            '📍 Setting up geolocation...',
-            '🎭 Preparing encounters...',
-            '✨ Finalizing cosmic realm...'
+            'Œ Initializing cosmic effects...',
+            'ðŸ—ºï¸ Loading map engine...',
+            'ðŸ“ Setting up geolocation...',
+            '­ Preparing encounters...',
+            '¨ Finalizing cosmic realm...'
         ];
         this.currentStep = 0;
         this.progress = 0;
     }
 
     init() {
-        console.log('🌟 Initializing particle loading screen...');
+        console.log('Ÿ Initializing particle loading screen...');
         this.setupCanvas();
         this.createParticles();
         this.startAnimation();
@@ -32,7 +32,7 @@ class ParticleLoadingScreen {
     setupCanvas() {
         this.canvas = document.getElementById('particle-canvas');
         if (!this.canvas) {
-            console.error('🌟 Particle canvas not found');
+            console.error('Ÿ Particle canvas not found');
             return;
         }
 
@@ -180,7 +180,7 @@ class ParticleLoadingScreen {
     }
 
     startLoadingSequence() {
-        console.log('🌟 Starting loading sequence...');
+        console.log('Ÿ Starting loading sequence...');
         
         // Show the loading screen
         this.show();
@@ -237,7 +237,7 @@ class ParticleLoadingScreen {
     }
 
     completeLoading() {
-        console.log('🌟 Loading completed!');
+        console.log('Ÿ Loading completed!');
         
         // Update final step
         this.updateStep(4);
@@ -246,7 +246,7 @@ class ParticleLoadingScreen {
         // Update loading text
         const loadingText = document.getElementById('loading-text');
         if (loadingText) {
-            loadingText.textContent = '✨ Cosmic realm ready!';
+            loadingText.textContent = '¨ Cosmic realm ready!';
         }
         
         // Hide loading screen immediately
@@ -286,3 +286,5 @@ class ParticleLoadingScreen {
 
 // Make it globally available
 window.ParticleLoadingScreen = ParticleLoadingScreen;
+
+

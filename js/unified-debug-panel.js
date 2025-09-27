@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Unified Debug Panel System
  * Combines all debug panels into one draggable, tabbed interface
  */
@@ -12,10 +12,10 @@ class UnifiedDebugPanel {
         this.dragOffset = { x: 0, y: 0 };
         this.position = { x: 20, y: 20 };
         this.tabs = {
-            encounter: { name: '🎭 Encounters', icon: '🎭' },
-            chat: { name: '💬 Chat', icon: '💬' },
-            path: { name: '🎨 Path', icon: '🎨' },
-            quest: { name: '🐙 Quest', icon: '🐙' }
+            encounter: { name: '­ Encounters', icon: '­' },
+            chat: { name: 'ðŸ’¬ Chat', icon: 'ðŸ’¬' },
+            path: { name: ' Path', icon: '' },
+            quest: { name: 'ðŸ™ Quest', icon: 'ðŸ™' }
         };
     }
 
@@ -31,7 +31,7 @@ class UnifiedDebugPanel {
         
         this.loadPanelState();
         this.startStatsUpdate();
-        console.log('🔧 Unified debug panel initialized');
+        console.log('ðŸ”§ Unified debug panel initialized');
     }
 
     createPanel() {
@@ -50,12 +50,12 @@ class UnifiedDebugPanel {
         this.panel.innerHTML = `
             <div class="debug-header">
                 <div class="debug-title">
-                    <span class="debug-icon">🔧</span>
+                    <span class="debug-icon">ðŸ”§</span>
                     <span class="debug-text">Debug Console</span>
                 </div>
                 <div class="debug-controls">
-                    <button id="minimize-debug" class="debug-minimize">−</button>
-                    <button id="close-debug" class="debug-close">×</button>
+                    <button id="minimize-debug" class="debug-minimize">âˆ’</button>
+                    <button id="close-debug" class="debug-close">Ã—</button>
                 </div>
             </div>
             <div class="debug-tabs">
@@ -95,7 +95,7 @@ class UnifiedDebugPanel {
         this.toggleButton = document.createElement('button');
         this.toggleButton.id = 'debug-toggle-button';
         this.toggleButton.className = 'debug-toggle-button';
-        this.toggleButton.innerHTML = '🔧';
+        this.toggleButton.innerHTML = 'ðŸ”§';
         this.toggleButton.title = 'Toggle Debug Panel';
         
         // Position in top-right corner
@@ -112,7 +112,7 @@ class UnifiedDebugPanel {
     createEncounterTab() {
         return `
             <div class="debug-section">
-                <h4>👤 Player Stats</h4>
+                <h4>ðŸ‘¤ Player Stats</h4>
                 <div class="player-stats-display">
                     <div class="stat-row">
                         <span>Health: <span id="debug-health">100/100</span></span>
@@ -193,7 +193,7 @@ class UnifiedDebugPanel {
                 </div>
             </div>
             <div class="debug-section">
-                <h4>🧠 Distortion Effects</h4>
+                <h4>ðŸ§  Distortion Effects</h4>
                 <div class="distortion-controls">
                     <button id="test-blur" class="debug-btn small">Test Blur</button>
                     <button id="test-noise" class="debug-btn small">Test Noise</button>
@@ -214,12 +214,12 @@ class UnifiedDebugPanel {
                 </div>
             </div>
             <div class="debug-section">
-                <h4>🎭 Encounter Tests</h4>
+                <h4>­ Encounter Tests</h4>
                 <button id="test-monster" class="debug-btn">Test Monster Encounter</button>
                 <button id="test-poi" class="debug-btn">Test POI Encounter</button>
                 <button id="test-mystery" class="debug-btn">Test Mystery Encounter</button>
                 <div class="legendary-section">
-                    <h5>⚡ Legendary Encounters</h5>
+                    <h5>âš¡ Legendary Encounters</h5>
                     <button id="test-heavy" class="debug-btn legendary-btn">Test HEVY Encounter</button>
                     <button id="force-heavy-spawn" class="debug-btn legendary-btn">Force HEVY Spawn</button>
                     <div class="legendary-info">
@@ -228,16 +228,16 @@ class UnifiedDebugPanel {
                 </div>
             </div>
             <div class="debug-section">
-                <h4>⚔️ PvP Simulation</h4>
+                <h4>âš”ï¸ PvP Simulation</h4>
                 <button id="add-other-player" class="debug-btn">Add Other Player</button>
                 <button id="remove-other-players" class="debug-btn">Remove All Players</button>
-                <button id="test-pvp-encounter" class="debug-btn legendary-btn">⚔️ Test PvP Encounter</button>
+                <button id="test-pvp-encounter" class="debug-btn legendary-btn">âš”ï¸ Test PvP Encounter</button>
                 <div class="pvp-stats">
                     <small>Players: <span id="other-player-count">0</span></small>
                 </div>
             </div>
             <div class="debug-section">
-                <h4>📍 Location Simulation</h4>
+                <h4>ðŸ“ Location Simulation</h4>
                 <div class="toggle-container">
                     <label class="toggle-label">
                         <input type="checkbox" id="location-simulator-toggle" class="toggle-input">
@@ -248,7 +248,7 @@ class UnifiedDebugPanel {
                 <div id="location-mode-status" class="status-indicator">Real GPS</div>
             </div>
             <div class="debug-section">
-                <h4>📊 Encounter Stats</h4>
+                <h4>ðŸ“Š Encounter Stats</h4>
                 <div id="encounter-stats">Steps: 0 | Encounters: 0</div>
             </div>
         `;
@@ -257,25 +257,25 @@ class UnifiedDebugPanel {
     createChatTab() {
         return `
             <div class="debug-section">
-                <h4>👥 NPC Controls</h4>
+                <h4>ðŸ‘¥ NPC Controls</h4>
                 <button id="test-chat-aurora" class="debug-btn">Chat with Aurora</button>
                 <button id="test-chat-zephyr" class="debug-btn">Chat with Zephyr</button>
                 <button id="test-chat-sage" class="debug-btn">Chat with Sage</button>
             </div>
             <div class="debug-section">
-                <h4>📍 Proximity Controls</h4>
+                <h4>ðŸ“ Proximity Controls</h4>
                 <button id="move-npcs-closer" class="debug-btn">Move NPCs Closer</button>
                 <button id="reset-npc-positions" class="debug-btn">Reset NPC Positions</button>
                 <button id="toggle-npc-movement" class="debug-btn">Toggle Movement</button>
             </div>
             <div class="debug-section">
-                <h4>⚙️ Chat Settings</h4>
+                <h4>âš™ï¸ Chat Settings</h4>
                 <label for="chat-distance">Chat Distance (m):</label>
                 <input type="number" id="chat-distance" value="30" min="5" max="100">
                 <button id="update-chat-distance" class="debug-btn">Update Distance</button>
             </div>
             <div class="debug-section">
-                <h4>📊 Chat Stats</h4>
+                <h4>ðŸ“Š Chat Stats</h4>
                 <div id="chat-stats">NPCs: 0 | Chat: Closed</div>
             </div>
         `;
@@ -284,7 +284,7 @@ class UnifiedDebugPanel {
     createPathTab() {
         return `
             <div class="debug-section">
-                <h4>🎨 Brush Settings</h4>
+                <h4> Brush Settings</h4>
                 <label for="brush-size">Brush Size (m):</label>
                 <input type="range" id="brush-size" min="5" max="50" value="10">
                 <span id="brush-size-value">10m</span>
@@ -293,7 +293,7 @@ class UnifiedDebugPanel {
                 <span id="brush-opacity-value">0.3</span>
             </div>
             <div class="debug-section">
-                <h4>🎨 Brush Colors</h4>
+                <h4> Brush Colors</h4>
                 <div class="color-palette">
                     <button class="color-btn" style="background: #FF6B6B" data-color="#FF6B6B" title="Red"></button>
                     <button class="color-btn" style="background: #4ECDC4" data-color="#4ECDC4" title="Teal"></button>
@@ -306,13 +306,13 @@ class UnifiedDebugPanel {
                 </div>
             </div>
             <div class="debug-section">
-                <h4>🛠️ Path Controls</h4>
+                <h4>ðŸ› ï¸ Path Controls</h4>
                 <button id="clear-painted-paths" class="debug-btn">Clear All Paths</button>
                 <button id="export-paths" class="debug-btn">Export Paths</button>
                 <button id="import-paths" class="debug-btn">Import Paths</button>
             </div>
             <div class="debug-section">
-                <h4>📊 Path Stats</h4>
+                <h4>ðŸ“Š Path Stats</h4>
                 <div id="path-stats">Points: 0 | Areas: 0</div>
                 <div id="current-brush">Brush: Red (10m)</div>
             </div>
@@ -322,12 +322,12 @@ class UnifiedDebugPanel {
     createQuestTab() {
         return `
             <div class="debug-section">
-                <h4>🎭 Quest System</h4>
+                <h4>­ Quest System</h4>
                 <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">
                     Quest proximity detection and debugging
                 </p>
                 <div id="quest-distance-info" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; margin-bottom: 15px;">
-                    <div style="color: #00ff88; font-weight: bold;">📍 Quest Distance Debug</div>
+                    <div style="color: #00ff88; font-weight: bold;">ðŸ“ Quest Distance Debug</div>
                     <div id="quest-distance-display">Calculating distance...</div>
                     <div style="color: #ffaa00; font-size: 11px;">Trigger distance: 50m</div>
                 </div>
@@ -336,7 +336,7 @@ class UnifiedDebugPanel {
                 <button id="reset-quest" class="debug-btn">Reset Quest</button>
             </div>
             <div class="debug-section">
-                <h4>📍 Quest Locations</h4>
+                <h4>ðŸ“ Quest Locations</h4>
                 <div class="quest-locations-list">
                     <div class="quest-location-item">
                         <strong>1. The Fuming Lake of Despair</strong><br>
@@ -361,7 +361,7 @@ class UnifiedDebugPanel {
                 </div>
             </div>
             <div class="debug-section">
-                <h4>🎮 Quest Controls</h4>
+                <h4>® Quest Controls</h4>
                 <button id="teleport-to-quest-location" class="debug-btn">Teleport to Current Location</button>
                 <button id="show-quest-status" class="debug-btn">Show Quest Status</button>
             </div>
@@ -370,7 +370,7 @@ class UnifiedDebugPanel {
 
     setupEventListeners() {
         if (!this.panel) {
-            console.error('🔧 Debug panel not initialized, cannot setup event listeners');
+            console.error('ðŸ”§ Debug panel not initialized, cannot setup event listeners');
             return;
         }
 
@@ -388,7 +388,7 @@ class UnifiedDebugPanel {
                 tab.addEventListener('click', (e) => {
                     const tabName = e.target.dataset.tab;
                     if (tabName) {
-                        console.log('🔧 Switching to tab:', tabName);
+                        console.log('ðŸ”§ Switching to tab:', tabName);
                         this.switchTab(tabName);
                     }
                 });
@@ -617,8 +617,8 @@ class UnifiedDebugPanel {
             // Quest controls
             document.getElementById('start-quest').addEventListener('click', () => window.lovecraftianQuest.startQuest());
             document.getElementById('start-quest-simulation').addEventListener('click', () => {
-                console.log('🐙 Quest simulation button clicked - quests now trigger by proximity to markers');
-                alert('🐙 Quest simulation disabled. Quests now trigger when you approach quest markers within 50m!');
+                console.log('ðŸ™ Quest simulation button clicked - quests now trigger by proximity to markers');
+                alert('ðŸ™ Quest simulation disabled. Quests now trigger when you approach quest markers within 50m!');
             });
             document.getElementById('reset-quest').addEventListener('click', () => window.lovecraftianQuest.resetQuest());
             document.getElementById('teleport-to-quest-location').addEventListener('click', () => this.teleportToCurrentQuestLocation());
@@ -649,7 +649,7 @@ class UnifiedDebugPanel {
             const location = window.lovecraftianQuest.questLocations[currentStep];
             if (location) {
                 window.mapEngine.map.setView([location.lat, location.lng], 18);
-                console.log(`🐙 Teleported to quest location: ${location.name}`);
+                console.log(`ðŸ™ Teleported to quest location: ${location.name}`);
             }
         }
     }
@@ -665,7 +665,7 @@ class UnifiedDebugPanel {
                 items: window.lovecraftianQuest.playerStats.items
             };
             
-            alert(`🐙 Quest Status:
+            alert(`ðŸ™ Quest Status:
 Active: ${status.active}
 Current Step: ${status.currentStep + 1}/${status.totalSteps}
 Health: ${status.health}
@@ -675,8 +675,8 @@ Items: ${status.items.join(', ') || 'None'}`);
     }
 
     showNotImplemented(feature) {
-        console.log(`🚧 Feature not implemented: ${feature}`);
-        alert(`🚧 Feature not implemented: ${feature}\n\nThis feature is not yet available in the current version.`);
+        console.log(`§ Feature not implemented: ${feature}`);
+        alert(`§ Feature not implemented: ${feature}\n\nThis feature is not yet available in the current version.`);
     }
 
     setupHeaderToggle() {
@@ -783,7 +783,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             window.encounterSystem.playerStats.health = window.encounterSystem.playerStats.maxHealth;
             window.encounterSystem.updateHealthBars();
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player healed to full health');
+            console.log('ðŸ‘¤ Player healed to full health');
         }
     }
 
@@ -791,7 +791,7 @@ Items: ${status.items.join(', ') || 'None'}`);
         if (window.encounterSystem) {
             window.encounterSystem.loseHealth(10, 'Debug damage');
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player took 10 damage');
+            console.log('ðŸ‘¤ Player took 10 damage');
         }
     }
 
@@ -800,7 +800,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             window.encounterSystem.playerStats.sanity = window.encounterSystem.playerStats.maxSanity;
             window.encounterSystem.updateHealthBars();
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player sanity restored to full');
+            console.log('ðŸ‘¤ Player sanity restored to full');
         }
     }
 
@@ -808,7 +808,7 @@ Items: ${status.items.join(', ') || 'None'}`);
         if (window.encounterSystem) {
             window.encounterSystem.loseSanity(10, 'Debug sanity loss');
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player lost 10 sanity');
+            console.log('ðŸ‘¤ Player lost 10 sanity');
         }
     }
 
@@ -816,7 +816,7 @@ Items: ${status.items.join(', ') || 'None'}`);
         if (window.encounterSystem) {
             window.encounterSystem.gainExperience(100, 'Debug experience gain');
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player gained 100 experience');
+            console.log('ðŸ‘¤ Player gained 100 experience');
         }
     }
 
@@ -826,7 +826,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             const expNeeded = requiredExp - window.encounterSystem.playerStats.experience;
             window.encounterSystem.gainExperience(expNeeded + 1, 'Debug forced level up');
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player forced to level up');
+            console.log('ðŸ‘¤ Player forced to level up');
         }
     }
 
@@ -863,7 +863,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             window.encounterSystem.playerSteps = 0;
             window.encounterSystem.updateStatBars();
             this.updatePlayerStatsDisplay();
-            console.log('👤 Player stats reset to default');
+            console.log('ðŸ‘¤ Player stats reset to default');
         }
     }
 
@@ -873,7 +873,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             window.encounterSystem.itemSystem.addToInventory(lootResult.itemId, 1);
             this.updatePlayerStatsDisplay();
             this.updateInventoryUI();
-            console.log(`🎒 Added random item: ${lootResult.item.name} (${lootResult.rarity})`);
+            console.log(`’ Added random item: ${lootResult.item.name} (${lootResult.rarity})`);
         }
     }
 
@@ -888,7 +888,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             window.encounterSystem.itemSystem.savePlayerInventory();
             this.updatePlayerStatsDisplay();
             this.updateInventoryUI();
-            console.log('🎒 Inventory cleared');
+            console.log('’ Inventory cleared');
         }
     }
 
@@ -896,75 +896,75 @@ Items: ${status.items.join(', ') || 'None'}`);
         if (window.npcSystem) {
             window.npcSystem.clearAllMarkers();
             this.updatePlayerStatsDisplay();
-            console.log('👥 All NPC markers cleared');
+            console.log('ðŸ‘¥ All NPC markers cleared');
         }
     }
 
     clearAllMarkers() {
         if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
             window.eldritchApp.systems.mapEngine.clearAllMarkers();
-            console.log('🗺️ All map markers cleared');
+            console.log('ðŸ—ºï¸ All map markers cleared');
         }
     }
 
     resetGameScreen() {
         if (window.eldritchApp) {
             window.eldritchApp.resetGameScreen();
-            console.log('🔄 Game screen reset and markers recreated');
+            console.log('ðŸ”„ Game screen reset and markers recreated');
         } else {
-            console.error('🔄 Main app not available for reset');
+            console.error('ðŸ”„ Main app not available for reset');
         }
     }
 
     resetEncounterFlags() {
         if (window.encounterSystem) {
             window.encounterSystem.resetEncounterFlags();
-            console.log('🔄 Encounter flags reset');
+            console.log('ðŸ”„ Encounter flags reset');
         } else {
-            console.error('🔄 Encounter system not available');
+            console.error('ðŸ”„ Encounter system not available');
         }
     }
 
     toggleProximityDebug() {
         if (window.encounterSystem) {
             window.encounterSystem.toggleDebugMode();
-            console.log('🎯 Proximity debug toggled');
+            console.log('¯ Proximity debug toggled');
         } else {
-            console.error('🎯 Encounter system not available');
+            console.error('¯ Encounter system not available');
         }
     }
 
     centerOnLocation() {
         if (window.eldritchApp) {
             window.eldritchApp.centerOnCurrentLocation();
-            console.log('📍 Centering map on current location');
+            console.log('ðŸ“ Centering map on current location');
         } else {
-            console.error('📍 Main app not available');
+            console.error('ðŸ“ Main app not available');
         }
     }
 
     forceGeolocation() {
         if (window.geolocationManager) {
             window.geolocationManager.startTracking();
-            console.log('📍 Forcing geolocation update');
+            console.log('ðŸ“ Forcing geolocation update');
         } else {
-            console.error('📍 Geolocation manager not available');
+            console.error('ðŸ“ Geolocation manager not available');
         }
     }
 
     toggleGpsManual() {
-        console.log('📍 Toggling device GPS...');
+        console.log('ðŸ“ Toggling device GPS...');
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             const geolocation = window.eldritchApp.systems.geolocation;
             const isEnabled = geolocation.toggleDeviceGPS();
             
             if (isEnabled) {
-                this.showNotification('📍 Device GPS enabled', 'info');
+                this.showNotification('ðŸ“ Device GPS enabled', 'info');
             } else {
-                this.showNotification('📍 Using fixed position', 'info');
+                this.showNotification('ðŸ“ Using fixed position', 'info');
             }
         } else {
-            console.error('📍 Geolocation system not available');
+            console.error('ðŸ“ Geolocation system not available');
         }
     }
 
@@ -977,7 +977,7 @@ Items: ${status.items.join(', ') || 'None'}`);
             const lng2 = 23.7650;
             
             const distance = window.encounterSystem.calculateDistance(lat1, lng1, lat2, lng2);
-            console.log(`🧪 Distance test: ${distance.toFixed(1)}m between points`);
+            console.log(`ðŸ§ª Distance test: ${distance.toFixed(1)}m between points`);
             alert(`Distance test: ${distance.toFixed(1)}m between test points`);
         }
     }
@@ -986,21 +986,21 @@ Items: ${status.items.join(', ') || 'None'}`);
         if (window.encounterSystem) {
             window.encounterSystem.addSteps(10);
             this.updatePlayerStatsDisplay();
-            console.log('👣 Added 10 steps manually');
+            console.log('ðŸ‘£ Added 10 steps manually');
         }
     }
 
     addQuestMarkers() {
-        console.log('🎯 DEBUG: addQuestMarkers called');
-        console.log('🎯 DEBUG: eldritchApp available:', !!window.eldritchApp);
-        console.log('🎯 DEBUG: mapEngine available:', !!window.eldritchApp?.systems?.mapEngine);
-        console.log('🎯 DEBUG: map available:', !!window.eldritchApp?.systems?.mapEngine?.map);
+        console.log('¯ DEBUG: addQuestMarkers called');
+        console.log('¯ DEBUG: eldritchApp available:', !!window.eldritchApp);
+        console.log('¯ DEBUG: mapEngine available:', !!window.eldritchApp?.systems?.mapEngine);
+        console.log('¯ DEBUG: map available:', !!window.eldritchApp?.systems?.mapEngine?.map);
         
         if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
             window.eldritchApp.systems.mapEngine.addTestQuestMarkers();
-            console.log('🎯 Quest markers added');
+            console.log('¯ Quest markers added');
         } else {
-            console.error('🎯 DEBUG: Map engine not available');
+            console.error('¯ DEBUG: Map engine not available');
         }
     }
 
@@ -1013,31 +1013,31 @@ Items: ${status.items.join(', ') || 'None'}`);
                 }
             });
             window.eldritchApp.systems.mapEngine.testQuestMarkers.clear();
-            console.log('🎯 Quest markers cleared');
+            console.log('¯ Quest markers cleared');
         }
     }
 
     testQuestProximity() {
-        console.log('🎯 DEBUG: Testing quest proximity manually...');
+        console.log('¯ DEBUG: Testing quest proximity manually...');
         
         if (!window.encounterSystem) {
-            console.error('🎯 DEBUG: Encounter system not available');
+            console.error('¯ DEBUG: Encounter system not available');
             return;
         }
         
         if (!window.eldritchApp?.systems?.mapEngine) {
-            console.error('🎯 DEBUG: Map engine not available');
+            console.error('¯ DEBUG: Map engine not available');
             return;
         }
         
         const playerPos = window.eldritchApp.systems.mapEngine.getPlayerPosition();
         if (!playerPos) {
-            console.error('🎯 DEBUG: Player position not available');
+            console.error('¯ DEBUG: Player position not available');
             return;
         }
         
-        console.log('🎯 DEBUG: Player position:', playerPos);
-        console.log('🎯 DEBUG: Test quest markers count:', window.eldritchApp.systems.mapEngine.testQuestMarkers?.size || 0);
+        console.log('¯ DEBUG: Player position:', playerPos);
+        console.log('¯ DEBUG: Test quest markers count:', window.eldritchApp.systems.mapEngine.testQuestMarkers?.size || 0);
         
         // Manually call the proximity check
         window.encounterSystem.checkTestQuestProximity(playerPos);
@@ -1050,32 +1050,32 @@ Items: ${status.items.join(', ') || 'None'}`);
                     playerPos.lat, playerPos.lng,
                     questPos.lat, questPos.lng
                 );
-                console.log(`🎯 DEBUG: Marker ${key} - Distance: ${distance.toFixed(1)}m, Position: ${questPos.lat}, ${questPos.lng}`);
+                console.log(`¯ DEBUG: Marker ${key} - Distance: ${distance.toFixed(1)}m, Position: ${questPos.lat}, ${questPos.lng}`);
             });
         }
     }
 
     forceQuestTrigger() {
-        console.log('🎯 DEBUG: Force triggering quest encounter...');
+        console.log('¯ DEBUG: Force triggering quest encounter...');
         
         if (!window.encounterSystem) {
-            console.error('🎯 DEBUG: Encounter system not available');
+            console.error('¯ DEBUG: Encounter system not available');
             return;
         }
         
         if (!window.eldritchApp?.systems?.mapEngine?.testQuestMarkers) {
-            console.error('🎯 DEBUG: No test quest markers available');
+            console.error('¯ DEBUG: No test quest markers available');
             return;
         }
         
         // Get the first available quest marker
         const firstMarker = window.eldritchApp.systems.mapEngine.testQuestMarkers.values().next().value;
         if (!firstMarker) {
-            console.error('🎯 DEBUG: No quest markers found');
+            console.error('¯ DEBUG: No quest markers found');
             return;
         }
         
-        console.log('🎯 DEBUG: Force triggering quest with marker:', firstMarker);
+        console.log('¯ DEBUG: Force triggering quest with marker:', firstMarker);
         
         // Reset the encountered flag and trigger
         firstMarker.encountered = false;
@@ -1083,7 +1083,7 @@ Items: ${status.items.join(', ') || 'None'}`);
     }
 
     addMapContent() {
-        console.log('🗺️ Adding all map content...');
+        console.log('ðŸ—ºï¸ Adding all map content...');
         
         // Add quest markers
         this.addQuestMarkers();
@@ -1094,28 +1094,28 @@ Items: ${status.items.join(', ') || 'None'}`);
         // Add monsters
         this.addMonsters();
         
-        console.log('🗺️ All map content added');
+        console.log('ðŸ—ºï¸ All map content added');
     }
 
     addNPCs() {
-        console.log('👥 Adding NPCs...');
+        console.log('ðŸ‘¥ Adding NPCs...');
         
         if (window.npcSystem) {
             window.npcSystem.generateNPCs();
-            console.log('👥 NPCs added');
+            console.log('ðŸ‘¥ NPCs added');
         } else {
-            console.error('👥 NPC system not available');
+            console.error('ðŸ‘¥ NPC system not available');
         }
     }
 
     addMonsters() {
-        console.log('👹 Adding monsters...');
+        console.log('ðŸ‘¹ Adding monsters...');
         
         if (window.eldritchApp && window.eldritchApp.systems.mapEngine) {
             window.eldritchApp.systems.mapEngine.generateMonsters();
-            console.log('👹 Monsters added');
+            console.log('ðŸ‘¹ Monsters added');
         } else {
-            console.error('👹 Map engine not available');
+            console.error('ðŸ‘¹ Map engine not available');
         }
     }
 
@@ -1130,9 +1130,9 @@ Items: ${status.items.join(', ') || 'None'}`);
     triggerDistortion() {
         if (window.sanityDistortion) {
             window.sanityDistortion.triggerManualDistortion();
-            console.log('🧠 Manual distortion effect triggered');
+            console.log('ðŸ§  Manual distortion effect triggered');
         } else {
-            console.log('🧠 Sanity distortion system not available');
+            console.log('ðŸ§  Sanity distortion system not available');
         }
     }
     
@@ -1144,15 +1144,15 @@ Items: ${status.items.join(', ') || 'None'}`);
                 statusElement.textContent = 'Stopped';
                 statusElement.style.color = '#ff6b6b';
             }
-            console.log('🧠 Distortion timer stopped');
+            console.log('ðŸ§  Distortion timer stopped');
         } else {
-            console.log('🧠 Sanity distortion system not available');
+            console.log('ðŸ§  Sanity distortion system not available');
         }
     }
     
     testDistortionEffect(effectType) {
         if (window.sanityDistortion) {
-            console.log(`🧠 Testing ${effectType} distortion effect`);
+            console.log(`ðŸ§  Testing ${effectType} distortion effect`);
             
             // Set the specific effect with high intensity
             window.sanityDistortion.distortionEffects[effectType] = 0.8;
@@ -1196,17 +1196,17 @@ Items: ${status.items.join(', ') || 'None'}`);
                     const opacity = sanity < 100 ? 0.3 + (1 - sanity / 100) * 0.7 : 0;
                     window.sanityDistortion.canvas.style.opacity = opacity;
                 }
-                console.log(`🧠 ${effectType} distortion effect cleared`);
+                console.log(`ðŸ§  ${effectType} distortion effect cleared`);
             }, 3000);
             
         } else {
-            console.log('🧠 Sanity distortion system not available');
+            console.log('ðŸ§  Sanity distortion system not available');
         }
     }
     
     testAllDistortionEffects() {
         if (window.sanityDistortion) {
-            console.log('🧠 Testing all distortion effects');
+            console.log('ðŸ§  Testing all distortion effects');
             
             // Make canvas visible
             window.sanityDistortion.makeCanvasVisible();
@@ -1241,17 +1241,17 @@ Items: ${status.items.join(', ') || 'None'}`);
             // Clear all effects after 5 seconds
             setTimeout(() => {
                 this.clearAllDistortions();
-                console.log('🧠 All distortion effects cleared');
+                console.log('ðŸ§  All distortion effects cleared');
             }, 5000);
             
         } else {
-            console.log('🧠 Sanity distortion system not available');
+            console.log('ðŸ§  Sanity distortion system not available');
         }
     }
     
     clearAllDistortions() {
         if (window.sanityDistortion) {
-            console.log('🧠 Clearing all distortion effects');
+            console.log('ðŸ§  Clearing all distortion effects');
             
             // Reset all distortion effects to 0
             Object.keys(window.sanityDistortion.distortionEffects).forEach(effect => {
@@ -1261,9 +1261,9 @@ Items: ${status.items.join(', ') || 'None'}`);
             // Clear ghostly shadows
             window.sanityDistortion.ghostlyShadows = [];
             
-            console.log('🧠 All distortion effects cleared');
+            console.log('ðŸ§  All distortion effects cleared');
         } else {
-            console.log('🧠 Sanity distortion system not available');
+            console.log('ðŸ§  Sanity distortion system not available');
         }
     }
     
@@ -1362,11 +1362,11 @@ Items: ${status.items.join(', ') || 'None'}`);
             if (enableSimulation) {
                 window.geolocationManager.enableSimulator();
                 this.updateLocationModeStatus('Simulated GPS');
-                console.log('🔧 Location simulation enabled');
+                console.log('ðŸ”§ Location simulation enabled');
             } else {
                 window.geolocationManager.disableSimulator();
                 this.updateLocationModeStatus('Real GPS');
-                console.log('🔧 Location simulation disabled');
+                console.log('ðŸ”§ Location simulation disabled');
             }
         }
     }
@@ -1459,14 +1459,14 @@ Items: ${status.items.join(', ') || 'None'}`);
     
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371e3; // Earth's radius in meters
-        const φ1 = lat1 * Math.PI/180;
-        const φ2 = lat2 * Math.PI/180;
-        const Δφ = (lat2-lat1) * Math.PI/180;
-        const Δλ = (lng2-lng1) * Math.PI/180;
+        const Ï†1 = lat1 * Math.PI/180;
+        const Ï†2 = lat2 * Math.PI/180;
+        const Î”Ï† = (lat2-lat1) * Math.PI/180;
+        const Î”Î» = (lng2-lng1) * Math.PI/180;
 
-        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const a = Math.sin(Î”Ï†/2) * Math.sin(Î”Ï†/2) +
+                Math.cos(Ï†1) * Math.cos(Ï†2) *
+                Math.sin(Î”Î»/2) * Math.sin(Î”Î»/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         return R * c; // Distance in meters
@@ -1489,3 +1489,5 @@ Items: ${status.items.join(', ') || 'None'}`);
 
 // Make unified debug panel globally available
 window.UnifiedDebugPanel = UnifiedDebugPanel;
+
+

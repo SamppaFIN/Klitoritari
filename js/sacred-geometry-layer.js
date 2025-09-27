@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sacred Geometry Effects Layer
  * Renders flags, paths, territories with cosmic effects and sacred geometry patterns
  * Z-Index: 10 (above map background, below clickable objects)
@@ -23,7 +23,7 @@ class SacredGeometryLayer extends RenderLayer {
             smallestFlag: null
         };
         
-        console.log('🔮 Initializing Sacred Geometry Layer...');
+        console.log('ðŸ”® Initializing Sacred Geometry Layer...');
         this.init();
         this.setupClickHandlers();
     }
@@ -31,7 +31,7 @@ class SacredGeometryLayer extends RenderLayer {
     setupClickHandlers() {
         // Create invisible clickable areas for each flag instead of making entire canvas clickable
         this.createFlagClickAreas();
-        console.log('🔮 Flag click handlers setup complete');
+        console.log('ðŸ”® Flag click handlers setup complete');
     }
     
     createFlagClickAreas() {
@@ -106,7 +106,7 @@ class SacredGeometryLayer extends RenderLayer {
         `;
         
         this.statisticsModal.innerHTML = `
-            <h3 style="margin-top: 0; color: #8b5cf6;">🏴 Flag Statistics</h3>
+            <h3 style="margin-top: 0; color: #8b5cf6;">ðŸ´ Flag Statistics</h3>
             <div style="margin-bottom: 10px;">
                 <strong>Player:</strong> ${flag.playerName || 'Unknown'}
             </div>
@@ -165,7 +165,7 @@ class SacredGeometryLayer extends RenderLayer {
         const flag = this.flags.find(f => f.playerId === playerId);
         if (flag) {
             flag.type = newType;
-            console.log(`🔮 Changed flag type for player ${playerId} to ${newType}`);
+            console.log(`ðŸ”® Changed flag type for player ${playerId} to ${newType}`);
             return true;
         }
         return false;
@@ -191,7 +191,7 @@ class SacredGeometryLayer extends RenderLayer {
         };
         
         this.flags.push(newFlag);
-        console.log(`🔮 Added new flag for player ${playerName} (${playerId})`);
+        console.log(`ðŸ”® Added new flag for player ${playerName} (${playerId})`);
         return newFlag;
     }
     
@@ -199,7 +199,7 @@ class SacredGeometryLayer extends RenderLayer {
         const index = this.flags.findIndex(f => f.playerId === playerId);
         if (index !== -1) {
             this.flags.splice(index, 1);
-            console.log(`🔮 Removed flag for player ${playerId}`);
+            console.log(`ðŸ”® Removed flag for player ${playerId}`);
             return true;
         }
         return false;
@@ -225,7 +225,7 @@ class SacredGeometryLayer extends RenderLayer {
         `;
         
         panel.innerHTML = `
-            <h3 style="margin-top: 0; color: #8b5cf6;">🏴 Flag Settings</h3>
+            <h3 style="margin-top: 0; color: #8b5cf6;">ðŸ´ Flag Settings</h3>
             <div style="margin-bottom: 10px;">
                 <label style="display: block; margin-bottom: 5px;">Flag Type:</label>
                 <select id="flagTypeSelect" style="width: 100%; padding: 5px; background: #333; color: white; border: 1px solid #8b5cf6;">
@@ -303,7 +303,7 @@ class SacredGeometryLayer extends RenderLayer {
         this.loadExistingData();
         this.createFlagClickAreas(); // Create click areas immediately on init
         this.isInitialized = true;
-        console.log('✅ Sacred Geometry Layer initialized');
+        console.log('… Sacred Geometry Layer initialized');
     }
     
     setupCosmicEffects() {
@@ -417,7 +417,7 @@ class SacredGeometryLayer extends RenderLayer {
             }
         ];
         
-        console.log(`🔮 Loaded ${this.flags.length} flags with customizable types`);
+        console.log(`ðŸ”® Loaded ${this.flags.length} flags with customizable types`);
     }
     
     loadPaths() {
@@ -437,7 +437,7 @@ class SacredGeometryLayer extends RenderLayer {
             }
         ];
         
-        console.log(`🔮 Loaded ${this.paths.length} paths`);
+        console.log(`ðŸ”® Loaded ${this.paths.length} paths`);
     }
     
     loadTerritories() {
@@ -453,7 +453,7 @@ class SacredGeometryLayer extends RenderLayer {
             }
         ];
         
-        console.log(`🔮 Loaded ${this.territories.length} territories`);
+        console.log(`ðŸ”® Loaded ${this.territories.length} territories`);
     }
     
     renderContent() {
@@ -587,7 +587,7 @@ class SacredGeometryLayer extends RenderLayer {
         this.ctx.textAlign = 'left';
         
         const info = this.baseInfo;
-        this.ctx.fillText(`🏴 Base Statistics`, x + 10, y + 25);
+        this.ctx.fillText(`ðŸ´ Base Statistics`, x + 10, y + 25);
         this.ctx.fillText(`Total Flags: ${info.totalFlags}`, x + 10, y + 45);
         this.ctx.fillText(`Combined Weight: ${info.totalWeight}`, x + 10, y + 65);
         this.ctx.fillText(`Average Weight: ${info.averageWeight}`, x + 10, y + 85);
@@ -1026,52 +1026,54 @@ class SacredGeometryLayer extends RenderLayer {
     // Public methods for adding/removing elements
     addFlag(flag) {
         this.flags.push(flag);
-        console.log(`🔮 Added flag: ${flag.id}`);
+        console.log(`ðŸ”® Added flag: ${flag.id}`);
     }
     
     removeFlag(flagId) {
         this.flags = this.flags.filter(flag => flag.id !== flagId);
-        console.log(`🔮 Removed flag: ${flagId}`);
+        console.log(`ðŸ”® Removed flag: ${flagId}`);
     }
     
     addPath(path) {
         this.paths.push(path);
-        console.log(`🔮 Added path: ${path.id}`);
+        console.log(`ðŸ”® Added path: ${path.id}`);
     }
     
     removePath(pathId) {
         this.paths = this.paths.filter(path => path.id !== pathId);
-        console.log(`🔮 Removed path: ${pathId}`);
+        console.log(`ðŸ”® Removed path: ${pathId}`);
     }
     
     addTerritory(territory) {
         this.territories.push(territory);
-        console.log(`🔮 Added territory: ${territory.id}`);
+        console.log(`ðŸ”® Added territory: ${territory.id}`);
     }
     
     removeTerritory(territoryId) {
         this.territories = this.territories.filter(territory => territory.id !== territoryId);
-        console.log(`🔮 Removed territory: ${territoryId}`);
+        console.log(`ðŸ”® Removed territory: ${territoryId}`);
     }
     
     // Integration methods for existing systems
     integrateWithFinnishFlags() {
         // TODO: Integrate with existing Finnish flag system
-        console.log('🔮 Integrating with Finnish flag system...');
+        console.log('ðŸ”® Integrating with Finnish flag system...');
     }
     
     integrateWithPathPainting() {
         // TODO: Integrate with existing path painting system
-        console.log('🔮 Integrating with path painting system...');
+        console.log('ðŸ”® Integrating with path painting system...');
     }
     
     integrateWithBaseSystem() {
         // TODO: Integrate with existing base/territory system
-        console.log('🔮 Integrating with base system...');
+        console.log('ðŸ”® Integrating with base system...');
     }
 }
 
 // Export for global access
 window.SacredGeometryLayer = SacredGeometryLayer;
 
-console.log('🔮 Sacred Geometry Layer loaded');
+console.log('ðŸ”® Sacred Geometry Layer loaded');
+
+

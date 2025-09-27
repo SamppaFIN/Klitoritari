@@ -1,4 +1,4 @@
-/**
+﻿/**
  * UILayer - Handles menus, dialogs, and interface elements
  * Manages game menus, modal dialogs, and interactive UI components
  */
@@ -58,6 +58,7 @@ class UILayer extends BaseLayer {
     }
 
     init() {
+        super.init();
         console.log('🎨 UILayer: Initializing...');
         
         // Initialize default menus
@@ -71,6 +72,15 @@ class UILayer extends BaseLayer {
         this.eventBus.on('ui:element:click', this.boundUIElementClick);
         
         console.log('🎨 UILayer: Initialized');
+    }
+    
+    /**
+     * Set up layer transparency and pointer events
+     * UILayer handles mouse events for UI interactions
+     */
+    setupLayerTransparency() {
+        // UILayer handles mouse events for UI interactions (buttons, menus, dialogs)
+        this.pointerEvents = 'auto';
     }
 
     destroy() {

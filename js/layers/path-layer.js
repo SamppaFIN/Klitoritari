@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PathLayer - Player movement trails and paths
  * 
  * This layer handles:

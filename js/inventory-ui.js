@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Inventory UI - Visual interface for the cosmic inventory system
  * Handles inventory display, equipment management, and item interactions
  */
@@ -13,7 +13,7 @@ class InventoryUI {
     init() {
         if (this.isInitialized) return;
         
-        console.log('🎒 Initializing Inventory UI...');
+        console.log('’ Initializing Inventory UI...');
         
         // Create tooltip element
         this.createTooltip();
@@ -25,7 +25,7 @@ class InventoryUI {
         this.updateInventory();
         
         this.isInitialized = true;
-        console.log('🎒 Inventory UI initialized!');
+        console.log('’ Inventory UI initialized!');
     }
 
     createTooltip() {
@@ -172,23 +172,23 @@ class InventoryUI {
     getItemIcon(item) {
         const icons = {
             weapon: {
-                melee: '⚔️',
-                ranged: '🏹',
-                eldritch: '🔮'
+                melee: 'âš”ï¸',
+                ranged: 'ðŸ¹',
+                eldritch: 'ðŸ”®'
             },
             armor: {
-                cloth: '👕',
-                heavy: '🛡️',
-                light: '🥋'
+                cloth: 'ðŸ‘•',
+                heavy: 'ðŸ›¡ï¸',
+                light: 'ðŸ¥‹'
             },
             accessory: {
-                magic: '💍',
-                utility: '🧭',
-                eldritch: '🌀'
+                magic: 'ðŸ’',
+                utility: 'ðŸ§­',
+                eldritch: '€'
             }
         };
 
-        return icons[item.type]?.[item.category] || '📦';
+        return icons[item.type]?.[item.category] || 'ðŸ“¦';
     }
 
     handleItemClick(item, invItem) {
@@ -293,7 +293,7 @@ class InventoryUI {
 
         statsContainer.innerHTML = `
             <div class="stat-section">
-                <h3>⚔️ Combat Stats</h3>
+                <h3>âš”ï¸ Combat Stats</h3>
                 <div class="stat-row">
                     <span class="stat-label">Attack</span>
                     <span class="stat-value">
@@ -315,7 +315,7 @@ class InventoryUI {
             </div>
             
             <div class="stat-section">
-                <h3>❤️ Health & Sanity</h3>
+                <h3>â¤ï¸ Health & Sanity</h3>
                 <div class="stat-row">
                     <span class="stat-label">Max Health</span>
                     <span class="stat-value">${baseStats.maxHealth}</span>
@@ -330,7 +330,7 @@ class InventoryUI {
             </div>
             
             <div class="stat-section">
-                <h3>🎒 Equipment Effects</h3>
+                <h3>’ Equipment Effects</h3>
                 ${equipmentStats.effects.length > 0 ? 
                     equipmentStats.effects.map(effect => `<div class="stat-row"><span class="stat-label">${effect}</span><span class="stat-value">Active</span></div>`).join('') :
                     '<div class="stat-row"><span class="stat-label">No effects</span><span class="stat-value">-</span></div>'
@@ -344,7 +344,7 @@ class InventoryUI {
 
         this.tooltip.innerHTML = `
             <div class="tooltip-name">${item.name}</div>
-            <div class="tooltip-type">${item.type} • ${item.rarity}</div>
+            <div class="tooltip-type">${item.type} â€¢ ${item.rarity}</div>
             <div class="tooltip-description">${item.description}</div>
             <div class="tooltip-stats">
                 ${item.stats.attack ? `Attack: +${item.stats.attack}<br>` : ''}
@@ -402,3 +402,5 @@ class InventoryUI {
 
 // Make it globally available
 window.InventoryUI = InventoryUI;
+
+

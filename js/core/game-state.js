@@ -1,4 +1,4 @@
-/**
+﻿/**
  * GameState - Central state management for the layered architecture
  * Manages all game data in a single, immutable state object
  */

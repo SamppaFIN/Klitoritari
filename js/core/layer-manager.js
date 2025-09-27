@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LayerManager - Manages the layered rendering architecture
  * Coordinates all layers in the correct order and handles rendering
  */

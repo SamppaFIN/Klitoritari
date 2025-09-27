@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Particle Effects System
  * Creates beautiful particle effects for interactions and ambiance
  */

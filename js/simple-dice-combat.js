@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Simple Dice Combat System
  * Replaces complex combat with simple dice roll animations
  */
@@ -17,7 +17,7 @@ class SimpleDiceCombat {
      * @param {Function} onLose - Callback when player loses
      */
     startCombat(enemy, onWin, onLose) {
-        console.log('🎲 Starting simple dice combat with:', enemy.name);
+        console.log('² Starting simple dice combat with:', enemy.name);
         
         this.isCombatActive = true;
         this.combatData = {
@@ -48,9 +48,9 @@ class SimpleDiceCombat {
         modal.innerHTML = `
             <div class="combat-content">
                 <div class="combat-header">
-                    <h3>🎲 Dice Combat</h3>
+                    <h3>² Dice Combat</h3>
                     <p>Face off against ${this.combatData.enemy.name}!</p>
-                    <button class="close-btn" onclick="window.simpleDiceCombat.endCombat()">×</button>
+                    <button class="close-btn" onclick="window.simpleDiceCombat.endCombat()">Ã—</button>
                 </div>
                 
                 <div class="dice-interface">
@@ -76,15 +76,15 @@ class SimpleDiceCombat {
                     
                     <div class="combat-actions">
                         <button id="roll-dice-btn" class="roll-btn" onclick="window.simpleDiceCombat.rollDice()">
-                            🎲 Roll Dice!
+                            ² Roll Dice!
                         </button>
                         <button id="flee-btn" class="flee-btn" onclick="window.simpleDiceCombat.flee()">
-                            🏃 Flee
+                            ðŸƒ Flee
                         </button>
                     </div>
                     
                     <div class="combat-log" id="combat-log">
-                        <div class="log-entry">🎲 Combat begins! Roll the dice to determine the winner!</div>
+                        <div class="log-entry">² Combat begins! Roll the dice to determine the winner!</div>
                     </div>
                 </div>
             </div>
@@ -114,7 +114,7 @@ class SimpleDiceCombat {
         
         // Disable roll button during animation
         rollBtn.disabled = true;
-        rollBtn.textContent = '🎲 Rolling...';
+        rollBtn.textContent = '² Rolling...';
         
         // Add rolling animation class
         playerDice.classList.add('rolling');
@@ -146,7 +146,7 @@ class SimpleDiceCombat {
     finishDiceRoll() {
         // Check if combat data is still valid
         if (!this.combatData) {
-            console.warn('🎲 Combat data is null, ending dice roll');
+            console.warn('² Combat data is null, ending dice roll');
             return;
         }
         
@@ -177,7 +177,7 @@ class SimpleDiceCombat {
         
         // Re-enable roll button for another round if needed
         rollBtn.disabled = false;
-        rollBtn.textContent = '🎲 Roll Again!';
+        rollBtn.textContent = '² Roll Again!';
     }
 
     /**
@@ -192,19 +192,19 @@ class SimpleDiceCombat {
         let isPlayerWin = false;
         
         if (playerRoll > enemyRoll) {
-            resultMessage = `🎉 You win! ${playerRoll} beats ${enemyRoll}!`;
+            resultMessage = `‰ You win! ${playerRoll} beats ${enemyRoll}!`;
             isPlayerWin = true;
             this.addLogEntry(resultMessage, 'success');
         } else if (enemyRoll > playerRoll) {
-            resultMessage = `💀 You lose! ${enemyRoll} beats ${playerRoll}!`;
+            resultMessage = `ðŸ’€ You lose! ${enemyRoll} beats ${playerRoll}!`;
             isPlayerWin = false;
             this.addLogEntry(resultMessage, 'danger');
         } else {
-            resultMessage = `🤝 It's a tie! Both rolled ${playerRoll}!`;
+            resultMessage = `ðŸ¤ It's a tie! Both rolled ${playerRoll}!`;
             this.addLogEntry(resultMessage, 'warning');
             // On tie, roll again after a short delay
             setTimeout(() => {
-                this.addLogEntry('🎲 Rolling again to break the tie...', 'info');
+                this.addLogEntry('² Rolling again to break the tie...', 'info');
                 this.animateDiceRoll();
             }, 2000);
             return;
@@ -224,8 +224,8 @@ class SimpleDiceCombat {
      * Handle player victory
      */
     handleWin() {
-        console.log('🎉 Player wins dice combat!');
-        this.addLogEntry('🎉 Victory! You have defeated your opponent!', 'success');
+        console.log('‰ Player wins dice combat!');
+        this.addLogEntry('‰ Victory! You have defeated your opponent!', 'success');
         if (window.soundManager) {
             try { window.soundManager.playBling({ frequency: 1700, duration: 0.22, type: 'triangle' }); } catch (e) {}
         }
@@ -253,8 +253,8 @@ class SimpleDiceCombat {
      * Handle player defeat
      */
     handleLose() {
-        console.log('💀 Player loses dice combat!');
-        this.addLogEntry('💀 Defeat! Your opponent has bested you!', 'danger');
+        console.log('ðŸ’€ Player loses dice combat!');
+        this.addLogEntry('ðŸ’€ Defeat! Your opponent has bested you!', 'danger');
         if (window.soundManager) {
             try { window.soundManager.playTerrifyingBling(); } catch (e) {}
         }
@@ -282,8 +282,8 @@ class SimpleDiceCombat {
      * Handle player fleeing
      */
     flee() {
-        console.log('🏃 Player flees from combat!');
-        this.addLogEntry('🏃 You flee from combat!', 'warning');
+        console.log('ðŸƒ Player flees from combat!');
+        this.addLogEntry('ðŸƒ You flee from combat!', 'warning');
         
         // End combat immediately
         setTimeout(() => {
@@ -331,3 +331,5 @@ class SimpleDiceCombat {
 
 // Initialize global instance
 window.simpleDiceCombat = new SimpleDiceCombat();
+
+

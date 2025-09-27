@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Centralized Health Bar System
  * Manages health display without DOM conflicts
  */
@@ -14,7 +14,7 @@ class HealthBar {
     }
     
     init() {
-        console.log('❤️ Initializing Health Bar System...');
+        console.log('â¤ï¸ Initializing Health Bar System...');
         
         // Create health bar container if it doesn't exist
         this.createHealthBar();
@@ -25,7 +25,7 @@ class HealthBar {
         }, 100); // Update every 100ms
         
         this.isInitialized = true;
-        console.log('❤️ Health Bar System initialized');
+        console.log('â¤ï¸ Health Bar System initialized');
     }
     
     createHealthBar() {
@@ -67,13 +67,13 @@ class HealthBar {
     setHealth(current, max = 100) {
         this.currentHealth = Math.max(0, Math.min(current, max));
         this.maxHealth = max;
-        console.log(`❤️ Health updated: ${this.currentHealth}/${this.maxHealth}`);
+        console.log(`â¤ï¸ Health updated: ${this.currentHealth}/${this.maxHealth}`);
     }
     
     setSanity(current, max = 100) {
         this.currentSanity = Math.max(0, Math.min(current, max));
         this.maxSanity = max;
-        console.log(`🧠 Sanity updated: ${this.currentSanity}/${this.maxSanity}`);
+        console.log(`ðŸ§  Sanity updated: ${this.currentSanity}/${this.maxSanity}`);
     }
     
     render() {
@@ -127,9 +127,11 @@ class HealthBar {
             clearInterval(this.updateInterval);
         }
         this.isInitialized = false;
-        console.log('❤️ Health Bar System destroyed');
+        console.log('â¤ï¸ Health Bar System destroyed');
     }
 }
 
 // Make globally available
 window.HealthBar = HealthBar;
+
+

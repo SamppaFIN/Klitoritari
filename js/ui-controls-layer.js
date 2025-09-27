@@ -1,4 +1,4 @@
-/**
+﻿/**
  * UI Controls Layer
  * Manages all floating buttons, overlays, and UI controls in a single layer
  */
@@ -9,7 +9,7 @@ class UIControlsLayer extends RenderLayer {
         this.controls = new Map();
         this.isInitialized = false;
         
-        console.log('🎛️ Initializing UI Controls Layer...');
+        console.log('›ï¸ Initializing UI Controls Layer...');
         this.init();
     }
 
@@ -19,7 +19,7 @@ class UIControlsLayer extends RenderLayer {
         this.createMobileLogger();
         this.createDebugControls();
         this.isInitialized = true;
-        console.log('✅ UI Controls Layer initialized');
+        console.log('… UI Controls Layer initialized');
     }
 
     setupControlContainer() {
@@ -42,7 +42,7 @@ class UIControlsLayer extends RenderLayer {
         // Mobile logging button
         const logButton = document.createElement('div');
         logButton.id = 'mobile-log-button';
-        logButton.innerHTML = '📱';
+        logButton.innerHTML = 'ðŸ“±';
         logButton.style.cssText = `
             position: fixed;
             top: 10px;
@@ -169,7 +169,7 @@ class UIControlsLayer extends RenderLayer {
         // Debug toggle button
         const debugButton = document.createElement('div');
         debugButton.id = 'debug-toggle-button';
-        debugButton.innerHTML = '🔧';
+        debugButton.innerHTML = 'ðŸ”§';
         debugButton.style.cssText = `
             position: fixed;
             top: 10px;
@@ -397,7 +397,7 @@ class UIControlsLayer extends RenderLayer {
                     };
                     baseLayer.bases = [base];
                     baseLayer.saveBaseData();
-                    this.showNotification('Test base created! 🏗️', 'success');
+                    this.showNotification('Test base created! ðŸ—ï¸', 'success');
                 } else {
                     this.showNotification('Base already exists! Adding steps...', 'info');
                 }
@@ -422,3 +422,5 @@ class UIControlsLayer extends RenderLayer {
 
 // Export for global access
 window.UIControlsLayer = UIControlsLayer;
+
+

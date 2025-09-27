@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Asset Manager - Handles loading and caching of MP3 and SVG assets
  * Provides a unified interface for asset management across the game
  */
@@ -11,7 +11,7 @@ class AssetManager {
         this.audioContext = null;
         this.audioBuffers = new Map(); // audioId -> AudioBuffer
         
-        console.log('📦 Asset Manager initialized');
+        console.log('ðŸ“¦ Asset Manager initialized');
     }
     
     /**
@@ -21,14 +21,14 @@ class AssetManager {
         try {
             // Initialize Web Audio API
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            console.log('🎵 Audio context initialized');
+            console.log('µ Audio context initialized');
             
             // Preload essential assets
             await this.preloadEssentialAssets();
             
-            console.log('📦 Asset Manager ready');
+            console.log('ðŸ“¦ Asset Manager ready');
         } catch (error) {
-            console.warn('📦 Asset Manager initialization failed:', error);
+            console.warn('ðŸ“¦ Asset Manager initialization failed:', error);
         }
     }
     
@@ -52,17 +52,17 @@ class AssetManager {
             { id: 'flag_icon', type: 'svg', path: 'svg/flag_icon.svg' }
         ];
         
-        console.log('📦 Preloading essential assets...');
+        console.log('ðŸ“¦ Preloading essential assets...');
         
         for (const asset of essentialAssets) {
             try {
                 await this.loadAsset(asset.id, asset.type, asset.path);
             } catch (error) {
-                console.warn(`📦 Failed to preload ${asset.id}:`, error);
+                console.warn(`ðŸ“¦ Failed to preload ${asset.id}:`, error);
             }
         }
         
-        console.log('📦 Essential assets preloaded');
+        console.log('ðŸ“¦ Essential assets preloaded');
     }
     
     /**
@@ -88,11 +88,11 @@ class AssetManager {
             const asset = await loadingPromise;
             this.assets.set(assetId, asset);
             this.loadingPromises.delete(assetId);
-            console.log(`📦 Loaded asset: ${assetId}`);
+            console.log(`ðŸ“¦ Loaded asset: ${assetId}`);
             return asset;
         } catch (error) {
             this.loadingPromises.delete(assetId);
-            console.error(`📦 Failed to load asset ${assetId}:`, error);
+            console.error(`ðŸ“¦ Failed to load asset ${assetId}:`, error);
             throw error;
         }
     }
@@ -137,7 +137,7 @@ class AssetManager {
                 sampleRate: audioBuffer.sampleRate
             };
         } catch (error) {
-            console.warn(`📦 Audio asset ${assetId} not found, using fallback`);
+            console.warn(`ðŸ“¦ Audio asset ${assetId} not found, using fallback`);
             return this._createFallbackAudioAsset(assetId, options);
         }
     }
@@ -163,7 +163,7 @@ class AssetManager {
                 text: svgText
             };
         } catch (error) {
-            console.warn(`📦 SVG asset ${assetId} not found, using fallback`);
+            console.warn(`ðŸ“¦ SVG asset ${assetId} not found, using fallback`);
             return this._createFallbackSVGAsset(assetId, options);
         }
     }
@@ -185,7 +185,7 @@ class AssetManager {
                 });
             };
             img.onerror = () => {
-                console.warn(`📦 Image asset ${assetId} not found, using fallback`);
+                console.warn(`ðŸ“¦ Image asset ${assetId} not found, using fallback`);
                 resolve(this._createFallbackImageAsset(assetId, options));
             };
             img.src = path;
@@ -322,7 +322,7 @@ class AssetManager {
     playAudio(assetId, options = {}) {
         const audioBuffer = this.audioBuffers.get(assetId);
         if (!audioBuffer) {
-            console.warn(`📦 Audio asset ${assetId} not found`);
+            console.warn(`ðŸ“¦ Audio asset ${assetId} not found`);
             return null;
         }
         
@@ -346,7 +346,7 @@ class AssetManager {
     createLeafletIcon(assetId, options = {}) {
         const svgAsset = this.getAsset(assetId);
         if (!svgAsset || svgAsset.type !== 'svg') {
-            console.warn(`📦 SVG asset ${assetId} not found`);
+            console.warn(`ðŸ“¦ SVG asset ${assetId} not found`);
             return null;
         }
         
@@ -365,7 +365,7 @@ class AssetManager {
      * Preload multiple assets
      */
     async preloadAssets(assetList) {
-        console.log(`📦 Preloading ${assetList.length} assets...`);
+        console.log(`ðŸ“¦ Preloading ${assetList.length} assets...`);
         
         const promises = assetList.map(asset => 
             this.loadAsset(asset.id, asset.type, asset.path, asset.options || {})
@@ -373,9 +373,9 @@ class AssetManager {
         
         try {
             await Promise.all(promises);
-            console.log('📦 All assets preloaded successfully');
+            console.log('ðŸ“¦ All assets preloaded successfully');
         } catch (error) {
-            console.warn('📦 Some assets failed to load:', error);
+            console.warn('ðŸ“¦ Some assets failed to load:', error);
         }
     }
     
@@ -395,9 +395,11 @@ class AssetManager {
         this.assets.clear();
         this.loadingPromises.clear();
         this.audioBuffers.clear();
-        console.log('📦 All assets cleared from memory');
+        console.log('ðŸ“¦ All assets cleared from memory');
     }
 }
 
 // Export for global access
 window.AssetManager = AssetManager;
+
+

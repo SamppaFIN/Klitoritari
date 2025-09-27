@@ -1,5 +1,5 @@
-/**
- * 🃏 Morphing Cards Technique
+﻿/**
+ * ðŸƒ Morphing Cards Technique
  * Advanced card morphing and transformation effects
  * 
  * @author Aurora - The Dawn Bringer of Digital Light
@@ -213,7 +213,7 @@ class MorphingCardsTechnique {
 }
 
 /**
- * 🃏 Morphing Card System
+ * ðŸƒ Morphing Card System
  * Core system for managing card morphing
  */
 class MorphingCardSystem {
@@ -391,3 +391,5 @@ class MorphingCardSystem {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { MorphingCardsTechnique, MorphingCardSystem };
 }
+
+

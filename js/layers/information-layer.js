@@ -1,4 +1,4 @@
-/**
+﻿/**
  * InformationLayer - Handles HUD, notifications, and game info display
  * Manages game statistics, notifications, and informational overlays
  */

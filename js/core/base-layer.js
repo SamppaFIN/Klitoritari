@@ -1,4 +1,4 @@
-/**
+﻿/**
  * BaseLayer - Base class for all rendering layers
  * Provides common functionality and interface for all layers
  */
@@ -34,7 +34,21 @@ class BaseLayer {
      */
     init() {
         this.isInitialized = true;
+        
+        // Set up layer transparency - only MapLayer should handle mouse events
+        this.setupLayerTransparency();
+        
         console.log(`🎨 ${this.name}Layer: Initialized`);
+    }
+    
+    /**
+     * Set up layer transparency and pointer events
+     * Only MapLayer and UILayer should handle mouse events
+     */
+    setupLayerTransparency() {
+        // By default, all layers are transparent to mouse events
+        // Only MapLayer and UILayer will override this
+        this.pointerEvents = 'none';
     }
 
     /**

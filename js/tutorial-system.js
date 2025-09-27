@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Tutorial System for Eldritch Sanctuary
  * Provides guided introduction to encounter types and gameplay mechanics
  */
@@ -10,37 +10,37 @@ class TutorialSystem {
         this.encounterTypes = [
             {
                 name: 'Monster Encounters',
-                emoji: '👹',
+                emoji: 'ðŸ‘¹',
                 description: 'Walk within 50m of monster markers to trigger combat encounters. Use dice combat to defeat them and gain experience.',
                 color: '#8b0000'
             },
             {
                 name: 'Item Collection',
-                emoji: '💎',
+                emoji: 'ðŸ’Ž',
                 description: 'Walk within 50m of item markers to collect useful items. Each item provides different stat bonuses.',
                 color: '#ff00ff'
             },
             {
                 name: 'Quest Markers',
-                emoji: '🎭',
+                emoji: '­',
                 description: 'Walk within 30m of quest markers to interact with quest objectives and progress through storylines.',
                 color: '#4b0082'
             },
             {
                 name: 'Shrine Interactions',
-                emoji: '⛩️',
+                emoji: 'â›©ï¸',
                 description: 'Walk within 50m of shrine markers to restore health, sanity, or gain other beneficial effects.',
                 color: '#00ff00'
             },
             {
                 name: 'NPC Encounters',
-                emoji: '👑',
+                emoji: 'ðŸ‘‘',
                 description: 'Walk within 20m of NPC markers to chat with Aurora, Zephyr, or other characters for guidance.',
                 color: '#ffff00'
             },
             {
                 name: 'HEVY Encounters',
-                emoji: '⚡',
+                emoji: 'âš¡',
                 description: 'Walk within 50m of HEVY markers for legendary cosmic encounters with massive rewards.',
                 color: '#ff4500'
             }
@@ -48,17 +48,17 @@ class TutorialSystem {
     }
 
     init() {
-        console.log('📚 Tutorial System initialized');
+        console.log('ðŸ“š Tutorial System initialized');
         this.isInitialized = true;
     }
 
     showEncounterTutorial() {
         if (this.tutorialShown) {
-            console.log('📚 Tutorial already shown, skipping');
+            console.log('ðŸ“š Tutorial already shown, skipping');
             return;
         }
 
-        console.log('📚 Showing encounter tutorial...');
+        console.log('ðŸ“š Showing encounter tutorial...');
         this.tutorialShown = true;
 
         // Create tutorial overlay
@@ -105,7 +105,7 @@ class TutorialSystem {
         tutorialModal.innerHTML = `
             <div style="text-align: center; margin-bottom: 25px;">
                 <h2 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 28px; text-shadow: 0 0 10px #4a9eff;">
-                    🌌 Welcome to Eldritch Sanctuary
+                    Œ Welcome to Eldritch Sanctuary
                 </h2>
                 <p style="color: #b8d4f0; margin: 0; font-size: 16px;">
                     Discover the different types of encounters you can find on the cosmic map
@@ -113,7 +113,7 @@ class TutorialSystem {
             </div>
             
             <div style="margin-bottom: 20px; padding: 15px; border: 1px solid rgba(74,158,255,0.3); border-radius: 12px; background: rgba(74,158,255,0.08);">
-                <h3 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 18px;">🧙 Start Your Journey</h3>
+                <h3 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 18px;">ðŸ§™ Start Your Journey</h3>
                 <div style="display: grid; gap: 10px;">
                     <label style="color:#b8d4f0; font-size: 14px;">Player Name</label>
                     <input id="onboarding-name" type="text" placeholder="Enter your name" style="
@@ -130,7 +130,7 @@ class TutorialSystem {
             
             <div style="margin-bottom: 25px;">
                 <h3 style="color: #4a9eff; margin: 0 0 15px 0; font-size: 20px; text-align: center;">
-                    🎯 Encounter Types
+                    ¯ Encounter Types
                 </h3>
                 <div style="display: grid; gap: 15px;">
                     ${this.encounterTypes.map(encounter => `
@@ -190,7 +190,7 @@ class TutorialSystem {
                 text-align: center;
             ">
                 <h4 style="color: #4a9eff; margin: 0 0 10px 0; font-size: 18px;">
-                    💡 How to Interact
+                    ðŸ’¡ How to Interact
                 </h4>
                 <p style="color: #b8d4f0; margin: 0; font-size: 14px; line-height: 1.5;">
                     Simply walk within the specified distance of any marker to trigger an encounter. 
@@ -213,7 +213,7 @@ class TutorialSystem {
                     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
                     letter-spacing: 1px;
                 " onmouseover="this.style.transform='translateY(-3px) scale(1.05)'; this.style.boxShadow='0 12px 35px rgba(74, 158, 255, 0.6)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(74, 158, 255, 0.4)'">
-                    🌌 Begin Your Cosmic Journey 🌌
+                    Œ Begin Your Cosmic Journey Œ
                 </button>
             </div>
         `;
@@ -272,7 +272,7 @@ class TutorialSystem {
         document.addEventListener('keydown', escapeHandler);
 
         // Show notification
-        this.showNotification('📚 Welcome to Eldritch Sanctuary! Learn about encounter types.');
+        this.showNotification('ðŸ“š Welcome to Eldritch Sanctuary! Learn about encounter types.');
     }
 
     getSymbolOptionsHTML() {
@@ -562,9 +562,11 @@ class TutorialSystem {
 
     resetTutorial() {
         this.tutorialShown = false;
-        console.log('📚 Tutorial reset - will show on next marker initialization');
+        console.log('ðŸ“š Tutorial reset - will show on next marker initialization');
     }
 }
 
 // Initialize tutorial system
 window.tutorialSystem = new TutorialSystem();
+
+

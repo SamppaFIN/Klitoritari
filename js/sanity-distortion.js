@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Sanity Distortion System
  * Creates visual effects based on player sanity levels
  */
@@ -45,7 +45,7 @@ class SanityDistortion {
         this.startTimer();
         this.startTimerDisplay();
         this.setupMouseTracking();
-        console.log('🧠 Sanity distortion system initialized');
+        console.log('ðŸ§  Sanity distortion system initialized');
     }
     
     setupMouseTracking() {
@@ -112,7 +112,7 @@ class SanityDistortion {
     
     // Method to manually trigger distortion effects
     triggerManualDistortion() {
-        console.log('🧠 Manual distortion triggered');
+        console.log('ðŸ§  Manual distortion triggered');
         this.triggerDistortionEffects();
     }
     
@@ -120,7 +120,7 @@ class SanityDistortion {
     makeCanvasVisible() {
         if (this.canvas) {
             this.canvas.style.opacity = '1';
-            console.log('🧠 Canvas made visible for testing');
+            console.log('ðŸ§  Canvas made visible for testing');
         }
     }
     
@@ -450,7 +450,7 @@ class SanityDistortion {
             pointer-events: none;
             animation: screamPulse 0.5s ease-out;
         `;
-        scream.textContent = '💀 SCREAM! 💀';
+        scream.textContent = 'ðŸ’€ SCREAM! ðŸ’€';
         
         document.body.appendChild(scream);
         
@@ -472,7 +472,7 @@ class SanityDistortion {
     }
 
     startTimer() {
-        console.log('🧠 Starting 30-second distortion timer');
+        console.log('ðŸ§  Starting 30-second distortion timer');
         this.timerStartTime = Date.now();
         this.timerInterval = setInterval(() => {
             this.triggerDistortionEffects();
@@ -481,7 +481,7 @@ class SanityDistortion {
     }
     
     startTimerDisplay() {
-        console.log('🧠 Starting distortion timer display');
+        console.log('ðŸ§  Starting distortion timer display');
         this.timerDisplayInterval = setInterval(() => {
             this.updateTimerDisplay();
         }, 1000); // Update every second
@@ -510,17 +510,17 @@ class SanityDistortion {
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
-            console.log('🧠 Distortion timer stopped');
+            console.log('ðŸ§  Distortion timer stopped');
         }
         if (this.timerDisplayInterval) {
             clearInterval(this.timerDisplayInterval);
             this.timerDisplayInterval = null;
-            console.log('🧠 Distortion timer display stopped');
+            console.log('ðŸ§  Distortion timer display stopped');
         }
     }
     
     triggerDistortionEffects() {
-        console.log('🧠 Timer triggered - applying random distortion effects');
+        console.log('ðŸ§  Timer triggered - applying random distortion effects');
         
         // Get current sanity from encounter system if available
         if (window.encounterSystem && window.encounterSystem.playerStats) {
@@ -630,7 +630,7 @@ class SanityDistortion {
     triggerCosmicEffects(intensity) {
         // Trigger cosmic effects if available
         if (window.cosmicEffects) {
-            console.log('🌌 Triggering cosmic effects with intensity:', intensity);
+            console.log('Œ Triggering cosmic effects with intensity:', intensity);
             // Create energy wave
             if (window.cosmicEffects.createEnergyWave) {
                 window.cosmicEffects.createEnergyWave(intensity);
@@ -899,3 +899,5 @@ class SanityDistortion {
 
 // Make globally available
 window.SanityDistortion = SanityDistortion;
+
+

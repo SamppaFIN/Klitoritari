@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Microgames Manager - Lightweight mini-games for quest interactions
  * Includes dice, trivia, and Tetris stub with animations
  */
@@ -16,7 +16,7 @@ class MicrogamesManager {
     }
 
     init() {
-        console.log('🎮 Microgames Manager initialized');
+        console.log('® Microgames Manager initialized');
         // Load scores from localStorage
         this.loadScores();
     }
@@ -38,7 +38,7 @@ class MicrogamesManager {
                 this.scores = { ...this.scores, ...JSON.parse(saved) };
             }
         } catch (e) {
-            console.warn('🎮 Failed to load microgame scores', e);
+            console.warn('® Failed to load microgame scores', e);
         }
     }
 
@@ -46,7 +46,7 @@ class MicrogamesManager {
         try {
             localStorage.setItem('eldritch-microgame-scores', JSON.stringify(this.scores));
         } catch (e) {
-            console.warn('🎮 Failed to save microgame scores', e);
+            console.warn('® Failed to save microgame scores', e);
         }
     }
 
@@ -64,7 +64,7 @@ class MicrogamesManager {
             case 'tetris':
                 return this.startTetrisGame(options);
             default:
-                console.warn('🎮 Unknown game type:', gameType);
+                console.warn('® Unknown game type:', gameType);
                 return false;
         }
     }
@@ -100,7 +100,7 @@ class MicrogamesManager {
 
         overlay.innerHTML = `
             <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #00ffff; border-radius: 15px; padding: 20px; text-align: center; color: white; max-width: 400px; width: 90%;">
-                <h3 style="color: #00ffff; margin: 0 0 15px;">🎲 Dice Challenge</h3>
+                <h3 style="color: #00ffff; margin: 0 0 15px;">² Dice Challenge</h3>
                 <p style="margin: 0 0 15px;">Roll ${rolls} dice, try to reach ${target} or higher!</p>
                 <div id="dice-container" style="display: flex; gap: 10px; justify-content: center; margin: 20px 0;">
                     ${Array(rolls).fill(0).map((_, i) => `
@@ -144,7 +144,7 @@ class MicrogamesManager {
                 rollBtn.disabled = true;
                 
                 const success = total >= target;
-                const message = success ? `🎉 Success! ${total} >= ${target}` : `💀 Failed! ${total} < ${target}`;
+                const message = success ? `‰ Success! ${total} >= ${target}` : `ðŸ’€ Failed! ${total} < ${target}`;
                 overlay.querySelector('#dice-status').innerHTML = `<div style="color: ${success ? '#00ff00' : '#ff0000'}; font-weight: bold;">${message}</div>`;
                 
                 if (success) this.scores.dice++;
@@ -216,7 +216,7 @@ class MicrogamesManager {
             const q = selectedQuestions[currentQ];
             overlay.innerHTML = `
                 <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #ff00ff; border-radius: 15px; padding: 20px; text-align: center; color: white; max-width: 500px; width: 90%;">
-                    <h3 style="color: #ff00ff; margin: 0 0 15px;">🧠 Cosmic Trivia</h3>
+                    <h3 style="color: #ff00ff; margin: 0 0 15px;">ðŸ§  Cosmic Trivia</h3>
                     <div style="margin: 10px 0; color: #ffaa00;">Question ${currentQ + 1} of ${questions}</div>
                     <div style="margin: 20px 0; font-size: 16px; line-height: 1.4;">${q.q}</div>
                     <div style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0;">
@@ -254,11 +254,11 @@ class MicrogamesManager {
                         setTimeout(showQuestion, 1500);
                     } else {
                         const success = correct >= Math.ceil(questions / 2);
-                        const message = success ? `🎉 Trivia Master! ${correct}/${questions} correct` : `💀 Failed! ${correct}/${questions} correct`;
+                        const message = success ? `‰ Trivia Master! ${correct}/${questions} correct` : `ðŸ’€ Failed! ${correct}/${questions} correct`;
                         
                         overlay.innerHTML = `
                             <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid ${success ? '#00ff00' : '#ff0000'}; border-radius: 15px; padding: 20px; text-align: center; color: white; max-width: 400px; width: 90%;">
-                                <h3 style="color: ${success ? '#00ff00' : '#ff0000'}; margin: 0 0 15px;">${success ? '🎉' : '💀'} Trivia Complete</h3>
+                                <h3 style="color: ${success ? '#00ff00' : '#ff0000'}; margin: 0 0 15px;">${success ? '‰' : 'ðŸ’€'} Trivia Complete</h3>
                                 <div style="font-size: 18px; margin: 15px 0;">${message}</div>
                                 <button onclick="window.microgamesManager.endGame()" style="background: #00ffff; color: #000; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Close</button>
                             </div>
@@ -368,7 +368,7 @@ class MicrogamesManager {
         // UI
         overlay.innerHTML = `
             <div style="background: linear-gradient(135deg, #0f1224, #131a35); border: 2px solid #ffaa00; border-radius: 12px; padding: 16px; color: #fff;">
-                <h3 style="color:#ffaa00; margin:0 0 12px;">🧩 Eldritch Tetris</h3>
+                <h3 style="color:#ffaa00; margin:0 0 12px;">ðŸ§© Eldritch Tetris</h3>
                 <div style="display:flex; gap:16px; align-items:flex-start;">
                     <div>
                         <canvas id="tetris-canvas" width="${COLS * CELL}" height="${ROWS * CELL}" style="border:2px solid #ffaa00; background:#000;"></canvas>
@@ -381,7 +381,7 @@ class MicrogamesManager {
                     <div style="min-width:180px;">
                         <div style="margin-bottom:8px;">Next</div>
                         <canvas id="tetris-next" width="${PREVIEW_SIZE * CELL}" height="${PREVIEW_SIZE * CELL}" style="border:1px solid #444; background:#05070f;"></canvas>
-                        <div style="margin:12px 0; font-size:12px;"><strong>Controls</strong><br>←/→ Move | ↓ Soft drop | ↑/Space Rotate | Shift Hard drop | P Pause</div>
+                        <div style="margin:12px 0; font-size:12px;"><strong>Controls</strong><br>â†/â†’ Move | â†“ Soft drop | â†‘/Space Rotate | Shift Hard drop | P Pause</div>
                         <div style="display:flex; gap:8px;">
                             <button id="t-start" style="background:#ffaa00;color:#000;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;">Start</button>
                             <button id="t-pause" style="background:#ff6b6b;color:#fff;border:none;padding:6px 10px;border-radius:4px;cursor:pointer;">Pause</button>
@@ -558,7 +558,7 @@ class MicrogamesManager {
             if (window.soundManager) {
                 try { window.soundManager.playTerrifyingBling(); } catch (e) {}
             }
-            overlay.querySelector('h3').innerHTML = '💀 Game Over';
+            overlay.querySelector('h3').innerHTML = 'ðŸ’€ Game Over';
             overlay.querySelector('h3').style.color = '#ff4d4d';
             if (onComplete) {
                 setTimeout(() => {
@@ -629,3 +629,5 @@ class MicrogamesManager {
 // Initialize global instance
 window.microgamesManager = new MicrogamesManager();
 window.microgamesManager.init();
+
+

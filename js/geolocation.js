@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Geolocation Manager - Real-time position tracking with accuracy indicators
  * Handles HTML5 Geolocation API with fallback options and user consent
  */

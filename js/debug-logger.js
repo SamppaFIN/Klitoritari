@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Debug Logger - Writes debug information to a file that can be accessed by AI
  * This helps with debugging when we can't directly access the browser console
  */

@@ -85,14 +85,14 @@
 - **PlayerLayer**: Player avatar and movement visualization
 
 ### **Interaction & Data Layers**
-- **InteractionLayer**: User input processing, touch events, gesture recognition
-- **GeolocationLayer**: GPS data management, coordinate conversion, location events
-- **InformationLayer**: HUD elements, notifications, game statistics display
+- **InteractionLayer**: User input processing, touch events, gesture recognition (transparent to mouse)
+- **GeolocationLayer**: GPS data management, coordinate conversion, location events (transparent to mouse)
+- **InformationLayer**: HUD elements, notifications, game statistics display (transparent to mouse)
 
 ### **UI & System Layers**
-- **UILayer**: Traditional HTML/CSS UI elements (menus, dialogs)
-- **ThreeJSUILayer**: Modern 3D UI with magnetic tabs and floating panels
-- **DebugLayer**: Development tools and performance monitoring
+- **UILayer**: Traditional HTML/CSS UI elements (menus, dialogs) - **handles mouse events**
+- **ThreeJSUILayer**: Modern 3D UI with magnetic tabs and floating panels - **handles mouse events**
+- **DebugLayer**: Development tools and performance monitoring (transparent to mouse)
 
 ## Three.js Scene Management
 - **Scene Setup**: Complete Three.js scene with camera, lighting, and controls

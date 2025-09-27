@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Welcome Screen System
  * Handles the onboarding experience for new players
  */
@@ -11,10 +11,27 @@ class WelcomeScreen {
         this.maxTutorialSteps = 4;
         this.gpsEnabled = false;
         this.gpsPermissionRequested = false;
+        this.isInitialized = false;
+        this.eventListenersSetup = false;
+        
     }
 
     init() {
+        // Prevent multiple initializations globally
+        if (window.welcomeScreenInitialized) {
+            console.log('🌟 Welcome screen already initialized globally, skipping duplicate initialization');
+            return;
+        }
+        
+        // Prevent multiple initializations per instance
+        if (this.isInitialized) {
+            console.log('🌟 Welcome screen already initialized, skipping duplicate initialization');
+            return;
+        }
+        
         console.log('🌟 Welcome screen initialized');
+        this.isInitialized = true;
+        window.welcomeScreenInitialized = true;
         
         // Tutorial system disabled - proceed with normal welcome screen
         
@@ -25,7 +42,14 @@ class WelcomeScreen {
 
     showInitialLoading() {
         // Show welcome screen immediately with integrated Klitoritarit branding
+        console.log('🌟 showInitialLoading called');
         this.showWelcomeScreen();
+        
+        // Ensure event listeners are attached after showing the screen
+        setTimeout(() => {
+            console.log('🌟 Re-attaching event listeners after screen show');
+            this.setupEventListeners();
+        }, 100);
     }
 
 
@@ -40,6 +64,17 @@ class WelcomeScreen {
     }
 
     setupEventListeners() {
+        // Prevent multiple event listener setup
+        if (this.eventListenersSetup) {
+            console.log('🌟 Event listeners already setup, skipping');
+            return;
+        }
+        
+        console.log('🌟 Setting up event listeners...');
+        console.log('🌟 DOM ready state:', document.readyState);
+        console.log('🌟 Welcome screen visible:', this.isVisible);
+        this.eventListenersSetup = true;
+        
         // GPS Enable button
         const enableGpsBtn = document.getElementById('enable-gps-btn');
         if (enableGpsBtn) {
@@ -57,8 +92,12 @@ class WelcomeScreen {
         const continueBtn = document.getElementById('continue-adventure');
         if (continueBtn) {
             console.log('🌟 Continue adventure button found, adding event listener');
-            continueBtn.addEventListener('click', () => {
-                console.log('🔄 Continue adventure button clicked!');
+            console.log('🌟 Button element:', continueBtn);
+            console.log('🌟 Button computed style:', window.getComputedStyle(continueBtn));
+            continueBtn.addEventListener('click', (e) => {
+                console.log('🔄 Continue adventure button clicked!', e);
+                e.preventDefault();
+                e.stopPropagation();
                 this.continueAdventure();
             });
         } else {
@@ -69,8 +108,12 @@ class WelcomeScreen {
         const startFreshBtn = document.getElementById('start-fresh');
         if (startFreshBtn) {
             console.log('🌟 Start fresh adventure button found, adding event listener');
-            startFreshBtn.addEventListener('click', () => {
-                console.log('🚀 Start fresh adventure button clicked!');
+            console.log('🌟 Button element:', startFreshBtn);
+            console.log('🌟 Button computed style:', window.getComputedStyle(startFreshBtn));
+            startFreshBtn.addEventListener('click', (e) => {
+                console.log('🚀 Start fresh adventure button clicked!', e);
+                e.preventDefault();
+                e.stopPropagation();
                 this.startFreshAdventure();
             });
         } else {
@@ -86,6 +129,19 @@ class WelcomeScreen {
     }
 
     showWelcomeScreen() {
+        console.log('🌟 showWelcomeScreen called - stack trace:', new Error().stack);
+        console.log('🌟 this.isVisible:', this.isVisible);
+        console.log('🌟 window.loadingInProgress:', window.loadingInProgress);
+        
+        // Prevent multiple calls to showWelcomeScreen
+        if (this.isVisible) {
+            console.log('🌟 Welcome screen already visible, skipping duplicate call');
+            return;
+        }
+        
+        // Loading system now controls when to show welcome screen
+        // No need to check loadingInProgress here
+        
         // Check if tutorial is active - if so, don't show welcome screen
         const tutorialActive = localStorage.getItem('eldritch_start_tutorial_encounter') === 'true';
         if (tutorialActive) {
@@ -96,18 +152,51 @@ class WelcomeScreen {
         
         const welcomeScreen = document.getElementById('welcome-screen');
         if (welcomeScreen) {
+            console.log('🌟 Showing welcome screen');
+            console.log('🌟 Welcome screen element:', welcomeScreen);
+            console.log('🌟 Welcome screen computed style:', window.getComputedStyle(welcomeScreen));
+            console.log('🌟 Welcome screen current display:', welcomeScreen.style.display);
+            console.log('🌟 Welcome screen current visibility:', welcomeScreen.style.visibility);
+            
+            // Show welcome screen and ensure it's interactive
             welcomeScreen.style.display = 'flex';
+            welcomeScreen.style.visibility = 'visible';
+            welcomeScreen.style.pointerEvents = 'auto';
             this.isVisible = true;
+            
+            console.log('🌟 Welcome screen shown');
+            console.log('🌟 Loading mask status:', welcomeScreen.classList.contains('loading-mask'));
+            console.log('🌟 Computed display:', window.getComputedStyle(welcomeScreen).display);
+            console.log('🌟 Computed visibility:', window.getComputedStyle(welcomeScreen).visibility);
+            
             this.animateWelcomeScreen();
             this.updateContinueAdventureLabel();
+            
+            // Debug: Check if buttons are clickable
+            setTimeout(() => {
+                const continueBtn = document.getElementById('continue-adventure');
+                const startBtn = document.getElementById('start-fresh');
+                console.log('🌟 Debug - Continue button:', continueBtn, 'clickable:', continueBtn?.style.pointerEvents);
+                console.log('🌟 Debug - Start button:', startBtn, 'clickable:', startBtn?.style.pointerEvents);
+                
+                // Test direct click
+                if (continueBtn) {
+                    console.log('🌟 Testing direct click on continue button');
+                    continueBtn.click();
+                }
+            }, 200);
+        } else {
+            console.error('🌟 Welcome screen element not found!');
         }
     }
 
     hideWelcomeScreen() {
+        console.log('🌟 hideWelcomeScreen called - stack trace:', new Error().stack);
         const welcomeScreen = document.getElementById('welcome-screen');
         if (welcomeScreen) {
             welcomeScreen.style.display = 'none';
             this.isVisible = false;
+            console.log('🌟 Welcome screen hidden');
         }
     }
 

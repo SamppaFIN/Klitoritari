@@ -1,4 +1,4 @@
-/**
+﻿/**
  * NPCModel - Unified NPC data model
  * Manages all NPC-related data and state
  */

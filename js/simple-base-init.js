@@ -1,4 +1,4 @@
-// Simple Base Initialization System
+﻿// Simple Base Initialization System
 // This is a clean, minimal approach to base management
 
 class SimpleBaseInit {

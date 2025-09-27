@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ViewportCuller - Viewport culling system for performance optimization
  * Only renders objects that are visible in the current viewport
  */

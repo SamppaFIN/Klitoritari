@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cosmic Effects - Three.js WebGL particle system for atmospheric effects
  * Creates immersive cosmic background with particles and energy waves
  */
@@ -41,14 +41,14 @@ class CosmicEffects {
         this.integrateWithEnhancedEffects();
 
         this.isInitialized = true;
-        console.log('🌌 Cosmic effects initialized with enhanced integration');
+        console.log('Œ Cosmic effects initialized with enhanced integration');
     }
     
     integrateWithEnhancedEffects() {
         // Wait for enhanced cosmic effects to be available
         setTimeout(() => {
             if (window.enhancedCosmicEffects) {
-                console.log('✨ Integrating with Enhanced Cosmic Effects');
+                console.log('¨ Integrating with Enhanced Cosmic Effects');
                 
                 // Add cosmic energy bursts on user interactions
                 this.setupInteractionEffects();
@@ -505,7 +505,7 @@ class CosmicEffects {
             life: 1.0
         };
         this.energyWaves.push(wave);
-        console.log('🌌 Energy wave created with intensity:', intensity);
+        console.log('Œ Energy wave created with intensity:', intensity);
     }
 
     setParticleIntensity(intensity) {
@@ -546,3 +546,5 @@ class CosmicEffects {
 
 // Export for use in other modules
 window.CosmicEffects = CosmicEffects;
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Encounter System - Handles proximity encounters, cutscenes, battles, and puzzles
  * Currency: Steps (gained through movement)
  */
@@ -67,7 +67,7 @@ class EncounterSystem {
             const saved = window.sessionPersistence?.restoreStats?.();
             if (saved) {
                 Object.assign(this.playerStats, saved);
-                console.log('💾 Restored player stats from session');
+                console.log('ðŸ’¾ Restored player stats from session');
             }
         } catch (_) {}
         
@@ -83,11 +83,11 @@ class EncounterSystem {
                     window.healthBar.setHealth(tutorialHealth, tutorialMaxHealth);
                     this.playerStats.health = tutorialHealth;
                     this.playerStats.maxHealth = tutorialMaxHealth;
-                    console.log(`❤️ Synced with tutorial health: ${tutorialHealth}/${tutorialMaxHealth}`);
+                    console.log(`â¤ï¸ Synced with tutorial health: ${tutorialHealth}/${tutorialMaxHealth}`);
                 } else {
                     // Use encounter system health values
                     window.healthBar.setHealth(this.playerStats.health, this.playerStats.maxHealth);
-                    console.log('❤️ Synced encounter system stats with health bar');
+                    console.log('â¤ï¸ Synced encounter system stats with health bar');
                 }
                 
                 window.healthBar.setSanity(this.playerStats.sanity, this.playerStats.maxSanity);
@@ -99,7 +99,7 @@ class EncounterSystem {
             const inv = window.sessionPersistence?.restoreInventory?.();
             if (Array.isArray(inv) && inv.length) {
                 this.playerStats.inventory = inv;
-                console.log('🎒 Restored inventory items:', inv.length);
+                console.log('’ Restored inventory items:', inv.length);
             }
         } catch (_) {}
 
@@ -114,7 +114,7 @@ class EncounterSystem {
             const restored = window.sessionPersistence?.restoreEncounterState?.();
             if (restored) {
                 this.encounterState = restored;
-                console.log('💾 Restored encounter state');
+                console.log('ðŸ’¾ Restored encounter state');
             }
         } catch (_) {}
         // Restore inventory from session
@@ -122,7 +122,7 @@ class EncounterSystem {
             const inv = window.sessionPersistence?.restoreInventory?.();
             if (Array.isArray(inv) && inv.length) {
                 this.playerStats.inventory = inv;
-                console.log('🎒 Restored inventory items:', inv.length);
+                console.log('’ Restored inventory items:', inv.length);
             }
         } catch (_) {}
         
@@ -149,19 +149,19 @@ class EncounterSystem {
     }
 
     init() {
-        console.log('🎭 Encounter system initialized');
+        console.log('­ Encounter system initialized');
         
         // Initialize item system reference
         if (window.itemSystem) {
             this.itemSystem = window.itemSystem;
-            console.log('🎭 Item system reference initialized');
+            console.log('­ Item system reference initialized');
         } else {
-            console.warn('🎭 Item system not available yet, will retry later');
+            console.warn('­ Item system not available yet, will retry later');
             // Retry after a short delay
             setTimeout(() => {
                 if (window.itemSystem) {
                     this.itemSystem = window.itemSystem;
-                    console.log('🎭 Item system reference initialized (delayed)');
+                    console.log('­ Item system reference initialized (delayed)');
                 }
             }, 1000);
         }
@@ -187,7 +187,7 @@ class EncounterSystem {
                 const encounter = this.currentLegendaryEncounter;
                 
                 if (encounter) {
-                    console.log('🎭 Global delegation: Legendary action', actionNumber, 'clicked for', encounter.name);
+                    console.log('­ Global delegation: Legendary action', actionNumber, 'clicked for', encounter.name);
                     this.handleLegendaryAction(encounter, actionNumber);
                 }
             }
@@ -198,7 +198,7 @@ class EncounterSystem {
                 e.stopPropagation();
                 
                 const actionNumber = parseInt(e.target.id.split('-')[1]);
-                console.log('🎭 Global delegation: Action', actionNumber, 'clicked');
+                console.log('­ Global delegation: Action', actionNumber, 'clicked');
                 
                 // Handle based on current encounter type
                 if (this.activeEncounter) {
@@ -217,7 +217,7 @@ class EncounterSystem {
             }
         });
         
-        console.log('🎭 Global event delegation set up for encounter buttons');
+        console.log('­ Global event delegation set up for encounter buttons');
     }
 
     setupUI() {
@@ -357,13 +357,13 @@ class EncounterSystem {
         panel.innerHTML = `
             <div class="debug-content" style="display:none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid rgba(74, 158, 255, 0.3);">
-                    <h3 style="color: #4a9eff; margin: 0; text-shadow: 0 0 10px #4a9eff;">🎭 Debug Panel</h3>
-                    <button id="close-debug-panel" style="background: linear-gradient(135deg, #ff4444, #cc3333); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);">×</button>
+                    <h3 style="color: #4a9eff; margin: 0; text-shadow: 0 0 10px #4a9eff;">­ Debug Panel</h3>
+                    <button id="close-debug-panel" style="background: linear-gradient(135deg, #ff4444, #cc3333); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);">Ã—</button>
                 </div>
                 
                 <!-- Player Stats Section -->
                 <div class="debug-section">
-                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff;">📊 Player Stats</h4>
+                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff;">ðŸ“Š Player Stats</h4>
                     <div class="health-sanity-display" style="background: rgba(74, 158, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
                         <div class="stat-bar" style="margin-bottom: 10px;">
                             <span class="stat-label" style="color: #b8d4f0; font-weight: bold; min-width: 80px; display: inline-block;">Health:</span>
@@ -387,95 +387,95 @@ class EncounterSystem {
                     
                     <!-- Encounter Testing -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎭 Test Encounters</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">­ Test Encounters</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="test-heavy" class="debug-btn" title="Test HEVY legendary encounter">⚡ HEVY</button>
-                            <button id="test-cosmic-shrine" class="debug-btn" title="Test Cosmic Shrine encounter">🏛️ Shrine</button>
-                            <button id="test-eldritch-horror" class="debug-btn" title="Test Eldritch Horror encounter">👹 Horror</button>
-                            <button id="test-wisdom-crystal" class="debug-btn" title="Test Wisdom Crystal encounter">💎 Crystal</button>
-                            <button id="test-cosmic-merchant" class="debug-btn" title="Test Cosmic Merchant encounter">🛒 Merchant</button>
-                            <button id="test-monster" class="debug-btn" title="Test random monster encounter">👹 Monster</button>
+                            <button id="test-heavy" class="debug-btn" title="Test HEVY legendary encounter">âš¡ HEVY</button>
+                            <button id="test-cosmic-shrine" class="debug-btn" title="Test Cosmic Shrine encounter">ðŸ›ï¸ Shrine</button>
+                            <button id="test-eldritch-horror" class="debug-btn" title="Test Eldritch Horror encounter">ðŸ‘¹ Horror</button>
+                            <button id="test-wisdom-crystal" class="debug-btn" title="Test Wisdom Crystal encounter">ðŸ’Ž Crystal</button>
+                            <button id="test-cosmic-merchant" class="debug-btn" title="Test Cosmic Merchant encounter">ðŸ›’ Merchant</button>
+                            <button id="test-monster" class="debug-btn" title="Test random monster encounter">ðŸ‘¹ Monster</button>
                         </div>
                     </div>
                     
                     <!-- Player Stats Controls -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">📊 Player Stats</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">ðŸ“Š Player Stats</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="heal-player" class="debug-btn" title="Restore player health to maximum">❤️ Heal</button>
-                            <button id="restore-sanity" class="debug-btn" title="Restore player sanity to maximum">🧠 Sanity</button>
-                            <button id="lose-health" class="debug-btn" title="Reduce player health by 10">💔 -10 HP</button>
-                            <button id="lose-sanity" class="debug-btn" title="Reduce player sanity by 10">😵 -10 Sanity</button>
+                            <button id="heal-player" class="debug-btn" title="Restore player health to maximum">â¤ï¸ Heal</button>
+                            <button id="restore-sanity" class="debug-btn" title="Restore player sanity to maximum">ðŸ§  Sanity</button>
+                            <button id="lose-health" class="debug-btn" title="Reduce player health by 10">ðŸ’” -10 HP</button>
+                            <button id="lose-sanity" class="debug-btn" title="Reduce player sanity by 10">ðŸ˜µ -10 Sanity</button>
                         </div>
                     </div>
                     
                     <!-- Simulation Controls -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎮 Simulation</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">® Simulation</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="start-simulation" class="debug-btn simulation-btn" title="Start quest simulation mode">🎭 Start</button>
-                            <button id="stop-simulation" class="debug-btn simulation-btn" title="Stop quest simulation mode">⏹️ Stop</button>
+                            <button id="start-simulation" class="debug-btn simulation-btn" title="Start quest simulation mode">­ Start</button>
+                            <button id="stop-simulation" class="debug-btn simulation-btn" title="Stop quest simulation mode">â¹ï¸ Stop</button>
                         </div>
                     </div>
                     
                     <!-- Minigames Testing -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎯 Minigames</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">¯ Minigames</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="test-tetris" class="debug-btn" title="Test Tetris minigame">🧩 Tetris</button>
-                            <button id="test-quiz" class="debug-btn" title="Test Quiz minigame">❓ Quiz</button>
-                            <button id="test-riddle" class="debug-btn" title="Test Riddle minigame">🧩 Riddle</button>
-                            <button id="test-fight" class="debug-btn" title="Test Fight minigame">⚔️ Fight</button>
+                            <button id="test-tetris" class="debug-btn" title="Test Tetris minigame">ðŸ§© Tetris</button>
+                            <button id="test-quiz" class="debug-btn" title="Test Quiz minigame">â“ Quiz</button>
+                            <button id="test-riddle" class="debug-btn" title="Test Riddle minigame">ðŸ§© Riddle</button>
+                            <button id="test-fight" class="debug-btn" title="Test Fight minigame">âš”ï¸ Fight</button>
                         </div>
                     </div>
                     
                     <!-- Visual Effects Testing -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🌀 Visual Effects</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">€ Visual Effects</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="test-distortion-effects" class="debug-btn" title="Test screen distortion effects">🌀 Distort</button>
-                            <button id="test-cosmic-effects" class="debug-btn" title="Test cosmic visual effects">🌌 Cosmic</button>
-                            <button id="test-sanity-loss" class="debug-btn" title="Test sanity loss effects">😵 Sanity</button>
-                            <button id="test-screen-effects" class="debug-btn" title="Test general screen effects">📺 Screen</button>
+                            <button id="test-distortion-effects" class="debug-btn" title="Test screen distortion effects">€ Distort</button>
+                            <button id="test-cosmic-effects" class="debug-btn" title="Test cosmic visual effects">Œ Cosmic</button>
+                            <button id="test-sanity-loss" class="debug-btn" title="Test sanity loss effects">ðŸ˜µ Sanity</button>
+                            <button id="test-screen-effects" class="debug-btn" title="Test general screen effects">ðŸ“º Screen</button>
                         </div>
                     </div>
                     
                     <!-- Audio Testing -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🔊 Audio</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">ðŸ”Š Audio</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="test-soundboard" class="debug-btn" title="Test general soundboard">🎵 Sound</button>
-                            <button id="test-ambient-sounds" class="debug-btn" title="Test ambient sounds">🌊 Ambient</button>
-                            <button id="test-combat-sounds" class="debug-btn" title="Test combat sounds">⚔️ Combat</button>
-                            <button id="test-quest-sounds" class="debug-btn" title="Test quest sounds">🎭 Quest</button>
+                            <button id="test-soundboard" class="debug-btn" title="Test general soundboard">µ Sound</button>
+                            <button id="test-ambient-sounds" class="debug-btn" title="Test ambient sounds">Š Ambient</button>
+                            <button id="test-combat-sounds" class="debug-btn" title="Test combat sounds">âš”ï¸ Combat</button>
+                            <button id="test-quest-sounds" class="debug-btn" title="Test quest sounds">­ Quest</button>
                         </div>
                     </div>
 
                 <!-- Multiplayer Tools -->
                 <div class="debug-group">
-                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🌐 Multiplayer</h4>
+                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;"> Multiplayer</h4>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                        <button id="debug-reload-flags" class="debug-btn" title="Request all clients to re-send flags">🏳️ Reload Flags</button>
-                        <button id="debug-refresh-players" class="debug-btn" title="Re-render known other players on map">👥 Refresh Players</button>
+                        <button id="debug-reload-flags" class="debug-btn" title="Request all clients to re-send flags">ðŸ³ï¸ Reload Flags</button>
+                        <button id="debug-refresh-players" class="debug-btn" title="Re-render known other players on map">ðŸ‘¥ Refresh Players</button>
                     </div>
                 </div>
                 
                 <!-- Mobile Wake Lock -->
                 <div class="debug-group">
-                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">📱 Mobile Wake Lock</h4>
+                    <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">ðŸ“± Mobile Wake Lock</h4>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                        <button id="debug-wake-lock-start" class="debug-btn" title="Start mobile wake lock">🔒 Start Wake Lock</button>
-                        <button id="debug-wake-lock-stop" class="debug-btn" title="Stop mobile wake lock">🔓 Stop Wake Lock</button>
-                        <button id="debug-wake-lock-status" class="debug-btn" title="Check wake lock status">📊 Status</button>
+                        <button id="debug-wake-lock-start" class="debug-btn" title="Start mobile wake lock">ðŸ”’ Start Wake Lock</button>
+                        <button id="debug-wake-lock-stop" class="debug-btn" title="Stop mobile wake lock">ðŸ”“ Stop Wake Lock</button>
+                        <button id="debug-wake-lock-status" class="debug-btn" title="Check wake lock status">ðŸ“Š Status</button>
                     </div>
                 </div>
                     
                     <!-- Chaos Mode -->
                     <div class="debug-group">
-                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;">🎨 Chaos Mode</h4>
+                        <h4 style="color: #4a9eff; margin: 0 0 15px 0; text-shadow: 0 0 5px #4a9eff; border-bottom: 1px solid rgba(74, 158, 255, 0.3); padding-bottom: 8px;"> Chaos Mode</h4>
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button id="test-all-effects" class="debug-btn" title="Test all effects sequentially">✨ All Effects</button>
-                            <button id="test-chaos-mode" class="debug-btn" title="Activate chaos mode - rapid fire all effects">🌪️ Chaos</button>
+                            <button id="test-all-effects" class="debug-btn" title="Test all effects sequentially">¨ All Effects</button>
+                            <button id="test-chaos-mode" class="debug-btn" title="Activate chaos mode - rapid fire all effects">ªï¸ Chaos</button>
                         </div>
                     </div>
                 </div>
@@ -621,7 +621,7 @@ class EncounterSystem {
         }
         
         document.body.appendChild(panel);
-        console.log('🎭 Debug panel created and added to DOM');
+        console.log('­ Debug panel created and added to DOM');
         
         // Close button will be wired up later in the event listeners section
         
@@ -642,32 +642,32 @@ class EncounterSystem {
         
         // Stats debug buttons
         document.getElementById('heal-player').addEventListener('click', () => {
-            console.log('🎭 Heal Player button clicked');
+            console.log('­ Heal Player button clicked');
             this.healPlayer();
         });
         document.getElementById('restore-sanity').addEventListener('click', () => {
-            console.log('🎭 Restore Sanity button clicked');
+            console.log('­ Restore Sanity button clicked');
             this.restoreSanity();
         });
         document.getElementById('lose-health').addEventListener('click', () => {
-            console.log('🎭 Lose Health button clicked');
+            console.log('­ Lose Health button clicked');
             this.loseHealth(10, 'Debug test');
         });
         document.getElementById('lose-sanity').addEventListener('click', () => {
-            console.log('🎭 Lose Sanity button clicked');
+            console.log('­ Lose Sanity button clicked');
             this.loseSanity(10, 'Debug test');
         });
         
         // Simulation buttons
         document.getElementById('start-simulation').addEventListener('click', () => {
-            console.log('🎭 Start Simulation button clicked');
+            console.log('­ Start Simulation button clicked');
             if (window.questSimulation) {
                 window.questSimulation.startSimulation();
             }
         });
         
         document.getElementById('stop-simulation').addEventListener('click', () => {
-            console.log('🎭 Stop Simulation button clicked');
+            console.log('­ Stop Simulation button clicked');
             if (window.questSimulation) {
                 window.questSimulation.stopSimulation();
             }
@@ -713,12 +713,12 @@ class EncounterSystem {
             try {
                 if (window.mobileWakeLock) {
                     window.mobileWakeLock.enableForGame();
-                    this.showNotification('📱 Wake lock started');
+                    this.showNotification('ðŸ“± Wake lock started');
                 } else {
-                    this.showNotification('📱 Wake lock not available');
+                    this.showNotification('ðŸ“± Wake lock not available');
                 }
             } catch (e) {
-                this.showNotification('📱 Wake lock start failed: ' + e.message);
+                this.showNotification('ðŸ“± Wake lock start failed: ' + e.message);
             }
         });
 
@@ -727,12 +727,12 @@ class EncounterSystem {
             try {
                 if (window.mobileWakeLock) {
                     window.mobileWakeLock.disableForGame();
-                    this.showNotification('📱 Wake lock stopped');
+                    this.showNotification('ðŸ“± Wake lock stopped');
                 } else {
-                    this.showNotification('📱 Wake lock not available');
+                    this.showNotification('ðŸ“± Wake lock not available');
                 }
             } catch (e) {
-                this.showNotification('📱 Wake lock stop failed: ' + e.message);
+                this.showNotification('ðŸ“± Wake lock stop failed: ' + e.message);
             }
         });
 
@@ -742,13 +742,13 @@ class EncounterSystem {
                 if (window.mobileWakeLock) {
                     const status = window.mobileWakeLock.getStatus();
                     const statusText = `Active: ${status.isActive}, Supported: ${status.isSupported}, Fallback: ${status.fallbackActive}`;
-                    this.showNotification('📱 Wake Lock Status: ' + statusText);
-                    console.log('📱 Wake Lock Status:', status);
+                    this.showNotification('ðŸ“± Wake Lock Status: ' + statusText);
+                    console.log('ðŸ“± Wake Lock Status:', status);
                 } else {
-                    this.showNotification('📱 Wake lock not available');
+                    this.showNotification('ðŸ“± Wake lock not available');
                 }
             } catch (e) {
-                this.showNotification('📱 Wake lock status failed: ' + e.message);
+                this.showNotification('ðŸ“± Wake lock status failed: ' + e.message);
             }
         });
         
@@ -808,7 +808,7 @@ class EncounterSystem {
         }
         list.innerHTML = items.map(it => `
             <div style="display:flex; align-items:center; gap:6px; background:rgba(74,158,255,0.08); border:1px solid rgba(74,158,255,0.2); padding:6px; border-radius:8px;">
-                <span style="font-size:18px;">${it.emoji || '💠'}</span>
+                <span style="font-size:18px;">${it.emoji || 'ðŸ’ '}</span>
                 <div style="display:flex; flex-direction:column;">
                     <span style="font-weight:600; color:#e6f0ff;">${it.name}</span>
                     <span style="font-size:11px; opacity:0.8;">${it.rarity || ''}</span>
@@ -822,18 +822,18 @@ class EncounterSystem {
         this.playerStats.health = this.playerStats.maxHealth;
         this.updateHealthBars();
         this.updateSimpleStatsDisplay();
-        console.log('❤️ Player healed to full health!');
+        console.log('â¤ï¸ Player healed to full health!');
     }
 
     restoreSanity() {
         this.playerStats.sanity = this.playerStats.maxSanity;
         this.updateHealthBars();
         this.updateSimpleStatsDisplay();
-        console.log('🧠 Sanity restored to full!');
+        console.log('ðŸ§  Sanity restored to full!');
     }
 
     startProximityDetection() {
-        console.log('🎭 Starting simplified encounter detection...');
+        console.log('­ Starting simplified encounter detection...');
         this.proximityCheckInterval = setInterval(() => {
             this.checkAllEncounters();
         }, 2000); // Check every 2 seconds
@@ -878,7 +878,7 @@ class EncounterSystem {
         ];
         
         const randomType = encounterTypes[Math.floor(Math.random() * encounterTypes.length)];
-        console.log(`🎭 Triggering random encounter: ${randomType}`);
+        console.log(`­ Triggering random encounter: ${randomType}`);
         
         switch(randomType) {
             case 'heavy':
@@ -949,7 +949,7 @@ class EncounterSystem {
         this.lastProximityCheckAt = now;
         this.lastProximityCheckPos = { lat: playerPos.lat, lng: playerPos.lng };
 
-        console.log('🎭 Encounter system checking proximity at:', playerPos);
+        console.log('­ Encounter system checking proximity at:', playerPos);
 
         // Debug: Log player position and nearby markers
         this.debugProximityInfo(playerPos);
@@ -973,7 +973,7 @@ class EncounterSystem {
 
     checkMonsterProximity(playerPos) {
         if (!window.mapEngine) {
-            console.log('🎭 Map engine not available for monster proximity check');
+            console.log('­ Map engine not available for monster proximity check');
             return;
         }
         
@@ -989,11 +989,11 @@ class EncounterSystem {
         }
         
         if (monsters.length === 0) {
-            console.log('🎭 No monsters available for proximity check');
+            console.log('­ No monsters available for proximity check');
             return;
         }
         
-        console.log(`🎭 Checking proximity to ${monsters.length} monsters...`);
+        console.log(`­ Checking proximity to ${monsters.length} monsters...`);
         
         monsters.forEach((monster, index) => {
             const distance = this.calculateDistance(
@@ -1003,11 +1003,11 @@ class EncounterSystem {
             
             // Log distance for debugging
             if (distance < 100) {
-                console.log(`🎭 Monster ${monster.name || monster.type?.name} distance: ${distance.toFixed(2)}m`);
+                console.log(`­ Monster ${monster.name || monster.type?.name} distance: ${distance.toFixed(2)}m`);
             }
             
             if (distance < 35 && !monster.encountered) { // tighten to 35m
-                console.log(`🎭 Monster encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                console.log(`­ Monster encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 monster.encountered = true;
                 try { this.hideMonsterMarker(monster); } catch (_) {}
                 this.startMonsterEncounter(monster);
@@ -1019,7 +1019,7 @@ class EncounterSystem {
 
     checkItemProximity(playerPos) {
         if (!window.mapEngine) {
-            console.log('🎭 Map engine not available for item proximity check');
+            console.log('­ Map engine not available for item proximity check');
             return;
         }
         
@@ -1027,12 +1027,12 @@ class EncounterSystem {
         
         // Check item markers storage
         if (!mapEngine.itemMarkers || mapEngine.itemMarkers.size === 0) {
-            console.log('🎭 No items available for proximity check');
+            console.log('­ No items available for proximity check');
             return;
         }
         
         const items = Array.from(mapEngine.itemMarkers.values());
-        console.log(`🎭 Checking proximity to ${items.length} items...`);
+        console.log(`­ Checking proximity to ${items.length} items...`);
         
         items.forEach((item, index) => {
             const distance = this.calculateDistance(
@@ -1042,11 +1042,11 @@ class EncounterSystem {
             
             // Log distance for debugging
             if (distance < 100) {
-                console.log(`🎭 Item ${item.name} distance: ${distance.toFixed(2)}m`);
+                console.log(`­ Item ${item.name} distance: ${distance.toFixed(2)}m`);
             }
             
             if (distance < 35 && !item.collected) { // tighten to 35m
-                console.log(`🎭 Item encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                console.log(`­ Item encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 item.collected = true;
                 try { this.hideItemMarker(item); } catch (_) {}
                 this.startItemEncounter(item);
@@ -1068,7 +1068,7 @@ class EncounterSystem {
             );
             
             if (distance < 25 && !poi.encountered) { // tighten to 25m
-                console.log(`🎭 POI encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                console.log(`­ POI encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 poi.encountered = true;
                 try { if (window.mapEngine?.map) window.mapEngine.map.removeLayer(poi); } catch (_) {}
                 this.startPOIEncounter(poi);
@@ -1103,7 +1103,7 @@ class EncounterSystem {
             
             // Use visual proximity - closer trigger area for better UX
             if (distance < 25) { // tighten to 25m
-                console.log(`🎭 Quest marker encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                console.log(`­ Quest marker encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 questMarker.encountered = true;
                 try { if (window.eldritchApp?.systems?.mapEngine?.map) window.eldritchApp.systems.mapEngine.map.removeLayer(questMarker); } catch (_) {}
                 try { window.unifiedQuestSystem?.questMarkers?.delete?.(key); } catch (_) {}
@@ -1130,7 +1130,7 @@ class EncounterSystem {
             
             // Use visual proximity - closer trigger area for better UX
             if (distance < 25) { // 25m for closer interaction
-                console.log(`🎯 Test quest encounter triggered! Distance: ${distance.toFixed(2)}m`);
+                console.log(`¯ Test quest encounter triggered! Distance: ${distance.toFixed(2)}m`);
                 questMarker.encountered = true;
                 try { if (window.mapEngine?.map) window.mapEngine.map.removeLayer(questMarker); } catch (_) {}
                 this.startTestQuestEncounter(questMarker);
@@ -1176,7 +1176,7 @@ class EncounterSystem {
     }
     
     startLegendaryEncounter(encounter) {
-        console.log('🌟 Starting legendary encounter:', encounter.name);
+        console.log('Ÿ Starting legendary encounter:', encounter.name);
         
         this.activeEncounter = {
             type: 'legendary',
@@ -1259,7 +1259,7 @@ class EncounterSystem {
 
     // Test function to trigger HEVY encounter (for testing purposes)
     testHeavyEncounter() {
-        console.log('⚡ Testing HEVY encounter...');
+        console.log('âš¡ Testing HEVY encounter...');
         const heavy = this.legendaryEncounters.heavy;
         if (heavy) {
             this.startLegendaryEncounter(heavy);
@@ -1270,7 +1270,7 @@ class EncounterSystem {
 
     // Force HEVY to spawn at current location (for testing)
     forceHeavySpawn() {
-        console.log('⚡ Forcing HEVY spawn at current location...');
+        console.log('âš¡ Forcing HEVY spawn at current location...');
         const heavy = this.legendaryEncounters.heavy;
         if (heavy) {
             // Temporarily increase spawn chance to 100%
@@ -1288,7 +1288,7 @@ class EncounterSystem {
     }
 
     startLegendaryEncounter(encounter) {
-        console.log(`⚡ Legendary encounter: ${encounter.name} appears!`);
+        console.log(`âš¡ Legendary encounter: ${encounter.name} appears!`);
         
         // Create special visual effects
         if (window.cosmicEffects) {
@@ -1319,7 +1319,7 @@ class EncounterSystem {
                 <div class="encounter-header legendary-header">
                     <h2>${encounter.emoji} ${encounter.name}</h2>
                     <p class="legendary-title">${encounter.title}</p>
-                    <button class="close-btn" onclick="this.closest('.encounter-modal').remove()">×</button>
+                    <button class="close-btn" onclick="this.closest('.encounter-modal').remove()">Ã—</button>
                 </div>
                 <div class="legendary-dialogue">
                     <div class="legendary-text">
@@ -1395,7 +1395,7 @@ class EncounterSystem {
             const action2 = document.getElementById('legendary-action-2');
             const action3 = document.getElementById('legendary-action-3');
             
-            console.log('🎭 Adding legendary action listeners:', {
+            console.log('­ Adding legendary action listeners:', {
                 action1: !!action1,
                 action2: !!action2,
                 action3: !!action3,
@@ -1406,7 +1406,7 @@ class EncounterSystem {
                 action1.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Legendary action 1 clicked');
+                    console.log('­ Legendary action 1 clicked');
                     this.handleLegendaryAction(encounter, 1);
                 });
             }
@@ -1414,7 +1414,7 @@ class EncounterSystem {
                 action2.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Legendary action 2 clicked');
+                    console.log('­ Legendary action 2 clicked');
                     this.handleLegendaryAction(encounter, 2);
                 });
             }
@@ -1422,7 +1422,7 @@ class EncounterSystem {
                 action3.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Legendary action 3 clicked');
+                    console.log('­ Legendary action 3 clicked');
                     this.handleLegendaryAction(encounter, 3);
                 });
             }
@@ -1456,19 +1456,19 @@ class EncounterSystem {
 
     // Default action methods for unknown legendary encounters
     defaultInteract(encounter) {
-        console.log('🎭 Default interact with:', encounter.name);
+        console.log('­ Default interact with:', encounter.name);
         this.showNotification(`You interact with the ${encounter.name}.`);
         this.closeLegendaryModal();
     }
 
     defaultObserve(encounter) {
-        console.log('🎭 Default observe:', encounter.name);
+        console.log('­ Default observe:', encounter.name);
         this.showNotification(`You carefully observe the ${encounter.name}.`);
         this.closeLegendaryModal();
     }
 
     defaultLeave(encounter) {
-        console.log('🎭 Default leave:', encounter.name);
+        console.log('­ Default leave:', encounter.name);
         this.showNotification(`You leave the ${encounter.name} behind.`);
         this.closeLegendaryModal();
     }
@@ -1479,7 +1479,7 @@ class EncounterSystem {
             modal.remove();
         }
         this.isDialogOpen = false;
-        console.log('🎭 Legendary modal closed, dialog flag reset');
+        console.log('­ Legendary modal closed, dialog flag reset');
     }
 
     submitQuestAnswer(encounterName) {
@@ -1517,7 +1517,7 @@ class EncounterSystem {
                 <p>${encounter.dialogue.farewell}</p>
             </div>
             <div class="quest-rewards">
-                <h3>🌟 Rewards Earned:</h3>
+                <h3>Ÿ Rewards Earned:</h3>
                 <p>+${encounter.quest.rewards.experience} Experience</p>
                 <p>+${encounter.quest.rewards.items.join(', ')}</p>
                 <p>Title: ${encounter.quest.rewards.title}</p>
@@ -1553,7 +1553,7 @@ class EncounterSystem {
             }
         }
 
-        console.log('⚡ Quest completed successfully!');
+        console.log('âš¡ Quest completed successfully!');
     }
 
     handleIncorrectAnswer(encounter) {
@@ -1568,7 +1568,7 @@ class EncounterSystem {
             <button onclick="this.closest('.encounter-modal').remove()" class="quest-close-btn">Continue Your Journey</button>
         `;
 
-        console.log('⚡ Quest answer was incorrect');
+        console.log('âš¡ Quest answer was incorrect');
     }
 
     showQuestHint(encounterName) {
@@ -1592,7 +1592,7 @@ class EncounterSystem {
         
         if (this.currentHintIndex < encounter.quest.hints.length) {
             const hint = encounter.quest.hints[this.currentHintIndex];
-            hintDisplay.innerHTML = `<p class="hint-text">💡 Hint: ${hint}</p>`;
+            hintDisplay.innerHTML = `<p class="hint-text">ðŸ’¡ Hint: ${hint}</p>`;
             hintDisplay.classList.remove('hidden');
             this.currentHintIndex++;
         } else {
@@ -1677,7 +1677,7 @@ class EncounterSystem {
             document.body.appendChild(warning);
         }
         
-        const typeEmoji = type === 'monster' ? '👹' : type === 'poi' ? '💎' : type === 'quest' ? '🎯' : '🔍';
+        const typeEmoji = type === 'monster' ? 'ðŸ‘¹' : type === 'poi' ? 'ðŸ’Ž' : type === 'quest' ? '¯' : 'ðŸ”';
         warning.innerHTML = `${typeEmoji} ${type.toUpperCase()} nearby! ${distance}m away`;
         warning.classList.remove('hidden');
     }
@@ -1691,14 +1691,14 @@ class EncounterSystem {
 
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371e3; // Earth's radius in meters
-        const φ1 = lat1 * Math.PI/180;
-        const φ2 = lat2 * Math.PI/180;
-        const Δφ = (lat2-lat1) * Math.PI/180;
-        const Δλ = (lng2-lng1) * Math.PI/180;
+        const Ï†1 = lat1 * Math.PI/180;
+        const Ï†2 = lat2 * Math.PI/180;
+        const Î”Ï† = (lat2-lat1) * Math.PI/180;
+        const Î”Î» = (lng2-lng1) * Math.PI/180;
 
-        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const a = Math.sin(Î”Ï†/2) * Math.sin(Î”Ï†/2) +
+                Math.cos(Ï†1) * Math.cos(Ï†2) *
+                Math.sin(Î”Î»/2) * Math.sin(Î”Î»/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         return R * c; // Distance in meters
@@ -1708,7 +1708,7 @@ class EncounterSystem {
     debugProximityInfo(playerPos) {
         if (!this.debugMode) return;
         
-        console.log(`🎯 Player position: ${playerPos.lat.toFixed(6)}, ${playerPos.lng.toFixed(6)}`);
+        console.log(`¯ Player position: ${playerPos.lat.toFixed(6)}, ${playerPos.lng.toFixed(6)}`);
         
         // Check test quest markers
         if (window.mapEngine && window.mapEngine.testQuestMarkers) {
@@ -1718,7 +1718,7 @@ class EncounterSystem {
                     playerPos.lat, playerPos.lng,
                     questPos.lat, questPos.lng
                 );
-                console.log(`🎯 Quest marker ${index + 1}: ${distance.toFixed(2)}m away (encountered: ${questMarker.encountered})`);
+                console.log(`¯ Quest marker ${index + 1}: ${distance.toFixed(2)}m away (encountered: ${questMarker.encountered})`);
             });
         }
         
@@ -1730,14 +1730,14 @@ class EncounterSystem {
                     playerPos.lat, playerPos.lng,
                     poiPos.lat, poiPos.lng
                 );
-                console.log(`💎 POI ${index + 1}: ${distance.toFixed(2)}m away (encountered: ${poi.encountered})`);
+                console.log(`ðŸ’Ž POI ${index + 1}: ${distance.toFixed(2)}m away (encountered: ${poi.encountered})`);
             });
         }
     }
 
     // Method to reset all encounter flags for testing
     resetEncounterFlags() {
-        console.log('🔄 Resetting all encounter flags...');
+        console.log('ðŸ”„ Resetting all encounter flags...');
         
         // Reset test quest markers
         if (window.mapEngine && window.mapEngine.testQuestMarkers) {
@@ -1767,13 +1767,13 @@ class EncounterSystem {
             });
         }
         
-        console.log('🔄 All encounter flags reset!');
+        console.log('ðŸ”„ All encounter flags reset!');
     }
 
     // Toggle debug mode for proximity detection
     toggleDebugMode() {
         this.debugMode = !this.debugMode;
-        console.log(`🎯 Proximity debug mode: ${this.debugMode ? 'ON' : 'OFF'}`);
+        console.log(`¯ Proximity debug mode: ${this.debugMode ? 'ON' : 'OFF'}`);
     }
 
     // Add visual proximity indicators to markers
@@ -1832,7 +1832,7 @@ class EncounterSystem {
 
     startMonsterEncounter(monster) {
         const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
-        console.log('👹 Monster encounter started:', monsterName);
+        console.log('ðŸ‘¹ Monster encounter started:', monsterName);
         
         // Trigger distortion effects for monster encounters
         this.triggerDistortionEffects();
@@ -1852,7 +1852,7 @@ class EncounterSystem {
     }
 
     startItemEncounter(item) {
-        console.log('💎 Item encounter started:', item.name);
+        console.log('ðŸ’Ž Item encounter started:', item.name);
         
         // Show item collection dialog
         this.showItemCollectionModal(item);
@@ -1865,7 +1865,7 @@ class EncounterSystem {
         
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>💎 Item Found!</h3>
+                <h3>ðŸ’Ž Item Found!</h3>
                 <p>You discovered a <strong>${item.name}</strong>!</p>
                 <p>${item.emoji} ${item.rarity ? `Rarity: ${item.rarity}` : ''}</p>
                 <p>This item could be useful on your journey.</p>
@@ -1887,7 +1887,7 @@ class EncounterSystem {
             const action2 = document.getElementById('action-2');
             const action3 = document.getElementById('action-3');
             
-            console.log('🎭 Adding item action listeners:', {
+            console.log('­ Adding item action listeners:', {
                 action1: !!action1,
                 action2: !!action2,
                 action3: !!action3,
@@ -1898,7 +1898,7 @@ class EncounterSystem {
                 action1.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Item action 1 (Collect) clicked');
+                    console.log('­ Item action 1 (Collect) clicked');
                     this.collectItem(item);
                 });
             }
@@ -1906,7 +1906,7 @@ class EncounterSystem {
                 action2.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Item action 2 (Examine) clicked');
+                    console.log('­ Item action 2 (Examine) clicked');
                     this.examineItem(item);
                 });
             }
@@ -1914,7 +1914,7 @@ class EncounterSystem {
                 action3.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Item action 3 (Leave) clicked');
+                    console.log('­ Item action 3 (Leave) clicked');
                     this.leaveItem(item);
                 });
             }
@@ -1924,7 +1924,7 @@ class EncounterSystem {
     }
 
     collectItem(item) {
-        console.log('💎 Collecting item:', item.name);
+        console.log('ðŸ’Ž Collecting item:', item.name);
         
         // Close encounter modal
         this.closeEncounterModal();
@@ -1941,9 +1941,9 @@ class EncounterSystem {
                 const itemId = item.name.toLowerCase().replace(/\s+/g, '_');
                 const success = this.itemSystem.addToInventory(itemId, 1);
                 if (success) {
-                    console.log(`🎒 Added ${item.name} to item system inventory`);
+                    console.log(`’ Added ${item.name} to item system inventory`);
                 } else {
-                    console.warn(`🎒 Failed to add ${item.name} to item system inventory`);
+                    console.warn(`’ Failed to add ${item.name} to item system inventory`);
                 }
             } else {
                 // Fallback to encounter system inventory
@@ -1966,7 +1966,7 @@ class EncounterSystem {
                 }
             } catch (_) {}
         } catch (e) {
-            console.warn('🎒 Failed to add item to inventory:', e);
+            console.warn('’ Failed to add item to inventory:', e);
         }
         
         // Apply item effects only for non-consumable items
@@ -1977,16 +1977,16 @@ class EncounterSystem {
         }
         
         // Item collected silently (no notification needed)
-        console.log(`🎒 Collected ${item.name} silently`);
+        console.log(`’ Collected ${item.name} silently`);
     }
 
     examineItem(item) {
-        console.log('🔍 Examining item:', item.name);
+        console.log('ðŸ” Examining item:', item.name);
         
         const dialog = document.getElementById('dialog-text');
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>🔍 Item Examination</h3>
+                <h3>ðŸ” Item Examination</h3>
                 <p><strong>${item.name}</strong></p>
                 <p>${item.emoji} ${item.rarity ? `Rarity: ${item.rarity}` : ''}</p>
                 <p>This item appears to be in good condition and ready to use.</p>
@@ -1996,7 +1996,7 @@ class EncounterSystem {
     }
 
     leaveItem(item) {
-        console.log('🚶 Leaving item:', item.name);
+        console.log('¶ Leaving item:', item.name);
         
         // Close encounter modal
         this.closeEncounterModal();
@@ -2020,7 +2020,7 @@ class EncounterSystem {
                     window.healthBar.setHealth(newHealth, maxHealth);
                 }
                 
-                this.showNotification(`🧪 Health restored by 20! Now ${newHealth}/${maxHealth}`);
+                this.showNotification(`ðŸ§ª Health restored by 20! Now ${newHealth}/${maxHealth}`);
                 break;
             case 'Sanity Elixir':
                 // Restore sanity directly in encounter system
@@ -2034,33 +2034,33 @@ class EncounterSystem {
                     window.healthBar.setSanity(newSanity, maxSanity);
                 }
                 
-                this.showNotification(`🧠 Sanity restored by 15! Now ${newSanity}/${maxSanity}`);
+                this.showNotification(`ðŸ§  Sanity restored by 15! Now ${newSanity}/${maxSanity}`);
                 break;
             case 'Power Orb':
                 if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
                     window.eldritchApp.systems.statistics.addExperience(50);
-                    this.showNotification('🔮 Gained 50 experience!');
+                    this.showNotification('ðŸ”® Gained 50 experience!');
                 }
                 break;
             case 'Cosmic Crystal':
                 if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
                     window.eldritchApp.systems.statistics.addExperience(100);
-                    this.showNotification('💎 Gained 100 experience!');
+                    this.showNotification('ðŸ’Ž Gained 100 experience!');
                 }
                 break;
             case 'Ancient Scroll':
                 if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.statistics) {
                     window.eldritchApp.systems.statistics.addExperience(200);
-                    this.showNotification('📜 Gained 200 experience!');
+                    this.showNotification('ðŸ“œ Gained 200 experience!');
                 }
                 break;
             default:
-                console.log(`🎒 Collected ${item.name} silently`);
+                console.log(`’ Collected ${item.name} silently`);
         }
     }
 
     startPOIEncounter(poi) {
-        console.log('🗺️ POI encounter started');
+        console.log('ðŸ—ºï¸ POI encounter started');
         
         this.activeEncounter = {
             type: this.encounterTypes.POI,
@@ -2074,18 +2074,18 @@ class EncounterSystem {
     // Mystery encounters removed as requested
     
     startQuestEncounter(questMarker) {
-        console.log('🐙 Starting quest encounter for marker:', questMarker.questIndex);
+        console.log('ðŸ™ Starting quest encounter for marker:', questMarker.questIndex);
         
         if (window.lovecraftianQuest) {
             // Start quest from the specific location
             window.lovecraftianQuest.startQuestFromLocation(questMarker.questIndex);
         } else {
-            console.error('🐙 Lovecraftian quest system not available');
+            console.error('ðŸ™ Lovecraftian quest system not available');
         }
     }
 
     startTestQuestEncounter(questMarker) {
-        console.log('🎯 Test quest encounter started:', questMarker.questName);
+        console.log('¯ Test quest encounter started:', questMarker.questName);
         
         this.activeEncounter = {
             type: 'testQuest',
@@ -2098,7 +2098,7 @@ class EncounterSystem {
     }
     
     startQuestMarkerEncounter(questMarker, markerKey) {
-        console.log('🎭 Quest marker encounter started:', markerKey);
+        console.log('­ Quest marker encounter started:', markerKey);
         
         this.activeEncounter = {
             type: 'questMarker',
@@ -2117,11 +2117,11 @@ class EncounterSystem {
         const battle = document.getElementById('battle-interface');
         
         const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
-        const monsterEmoji = monster.type?.emoji || monster.emoji || '👹';
+        const monsterEmoji = monster.type?.emoji || monster.emoji || 'ðŸ‘¹';
         
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>⚠️ Monster Encounter!</h3>
+                <h3>âš ï¸ Monster Encounter!</h3>
                 <p>A <strong>${monsterName}</strong> blocks your path!</p>
                 <p>${monsterEmoji} The creature looks dangerous and ready to fight.</p>
                 <p>What will you do?</p>
@@ -2137,7 +2137,7 @@ class EncounterSystem {
         battle.classList.add('hidden');
         
         // Debug: Check if buttons are visible
-        console.log('🎭 Encounter buttons created:', {
+        console.log('­ Encounter buttons created:', {
             action1: document.getElementById('action-1'),
             action2: document.getElementById('action-2'),
             action3: document.getElementById('action-3'),
@@ -2151,7 +2151,7 @@ class EncounterSystem {
             const action2 = document.getElementById('action-2');
             const action3 = document.getElementById('action-3');
             
-            console.log('🎭 Adding monster action listeners:', {
+            console.log('­ Adding monster action listeners:', {
                 action1: !!action1,
                 action2: !!action2,
                 action3: !!action3,
@@ -2162,7 +2162,7 @@ class EncounterSystem {
                 action1.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Monster action 1 (Fight) clicked');
+                    console.log('­ Monster action 1 (Fight) clicked');
                     this.startBattle(monster);
                 });
             }
@@ -2170,7 +2170,7 @@ class EncounterSystem {
                 action2.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Monster action 2 (Flee) clicked');
+                    console.log('­ Monster action 2 (Flee) clicked');
                     this.attemptFlee(monster);
                 });
             }
@@ -2178,7 +2178,7 @@ class EncounterSystem {
                 action3.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🎭 Monster action 3 (Observe) clicked');
+                    console.log('­ Monster action 3 (Observe) clicked');
                     this.observeMonster(monster);
                 });
             }
@@ -2186,13 +2186,13 @@ class EncounterSystem {
     }
 
     showPOICutscene(poi) {
-        console.log('🎭 Showing POI cutscene for:', poi);
+        console.log('­ Showing POI cutscene for:', poi);
         const dialog = document.getElementById('dialog-text');
         const actions = document.getElementById('encounter-actions');
         const puzzle = document.getElementById('puzzle-interface');
         
         if (!dialog || !actions) {
-            console.error('🎭 Missing dialog elements:', { dialog: !!dialog, actions: !!actions });
+            console.error('­ Missing dialog elements:', { dialog: !!dialog, actions: !!actions });
             return;
         }
         
@@ -2202,7 +2202,7 @@ class EncounterSystem {
         
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>🗺️ Point of Interest Discovered!</h3>
+                <h3>ðŸ—ºï¸ Point of Interest Discovered!</h3>
                 <p>You've found <strong>${poiName}</strong></p>
                 <p>Rarity: <span style="color: #ffd700;">${poiRarity}</span></p>
                 <p>This location seems to hold ancient secrets. Will you investigate?</p>
@@ -2218,7 +2218,7 @@ class EncounterSystem {
         puzzle.classList.add('hidden');
         
         // Debug: Check if POI buttons are visible
-        console.log('🎭 POI Encounter buttons created:', {
+        console.log('­ POI Encounter buttons created:', {
             action1: document.getElementById('action-1'),
             action2: document.getElementById('action-2'),
             action3: document.getElementById('action-3'),
@@ -2239,7 +2239,7 @@ class EncounterSystem {
         
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>🎯 ${questMarker.questName}</h3>
+                <h3>¯ ${questMarker.questName}</h3>
                 <p>${questMarker.questType === 'mystery' ? 'A strange forest where reality seems to bend...' : 
                    questMarker.questType === 'poi' ? 'Crumbling stones that whisper of forgotten times...' : 
                    'A swirling vortex of otherworldly energy...'}</p>
@@ -2268,22 +2268,22 @@ class EncounterSystem {
         let markerInfo = {
             title: 'Quest Objective',
             description: 'A quest marker awaits your interaction.',
-            symbol: '🎯',
+            symbol: '¯',
             color: '#ffd700'
         };
         
         if (markerKey === 'aurora') {
             markerInfo = {
-                title: '👑 Aurora - The Cosmic Entity',
+                title: 'ðŸ‘‘ Aurora - The Cosmic Entity',
                 description: 'A mysterious cosmic entity that offers quests and guidance.',
-                symbol: '👑',
+                symbol: 'ðŸ‘‘',
                 color: '#ffd700'
             };
         } else if (questMarker.objective) {
             markerInfo = {
                 title: questMarker.objective.name || 'Quest Objective',
                 description: questMarker.objective.description || 'Complete this quest objective.',
-                symbol: '🎯',
+                symbol: '¯',
                 color: '#4ecdc4'
             };
         }
@@ -2311,7 +2311,7 @@ class EncounterSystem {
     }
     
     interactWithQuestMarker(questMarker, markerKey) {
-        console.log('🎭 Interacting with quest marker:', markerKey);
+        console.log('­ Interacting with quest marker:', markerKey);
         
         // Close encounter modal
         this.closeEncounterModal();
@@ -2335,13 +2335,13 @@ class EncounterSystem {
     }
     
     observeQuestMarker(questMarker, markerKey) {
-        console.log('🎭 Observing quest marker:', markerKey);
+        console.log('­ Observing quest marker:', markerKey);
         
         // Show observation dialog
         const dialog = document.getElementById('dialog-text');
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>🔍 Observation</h3>
+                <h3>ðŸ” Observation</h3>
                 <p>You carefully study the quest marker...</p>
                 <p>${markerKey === 'aurora' ? 
                     'The cosmic entity seems to pulse with otherworldly energy. You sense great power and ancient wisdom.' :
@@ -2361,12 +2361,12 @@ class EncounterSystem {
     }
     
     leaveQuestMarker(questMarker, markerKey) {
-        console.log('🎭 Leaving quest marker:', markerKey);
+        console.log('­ Leaving quest marker:', markerKey);
         this.closeEncounterModal();
     }
 
     startBattle(monster) {
-        console.log('🎭 Starting battle with:', monster);
+        console.log('­ Starting battle with:', monster);
         
         const monsterName = monster.type?.name || monster.name || 'Unknown Monster';
         
@@ -2415,7 +2415,7 @@ class EncounterSystem {
                     health: -(monster.attack || 10), // Take some damage
                     skills: { combat: 2, courage: 1 }
                 });
-                this.showNotification(`🎉 ${monsterName} defeated! +${monster.experience || 50} XP, +2 Combat, +1 Courage`);
+                this.showNotification(`‰ ${monsterName} defeated! +${monster.experience || 50} XP, +2 Combat, +1 Courage`);
                 
                 // Remove monster from map
                 this.removeMonsterFromMap(monster);
@@ -2427,7 +2427,7 @@ class EncounterSystem {
                     sanity: -5, // Battle affects sanity
                     experience: Math.floor((monster.experience || 50) * 0.3) // Some learning from defeat
                 });
-                this.showNotification(`💀 Defeated by ${monsterName}! -${(monster.attack || 10) * 2} HP, -5 Sanity, +${Math.floor((monster.experience || 50) * 0.3)} XP`);
+                this.showNotification(`ðŸ’€ Defeated by ${monsterName}! -${(monster.attack || 10) * 2} HP, -5 Sanity, +${Math.floor((monster.experience || 50) * 0.3)} XP`);
             }
             
             this.closeEncounterModal();
@@ -2443,7 +2443,7 @@ class EncounterSystem {
                 if (marker && marker.marker) {
                     window.mapEngine.map.removeLayer(marker.marker);
                     window.mapEngine.monsterMarkers.delete(monsterName);
-                    console.log('🎭 Removed monster marker:', monsterName);
+                    console.log('­ Removed monster marker:', monsterName);
                 }
             }
         }
@@ -2613,7 +2613,7 @@ class EncounterSystem {
                     experience: 15, // Learning from the experience
                     skills: { survival: 1, stealth: 1 }
                 });
-                this.showNotification(`🏃 Successfully fled from ${monsterName}! -3 Sanity, +15 XP, +1 Survival, +1 Stealth`);
+                this.showNotification(`ðŸƒ Successfully fled from ${monsterName}! -3 Sanity, +15 XP, +1 Survival, +1 Stealth`);
             } else {
                 this.showDialog(`The ${monsterName} blocks your escape! You must fight!`);
                 setTimeout(() => this.startBattle(monster), 1000);
@@ -2635,7 +2635,7 @@ class EncounterSystem {
                 experience: 10, // Learning from observation
                 skills: { investigation: 1, survival: 1 }
             });
-            this.showNotification(`👁️ Observed ${monsterName}! +10 XP, +1 Investigation, +1 Survival`);
+            this.showNotification(`ðŸ‘ï¸ Observed ${monsterName}! +10 XP, +1 Investigation, +1 Survival`);
             
             this.closeEncounterModal();
         }, 1500);
@@ -2686,7 +2686,7 @@ class EncounterSystem {
                     color2: "#8a2be2",
                     borderColor: "#ff00ff",
                     textColor: "#ffffff",
-                    icon: "🏊"
+                    icon: "ðŸŠ"
                 },
                 {
                     text: "Run Around the Lake", 
@@ -2695,7 +2695,7 @@ class EncounterSystem {
                     color2: "#ff4500",
                     borderColor: "#ffaa00",
                     textColor: "#ffffff",
-                    icon: "🏃"
+                    icon: "ðŸƒ"
                 },
                 {
                     text: "Accept Your Fate",
@@ -2704,7 +2704,7 @@ class EncounterSystem {
                     color2: "#dc143c",
                     borderColor: "#ff0000",
                     textColor: "#ffffff",
-                    icon: "💀"
+                    icon: "ðŸ’€"
                 }
             ],
             onChoice: (index, choice, alignment) => {
@@ -2739,7 +2739,7 @@ class EncounterSystem {
         
         dialog.innerHTML = `
             <div class="moral-choice-dialog">
-                <h3 style="color: var(--cosmic-purple); margin-bottom: 15px;">⚖️ ${title}</h3>
+                <h3 style="color: var(--cosmic-purple); margin-bottom: 15px;">âš–ï¸ ${title}</h3>
                 <div style="margin-bottom: 20px; line-height: 1.6; color: var(--cosmic-light);">
                     ${description}
                 </div>
@@ -2799,7 +2799,7 @@ class EncounterSystem {
 
     // Handle moral choice selection
     handleMoralChoice(choiceIndex, choice, onChoice, questMarker) {
-        console.log('⚖️ Moral choice selected:', choice.text);
+        console.log('âš–ï¸ Moral choice selected:', choice.text);
         
         // Update alignment based on choice
         let alignmentChanges = {};
@@ -2877,7 +2877,7 @@ class EncounterSystem {
                 const stepsGained = Math.floor(distance / 100); // 1 step per 100 meters
                 if (stepsGained > 0) {
                     this.addSteps(stepsGained);
-                    console.log(`👣 Moved ${distance.toFixed(1)}m, gained ${stepsGained} steps`);
+                    console.log(`ðŸ‘£ Moved ${distance.toFixed(1)}m, gained ${stepsGained} steps`);
                 }
             }
         }
@@ -2998,7 +2998,7 @@ class EncounterSystem {
     // Experience and Leveling System
     gainExperience(amount, reason = "Cosmic knowledge gained") {
         this.playerStats.experience += amount;
-        console.log(`⭐ Experience gained: ${amount}. Reason: ${reason}`);
+        console.log(`â­ Experience gained: ${amount}. Reason: ${reason}`);
         
         // Check for level up
         this.checkLevelUp();
@@ -3048,10 +3048,10 @@ class EncounterSystem {
             luck: this.playerStats.luck
         });
         
-        console.log(`🌟 Level up! ${oldLevel} → ${this.playerStats.level}`);
-        console.log(`❤️ Max Health: +${healthIncrease} (${this.playerStats.maxHealth})`);
-        console.log(`🧠 Max Sanity: +${sanityIncrease} (${this.playerStats.maxSanity})`);
-        console.log(`⚔️ Attack: ${this.playerStats.attack}, Defense: ${this.playerStats.defense}, Luck: ${this.playerStats.luck}`);
+        console.log(`Ÿ Level up! ${oldLevel} â†’ ${this.playerStats.level}`);
+        console.log(`â¤ï¸ Max Health: +${healthIncrease} (${this.playerStats.maxHealth})`);
+        console.log(`ðŸ§  Max Sanity: +${sanityIncrease} (${this.playerStats.maxSanity})`);
+        console.log(`âš”ï¸ Attack: ${this.playerStats.attack}, Defense: ${this.playerStats.defense}, Luck: ${this.playerStats.luck}`);
         
         // Check for another level up
         this.checkLevelUp();
@@ -3064,13 +3064,13 @@ class EncounterSystem {
         notification.innerHTML = `
             <div class="level-up-content">
                 <div class="level-up-header">
-                    <div class="level-up-icon">🌟</div>
+                    <div class="level-up-icon">Ÿ</div>
                     <h3>Level Up!</h3>
                 </div>
                 <div class="level-up-stats">
                     <div class="level-up-stat">
                         <span class="stat-name">Level:</span>
-                        <span class="stat-change">${oldLevel} → ${newLevel}</span>
+                        <span class="stat-change">${oldLevel} â†’ ${newLevel}</span>
                     </div>
                     <div class="level-up-stat">
                         <span class="stat-name">Max Health:</span>
@@ -3132,7 +3132,7 @@ class EncounterSystem {
     }
 
     handlePlayerDeath() {
-        console.log('💀 Player has died:', this.playerStats.deathReason);
+        console.log('ðŸ’€ Player has died:', this.playerStats.deathReason);
         
         // Show death screen
         this.showDeathScreen();
@@ -3158,20 +3158,20 @@ class EncounterSystem {
         
         const deathMessages = {
             health: {
-                title: '💀 Physical Demise',
-                icon: '💀',
+                title: 'ðŸ’€ Physical Demise',
+                icon: 'ðŸ’€',
                 message: 'Your physical form has been consumed by the cosmic forces. The void claims another soul...',
                 subtext: 'But in the cosmic realm, death is merely a transition to another state of being.'
             },
             sanity: {
-                title: '🌀 Reality Collapse',
-                icon: '🌀',
+                title: '€ Reality Collapse',
+                icon: '€',
                 message: 'Your mind has shattered under the weight of forbidden knowledge. Reality itself rejects your consciousness...',
                 subtext: 'The cosmic truth was too much for mortal comprehension. You have become one with the madness.'
             },
             steps: {
-                title: '⚡ Energy Depletion',
-                icon: '⚡',
+                title: 'âš¡ Energy Depletion',
+                icon: 'âš¡',
                 message: 'You have run out of cosmic energy. Without steps, you cannot traverse the infinite realms.',
                 subtext: 'The cosmic dance requires movement. Even the eldritch entities need to stretch their tentacles.'
             }
@@ -3205,10 +3205,10 @@ class EncounterSystem {
                 </div>
                 <div class="death-actions">
                     <button id="resurrect-btn" class="sacred-button primary">
-                        🌟 Resurrect (Cost: 100 Steps)
+                        Ÿ Resurrect (Cost: 100 Steps)
                     </button>
                     <button id="new-game-btn" class="sacred-button secondary">
-                        🌌 New Journey
+                        Œ New Journey
                     </button>
                 </div>
             </div>
@@ -3248,7 +3248,7 @@ class EncounterSystem {
             }
             
             this.updateStatBars();
-            this.showDialog('🌟 You have been resurrected! The cosmic forces grant you a second chance...');
+            this.showDialog('Ÿ You have been resurrected! The cosmic forces grant you a second chance...');
         } else {
             this.showDialog('Not enough steps to resurrect! You need at least 100 steps.');
         }
@@ -3296,17 +3296,17 @@ class EncounterSystem {
         }
         
         this.updateStatBars();
-        this.showDialog('🌌 A new cosmic journey begins... Welcome back to the infinite realm!');
+        this.showDialog('Œ A new cosmic journey begins... Welcome back to the infinite realm!');
     }
 
     // Sanity system - because knowing too much is... problematic
     loseSanity(amount, reason = "The cosmic truth weighs heavily on your mind.") {
         this.playerStats.sanity = Math.max(0, this.playerStats.sanity - amount);
-        console.log(`🧠 Sanity lost: ${amount}. Reason: ${reason}`);
+        console.log(`ðŸ§  Sanity lost: ${amount}. Reason: ${reason}`);
         
         // Check for sanity effects
         if (this.playerStats.sanity < 30) {
-            console.log('⚠️ Warning: Your sanity is dangerously low! The cosmic entities are starting to look... reasonable.');
+            console.log('âš ï¸ Warning: Your sanity is dangerously low! The cosmic entities are starting to look... reasonable.');
         }
         
         // Trigger distortion effects based on sanity level
@@ -3319,7 +3319,7 @@ class EncounterSystem {
 
     gainSanity(amount, reason = "A moment of clarity in the cosmic chaos.") {
         this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + amount);
-        console.log(`🧠 Sanity gained: ${amount}. Reason: ${reason}`);
+        console.log(`ðŸ§  Sanity gained: ${amount}. Reason: ${reason}`);
         
         this.updateHealthBars();
     }
@@ -3362,7 +3362,7 @@ class EncounterSystem {
         }
         
         if (effectType) {
-            console.log(`🌀 Triggering distortion effect: ${effectType} (intensity: ${intensity})`);
+            console.log(`€ Triggering distortion effect: ${effectType} (intensity: ${intensity})`);
             mapEngine.addDistortionEffect(effectType, playerPos.lat, playerPos.lng, intensity);
         }
     }
@@ -3370,7 +3370,7 @@ class EncounterSystem {
     // Health system - because physical damage is... physical
     loseHealth(amount, reason = "The cosmic realm is not kind to the unprepared.") {
         this.playerStats.health = Math.max(0, this.playerStats.health - amount);
-        console.log(`❤️ Health lost: ${amount}. Reason: ${reason}`);
+        console.log(`â¤ï¸ Health lost: ${amount}. Reason: ${reason}`);
         
         this.updateHealthBars();
         this.checkPlayerDeath();
@@ -3378,7 +3378,7 @@ class EncounterSystem {
 
     gainHealth(amount, reason = "Cosmic energy flows through your being.") {
         this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + amount);
-        console.log(`❤️ Health gained: ${amount}. Reason: ${reason}`);
+        console.log(`â¤ï¸ Health gained: ${amount}. Reason: ${reason}`);
         
         this.updateHealthBars();
     }
@@ -3386,7 +3386,7 @@ class EncounterSystem {
     // Rewards system
     giveReward(type, amount) {
         this.rewards[type] += amount;
-        console.log(`🎁 Reward: ${type} +${amount}`);
+        console.log(` Reward: ${type} +${amount}`);
     }
 
     showRewards() {
@@ -3411,9 +3411,9 @@ class EncounterSystem {
         const modal = document.getElementById('encounter-modal');
         if (modal) {
             modal.classList.remove('hidden');
-            console.log('🎭 Encounter modal shown');
+            console.log('­ Encounter modal shown');
         } else {
-            console.error('🎭 Encounter modal not found!');
+            console.error('­ Encounter modal not found!');
         }
     }
 
@@ -3422,7 +3422,7 @@ class EncounterSystem {
         if (modal) {
             modal.classList.add('hidden');
             this.isDialogOpen = false; // Reset dialog flag
-            console.log('🎭 Encounter modal closed');
+            console.log('­ Encounter modal closed');
         }
         
         // Also close any legendary encounter modals
@@ -3466,7 +3466,7 @@ class EncounterSystem {
     // Add steps to player's step count
     addSteps(steps) {
         this.playerSteps += steps;
-        console.log(`👣 Added ${steps} steps. Total: ${this.playerSteps}`);
+        console.log(`ðŸ‘£ Added ${steps} steps. Total: ${this.playerSteps}`);
         
         // Update debug panel if available
         if (window.unifiedDebugPanel) {
@@ -3476,12 +3476,12 @@ class EncounterSystem {
 
     // Debug methods for testing
     triggerMonsterEncounter() {
-        console.log('🎭 Triggering monster encounter...');
+        console.log('­ Triggering monster encounter...');
         if (window.mapEngine && window.mapEngine.monsters && window.mapEngine.monsters.length > 0) {
             const monster = window.mapEngine.monsters[0];
             this.startMonsterEncounter(monster);
         } else {
-            console.log('🎭 No monsters available, creating test monster...');
+            console.log('­ No monsters available, creating test monster...');
             // Create a test monster for demonstration
             const testMonster = {
                 id: 'test_monster',
@@ -3499,17 +3499,17 @@ class EncounterSystem {
 
     testLegendaryEncounter(encounterType) {
         if (this.isDialogOpen) {
-            console.log('🎭 Dialog already open, skipping encounter');
+            console.log('­ Dialog already open, skipping encounter');
             return;
         }
 
-        console.log(`🎭 Testing legendary encounter: ${encounterType}`);
+        console.log(`­ Testing legendary encounter: ${encounterType}`);
         const encounter = this.legendaryEncounters[encounterType];
         if (encounter) {
             this.isDialogOpen = true;
             this.startLegendaryEncounter(encounter, encounterType);
         } else {
-            console.error(`🎭 Encounter type not found: ${encounterType}`);
+            console.error(`­ Encounter type not found: ${encounterType}`);
         }
     }
 
@@ -3518,7 +3518,7 @@ class EncounterSystem {
             return;
         }
 
-        console.log('🎭 Triggering mystery encounter...');
+        console.log('­ Triggering mystery encounter...');
         this.isDialogOpen = true;
         
         const mystery = {
@@ -3535,7 +3535,7 @@ class EncounterSystem {
     }
 
     startMysteryEncounter(mystery) {
-        console.log('🎭 Starting mystery encounter:', mystery.name);
+        console.log('­ Starting mystery encounter:', mystery.name);
         
         const dialog = document.getElementById('dialog-text');
         const actions = document.getElementById('encounter-actions');
@@ -3543,7 +3543,7 @@ class EncounterSystem {
 
         dialog.innerHTML = `
             <div class="cutscene-text">
-                <h3>🔮 ${mystery.name}</h3>
+                <h3>ðŸ”® ${mystery.name}</h3>
                 <p>${mystery.description}</p>
                 <p>Your sanity feels affected by this mysterious presence...</p>
             </div>
@@ -3565,31 +3565,31 @@ class EncounterSystem {
     }
 
     investigateMystery(mystery) {
-        console.log('🎭 Investigating mystery...');
+        console.log('­ Investigating mystery...');
         this.closeEncounterModal();
         this.applyEncounterEffects(mystery.effects);
         this.showNotification(`You investigated the ${mystery.name} and gained ${mystery.effects.experience} experience!`);
     }
 
     observeMystery(mystery) {
-        console.log('🎭 Observing mystery...');
+        console.log('­ Observing mystery...');
         this.closeEncounterModal();
         this.showNotification(`You observed the ${mystery.name} from a safe distance.`);
     }
 
     fleeMystery(mystery) {
-        console.log('🎭 Fleeing from mystery...');
+        console.log('­ Fleeing from mystery...');
         this.closeEncounterModal();
         this.showNotification(`You quickly left the area, avoiding the ${mystery.name}.`);
     }
 
     triggerPOIEncounter() {
-        console.log('🎭 Triggering POI encounter...');
+        console.log('­ Triggering POI encounter...');
         if (window.mapEngine && window.mapEngine.pointsOfInterest && window.mapEngine.pointsOfInterest.length > 0) {
             const poi = window.mapEngine.pointsOfInterest[0];
             this.startPOIEncounter(poi);
         } else {
-            console.log('🎭 No POIs available, creating test POI...');
+            console.log('­ No POIs available, creating test POI...');
             // Create a test POI for demonstration
             const testPOI = {
                 id: 'test_poi',
@@ -3604,7 +3604,7 @@ class EncounterSystem {
     // Mystery encounters removed as requested
 
     triggerPvPCombat(otherPlayer) {
-        console.log(`⚔️ Starting PvP combat with ${otherPlayer.name}!`);
+        console.log(`âš”ï¸ Starting PvP combat with ${otherPlayer.name}!`);
         
         // Create PvP combat encounter
         const pvpEncounter = {
@@ -3632,9 +3632,9 @@ class EncounterSystem {
         modal.innerHTML = `
             <div class="encounter-content pvp-combat">
                 <div class="encounter-header pvp-combat-header">
-                    <h3>⚔️ PvP Combat: ${pvpEncounter.emoji} ${pvpEncounter.name}</h3>
+                    <h3>âš”ï¸ PvP Combat: ${pvpEncounter.emoji} ${pvpEncounter.name}</h3>
                     <p class="player-level">Level ${pvpEncounter.level} ${pvpEncounter.isHostile ? 'Hostile' : 'Friendly'} Player</p>
-                    <button class="close-btn" onclick="window.encounterSystem.hideModal()">×</button>
+                    <button class="close-btn" onclick="window.encounterSystem.hideModal()">Ã—</button>
                 </div>
                 <div class="combat-interface">
                     <div class="combat-stats">
@@ -3655,10 +3655,10 @@ class EncounterSystem {
                         </div>
                     </div>
                     <div class="combat-actions">
-                        <button class="battle-btn" onclick="window.encounterSystem.pvpAttack('${pvpEncounter.id}')">⚔️ Attack</button>
-                        <button class="battle-btn" onclick="window.encounterSystem.pvpDefend('${pvpEncounter.id}')">🛡️ Defend</button>
-                        <button class="battle-btn" onclick="window.encounterSystem.pvpFlee('${pvpEncounter.id}')">🏃 Flee</button>
-                        <button class="battle-btn" onclick="window.encounterSystem.pvpUseItem('${pvpEncounter.id}')">🧪 Use Item</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpAttack('${pvpEncounter.id}')">âš”ï¸ Attack</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpDefend('${pvpEncounter.id}')">ðŸ›¡ï¸ Defend</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpFlee('${pvpEncounter.id}')">ðŸƒ Flee</button>
+                        <button class="battle-btn" onclick="window.encounterSystem.pvpUseItem('${pvpEncounter.id}')">ðŸ§ª Use Item</button>
                     </div>
                     <div id="battle-log" class="battle-log"></div>
                 </div>
@@ -3670,7 +3670,7 @@ class EncounterSystem {
         this.playerTurn = true;
         
         const log = document.getElementById('battle-log');
-        log.innerHTML = `<div class="log-entry">⚔️ PvP combat begins! You face ${pvpEncounter.name} in battle!</div>`;
+        log.innerHTML = `<div class="log-entry">âš”ï¸ PvP combat begins! You face ${pvpEncounter.name} in battle!</div>`;
     }
 
     pvpAttack(enemyId) {
@@ -3942,7 +3942,7 @@ class EncounterSystem {
             heavy: {
                 name: "HEVY",
                 title: "The Legendary Cosmic Guardian",
-                emoji: "⚡",
+                emoji: "âš¡",
                 color: "#FF4500",
                 rarity: "legendary",
                 spawnChance: 0.001, // 0.1% chance per position update
@@ -3976,7 +3976,7 @@ class EncounterSystem {
             cosmicShrine: {
                 name: "Cosmic Shrine",
                 title: "Ancient Power Source",
-                emoji: "🏛️",
+                emoji: "ðŸ›ï¸",
                 color: "#8A2BE2",
                 rarity: "rare",
                 spawnChance: 0.01, // 1% chance per position update
@@ -3996,7 +3996,7 @@ class EncounterSystem {
             eldritchMonster: {
                 name: "Eldritch Horror",
                 title: "Cosmic Terror",
-                emoji: "👹",
+                emoji: "ðŸ‘¹",
                 color: "#8B0000",
                 rarity: "epic",
                 spawnChance: 0.005, // 0.5% chance per position update
@@ -4025,7 +4025,7 @@ class EncounterSystem {
             wisdomCrystal: {
                 name: "Wisdom Crystal",
                 title: "Fragment of Cosmic Knowledge",
-                emoji: "💎",
+                emoji: "ðŸ’Ž",
                 color: "#00BFFF",
                 rarity: "uncommon",
                 spawnChance: 0.02, // 2% chance per position update
@@ -4048,7 +4048,7 @@ class EncounterSystem {
             cosmicMerchant: {
                 name: "Cosmic Merchant",
                 title: "Trader of Otherworldly Goods",
-                emoji: "🛒",
+                emoji: "ðŸ›’",
                 color: "#FFD700",
                 rarity: "rare",
                 spawnChance: 0.008, // 0.8% chance per position update
@@ -4103,7 +4103,7 @@ class EncounterSystem {
         
         const monsterData = this.stories.monster[monsterType] || this.stories.monster.shadowStalker;
         
-        console.log('🎲 Starting simplified dice combat with:', monsterName);
+        console.log('² Starting simplified dice combat with:', monsterName);
         
         // Use the simple dice combat system
         if (window.simpleDiceCombat) {
@@ -4126,14 +4126,14 @@ class EncounterSystem {
      * Handle combat victory
      */
     handleCombatWin(enemy) {
-        console.log('🎉 Combat victory!');
+        console.log('‰ Combat victory!');
         
         // Award experience and items
         const experience = enemy.type === 'shadowStalker' ? 25 : 15;
         this.playerStats.experience += experience;
         
         // Show victory message
-        this.showDialog(`🎉 Victory! You defeated ${enemy.name} and gained ${experience} experience!`);
+        this.showDialog(`‰ Victory! You defeated ${enemy.name} and gained ${experience} experience!`);
         
         // Check for level up
         this.checkLevelUp();
@@ -4149,7 +4149,7 @@ class EncounterSystem {
      * Handle combat defeat
      */
     handleCombatLose(enemy) {
-        console.log('💀 Combat defeat!');
+        console.log('ðŸ’€ Combat defeat!');
         
         // Lose some health and sanity
         const healthLoss = Math.floor(Math.random() * 20) + 10;
@@ -4159,13 +4159,13 @@ class EncounterSystem {
         this.playerStats.sanity = Math.max(0, this.playerStats.sanity - sanityLoss);
         
         // Show defeat message
-        this.showDialog(`💀 Defeat! You lost ${healthLoss} health and ${sanityLoss} sanity!`);
+        this.showDialog(`ðŸ’€ Defeat! You lost ${healthLoss} health and ${sanityLoss} sanity!`);
         
         // Check if player is dead
         if (this.playerStats.health <= 0) {
             this.playerStats.isDead = true;
             this.playerStats.deathReason = `Defeated by ${enemy.name}`;
-            this.showDialog('💀 You have died! The cosmic horror has consumed you...');
+            this.showDialog('ðŸ’€ You have died! The cosmic horror has consumed you...');
         }
         
         // Update mobile stats
@@ -4200,7 +4200,7 @@ class EncounterSystem {
                 break;
         }
         
-        console.log('🎁 Reward:', reward.message);
+        console.log(' Reward:', reward.message);
     }
 
     rollInitiative(monster) {
@@ -4574,7 +4574,7 @@ class EncounterSystem {
                 sanity: -10, // Horror affects sanity
                 skills: { combat: 5, courage: 3 }
             });
-            this.showNotification("🎉 Eldritch Horror defeated! +200 XP, +5 Combat, +3 Courage");
+            this.showNotification("‰ Eldritch Horror defeated! +200 XP, +5 Combat, +3 Courage");
         } else {
             // Monster wins
             this.showDialog("The Eldritch Horror overwhelms you with its otherworldly power!");
@@ -4583,7 +4583,7 @@ class EncounterSystem {
                 sanity: -25, // Major sanity loss
                 experience: 50 // Some learning from defeat
             });
-            this.showNotification("💀 Defeated by Eldritch Horror! -40 HP, -25 Sanity, +50 XP");
+            this.showNotification("ðŸ’€ Defeated by Eldritch Horror! -40 HP, -25 Sanity, +50 XP");
         }
         
         // Remove the encounter from the map
@@ -4600,7 +4600,7 @@ class EncounterSystem {
                 experience: 25, // Learning from the experience
                 skills: { survival: 2, stealth: 1 }
             });
-            this.showNotification("🏃 Successfully fled! -5 Sanity, +25 XP, +2 Survival, +1 Stealth");
+            this.showNotification("ðŸƒ Successfully fled! -5 Sanity, +25 XP, +2 Survival, +1 Stealth");
         } else {
             this.showDialog("The horror blocks your escape! You must fight!");
             setTimeout(() => this.fightEldritchHorror(encounter), 1500);
@@ -4619,14 +4619,14 @@ class EncounterSystem {
                     sanity: 10, // Gaining cosmic understanding
                     skills: { diplomacy: 4, cosmic_lore: 3 }
                 });
-                this.showNotification("🤝 Diplomacy successful! +150 XP, +10 Sanity, +4 Diplomacy, +3 Cosmic Lore");
+                this.showNotification("ðŸ¤ Diplomacy successful! +150 XP, +10 Sanity, +4 Diplomacy, +3 Cosmic Lore");
             } else {
                 this.showDialog("The horror only responds with otherworldly screeches. Diplomacy fails!");
                 this.applyEncounterEffects({
                     sanity: -15, // Failed diplomacy is mentally taxing
                     experience: 30 // Some learning from the attempt
                 });
-                this.showNotification("💀 Diplomacy failed! -15 Sanity, +30 XP");
+                this.showNotification("ðŸ’€ Diplomacy failed! -15 Sanity, +30 XP");
                 setTimeout(() => this.fightEldritchHorror(encounter), 2000);
             }
             
@@ -4644,7 +4644,7 @@ class EncounterSystem {
                 if (layer.options && layer.options.encounterType === 'legendary' && 
                     layer.options.encounterName === encounter.name) {
                     window.mapEngine.map.removeLayer(layer);
-                    console.log('🎭 Removed legendary encounter marker:', encounter.name);
+                    console.log('­ Removed legendary encounter marker:', encounter.name);
                 }
             });
         }
@@ -4694,7 +4694,7 @@ class EncounterSystem {
     applyEncounterRewards(rewards) {
         if (rewards.experience) {
             this.playerStats.experience += rewards.experience;
-            this.showNotification(`⭐ Gained ${rewards.experience} experience!`);
+            this.showNotification(`â­ Gained ${rewards.experience} experience!`);
         }
         if (rewards.steps) {
             // Add steps to step currency system
@@ -4705,29 +4705,29 @@ class EncounterSystem {
         if (rewards.items) {
             rewards.items.forEach(item => {
                 // Add items to inventory
-                console.log('🎒 Received item:', item);
+                console.log('’ Received item:', item);
             });
         }
         if (rewards.title) {
-            console.log('🏆 Earned title:', rewards.title);
+            console.log('ðŸ† Earned title:', rewards.title);
         }
     }
     
     applyEncounterEffects(effects) {
-        console.log('🎭 Applying encounter effects:', effects);
+        console.log('­ Applying encounter effects:', effects);
         
         // Use local stats system (statistics system is for logging only)
         if (effects.health) {
             this.playerStats.health = Math.min(this.playerStats.maxHealth, this.playerStats.health + effects.health);
-            this.showNotification(`❤️ Health restored by ${effects.health}!`);
+            this.showNotification(`â¤ï¸ Health restored by ${effects.health}!`);
         }
         if (effects.sanity) {
             this.playerStats.sanity = Math.min(this.playerStats.maxSanity, this.playerStats.sanity + effects.sanity);
-            this.showNotification(`🧠 Sanity restored by ${effects.sanity}!`);
+            this.showNotification(`ðŸ§  Sanity restored by ${effects.sanity}!`);
         }
         if (effects.experience) {
             this.playerStats.experience += effects.experience;
-            this.showNotification(`⭐ Gained ${effects.experience} experience!`);
+            this.showNotification(`â­ Gained ${effects.experience} experience!`);
         }
         
         // Handle skills, luck, attack, defense locally
@@ -4735,17 +4735,17 @@ class EncounterSystem {
             if (!this.playerStats.skills) this.playerStats.skills = {};
             Object.entries(effects.skills).forEach(([skill, value]) => {
                 this.playerStats.skills[skill] = (this.playerStats.skills[skill] || 0) + value;
-                this.showNotification(`📚 ${skill} skill increased by ${value}!`);
+                this.showNotification(`ðŸ“š ${skill} skill increased by ${value}!`);
             });
         }
         if (effects.stats) {
             Object.entries(effects.stats).forEach(([stat, value]) => {
                 this.playerStats[stat] = (this.playerStats[stat] || 0) + value;
-                this.showNotification(`📊 ${stat} increased by ${value}!`);
+                this.showNotification(`ðŸ“Š ${stat} increased by ${value}!`);
             });
         }
         
-        console.log('🎭 Encounter effects applied successfully');
+        console.log('­ Encounter effects applied successfully');
         this.updateStatBars();
     }
 
@@ -5039,7 +5039,7 @@ class EncounterSystem {
 
     // Minigame test methods
     testTetrisMinigame() {
-        console.log('🧩 Testing Tetris minigame...');
+        console.log('ðŸ§© Testing Tetris minigame...');
         if (window.microgamesManager && window.microgamesManager.startTetrisGame) {
             window.microgamesManager.startTetrisGame();
         } else {
@@ -5048,7 +5048,7 @@ class EncounterSystem {
     }
 
     testQuizMinigame() {
-        console.log('❓ Testing Quiz minigame...');
+        console.log('â“ Testing Quiz minigame...');
         if (window.microgamesManager && window.microgamesManager.startTriviaGame) {
             window.microgamesManager.startTriviaGame();
         } else {
@@ -5057,7 +5057,7 @@ class EncounterSystem {
     }
 
     testRiddleMinigame() {
-        console.log('🧩 Testing Riddle minigame...');
+        console.log('ðŸ§© Testing Riddle minigame...');
         if (window.microgamesManager && window.microgamesManager.startDiceGame) {
             window.microgamesManager.startDiceGame();
         } else {
@@ -5066,13 +5066,13 @@ class EncounterSystem {
     }
 
     testFightMinigame() {
-        console.log('⚔️ Testing Fight minigame...');
+        console.log('âš”ï¸ Testing Fight minigame...');
         this.triggerMonsterEncounter();
     }
 
     showNotification(message) {
         // Show a simple notification
-        console.log('📢 Notification:', message);
+        console.log('ðŸ“¢ Notification:', message);
         
         // Try to use the app's notification system if available
         if (window.app && window.app.showNotification) {
@@ -5085,7 +5085,7 @@ class EncounterSystem {
 
     // Visual Effects Test Methods
     testDistortionEffects() {
-        console.log('🌀 Testing distortion effects...');
+        console.log('€ Testing distortion effects...');
         if (window.sanityDistortion && window.sanityDistortion.triggerDistortionEffects) {
             // Trigger all distortion effects
             const effects = ['blur', 'noise', 'chromaticAberration', 'vignette', 'shake', 'ghostlyShadows', 'colorShift', 'screenWarp', 'glitch', 'particles', 'cosmicEffects'];
@@ -5094,14 +5094,14 @@ class EncounterSystem {
                     window.sanityDistortion.triggerDistortionEffects(effect, 0.8);
                 }, index * 500);
             });
-            this.showNotification('🌀 Distortion effects triggered!');
+            this.showNotification('€ Distortion effects triggered!');
         } else {
-            this.showNotification('🌀 Sanity distortion system not available');
+            this.showNotification('€ Sanity distortion system not available');
         }
     }
 
     testCosmicEffects() {
-        console.log('🌌 Testing cosmic effects...');
+        console.log('Œ Testing cosmic effects...');
         if (window.cosmicEffects && window.cosmicEffects.createEnergyWave) {
             // Create energy wave
             window.cosmicEffects.createEnergyWave(1.0);
@@ -5109,80 +5109,80 @@ class EncounterSystem {
             if (window.cosmicEffects.setParticleIntensity) {
                 window.cosmicEffects.setParticleIntensity(1.0);
             }
-            this.showNotification('🌌 Cosmic effects triggered!');
+            this.showNotification('Œ Cosmic effects triggered!');
         } else {
-            this.showNotification('🌌 Cosmic effects system not available');
+            this.showNotification('Œ Cosmic effects system not available');
         }
     }
 
     testSanityLoss() {
-        console.log('😵 Testing sanity loss...');
+        console.log('ðŸ˜µ Testing sanity loss...');
         this.loseSanity(30, 'Debug test - sanity loss');
-        this.showNotification('😵 Sanity loss triggered!');
+        this.showNotification('ðŸ˜µ Sanity loss triggered!');
     }
 
     testScreenEffects() {
-        console.log('📺 Testing screen effects...');
+        console.log('ðŸ“º Testing screen effects...');
         if (window.discordEffects) {
             // Test various screen effects
             window.discordEffects.triggerScreenFlash('#ff0000', 1000);
             setTimeout(() => window.discordEffects.triggerGlowPulse(window.innerWidth/2, window.innerHeight/2, '#00ff00', 200), 500);
             setTimeout(() => window.discordEffects.triggerParticleBurst(window.innerWidth/2, window.innerHeight/2, 50, '#0000ff'), 1000);
-            this.showNotification('📺 Screen effects triggered!');
+            this.showNotification('ðŸ“º Screen effects triggered!');
         } else {
-            this.showNotification('📺 Discord effects system not available');
+            this.showNotification('ðŸ“º Discord effects system not available');
         }
     }
 
     // Audio & Sound Test Methods
     testSoundboard() {
-        console.log('🎵 Testing soundboard...');
+        console.log('µ Testing soundboard...');
         if (window.soundManager) {
             // Test various sounds
             window.soundManager.playSound('step_sound');
             setTimeout(() => window.soundManager.playSound('quest_complete'), 500);
             setTimeout(() => window.soundManager.playSound('combat_win'), 1000);
-            this.showNotification('🎵 Soundboard test triggered!');
+            this.showNotification('µ Soundboard test triggered!');
         } else {
-            this.showNotification('🎵 Sound manager not available');
+            this.showNotification('µ Sound manager not available');
         }
     }
 
     testAmbientSounds() {
-        console.log('🌊 Testing ambient sounds...');
+        console.log('Š Testing ambient sounds...');
         if (window.soundManager) {
             window.soundManager.playEerieHum();
-            this.showNotification('🌊 Ambient sounds triggered!');
+            this.showNotification('Š Ambient sounds triggered!');
         } else {
-            this.showNotification('🌊 Sound manager not available');
+            this.showNotification('Š Sound manager not available');
         }
     }
 
     testCombatSounds() {
-        console.log('⚔️ Testing combat sounds...');
+        console.log('âš”ï¸ Testing combat sounds...');
         if (window.soundManager) {
             window.soundManager.playSound('combat_win');
             setTimeout(() => window.soundManager.playSound('combat_lose'), 1000);
-            this.showNotification('⚔️ Combat sounds triggered!');
+            this.showNotification('âš”ï¸ Combat sounds triggered!');
         } else {
-            this.showNotification('⚔️ Sound manager not available');
+            this.showNotification('âš”ï¸ Sound manager not available');
         }
     }
 
     testQuestSounds() {
-        console.log('🎭 Testing quest sounds...');
+        console.log('­ Testing quest sounds...');
         if (window.soundManager) {
             window.soundManager.playSound('quest_complete');
-            this.showNotification('🎭 Quest sounds triggered!');
+            this.showNotification('­ Quest sounds triggered!');
         } else {
-            this.showNotification('🎭 Sound manager not available');
+            this.showNotification('­ Sound manager not available');
         }
     }
 
     // All Effects Test Methods
     testAllEffects() {
-        console.log('✨ Testing all effects...');
-        this.showNotification('✨ Testing all effects - prepare for chaos!');
+        console.log('¨ Testing all effects...');
+        this.showNotification('¨ Testing all effects - prepare for chaos!');
         
         // Test visual effects
         setTimeout(() => this.testDistortionEffects(), 0);
@@ -5198,8 +5198,8 @@ class EncounterSystem {
     }
 
     testChaosMode() {
-        console.log('🌪️ Testing chaos mode...');
-        this.showNotification('🌪️ CHAOS MODE ACTIVATED!');
+        console.log('ªï¸ Testing chaos mode...');
+        this.showNotification('ªï¸ CHAOS MODE ACTIVATED!');
         
         // Rapid fire all effects
         for (let i = 0; i < 10; i++) {
@@ -5219,7 +5219,7 @@ class EncounterSystem {
     
     // Handle quest completion
     onQuestComplete(quest) {
-        console.log('🎭 Quest completed, updating encounter system:', quest.name);
+        console.log('­ Quest completed, updating encounter system:', quest.name);
         // Add any quest completion logic here if needed
         // For example, unlock new encounters, update difficulty, etc.
     }
@@ -5227,3 +5227,5 @@ class EncounterSystem {
 
 // Make it globally available
 window.EncounterSystem = EncounterSystem;
+
+

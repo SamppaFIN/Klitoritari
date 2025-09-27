@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Three.js UI Layer
  * Integrates Three.js UI system with the layered architecture
  */
@@ -22,43 +22,786 @@ class ThreeJSUILayer extends BaseLayer {
         // UI state
         this.isInitialized = false;
         this.uiElements = new Map();
+        this.activeTab = null; // Track currently active tab for toggle behavior
         
         console.log('🎮 ThreeJS UI Layer: Initialized');
     }
     
     init() {
-        console.log('🎮 ThreeJS UI Layer: Initializing...');
+        super.init();
+        console.log('🎮 ThreeJS UI Layer: DISABLED - Using 2D UI instead');
         
-        // Wait for Three.js to be available
-        if (typeof THREE === 'undefined') {
-            console.error('❌ Three.js not loaded!');
+        // Three.js UI is disabled - using 2D magnetic UI instead
+        this.isInitialized = true;
+        console.log('🎮 ThreeJS UI Layer: Skipped (2D UI active)');
+        
+        // TODO: Implement 2D magnetic UI system
+        this.init2DMagneticUI();
+    }
+    
+    /**
+     * Initialize 2D Magnetic UI System
+     */
+    init2DMagneticUI() {
+        console.log('🎨 Initializing 2D Magnetic UI...');
+        
+        // Create magnetic tabs container
+        this.createMagneticTabsContainer();
+        
+        // Setup event listeners for 2D UI
+        this.setup2DEventListeners();
+        
+        console.log('🎨 2D Magnetic UI initialized');
+    }
+    
+    createMagneticTabsContainer() {
+        // Create bottom magnetic tabs with modern design
+        this.tabsContainer = document.createElement('div');
+        this.tabsContainer.id = 'magnetic-tabs-container';
+        this.tabsContainer.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 1000;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        `;
+        
+        // Create magnetic tab buttons
+        const tabs = [
+            { id: 'inventory', label: 'Inventory', icon: '🎒', color: '#3b82f6', shortcut: 'I' },
+            { id: 'quests', label: 'Quests', icon: '📜', color: '#10b981', shortcut: 'Q' },
+            { id: 'base', label: 'Base', icon: '🏠', color: '#f59e0b', shortcut: 'B' },
+            { id: 'settings', label: 'Settings', icon: '⚙️', color: '#8b5cf6', shortcut: 'S' }
+        ];
+        
+        // Store tab data for later use
+        this.tabData = tabs;
+        
+        tabs.forEach(tab => {
+            const tabElement = this.createMagneticTab(tab);
+            this.tabsContainer.appendChild(tabElement);
+        });
+        
+        // Add to document
+        document.body.appendChild(this.tabsContainer);
+        
+        // Add keyboard shortcuts
+        this.setupKeyboardShortcuts();
+        
+        console.log('🎨 Magnetic tabs container created');
+    }
+    
+    createMagneticTab(tabData) {
+        const tab = document.createElement('div');
+        tab.className = 'magnetic-tab';
+        tab.dataset.tabId = tabData.id;
+        tab.style.cssText = `
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            min-width: 100px;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        `;
+        
+        tab.innerHTML = `
+            <span class="tab-icon" style="font-size: 16px;">${tabData.icon}</span>
+            <span class="tab-label">${tabData.label}</span>
+            <span class="tab-shortcut" style="
+                position: absolute;
+                top: 2px;
+                right: 4px;
+                font-size: 10px;
+                background: rgba(255, 255, 255, 0.2);
+                padding: 2px 4px;
+                border-radius: 4px;
+                font-weight: bold;
+            ">${tabData.shortcut}</span>
+        `;
+        
+        // Add magnetic hover effect with modern animations
+        tab.addEventListener('mouseenter', () => {
+            tab.style.transform = 'translateY(-4px) scale(1.02)';
+            tab.style.background = `linear-gradient(135deg, ${tabData.color}20, ${this.lightenColor(tabData.color, 30)}20)`;
+            tab.style.borderColor = `${tabData.color}40`;
+            tab.style.boxShadow = `0 8px 25px ${tabData.color}30`;
+            tab.style.color = 'white';
+        });
+        
+        tab.addEventListener('mouseleave', () => {
+            if (!tab.classList.contains('active')) {
+                tab.style.transform = 'translateY(0) scale(1)';
+                tab.style.background = 'rgba(255, 255, 255, 0.1)';
+                tab.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                tab.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                tab.style.color = 'rgba(255, 255, 255, 0.8)';
+            }
+        });
+        
+        // Add click handler with ripple effect
+        tab.addEventListener('click', (e) => {
+            this.createRippleEffect(e, tab);
+            this.switchTab(tabData.id);
+        });
+        
+        return tab;
+    }
+    
+    switchTab(tabId) {
+        console.log('🎨 Switching to tab:', tabId);
+        
+        // Check if the same tab is being clicked (toggle behavior)
+        if (this.activeTab === tabId) {
+            console.log('🎨 Toggling off active tab:', tabId);
+            this.hideAllTabs();
+            this.activeTab = null;
+            
+            // Hide any existing panels
+            this.hideAllPanels();
+            
+            // Emit event for tab closed
+            if (this.eventBus) {
+                this.eventBus.emit('ui:tab:closed', { tabId });
+            }
+            
+            // Visual feedback handled by tab state
+            
             return;
         }
         
-        // Wait a bit for all scripts to load
+        // Update active tab with smooth transition
+        const tabs = this.tabsContainer.querySelectorAll('.magnetic-tab');
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            tab.style.opacity = '0.6';
+            tab.style.transform = 'translateY(0) scale(1)';
+            tab.style.background = 'rgba(255, 255, 255, 0.1)';
+            tab.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        });
+        
+        const activeTab = this.tabsContainer.querySelector(`[data-tab-id="${tabId}"]`);
+        if (activeTab) {
+            const tabData = this.tabData.find(tab => tab.id === tabId);
+            const color = tabData ? tabData.color : '#4a90e2';
+            
+            activeTab.classList.add('active');
+            activeTab.style.opacity = '1';
+            activeTab.style.transform = 'translateY(-2px) scale(1.05)';
+            activeTab.style.background = `linear-gradient(135deg, ${color}40, ${this.lightenColor(color, 20)}40)`;
+            activeTab.style.borderColor = `${color}60`;
+        }
+        
+        this.activeTab = tabId;
+        
+        // Emit event for other systems
+        if (this.eventBus) {
+            this.eventBus.emit('ui:tab:changed', { tabId });
+        }
+        
+        // Show corresponding panel with fullscreen option
+        this.showTabPanel(tabId);
+        
+        // Visual feedback handled by tab state
+    }
+    
+    /**
+     * Hide all tabs (reset to inactive state)
+     */
+    hideAllTabs() {
+        console.log('🎨 Hiding all tabs');
+        const tabs = this.tabsContainer.querySelectorAll('.magnetic-tab');
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            tab.style.opacity = '0.6';
+            tab.style.transform = 'translateY(0) scale(1)';
+            tab.style.background = 'rgba(255, 255, 255, 0.1)';
+            tab.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        });
+    }
+    
+    /**
+     * Hide all panels
+     */
+    hideAllPanels() {
+        console.log('🎨 Hiding all panels');
+        const existingPanel = document.getElementById('tab-panel');
+        if (existingPanel) {
+            existingPanel.remove();
+        }
+    }
+    
+    /**
+     * Show visual feedback for tab toggle
+     */
+    showTabToggleFeedback(action, tabId) {
+        const tabData = this.tabData.find(tab => tab.id === tabId);
+        const tabName = tabData ? tabData.label : tabId;
+        
+        // Create notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            z-index: 10000;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid ${action === 'opened' ? '#4CAF50' : '#ff4444'};
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            animation: tabTogglePulse 0.6s ease-out;
+        `;
+        
+        notification.textContent = `${action === 'opened' ? '📂' : '📁'} ${tabName} ${action === 'opened' ? 'Opened' : 'Closed'}`;
+        
+        // Add animation keyframes if not already added
+        if (!document.getElementById('tab-toggle-animation')) {
+            const style = document.createElement('style');
+            style.id = 'tab-toggle-animation';
+            style.textContent = `
+                @keyframes tabTogglePulse {
+                    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+                    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+                    100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Remove after animation
         setTimeout(() => {
-            // Check if all dependencies are loaded
-            if (typeof THREE === 'undefined') {
-                console.error('❌ Three.js not loaded!');
-                return;
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
             }
-            
-            if (typeof GSAP === 'undefined') {
-                console.warn('⚠️ GSAP not loaded, using fallback animations');
+        }, 600);
+    }
+    
+    
+    showTabPanel(tabId) {
+        // Remove existing panels
+        const existingPanel = document.getElementById('tab-panel');
+        if (existingPanel) {
+            existingPanel.remove();
+        }
+        
+        // Create fullscreen panel following modern mobile design principles
+        const panel = document.createElement('div');
+        panel.id = 'tab-panel';
+        panel.style.cssText = `
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            right: 0;
+            bottom: 100px; /* Leave space for footer tabs */
+            background: linear-gradient(135deg, rgba(10, 10, 20, 0.95), rgba(20, 20, 40, 0.95));
+            backdrop-filter: blur(20px);
+            z-index: 1500;
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        `;
+        
+        // Create header with close button
+        const header = document.createElement('div');
+        header.style.cssText = `
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+        `;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '✕';
+        closeBtn.style.cssText = `
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        `;
+        
+        closeBtn.addEventListener('mouseenter', () => {
+            closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+            closeBtn.style.transform = 'scale(1.1)';
+        });
+        
+        closeBtn.addEventListener('mouseleave', () => {
+            closeBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+            closeBtn.style.transform = 'scale(1)';
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            this.closePanel();
+        });
+        
+        const title = document.createElement('h2');
+        title.style.cssText = `
+            color: white;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        `;
+        
+        // Create content area
+        const content = document.createElement('div');
+        content.style.cssText = `
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        `;
+        
+        // Add content based on tab
+        const tabContent = this.getTabContent(tabId);
+        content.innerHTML = tabContent;
+        
+        // Set title based on tab
+        const tabTitles = {
+            'inventory': '🎒 Inventory',
+            'quests': '📜 Quests',
+            'base': '🏠 Base Management',
+            'settings': '⚙️ Settings'
+        };
+        title.textContent = tabTitles[tabId] || 'Panel';
+        
+        header.appendChild(title);
+        header.appendChild(closeBtn);
+        panel.appendChild(header);
+        panel.appendChild(content);
+        
+        // Add to document
+        document.body.appendChild(panel);
+        
+        // Animate in with modern slide-up animation
+        panel.style.opacity = '0';
+        panel.style.transform = 'translateY(100%)';
+        requestAnimationFrame(() => {
+            panel.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            panel.style.opacity = '1';
+            panel.style.transform = 'translateY(0)';
+        });
+        
+        // Add keyboard support (ESC to close)
+        this.setupPanelKeyboard();
+    }
+    
+    closePanel() {
+        const panel = document.getElementById('tab-panel');
+        if (panel) {
+            panel.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            panel.style.opacity = '0';
+            panel.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                panel.remove();
+                // Reset the active tab state when closing
+                this.activeTab = null;
+                this.hideAllTabs();
+            }, 300);
+        }
+    }
+    
+    setupPanelKeyboard() {
+        const handleKeyPress = (e) => {
+            if (e.key === 'Escape') {
+                this.closePanel();
+                document.removeEventListener('keydown', handleKeyPress);
             }
+        };
+        document.addEventListener('keydown', handleKeyPress);
+    }
+    
+    getTabContent(tabId) {
+        switch (tabId) {
+            case 'inventory':
+                return `
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="color: #3b82f6; margin: 0; font-size: 20px; font-weight: 600;">🎒 Inventory</h3>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 14px;">3/20 slots</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 12px;">
+                            ${Array.from({length: 9}, (_, i) => `
+                                <div class="inventory-slot" style="
+                                    background: rgba(255,255,255,0.05);
+                                    border: 2px solid rgba(255,255,255,0.1);
+                                    padding: 16px 8px;
+                                    border-radius: 12px;
+                                    text-align: center;
+                                    min-height: 80px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 12px;
+                                    color: rgba(255,255,255,0.4);
+                                    transition: all 0.2s ease;
+                                " onmouseover="this.style.borderColor='#3b82f6'; this.style.background='rgba(59,130,246,0.1)'" 
+                                   onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'">
+                                    ${i < 3 ? 'Empty' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            case 'quests':
+                return `
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="color: #10b981; margin: 0; font-size: 20px; font-weight: 600;">📜 Quests</h3>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 14px;">2 active</span>
+                        </div>
+                        <div style="space-y: 12px;">
+                            <div style="
+                                background: rgba(16, 185, 129, 0.1);
+                                border: 1px solid rgba(16, 185, 129, 0.3);
+                                padding: 16px;
+                                border-radius: 12px;
+                                margin-bottom: 12px;
+                            ">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                    <strong style="color: #10b981; font-size: 16px;">Explore the Area</strong>
+                                    <span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">ACTIVE</span>
+                                </div>
+                                <p style="color: rgba(255,255,255,0.8); margin: 0 0 12px 0; font-size: 14px; line-height: 1.4;">Walk around and discover new locations</p>
+                                <div style="background: rgba(0,0,0,0.3); height: 6px; border-radius: 3px; overflow: hidden;">
+                                    <div style="background: #10b981; height: 100%; width: 30%; transition: width 0.3s ease;"></div>
+                                </div>
+                                <small style="color: rgba(255,255,255,0.6);">Progress: 3/10 locations</small>
+                            </div>
+                            <div style="
+                                background: rgba(255,255,255,0.05);
+                                border: 1px solid rgba(255,255,255,0.1);
+                                padding: 16px;
+                                border-radius: 12px;
+                            ">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                    <strong style="color: white; font-size: 16px;">Find Resources</strong>
+                                    <span style="background: rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">PENDING</span>
+                                </div>
+                                <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 14px; line-height: 1.4;">Collect materials for your base</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            case 'base':
+                return `
+                    <div style="margin-bottom: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
+                            <span style="color: rgba(255,255,255,0.6); font-size: 14px;">Level 1</span>
+                        </div>
+                        <div style="space-y: 16px;">
+                            <div style="
+                                background: rgba(245, 158, 11, 0.1);
+                                border: 1px solid rgba(245, 158, 11, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 16px;
+                            ">
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                    <div>
+                                        <div style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 4px;">Base Level</div>
+                                        <div style="color: #f59e0b; font-size: 24px; font-weight: 700;">1</div>
+                                    </div>
+                                    <div>
+                                        <div style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 4px;">Resources</div>
+                                        <div style="color: white; font-size: 18px; font-weight: 600;">0/100</div>
+                                    </div>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.3); height: 8px; border-radius: 4px; overflow: hidden;">
+                                    <div style="background: #f59e0b; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                                </div>
+                            </div>
+                            <button style="
+                                background: linear-gradient(135deg, #f59e0b, #fbbf24);
+                                color: white;
+                                border: none;
+                                padding: 16px 24px;
+                                border-radius: 12px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                font-weight: 600;
+                                width: 100%;
+                                transition: all 0.2s ease;
+                                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                                Upgrade Base
+                            </button>
+                        </div>
+                    </div>
+                `;
+            case 'settings':
+                return `
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="color: #8b5cf6; margin: 0 0 20px 0; font-size: 20px; font-weight: 600;">⚙️ Settings</h3>
+                        <div style="space-y: 20px;">
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Player Name</label>
+                                <input type="text" value="Cosmic Explorer" style="
+                                    width: 100%;
+                                    padding: 16px;
+                                    border-radius: 12px;
+                                    border: 2px solid rgba(255,255,255,0.1);
+                                    background: rgba(255,255,255,0.05);
+                                    color: white;
+                                    font-size: 16px;
+                                    transition: all 0.2s ease;
+                                " onfocus="this.style.borderColor='#8b5cf6'; this.style.background='rgba(139,92,246,0.1)'"
+                                   onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'">
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Path Color</label>
+                                <div style="display: flex; gap: 12px; align-items: center;">
+                                    <input type="color" value="#3b82f6" style="
+                                        width: 60px;
+                                        height: 60px;
+                                        border-radius: 12px;
+                                        border: 2px solid rgba(255,255,255,0.1);
+                                        cursor: pointer;
+                                    ">
+                                    <div style="flex: 1; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; color: rgba(255,255,255,0.8);">
+                                        Choose your path color for the map
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label style="color: white; font-weight: 500; font-size: 16px;">Dark Mode</label>
+                                    <div class="toggle-switch" style="
+                                        width: 50px;
+                                        height: 28px;
+                                        background: rgba(255,255,255,0.2);
+                                        border-radius: 14px;
+                                        position: relative;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                    " onclick="this.style.background=this.style.background.includes('8b5cf6') ? 'rgba(255,255,255,0.2)' : '#8b5cf6'; this.querySelector('.toggle-knob').style.transform=this.querySelector('.toggle-knob').style.transform.includes('translateX(22px)') ? 'translateX(2px)' : 'translateX(22px)'">
+                                        <div class="toggle-knob" style="
+                                            width: 24px;
+                                            height: 24px;
+                                            background: white;
+                                            border-radius: 12px;
+                                            position: absolute;
+                                            top: 2px;
+                                            left: 2px;
+                                            transition: all 0.3s ease;
+                                            transform: translateX(2px);
+                                        "></div>
+                                    </div>
+                                </div>
+                                <small style="color: rgba(255,255,255,0.6);">Enable dark mode for better visibility</small>
+                            </div>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <label style="color: white; font-weight: 500; font-size: 16px;">Notifications</label>
+                                    <div class="toggle-switch" style="
+                                        width: 50px;
+                                        height: 28px;
+                                        background: #8b5cf6;
+                                        border-radius: 14px;
+                                        position: relative;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                    " onclick="this.style.background=this.style.background.includes('8b5cf6') ? 'rgba(255,255,255,0.2)' : '#8b5cf6'; this.querySelector('.toggle-knob').style.transform=this.querySelector('.toggle-knob').style.transform.includes('translateX(22px)') ? 'translateX(2px)' : 'translateX(22px)'">
+                                        <div class="toggle-knob" style="
+                                            width: 24px;
+                                            height: 24px;
+                                            background: white;
+                                            border-radius: 12px;
+                                            position: absolute;
+                                            top: 2px;
+                                            left: 2px;
+                                            transition: all 0.3s ease;
+                                            transform: translateX(22px);
+                                        "></div>
+                                    </div>
+                                </div>
+                                <small style="color: rgba(255,255,255,0.6);">Receive quest updates and achievements</small>
+                            </div>
+                            
+                            <button style="
+                                background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+                                color: white;
+                                border: none;
+                                padding: 16px 24px;
+                                border-radius: 12px;
+                                cursor: pointer;
+                                font-size: 16px;
+                                font-weight: 600;
+                                width: 100%;
+                                transition: all 0.2s ease;
+                                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
+                                Save Settings
+                            </button>
+                        </div>
+                    </div>
+                `;
+            default:
+                return '<p style="color: rgba(255,255,255,0.6); text-align: center; padding: 40px;">Content not available</p>';
+        }
+    }
+    
+    setup2DEventListeners() {
+        // Listen for player creation events
+        this.eventBus.on('ui:show-player-creation', (data) => {
+            console.log('🎨 2D UI: Received player creation request:', data);
+            this.showPlayerCreationDialog(data);
+        });
+        
+        // Listen for game start events
+        this.eventBus.on('game:start', (data) => {
+            console.log('🎨 2D UI: Game start requested:', data);
+            this.showMagneticTabs();
+        });
+        
+        console.log('🎨 2D UI event listeners setup complete');
+    }
+    
+    setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Only handle shortcuts when no panel is open
+            if (document.getElementById('tab-panel')) return;
             
-            // Initialize Three.js systems
-            this.initThreeJSSystems();
+            const shortcuts = {
+                'i': 'inventory',
+                'q': 'quests', 
+                'b': 'base',
+                's': 'settings'
+            };
             
-            // Setup event listeners
-            this.setupEventListeners();
-            
-            // Create initial UI elements
-            this.createInitialUI();
-            
-            this.isInitialized = true;
-            console.log('🎮 ThreeJS UI Layer: Initialized successfully');
-        }, 500);
+            const tabId = shortcuts[e.key.toLowerCase()];
+            if (tabId) {
+                e.preventDefault();
+                this.switchTab(tabId);
+            }
+        });
+    }
+    
+    createRippleEffect(event, element) {
+        const ripple = document.createElement('span');
+        const rect = element.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = event.clientX - rect.left - size / 2;
+        const y = event.clientY - rect.top - size / 2;
+        
+        ripple.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        `;
+        
+        element.style.position = 'relative';
+        element.style.overflow = 'hidden';
+        element.appendChild(ripple);
+        
+        // Add CSS animation if not exists
+        if (!document.getElementById('ripple-animation')) {
+            const style = document.createElement('style');
+            style.id = 'ripple-animation';
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    }
+    
+    showPlayerCreationDialog(data) {
+        console.log('🎨 2D UI: Showing player creation dialog...');
+        
+        // Show the settings tab for player creation
+        this.switchTab('settings');
+    }
+    
+    showMagneticTabs() {
+        console.log('🎨 2D UI: Showing magnetic tabs...');
+        
+        if (this.tabsContainer) {
+            this.tabsContainer.style.display = 'flex';
+            console.log('🎨 Magnetic tabs container displayed:', this.tabsContainer);
+            console.log('🎨 Tab count:', this.tabsContainer.children.length);
+        } else {
+            console.error('❌ Magnetic tabs container not found!');
+        }
+    }
+    
+    lightenColor(color, percent) {
+        const num = parseInt(color.replace("#", ""), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) + amt;
+        const G = (num >> 8 & 0x00FF) + amt;
+        const B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+            (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+    }
+    
+    /**
+     * Set up layer transparency and pointer events
+     * ThreeJSUILayer handles mouse events for 3D UI interactions
+     */
+    setupLayerTransparency() {
+        // ThreeJSUILayer handles mouse events for 3D UI interactions (magnetic tabs, 3D panels)
+        this.pointerEvents = 'auto';
     }
     
     initThreeJSSystems() {
@@ -113,6 +856,17 @@ class ThreeJSUILayer extends BaseLayer {
     }
     
     createMainMenuButtons() {
+        // Check if we're using enhanced UI or basic systems
+        if (this.enhancedUI) {
+            console.log('🎮 Using enhanced UI - buttons already created in magnetic tabs');
+            return;
+        }
+        
+        if (!this.buttonSystem) {
+            console.error('❌ Button system not available!');
+            return;
+        }
+        
         const buttonConfigs = [
             {
                 id: 'gps-button',
@@ -165,6 +919,17 @@ class ThreeJSUILayer extends BaseLayer {
     }
     
     createDebugPanel() {
+        // Check if we're using enhanced UI or basic systems
+        if (this.enhancedUI) {
+            console.log('🎮 Using enhanced UI - debug panel handled by tab system');
+            return;
+        }
+        
+        if (!this.panelSystem) {
+            console.error('❌ Panel system not available!');
+            return;
+        }
+        
         const debugPanel = this.panelSystem.createPanel({
             id: 'debug-panel',
             position: { x: 6, y: 0, z: 0 },
@@ -185,6 +950,17 @@ class ThreeJSUILayer extends BaseLayer {
     }
     
     createAmbientEffects() {
+        // Check if we're using enhanced UI or basic systems
+        if (this.enhancedUI) {
+            console.log('🎮 Using enhanced UI - ambient effects handled by enhanced system');
+            return;
+        }
+        
+        if (!this.particleSystem) {
+            console.error('❌ Particle system not available!');
+            return;
+        }
+        
         // Create ambient particles
         const ambientEffectId = this.particleSystem.createAmbientParticles({
             particleCount: 50,
@@ -294,6 +1070,27 @@ class ThreeJSUILayer extends BaseLayer {
     showPlayerCreationPanel(data) {
         console.log('🎮 Showing Three.js player creation panel...');
         
+        // Check if we're using enhanced UI or basic systems
+        if (this.enhancedUI) {
+            console.log('🎮 Using enhanced UI - showing player creation in tab system');
+            console.log('🎮 Enhanced UI ready:', this.enhancedUI.isInitialized);
+            console.log('🎮 Magnetic tabs count:', this.enhancedUI.magneticTabs ? this.enhancedUI.magneticTabs.length : 'undefined');
+            
+            // Wait a bit for the UI to be fully ready
+            setTimeout(() => {
+                // Show the magnetic tabs first
+                this.enhancedUI.showMagneticTabs();
+                // Then switch to the settings tab which can handle player creation
+                this.enhancedUI.switchTab('settings');
+            }, 100);
+            return;
+        }
+        
+        if (!this.panelSystem) {
+            console.error('❌ Panel system not available!');
+            return;
+        }
+        
         // Create a floating panel for player creation
         const panel = this.panelSystem.createPanel({
             title: '🌟 Create Your Cosmic Identity',
@@ -312,6 +1109,17 @@ class ThreeJSUILayer extends BaseLayer {
     }
     
     createPlayerCreationForm(panel, data) {
+        // Check if we're using enhanced UI or basic systems
+        if (this.enhancedUI) {
+            console.log('🎮 Using enhanced UI - player creation form handled by tab system');
+            return;
+        }
+        
+        if (!this.buttonSystem) {
+            console.error('❌ Button system not available!');
+            return;
+        }
+        
         // Create form elements as 3D text and buttons
         const formElements = [];
         

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Quest Log UI - Visual interface for quest management and lore journal
  * Handles quest tracking, lore entries, and mystery investigation
  */
@@ -15,7 +15,7 @@ class QuestLogUI {
     init() {
         if (this.isInitialized) return;
         
-        console.log('📜 Initializing Quest Log UI...');
+        console.log('ðŸ“œ Initializing Quest Log UI...');
         
         // Setup event listeners
         this.setupEventListeners();
@@ -27,7 +27,7 @@ class QuestLogUI {
         this.updateQuestLog();
         
         this.isInitialized = true;
-        console.log('📜 Quest Log UI initialized!');
+        console.log('ðŸ“œ Quest Log UI initialized!');
     }
 
     setupEventListeners() {
@@ -126,11 +126,11 @@ class QuestLogUI {
         this.quests = [
             {
                 id: 'harmala-mystery-1',
-                title: 'The Härmälä Mystery',
+                title: 'The HÃ¤rmÃ¤lÃ¤ Mystery',
                 type: 'main',
-                description: 'Investigate the mysterious disappearances in the Härmälä area. Something dark lurks beneath the surface of this seemingly peaceful region. The local mining town was abandoned after a massive sinkhole appeared in 1987, but recent reports suggest the area is still active with strange phenomena.',
+                description: 'Investigate the mysterious disappearances in the HÃ¤rmÃ¤lÃ¤ area. Something dark lurks beneath the surface of this seemingly peaceful region. The local mining town was abandoned after a massive sinkhole appeared in 1987, but recent reports suggest the area is still active with strange phenomena.',
                 objectives: [
-                    { id: 'explore-harmala', text: 'Explore the Härmälä area and map the region', completed: false, progress: 0, max: 5 },
+                    { id: 'explore-harmala', text: 'Explore the HÃ¤rmÃ¤lÃ¤ area and map the region', completed: false, progress: 0, max: 5 },
                     { id: 'find-clues', text: 'Find clues about the disappearances', completed: false, progress: 0, max: 3 },
                     { id: 'interview-witnesses', text: 'Interview local witnesses and survivors', completed: false, progress: 0, max: 2 },
                     { id: 'investigate-sites', text: 'Investigate suspicious locations', completed: false, progress: 0, max: 4 },
@@ -146,7 +146,7 @@ class QuestLogUI {
                 progress: 0,
                 status: 'active',
                 difficulty: 'hard',
-                story: 'The Härmälä Mystery is the central storyline of your cosmic investigation. This small mining town was once prosperous until the Great Collapse of 1987, when a massive sinkhole appeared overnight, swallowing half the town. The survivors spoke of strange lights and sounds coming from the depths, but their stories were dismissed as trauma-induced hallucinations. Now, 37 years later, new disappearances have begun, and the cosmic entities that once lurked in the shadows are becoming more active.'
+                story: 'The HÃ¤rmÃ¤lÃ¤ Mystery is the central storyline of your cosmic investigation. This small mining town was once prosperous until the Great Collapse of 1987, when a massive sinkhole appeared overnight, swallowing half the town. The survivors spoke of strange lights and sounds coming from the depths, but their stories were dismissed as trauma-induced hallucinations. Now, 37 years later, new disappearances have begun, and the cosmic entities that once lurked in the shadows are becoming more active.'
             },
             {
                 id: 'cosmic-exploration-1',
@@ -171,8 +171,8 @@ class QuestLogUI {
         this.loreEntries = [
             {
                 id: 'harmala-history',
-                title: 'The History of Härmälä',
-                content: 'Härmälä was once a thriving mining town, known for its rich deposits of cosmic crystals. The town prospered for decades until the Great Collapse of 1987, when a massive sinkhole appeared overnight, swallowing half the town. The survivors spoke of strange lights and sounds coming from the depths, but their stories were dismissed as trauma-induced hallucinations. The mining company, Cosmic Crystals Inc., abandoned the site and covered up the incident, claiming it was a natural geological event.',
+                title: 'The History of HÃ¤rmÃ¤lÃ¤',
+                content: 'HÃ¤rmÃ¤lÃ¤ was once a thriving mining town, known for its rich deposits of cosmic crystals. The town prospered for decades until the Great Collapse of 1987, when a massive sinkhole appeared overnight, swallowing half the town. The survivors spoke of strange lights and sounds coming from the depths, but their stories were dismissed as trauma-induced hallucinations. The mining company, Cosmic Crystals Inc., abandoned the site and covered up the incident, claiming it was a natural geological event.',
                 source: 'Local History Archives',
                 tags: ['history', 'harmala', 'mining', 'collapse'],
                 discovered: true
@@ -180,7 +180,7 @@ class QuestLogUI {
             {
                 id: 'great-collapse',
                 title: 'The Great Collapse of 1987',
-                content: 'On the night of October 31st, 1987, a massive sinkhole appeared in the center of Härmälä, swallowing 47 buildings and 23 people. The sinkhole was perfectly circular, 200 meters in diameter, and seemed to extend into infinite darkness. Rescue attempts were abandoned after the first team disappeared without a trace. The government declared the area a "geological hazard zone" and evacuated all remaining residents within a 5-kilometer radius.',
+                content: 'On the night of October 31st, 1987, a massive sinkhole appeared in the center of HÃ¤rmÃ¤lÃ¤, swallowing 47 buildings and 23 people. The sinkhole was perfectly circular, 200 meters in diameter, and seemed to extend into infinite darkness. Rescue attempts were abandoned after the first team disappeared without a trace. The government declared the area a "geological hazard zone" and evacuated all remaining residents within a 5-kilometer radius.',
                 source: 'Emergency Services Report #1987-1031',
                 tags: ['harmala', 'collapse', 'disappearances', 'sinkhole'],
                 discovered: false
@@ -188,7 +188,7 @@ class QuestLogUI {
             {
                 id: 'cosmic-crystals',
                 title: 'Cosmic Crystals and Their Properties',
-                content: 'Cosmic crystals are rare minerals that form in areas where the fabric of reality is thin. They possess unique properties that can bend space and time, making them highly sought after by both scientists and cultists. The crystals found in Härmälä were particularly pure, which may explain the unusual phenomena reported in the area. Recent studies suggest these crystals may be fragments of a larger cosmic entity that slumbers beneath the earth.',
+                content: 'Cosmic crystals are rare minerals that form in areas where the fabric of reality is thin. They possess unique properties that can bend space and time, making them highly sought after by both scientists and cultists. The crystals found in HÃ¤rmÃ¤lÃ¤ were particularly pure, which may explain the unusual phenomena reported in the area. Recent studies suggest these crystals may be fragments of a larger cosmic entity that slumbers beneath the earth.',
                 source: 'Scientific Journal of Cosmic Phenomena',
                 tags: ['science', 'crystals', 'reality', 'harmala'],
                 discovered: true
@@ -203,8 +203,8 @@ class QuestLogUI {
             },
             {
                 id: 'recent-disappearances',
-                title: 'Recent Disappearances in the Härmälä Area',
-                content: 'Since 2020, there have been 12 new disappearances in the Härmälä area. All victims were between 25-45 years old, and all disappearances occurred during the full moon. The pattern is eerily similar to the original Great Collapse, but on a smaller scale. Local authorities have been unable to find any physical evidence, and the disappearances have been officially classified as "unsolved missing persons cases." However, unofficial reports suggest that strange lights and sounds have been observed in the area again.',
+                title: 'Recent Disappearances in the HÃ¤rmÃ¤lÃ¤ Area',
+                content: 'Since 2020, there have been 12 new disappearances in the HÃ¤rmÃ¤lÃ¤ area. All victims were between 25-45 years old, and all disappearances occurred during the full moon. The pattern is eerily similar to the original Great Collapse, but on a smaller scale. Local authorities have been unable to find any physical evidence, and the disappearances have been officially classified as "unsolved missing persons cases." However, unofficial reports suggest that strange lights and sounds have been observed in the area again.',
                 source: 'Police Reports, 2020-2024',
                 tags: ['disappearances', 'harmala', 'recent', 'pattern'],
                 discovered: false
@@ -212,7 +212,7 @@ class QuestLogUI {
             {
                 id: 'eldritch-entities',
                 title: 'Eldritch Entities and Their Motivations',
-                content: 'Eldritch entities are cosmic beings that exist beyond human comprehension. They are not inherently evil, but their very presence can drive mortals to madness. Some seek to understand humanity, while others view us as insignificant specks in the cosmic void. The entity in Härmälä appears to be of the latter variety.',
+                content: 'Eldritch entities are cosmic beings that exist beyond human comprehension. They are not inherently evil, but their very presence can drive mortals to madness. Some seek to understand humanity, while others view us as insignificant specks in the cosmic void. The entity in HÃ¤rmÃ¤lÃ¤ appears to be of the latter variety.',
                 source: 'The Necronomicon (Excerpt)',
                 tags: ['entities', 'eldritch', 'cosmic', 'madness'],
                 discovered: false
@@ -223,8 +223,8 @@ class QuestLogUI {
         this.mysteries = [
             {
                 id: 'harmala-disappearances',
-                title: 'The Härmälä Disappearances',
-                description: 'Over the past four years, 12 people have vanished without a trace in the Härmälä area. All disappearances occurred during the full moon, and witnesses report seeing strange lights and hearing otherworldly sounds. The pattern suggests the cosmic entity that caused the Great Collapse of 1987 is becoming active again.',
+                title: 'The HÃ¤rmÃ¤lÃ¤ Disappearances',
+                description: 'Over the past four years, 12 people have vanished without a trace in the HÃ¤rmÃ¤lÃ¤ area. All disappearances occurred during the full moon, and witnesses report seeing strange lights and hearing otherworldly sounds. The pattern suggests the cosmic entity that caused the Great Collapse of 1987 is becoming active again.',
                 clues: [
                     'All disappearances occurred during full moon',
                     'Witnesses report strange lights in the sky',
@@ -238,7 +238,7 @@ class QuestLogUI {
                 progress: 40,
                 difficulty: 'hard',
                 status: 'investigating',
-                story: 'The Härmälä Disappearances represent the resurgence of cosmic activity in the area. After 37 years of relative quiet, something has awakened beneath the earth, and it\'s hungry. The pattern of disappearances suggests a deliberate, almost ritualistic selection process, as if the entity is choosing its victims based on some unknown criteria.'
+                story: 'The HÃ¤rmÃ¤lÃ¤ Disappearances represent the resurgence of cosmic activity in the area. After 37 years of relative quiet, something has awakened beneath the earth, and it\'s hungry. The pattern of disappearances suggests a deliberate, almost ritualistic selection process, as if the entity is choosing its victims based on some unknown criteria.'
             },
             {
                 id: 'cosmic-disturbances',
@@ -260,8 +260,8 @@ class QuestLogUI {
             },
             {
                 id: 'the-entity-beneath',
-                title: 'The Entity Beneath Härmälä',
-                description: 'Something ancient and powerful slumbers beneath the Härmälä sinkhole. The cosmic crystals were not just minerals - they were fragments of this entity, and the mining operations may have awakened it. Now it stirs, and its dreams are becoming reality.',
+                title: 'The Entity Beneath HÃ¤rmÃ¤lÃ¤',
+                description: 'Something ancient and powerful slumbers beneath the HÃ¤rmÃ¤lÃ¤ sinkhole. The cosmic crystals were not just minerals - they were fragments of this entity, and the mining operations may have awakened it. Now it stirs, and its dreams are becoming reality.',
                 clues: [
                     'The sinkhole extends far deeper than geologically possible',
                     'Cosmic crystals are fragments of a larger being',
@@ -274,7 +274,7 @@ class QuestLogUI {
                 progress: 10,
                 difficulty: 'legendary',
                 status: 'investigating',
-                story: 'The Entity Beneath Härmälä is the central mystery of your investigation. This ancient cosmic being has been slumbering beneath the earth for millennia, but the mining operations and the extraction of cosmic crystals have disturbed its rest. Now it awakens, and it seeks to reclaim what was taken from it. The disappearances are not random - they are the entity\'s way of gathering the consciousness it needs to fully manifest in our world.'
+                story: 'The Entity Beneath HÃ¤rmÃ¤lÃ¤ is the central mystery of your investigation. This ancient cosmic being has been slumbering beneath the earth for millennia, but the mining operations and the extraction of cosmic crystals have disturbed its rest. Now it awakens, and it seeks to reclaim what was taken from it. The disappearances are not random - they are the entity\'s way of gathering the consciousness it needs to fully manifest in our world.'
             }
         ];
     }
@@ -523,3 +523,5 @@ class QuestLogUI {
 
 // Make it globally available
 window.QuestLogUI = QuestLogUI;
+
+

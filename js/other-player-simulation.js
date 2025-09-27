@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Other Player Simulation - Simulates other players for testing PvP encounters
  * Creates AI-controlled players that move around and can trigger encounters
  */
@@ -16,7 +16,7 @@ class OtherPlayerSimulation {
     }
 
     init() {
-        console.log('👥 Other player simulation initialized');
+        console.log('ðŸ‘¥ Other player simulation initialized');
         this.isInitialized = true;
         this.createDebugControls();
         // Temporarily disabled for tutorial-first approach
@@ -37,7 +37,7 @@ class OtherPlayerSimulation {
 
     generateTestPlayers() {
         // Temporarily disabled for tutorial-first approach
-        console.log('👥 Other player generation disabled for tutorial-first approach');
+        console.log('ðŸ‘¥ Other player generation disabled for tutorial-first approach');
         return;
         
         // Create 2-3 test players
@@ -49,16 +49,16 @@ class OtherPlayerSimulation {
 
     addRandomPlayer() {
         // Temporarily disabled for tutorial-first approach
-        console.log('👥 Random player creation disabled for tutorial-first approach');
+        console.log('ðŸ‘¥ Random player creation disabled for tutorial-first approach');
         return;
         
         if (!window.eldritchApp || !window.eldritchApp.systems.mapEngine || !window.eldritchApp.systems.mapEngine.map) {
-            console.log('👥 Map not ready for player generation');
+            console.log('ðŸ‘¥ Map not ready for player generation');
             return;
         }
 
         const playerId = `other_player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        const baseLat = 61.473683430224284; // Härmälänranta
+        const baseLat = 61.473683430224284; // HÃ¤rmÃ¤lÃ¤nranta
         const baseLng = 23.726548746143216;
         
         // Random position within 500m radius
@@ -66,7 +66,7 @@ class OtherPlayerSimulation {
         const lng = baseLng + (Math.random() - 0.5) * 0.0045;
 
         const playerNames = ['CosmicWanderer', 'VoidExplorer', 'StellarSeeker', 'DimensionWalker', 'MysticTraveler'];
-        const playerEmojis = ['🌟', '⚡', '🌙', '🔥', '💫'];
+        const playerEmojis = ['Ÿ', 'âš¡', '™', 'ðŸ”¥', 'ðŸ’«'];
         const playerColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
 
         const player = {
@@ -93,7 +93,7 @@ class OtherPlayerSimulation {
         this.createPlayerMarker(player);
         this.updatePlayerCount();
         
-        console.log(`👥 Added other player: ${player.name} (${player.isHostile ? 'Hostile' : 'Friendly'})`);
+        console.log(`ðŸ‘¥ Added other player: ${player.name} (${player.isHostile ? 'Hostile' : 'Friendly'})`);
     }
 
     createPlayerMarker(player) {
@@ -112,7 +112,7 @@ class OtherPlayerSimulation {
                     <!-- Player emoji -->
                     <div style="position: absolute; top: 5px; left: 5px; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 14px; text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">${player.emoji}</div>
                     <!-- Hostile indicator -->
-                    ${player.isHostile ? '<div style="position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff0000; border: 2px solid #ffffff; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center;">⚔️</div>' : ''}
+                    ${player.isHostile ? '<div style="position: absolute; top: -2px; right: -2px; width: 12px; height: 12px; background: #ff0000; border: 2px solid #ffffff; border-radius: 50%; font-size: 8px; display: flex; align-items: center; justify-content: center;">âš”ï¸</div>' : ''}
                 </div>
             `,
             iconSize: [35, 35],
@@ -132,7 +132,7 @@ class OtherPlayerSimulation {
                 </div>
                 <button onclick="window.otherPlayerSimulation.triggerPvPEncounter('${player.id}')" 
                         style="background: ${player.isHostile ? 'linear-gradient(45deg, #ff4444, #cc0000)' : 'linear-gradient(45deg, #4CAF50, #2E7D32)'}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;">
-                    ${player.isHostile ? '⚔️ Challenge' : '🤝 Interact'}
+                    ${player.isHostile ? 'âš”ï¸ Challenge' : 'ðŸ¤ Interact'}
                 </button>
             </div>
         `);
@@ -217,7 +217,7 @@ class OtherPlayerSimulation {
             return;
         }
 
-        console.log(`⚔️ PvP Encounter triggered with ${player.name}!`);
+        console.log(`âš”ï¸ PvP Encounter triggered with ${player.name}!`);
         this.showPvPModal(player);
     }
 
@@ -236,7 +236,7 @@ class OtherPlayerSimulation {
                 <div class="encounter-header pvp-header">
                     <h2>${player.emoji} ${player.name}</h2>
                     <p class="player-level">Level ${player.level} ${player.isHostile ? 'Hostile' : 'Friendly'} Player</p>
-                    <button class="close-btn" onclick="this.closest('.encounter-modal').remove()">×</button>
+                    <button class="close-btn" onclick="this.closest('.encounter-modal').remove()">Ã—</button>
                 </div>
                 <div class="pvp-dialogue">
                     <div class="player-info">
@@ -252,13 +252,13 @@ class OtherPlayerSimulation {
                     </div>
                     <div class="encounter-actions">
                         ${player.isHostile ? `
-                            <button onclick="window.otherPlayerSimulation.startPvPCombat('${player.id}')" class="combat-btn">⚔️ Challenge to Combat</button>
-                            <button onclick="window.otherPlayerSimulation.tryDiplomacy('${player.id}')" class="diplomacy-btn">🤝 Try Diplomacy</button>
+                            <button onclick="window.otherPlayerSimulation.startPvPCombat('${player.id}')" class="combat-btn">âš”ï¸ Challenge to Combat</button>
+                            <button onclick="window.otherPlayerSimulation.tryDiplomacy('${player.id}')" class="diplomacy-btn">ðŸ¤ Try Diplomacy</button>
                         ` : `
-                            <button onclick="window.otherPlayerSimulation.startFriendlyInteraction('${player.id}')" class="friendly-btn">🤝 Friendly Chat</button>
-                            <button onclick="window.otherPlayerSimulation.tradeWithPlayer('${player.id}')" class="trade-btn">💎 Trade</button>
+                            <button onclick="window.otherPlayerSimulation.startFriendlyInteraction('${player.id}')" class="friendly-btn">ðŸ¤ Friendly Chat</button>
+                            <button onclick="window.otherPlayerSimulation.tradeWithPlayer('${player.id}')" class="trade-btn">ðŸ’Ž Trade</button>
                         `}
-                        <button onclick="window.otherPlayerSimulation.ignorePlayer('${player.id}')" class="ignore-btn">😐 Ignore</button>
+                        <button onclick="window.otherPlayerSimulation.ignorePlayer('${player.id}')" class="ignore-btn">ðŸ˜ Ignore</button>
                     </div>
                 </div>
             </div>
@@ -271,7 +271,7 @@ class OtherPlayerSimulation {
         const player = this.otherPlayers.find(p => p.id === playerId);
         if (!player) return;
 
-        console.log(`⚔️ Starting combat with ${player.name}!`);
+        console.log(`âš”ï¸ Starting combat with ${player.name}!`);
         // Close modal and start combat
         document.getElementById('pvp-modal').remove();
         
@@ -285,7 +285,7 @@ class OtherPlayerSimulation {
         const player = this.otherPlayers.find(p => p.id === playerId);
         if (!player) return;
 
-        console.log(`🤝 Attempting diplomacy with ${player.name}...`);
+        console.log(`ðŸ¤ Attempting diplomacy with ${player.name}...`);
         // Add diplomacy logic here
         document.getElementById('pvp-modal').remove();
     }
@@ -294,7 +294,7 @@ class OtherPlayerSimulation {
         const player = this.otherPlayers.find(p => p.id === playerId);
         if (!player) return;
 
-        console.log(`🤝 Starting friendly interaction with ${player.name}!`);
+        console.log(`ðŸ¤ Starting friendly interaction with ${player.name}!`);
         // Add friendly interaction logic here
         document.getElementById('pvp-modal').remove();
     }
@@ -303,19 +303,19 @@ class OtherPlayerSimulation {
         const player = this.otherPlayers.find(p => p.id === playerId);
         if (!player) return;
 
-        console.log(`💎 Trading with ${player.name}!`);
+        console.log(`ðŸ’Ž Trading with ${player.name}!`);
         // Add trade logic here
         document.getElementById('pvp-modal').remove();
     }
 
     ignorePlayer(playerId) {
-        console.log(`😐 Ignoring player ${playerId}`);
+        console.log(`ðŸ˜ Ignoring player ${playerId}`);
         document.getElementById('pvp-modal').remove();
     }
 
     testPvPEncounter() {
         // Temporarily disabled for tutorial-first approach
-        console.log('👥 PvP encounter testing disabled for tutorial-first approach');
+        console.log('ðŸ‘¥ PvP encounter testing disabled for tutorial-first approach');
         return;
         
         if (this.otherPlayers.length === 0) {
@@ -334,7 +334,7 @@ class OtherPlayerSimulation {
         this.otherPlayers = [];
         this.playerMarkers = [];
         this.updatePlayerCount();
-        console.log('👥 Removed all other players');
+        console.log('ðŸ‘¥ Removed all other players');
     }
 
     updatePlayerCount() {
@@ -379,3 +379,5 @@ class OtherPlayerSimulation {
 
 // Make it globally available
 window.OtherPlayerSimulation = OtherPlayerSimulation;
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Loading System
  * Manages component initialization and loading states
  */
@@ -33,6 +33,9 @@ class LoadingSystem {
     
     init() {
         console.log('🔄 Loading System: Starting initialization...');
+        window.loadingInProgress = true; // Set loading flag
+        window.loadingSystemActive = true; // Prevent direct app initialization
+        window.loadingSystemInitialized = true; // Mark as initialized
         this.createLoadingUI();
         this.startLoadingSequence();
     }
@@ -299,6 +302,7 @@ class LoadingSystem {
     
     showWelcomeScreen() {
         console.log('🎉 Loading complete! Showing welcome screen...');
+        window.loadingInProgress = false; // Clear loading flag
         
         // Animate out loading screen
         this.animateOutLoading(() => {
@@ -307,9 +311,58 @@ class LoadingSystem {
                 this.loadingContainer.remove();
             }
             
-            // Initialize the main app
-            this.initializeMainApp();
+            // Initialize and show the welcome screen
+            this.initializeWelcomeScreen();
         });
+    }
+    
+    initializeWelcomeScreen() {
+        console.log('🌟 Initializing welcome screen...');
+        console.log('🌟 WelcomeScreen class available:', !!window.WelcomeScreen);
+        console.log('🌟 Welcome screen element exists:', !!document.getElementById('welcome-screen'));
+        
+        // Check if welcome screen is already initialized
+        if (window.welcomeScreenInitialized) {
+            console.log('🌟 Welcome screen already initialized, skipping duplicate initialization');
+            this.initializeMainApp();
+            return;
+        }
+        
+        // Check if WelcomeScreen class is available
+        if (window.WelcomeScreen) {
+            try {
+                console.log('🌟 Creating WelcomeScreen instance...');
+                const welcomeScreen = new WelcomeScreen();
+                console.log('🌟 WelcomeScreen instance created:', welcomeScreen);
+                
+                console.log('🌟 Calling welcomeScreen.init()...');
+                welcomeScreen.init();
+                
+                // Small delay to ensure welcome screen is ready
+                setTimeout(() => {
+                    console.log('🌟 Calling welcomeScreen.showWelcomeScreen()...');
+                    // Show the welcome screen after initialization
+                    welcomeScreen.showWelcomeScreen();
+                    
+                    // Remove loading mask to reveal welcome screen content
+                    console.log('🌟 Removing loading mask...');
+                    welcomeScreen.removeLoadingMask();
+                    
+                    // Initialize the main app after welcome screen is ready
+                    console.log('🚀 Initializing main app after welcome screen...');
+                    this.initializeMainApp();
+                    
+                    console.log('🌟 Welcome screen initialized and shown successfully');
+                }, 100);
+            } catch (error) {
+                console.error('🌟 Failed to initialize welcome screen:', error);
+                // Fallback: initialize main app directly
+                this.initializeMainApp();
+            }
+        } else {
+            console.error('🌟 WelcomeScreen class not available, initializing main app directly');
+            this.initializeMainApp();
+        }
     }
     
     animateOutLoading(callback) {
@@ -325,6 +378,9 @@ class LoadingSystem {
     }
     
     initializeMainApp() {
+        // Clear loading system active flag to allow app initialization
+        window.loadingSystemActive = false;
+        
         // Initialize the main Eldritch Sanctuary app
         if (window.EldritchSanctuaryApp) {
             console.log('🚀 Initializing Eldritch Sanctuary App...');

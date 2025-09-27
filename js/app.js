@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Main Application - Coordinates all systems and manages the cosmic exploration experience
  * Integrates geolocation, map engine, investigation system, and WebSocket communication
  */

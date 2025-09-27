@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Moral Choice System - Non-blocking overlays for cosmic moral dilemmas
  * Provides choices that affect player alignment and quest outcomes
  */
@@ -18,7 +18,7 @@ class MoralChoiceSystem {
     }
 
     init() {
-        console.log('⚖️ Moral Choice System initialized');
+        console.log('âš–ï¸ Moral Choice System initialized');
         this.loadAlignment();
         this.loadChoiceHistory();
     }
@@ -30,7 +30,7 @@ class MoralChoiceSystem {
                 this.playerAlignment = { ...this.playerAlignment, ...JSON.parse(saved) };
             }
         } catch (e) {
-            console.warn('⚖️ Failed to load moral alignment', e);
+            console.warn('âš–ï¸ Failed to load moral alignment', e);
         }
     }
 
@@ -38,7 +38,7 @@ class MoralChoiceSystem {
         try {
             localStorage.setItem('eldritch-moral-alignment', JSON.stringify(this.playerAlignment));
         } catch (e) {
-            console.warn('⚖️ Failed to save moral alignment', e);
+            console.warn('âš–ï¸ Failed to save moral alignment', e);
         }
     }
 
@@ -49,7 +49,7 @@ class MoralChoiceSystem {
                 this.choiceHistory = JSON.parse(saved);
             }
         } catch (e) {
-            console.warn('⚖️ Failed to load choice history', e);
+            console.warn('âš–ï¸ Failed to load choice history', e);
         }
     }
 
@@ -57,7 +57,7 @@ class MoralChoiceSystem {
         try {
             localStorage.setItem('eldritch-choice-history', JSON.stringify(this.choiceHistory));
         } catch (e) {
-            console.warn('⚖️ Failed to save choice history', e);
+            console.warn('âš–ï¸ Failed to save choice history', e);
         }
     }
 
@@ -85,8 +85,8 @@ class MoralChoiceSystem {
 
         this.activeOverlay.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="margin: 0; color: var(--cosmic-purple); font-size: 16px;">⚖️ ${title}</h3>
-                <button id="moral-choice-close" style="background: none; border: none; color: var(--cosmic-red); font-size: 18px; cursor: pointer; padding: 0; width: 24px; height: 24px;">×</button>
+                <h3 style="margin: 0; color: var(--cosmic-purple); font-size: 16px;">âš–ï¸ ${title}</h3>
+                <button id="moral-choice-close" style="background: none; border: none; color: var(--cosmic-red); font-size: 18px; cursor: pointer; padding: 0; width: 24px; height: 24px;">Ã—</button>
             </div>
             <div style="margin-bottom: 16px; font-size: 13px; line-height: 1.4; opacity: 0.9;">
                 ${description}
@@ -136,7 +136,7 @@ class MoralChoiceSystem {
                 const target = e.currentTarget || e.target.closest('.moral-choice-btn');
                 const choiceIndex = parseInt(target?.dataset?.choiceIndex);
                 if (Number.isNaN(choiceIndex) || choiceIndex < 0 || choiceIndex >= choices.length) {
-                    console.warn('⚖️ Invalid choice index', choiceIndex);
+                    console.warn('âš–ï¸ Invalid choice index', choiceIndex);
                     return;
                 }
                 this.handleChoice(choiceIndex, choices[choiceIndex], onChoice);
@@ -170,7 +170,7 @@ class MoralChoiceSystem {
     }
 
     handleChoice(choiceIndex, choice, onChoice) {
-        console.log('⚖️ Moral choice made:', choice.text);
+        console.log('âš–ï¸ Moral choice made:', choice.text);
         
         // Apply alignment changes
         if (choice.alignment) {
@@ -194,7 +194,7 @@ class MoralChoiceSystem {
             try {
                 onChoice(choiceIndex, choice, this.playerAlignment);
             } catch (e) {
-                console.error('⚖️ Error in choice callback:', e);
+                console.error('âš–ï¸ Error in choice callback:', e);
             }
         }
 
@@ -211,7 +211,7 @@ class MoralChoiceSystem {
             }
         });
         this.saveAlignment();
-        console.log('⚖️ Alignment updated:', this.playerAlignment);
+        console.log('âš–ï¸ Alignment updated:', this.playerAlignment);
         try { window.statistics?.logMoralityChange?.(changes, 'moral_choice'); } catch (_) {}
     }
 
@@ -226,7 +226,7 @@ class MoralChoiceSystem {
             const message = changes ? `Alignment: ${changes}` : 'Choice recorded';
             const flavor = choice.flavor || (value => value > 0 ? 'A strange warmth floods your veins.' : 'Cold cosmic dread seeps into your bones.');
             const flavorText = changes ? ` ${flavor(Object.values(alignment)[0] || 0)}` : '';
-            window.gruesomeNotifications.show('⚖️ Choice Made', message + flavorText, 'info');
+            window.gruesomeNotifications.show('âš–ï¸ Choice Made', message + flavorText, 'info');
         }
 
         // Visual effect
@@ -385,9 +385,9 @@ class MoralChoiceSystem {
         this.showMoralChoice({
             ...choices[randomKey],
             onChoice: (index, choice, alignment) => {
-                console.log('⚖️ Random choice completed:', choice.text);
+                console.log('âš–ï¸ Random choice completed:', choice.text);
                 if (window.gruesomeNotifications && typeof window.gruesomeNotifications.show === 'function') {
-                    window.gruesomeNotifications.show('⚖️ Choice Recorded', 'Your cosmic alignment has shifted', 'info');
+                    window.gruesomeNotifications.show('âš–ï¸ Choice Recorded', 'Your cosmic alignment has shifted', 'info');
                 }
             }
         });
@@ -462,3 +462,5 @@ class MoralChoiceSystem {
 
 // Initialize global instance
 window.moralChoiceSystem = new MoralChoiceSystem();
+
+

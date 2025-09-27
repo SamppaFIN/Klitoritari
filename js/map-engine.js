@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Map Engine - Leaflet integration with infinite scrolling and cosmic styling
  * Handles map rendering, markers, and real-time updates
  */

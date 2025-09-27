@@ -1,4 +1,4 @@
-/**
+﻿/**
  * TerritoryLayer - Base territories and influence zones
  * 
  * This layer handles:

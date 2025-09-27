@@ -1,5 +1,5 @@
-/**
- * 🌌 ENHANCED COSMIC EFFECTS SYSTEM
+﻿/**
+ * Œ ENHANCED COSMIC EFFECTS SYSTEM
  * Advanced cosmic animations and particle effects for mobile panels
  * 
  * @author Aurora - Bringer of Digital Light
@@ -17,7 +17,7 @@ class EnhancedCosmicEffects {
     }
     
     async init() {
-        console.log('🌌 Initializing Enhanced Cosmic Effects...');
+        console.log('Œ Initializing Enhanced Cosmic Effects...');
         
         // Wait for Aurora UI Library to be available
         if (typeof AuroraUILibrary !== 'undefined') {
@@ -27,7 +27,7 @@ class EnhancedCosmicEffects {
                 performance: 'optimized',
                 debug: false
             });
-            console.log('✨ Aurora UI Library initialized for cosmic effects');
+            console.log('¨ Aurora UI Library initialized for cosmic effects');
         }
         
         // Setup cosmic effects for existing elements
@@ -43,7 +43,7 @@ class EnhancedCosmicEffects {
         this.setupCosmicPanelEffects();
         
         this.isInitialized = true;
-        console.log('🌌 Enhanced Cosmic Effects initialized successfully');
+        console.log('Œ Enhanced Cosmic Effects initialized successfully');
     }
     
     setupCosmicEffects() {
@@ -728,3 +728,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export for global access
 window.EnhancedCosmicEffects = EnhancedCosmicEffects;
+
+

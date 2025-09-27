@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Clean Tablist Implementation
  * Based on CSS-Tricks article: https://css-tricks.com/the-anatomy-of-a-tablist-component/
  */

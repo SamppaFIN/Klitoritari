@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Item System - Cosmic Arsenal Management
  * 
  * Manages weapons, armor, accessories, and eldritch artifacts
@@ -7,7 +7,7 @@
 
 class ItemSystem {
     constructor() {
-        console.log('🎒 ItemSystem constructor called');
+        console.log('’ ItemSystem constructor called');
         this.items = new Map();
         this.playerInventory = [];
         this.equippedItems = {
@@ -19,9 +19,9 @@ class ItemSystem {
         
         this.initializeItems();
         this.loadPlayerInventory();
-        console.log('🎒 ItemSystem initialized with', this.playerInventory.length, 'items in inventory');
-        console.log('🎒 Available items:', Array.from(this.items.keys()));
-        console.log('🎒 Health potion defined:', this.items.has('health_potion'));
+        console.log('’ ItemSystem initialized with', this.playerInventory.length, 'items in inventory');
+        console.log('’ Available items:', Array.from(this.items.keys()));
+        console.log('’ Health potion defined:', this.items.has('health_potion'));
     }
 
     // Initialize all available items in the cosmic realm
@@ -33,7 +33,7 @@ class ItemSystem {
             type: 'consumable',
             category: 'potion',
             rarity: 'common',
-            emoji: '🧪',
+            emoji: 'ðŸ§ª',
             description: 'A glowing red potion that restores health',
             stats: { 
                 heal: 20,
@@ -53,7 +53,7 @@ class ItemSystem {
             type: 'consumable',
             category: 'elixir',
             rarity: 'uncommon',
-            emoji: '🧠',
+            emoji: 'ðŸ§ ',
             description: 'Soothes the mind and clears the fog.',
             stats: { sanity: 15 },
             effects: ['restore_sanity'],
@@ -68,7 +68,7 @@ class ItemSystem {
             type: 'consumable',
             category: 'orb',
             rarity: 'rare',
-            emoji: '⚡',
+            emoji: 'âš¡',
             description: 'Vibrates with latent potential. Grants experience.',
             stats: { xp: 50 },
             effects: ['grant_experience'],
@@ -83,7 +83,7 @@ class ItemSystem {
             type: 'consumable',
             category: 'scroll',
             rarity: 'uncommon',
-            emoji: '📜',
+            emoji: 'ðŸ“œ',
             description: 'Teaches a small permanent trick of survival.',
             stats: { defense: 1 },
             effects: ['permanent_defense'],
@@ -97,7 +97,7 @@ class ItemSystem {
             type: 'weapon',
             category: 'melee',
             rarity: 'common',
-            emoji: '⚔️',
+            emoji: 'âš”ï¸',
             description: 'A sword that has seen better eons. The rust is actually cosmic corrosion from the 47th dimension, which is... surprisingly effective.',
             stats: {
                 attack: 8,
@@ -352,13 +352,13 @@ class ItemSystem {
     buildConsumableHandlers() {
         return {
             health_potion: (item) => {
-                console.log(`🧪 Health potion handler called`);
-                console.log(`🧪 Encounter system available:`, !!window.encounterSystem);
-                console.log(`🧪 Player stats available:`, !!window.encounterSystem?.playerStats);
+                console.log(`ðŸ§ª Health potion handler called`);
+                console.log(`ðŸ§ª Encounter system available:`, !!window.encounterSystem);
+                console.log(`ðŸ§ª Player stats available:`, !!window.encounterSystem?.playerStats);
                 
                 let ps = window.encounterSystem?.playerStats;
                 if (!ps) {
-                    console.log(`🧪 No player stats available, creating fallback`);
+                    console.log(`ðŸ§ª No player stats available, creating fallback`);
                     // Create fallback player stats for tutorial
                     if (!window.encounterSystem) {
                         window.encounterSystem = { playerStats: { health: 50, maxHealth: 100, sanity: 100, maxSanity: 100 } };
@@ -371,7 +371,7 @@ class ItemSystem {
                 const before = ps.health;
                 const healAmount = item.stats?.heal || 50;
                 
-                console.log(`🧪 Before health: ${before}, max health: ${ps.maxHealth}`);
+                console.log(`ðŸ§ª Before health: ${before}, max health: ${ps.maxHealth}`);
                 
                 // Restore health to maximum
                 ps.health = ps.maxHealth;
@@ -380,7 +380,7 @@ class ItemSystem {
                 const beforeSanity = ps.sanity;
                 ps.sanity = Math.max(0, ps.sanity - 30);
                 
-                console.log(`🧪 After health: ${ps.health}, sanity: ${ps.sanity}`);
+                console.log(`ðŸ§ª After health: ${ps.health}, sanity: ${ps.sanity}`);
                 
                 // Show cosmic ghost effect
                 this.createCosmicGhostEffect();
@@ -392,12 +392,12 @@ class ItemSystem {
                 if (window.healthBar) {
                     window.healthBar.setHealth(ps.health, ps.maxHealth);
                     window.healthBar.setSanity(ps.sanity, ps.maxSanity);
-                    console.log(`🧪 Updated health bar: ${ps.health}/${ps.maxHealth}, sanity: ${ps.sanity}/${ps.maxSanity}`);
+                    console.log(`ðŸ§ª Updated health bar: ${ps.health}/${ps.maxHealth}, sanity: ${ps.sanity}/${ps.maxSanity}`);
                 }
                 
                 // Trigger sanity distortion effects due to cosmic cost
                 if (window.sanityDistortion) {
-                    console.log(`🧪 Triggering sanity distortion effects due to cosmic cost`);
+                    console.log(`ðŸ§ª Triggering sanity distortion effects due to cosmic cost`);
                     window.sanityDistortion.distortionEffects.shake = 0.6;
                     window.sanityDistortion.distortionEffects.colorShift = 0.4;
                     window.sanityDistortion.distortionEffects.cosmicDistortion = 0.5;
@@ -413,16 +413,16 @@ class ItemSystem {
                 }
                 
                 // Check if this is tutorial potion usage
-                console.log(`🧪 Tutorial system available:`, !!window.tutorialEncounterSystem);
-                console.log(`🧪 Current tutorial stage:`, window.tutorialEncounterSystem?.tutorialStage);
-                console.log(`🧪 Tutorial flags:`, window.tutorialEncounterSystem?.tutorialFlags);
+                console.log(`ðŸ§ª Tutorial system available:`, !!window.tutorialEncounterSystem);
+                console.log(`ðŸ§ª Current tutorial stage:`, window.tutorialEncounterSystem?.tutorialStage);
+                console.log(`ðŸ§ª Tutorial flags:`, window.tutorialEncounterSystem?.tutorialFlags);
                 
                 // Always trigger tutorial progression for health potion usage
                 if (window.tutorialEncounterSystem) {
-                    console.log(`🧪 Triggering tutorial potion usage handler`);
+                    console.log(`ðŸ§ª Triggering tutorial potion usage handler`);
                     this.handleTutorialPotionUsage();
                 } else {
-                    console.log(`🧪 Tutorial system not available, skipping tutorial progression`);
+                    console.log(`ðŸ§ª Tutorial system not available, skipping tutorial progression`);
                 }
                 
                 return true;
@@ -460,7 +460,7 @@ class ItemSystem {
     }
     
     createCosmicGhostEffect() {
-        console.log('🎆 Creating cosmic fireworks effect...');
+        console.log('† Creating cosmic fireworks effect...');
         
         // Create fireworks container
         const fireworksContainer = document.createElement('div');
@@ -565,7 +565,7 @@ class ItemSystem {
         notification.className = 'cosmic-ghost-notification';
         notification.innerHTML = `
             <div style="text-align: center; font-family: 'Courier New', monospace;">
-                <h3 style="color: #ff6b6b; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(255, 107, 107, 0.8);">🎆 Cosmic Fireworks!</h3>
+                <h3 style="color: #ff6b6b; margin: 0 0 10px 0; text-shadow: 0 0 10px rgba(255, 107, 107, 0.8);">† Cosmic Fireworks!</h3>
                 <p style="margin: 0 0 10px 0; color: #4ecdc4; font-size: 1.1rem;">The potion's power explodes in a burst of cosmic energy!</p>
                 <p style="margin: 0; color: #feca57; font-size: 0.9rem;">But the cosmic cost to your sanity is real...</p>
             </div>
@@ -597,9 +597,9 @@ class ItemSystem {
     }
     
     handleTutorialPotionUsage() {
-        console.log('📚 Handling tutorial potion usage...');
-        console.log('📚 Tutorial system available:', !!window.tutorialEncounterSystem);
-        console.log('📚 Current tutorial stage before:', window.tutorialEncounterSystem?.tutorialStage);
+        console.log('ðŸ“š Handling tutorial potion usage...');
+        console.log('ðŸ“š Tutorial system available:', !!window.tutorialEncounterSystem);
+        console.log('ðŸ“š Current tutorial stage before:', window.tutorialEncounterSystem?.tutorialStage);
         
         // Advance tutorial stage
         if (window.tutorialEncounterSystem) {
@@ -607,15 +607,15 @@ class ItemSystem {
             window.tutorialEncounterSystem.tutorialFlags.set('potion_used', true);
             window.tutorialEncounterSystem.saveTutorialState();
             
-            console.log('📚 Tutorial stage advanced to:', window.tutorialEncounterSystem.tutorialStage);
-            console.log('📚 Tutorial flags:', Array.from(window.tutorialEncounterSystem.tutorialFlags.entries()));
+            console.log('ðŸ“š Tutorial stage advanced to:', window.tutorialEncounterSystem.tutorialStage);
+            console.log('ðŸ“š Tutorial flags:', Array.from(window.tutorialEncounterSystem.tutorialFlags.entries()));
             
             // Show quest window about mind being shattered
             setTimeout(() => {
                 // Show quest window with mind shattered message
                 this.showQuestWindow(`
                     <div style="text-align: center; padding: 20px;">
-                        <h2 style="color: #ff6b6b; margin-bottom: 15px;">🌀 Quest: Mind Shattered</h2>
+                        <h2 style="color: #ff6b6b; margin-bottom: 15px;">€ Quest: Mind Shattered</h2>
                         <div style="background: rgba(255, 107, 107, 0.1); border: 2px solid #ff6b6b; border-radius: 10px; padding: 15px; margin: 15px 0;">
                             <p style="font-size: 16px; line-height: 1.6; color: #ff6b6b;">
                                 <strong>Something is not right...</strong><br><br>
@@ -631,22 +631,22 @@ class ItemSystem {
                 `);
                 
                 // Spawn meditation shrine immediately
-                console.log('📚 Spawning meditation shrine...');
-                console.log('📚 Map engine available:', !!window.mapEngine);
-                console.log('📚 Map available:', !!(window.mapEngine && window.mapEngine.map));
+                console.log('ðŸ“š Spawning meditation shrine...');
+                console.log('ðŸ“š Map engine available:', !!window.mapEngine);
+                console.log('ðŸ“š Map available:', !!(window.mapEngine && window.mapEngine.map));
                 
                 // Try to spawn shrine with retry logic
                 const trySpawnShrine = (attempts = 0) => {
                     if (attempts > 5) {
-                        console.error('📚 Failed to spawn shrine after 5 attempts');
+                        console.error('ðŸ“š Failed to spawn shrine after 5 attempts');
                         return;
                     }
                     
                     if (window.mapEngine && window.mapEngine.map) {
-                        console.log('📚 Map is ready, spawning shrine...');
+                        console.log('ðŸ“š Map is ready, spawning shrine...');
                         window.tutorialEncounterSystem.spawnMeditationShrine();
                     } else {
-                        console.log(`📚 Map not ready, retrying in 1 second... (attempt ${attempts + 1})`);
+                        console.log(`ðŸ“š Map not ready, retrying in 1 second... (attempt ${attempts + 1})`);
                         setTimeout(() => trySpawnShrine(attempts + 1), 1000);
                     }
                 };
@@ -654,7 +654,7 @@ class ItemSystem {
                 trySpawnShrine();
             }, 1000);
         } else {
-            console.error('📚 Tutorial system not available for potion usage handler');
+            console.error('ðŸ“š Tutorial system not available for potion usage handler');
         }
     }
 
@@ -696,7 +696,7 @@ class ItemSystem {
                     font-size: 18px;
                     text-align: center;
                 ">
-                    🌌 Quest Received
+                    Œ Quest Received
                 </div>
                 <div style="padding: 0;">
                     ${content}
@@ -755,14 +755,14 @@ class ItemSystem {
 
     // Add item to player inventory
     addToInventory(itemId, quantity = 1) {
-        console.log(`🎒 addToInventory called with itemId: ${itemId}, quantity: ${quantity}`);
+        console.log(`’ addToInventory called with itemId: ${itemId}, quantity: ${quantity}`);
         const item = this.getItem(itemId);
         if (!item) {
-            console.log(`❌ Item ${itemId} not found!`);
-            console.log(`❌ Available items:`, Array.from(this.items.keys()));
+            console.log(`âŒ Item ${itemId} not found!`);
+            console.log(`âŒ Available items:`, Array.from(this.items.keys()));
             return false;
         }
-        console.log(`🎒 Found item:`, item);
+        console.log(`’ Found item:`, item);
 
         const existingItem = this.playerInventory.find(invItem => invItem.id === itemId);
         if (existingItem) {
@@ -775,22 +775,22 @@ class ItemSystem {
             });
         }
 
-        console.log(`📦 Added ${quantity}x ${item.name} to inventory!`);
-        console.log('🎒 Current inventory after adding:', this.playerInventory);
+        console.log(`ðŸ“¦ Added ${quantity}x ${item.name} to inventory!`);
+        console.log('’ Current inventory after adding:', this.playerInventory);
         this.savePlayerInventory();
         
         // Update UI inventory panel
         try {
-            console.log('🎒 Attempting to update UI inventory panel...');
+            console.log('’ Attempting to update UI inventory panel...');
             if (window.UIPanels && window.UIPanels.populateInventoryPanel) {
-                console.log('🎒 Calling populateInventoryPanel...');
+                console.log('’ Calling populateInventoryPanel...');
                 window.UIPanels.populateInventoryPanel();
-                console.log('🎒 populateInventoryPanel called successfully');
+                console.log('’ populateInventoryPanel called successfully');
             } else {
-                console.warn('🎒 UIPanels or populateInventoryPanel not available');
+                console.warn('’ UIPanels or populateInventoryPanel not available');
             }
         } catch (e) {
-            console.error('🎒 Error updating UI inventory panel:', e);
+            console.error('’ Error updating UI inventory panel:', e);
         }
         
         return true;
@@ -800,7 +800,7 @@ class ItemSystem {
     removeFromInventory(itemId, quantity = 1) {
         const existingItem = this.playerInventory.find(invItem => invItem.id === itemId);
         if (!existingItem) {
-            console.log(`❌ Item ${itemId} not in inventory!`);
+            console.log(`âŒ Item ${itemId} not in inventory!`);
             return false;
         }
 
@@ -814,7 +814,7 @@ class ItemSystem {
             existingItem.quantity -= quantity;
         }
 
-        console.log(`📦 Removed ${quantity}x ${itemId} from inventory!`);
+        console.log(`ðŸ“¦ Removed ${quantity}x ${itemId} from inventory!`);
         this.savePlayerInventory();
         return true;
     }
@@ -823,13 +823,13 @@ class ItemSystem {
     equipItem(itemId) {
         const item = this.getItem(itemId);
         if (!item) {
-            console.log(`❌ Item ${itemId} not found!`);
+            console.log(`âŒ Item ${itemId} not found!`);
             return false;
         }
 
         const inventoryItem = this.playerInventory.find(invItem => invItem.id === itemId);
         if (!inventoryItem || inventoryItem.quantity <= 0) {
-            console.log(`❌ Item ${itemId} not in inventory!`);
+            console.log(`âŒ Item ${itemId} not in inventory!`);
             return false;
         }
 
@@ -842,7 +842,7 @@ class ItemSystem {
         this.equippedItems[item.type] = item;
         inventoryItem.equipped = true;
 
-        console.log(`⚔️ Equipped ${item.name}!`);
+        console.log(`âš”ï¸ Equipped ${item.name}!`);
         this.savePlayerInventory();
         return true;
     }
@@ -851,7 +851,7 @@ class ItemSystem {
     unequipItem(itemId) {
         const item = this.getItem(itemId);
         if (!item) {
-            console.log(`❌ Item ${itemId} not found!`);
+            console.log(`âŒ Item ${itemId} not found!`);
             return false;
         }
 
@@ -863,7 +863,7 @@ class ItemSystem {
                 inventoryItem.equipped = false;
             }
 
-            console.log(`⚔️ Unequipped ${item.name}!`);
+            console.log(`âš”ï¸ Unequipped ${item.name}!`);
             this.savePlayerInventory();
             return true;
         }
@@ -923,9 +923,9 @@ class ItemSystem {
                     armor: null,
                     accessory: null
                 };
-                console.log('📦 Player inventory loaded!');
+                console.log('ðŸ“¦ Player inventory loaded!');
             } catch (error) {
-                console.log('❌ Error loading inventory:', error);
+                console.log('âŒ Error loading inventory:', error);
                 this.playerInventory = [];
                 this.equippedItems = {
                     weapon: null,
@@ -948,34 +948,34 @@ class ItemSystem {
 
     // Use a consumable item by ID
     useConsumable(itemId) {
-        console.log(`🧪 ItemSystem.useConsumable called with: ${itemId}`);
-        console.log(`🧪 ItemSystem instance:`, this);
-        console.log(`🧪 Player inventory:`, this.playerInventory);
+        console.log(`ðŸ§ª ItemSystem.useConsumable called with: ${itemId}`);
+        console.log(`ðŸ§ª ItemSystem instance:`, this);
+        console.log(`ðŸ§ª Player inventory:`, this.playerInventory);
         
         const item = this.getItem(itemId);
-        console.log(`🧪 Item found:`, item);
+        console.log(`ðŸ§ª Item found:`, item);
         if (!item || item.type !== 'consumable') {
-            console.log(`🧪 Item not found or not consumable:`, item);
+            console.log(`ðŸ§ª Item not found or not consumable:`, item);
             return false;
         }
         
         const inv = this.playerInventory.find(i => i.id === itemId);
-        console.log(`🧪 Inventory item:`, inv);
+        console.log(`ðŸ§ª Inventory item:`, inv);
         if (!inv || inv.quantity <= 0) {
-            console.log(`🧪 No inventory item or quantity 0:`, inv);
+            console.log(`ðŸ§ª No inventory item or quantity 0:`, inv);
             return false;
         }
         
         const handler = this.consumableHandlers[itemId];
-        console.log(`🧪 Handler found:`, !!handler);
-        console.log(`🧪 Available handlers:`, Object.keys(this.consumableHandlers));
+        console.log(`ðŸ§ª Handler found:`, !!handler);
+        console.log(`ðŸ§ª Available handlers:`, Object.keys(this.consumableHandlers));
         
         const applied = handler ? handler(item) : false;
-        console.log(`🧪 Handler applied:`, applied);
+        console.log(`ðŸ§ª Handler applied:`, applied);
         
         if (applied) {
             this.removeFromInventory(itemId, 1);
-            console.log(`🧪 Item removed from inventory`);
+            console.log(`ðŸ§ª Item removed from inventory`);
         }
         return applied;
     }
@@ -1048,10 +1048,12 @@ class ItemSystem {
     
     // Initialize the item system
     init() {
-        console.log('🎒 Item system initialized');
+        console.log('’ Item system initialized');
         this.isInitialized = true;
     }
 }
 
 // Make it globally available
 window.ItemSystem = ItemSystem;
+
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Mobile Logger System
  * Provides accessible logging for mobile devices where console is not easily accessible
  */
@@ -14,7 +14,7 @@ class MobileLogger {
     }
 
     init() {
-        console.log('📱 Mobile Logger initialized');
+        console.log('ðŸ“± Mobile Logger initialized');
         this.createLogPanel();
         this.setupEventListeners();
         this.overrideConsole();
@@ -24,7 +24,7 @@ class MobileLogger {
         // Create floating log button
         const logButton = document.createElement('div');
         logButton.id = 'mobile-log-button';
-        logButton.innerHTML = '📱';
+        logButton.innerHTML = 'ðŸ“±';
         logButton.style.cssText = `
             position: fixed;
             top: 10px;
@@ -277,4 +277,6 @@ class MobileLogger {
 // Mobile logger is now integrated into UI Controls Layer
 // This file is kept for reference but not initialized
 
-console.log('📱 Mobile Logger system loaded');
+console.log('ðŸ“± Mobile Logger system loaded');
+
+

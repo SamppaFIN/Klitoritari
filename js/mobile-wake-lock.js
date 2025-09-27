@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Mobile Wake Lock Manager
  * Prevents mobile devices from going to sleep while the game is active
  * Uses Wake Lock API with NoSleep.js fallback for broader compatibility
@@ -23,16 +23,16 @@ class MobileWakeLockManager {
         // Initialize NoSleep fallback
         this.initNoSleepFallback();
         
-        console.log('📱 Mobile Wake Lock Manager initialized');
+        console.log('ðŸ“± Mobile Wake Lock Manager initialized');
     }
 
     checkSupport() {
         // Check for Wake Lock API support
         if ('wakeLock' in navigator) {
             this.isSupported = true;
-            console.log('📱 Wake Lock API supported');
+            console.log('ðŸ“± Wake Lock API supported');
         } else {
-            console.log('📱 Wake Lock API not supported, using NoSleep fallback');
+            console.log('ðŸ“± Wake Lock API not supported, using NoSleep fallback');
         }
     }
 
@@ -42,9 +42,9 @@ class MobileWakeLockManager {
             const init = () => {
                 try {
                     this.noSleepInstance = this.createNoSleepFallback();
-                    console.log('📱 NoSleep fallback initialized');
+                    console.log('ðŸ“± NoSleep fallback initialized');
                 } catch (err) {
-                    console.warn('📱 Failed to initialize NoSleep fallback:', err);
+                    console.warn('ðŸ“± Failed to initialize NoSleep fallback:', err);
                 }
             };
             if (document.readyState === 'loading') {
@@ -53,7 +53,7 @@ class MobileWakeLockManager {
                 init();
             }
         } catch (error) {
-            console.warn('📱 Failed to initialize NoSleep fallback:', error);
+            console.warn('ðŸ“± Failed to initialize NoSleep fallback:', error);
         }
     }
 
@@ -99,7 +99,7 @@ class MobileWakeLockManager {
             video: video,
             start: () => {
                 video.play().catch(e => {
-                    console.warn('📱 NoSleep video play failed:', e);
+                    console.warn('ðŸ“± NoSleep video play failed:', e);
                 });
             },
             stop: () => {
@@ -129,7 +129,7 @@ class MobileWakeLockManager {
 
     async requestWakeLock() {
         if (!this.isSupported) {
-            console.log('📱 Wake Lock API not supported, using NoSleep fallback');
+            console.log('ðŸ“± Wake Lock API not supported, using NoSleep fallback');
             return this.startNoSleepFallback();
         }
 
@@ -139,26 +139,26 @@ class MobileWakeLockManager {
             this.isActive = true;
             this.fallbackActive = false;
             
-            console.log('📱 Wake lock acquired successfully');
+            console.log('ðŸ“± Wake lock acquired successfully');
             
             // Handle wake lock release
             this.wakeLock.addEventListener('release', () => {
-                console.log('📱 Wake lock released');
+                console.log('ðŸ“± Wake lock released');
                 this.isActive = false;
                 this.handleWakeLockRelease();
             });
             
             return true;
         } catch (error) {
-            console.warn('📱 Wake lock request failed:', error);
+            console.warn('ðŸ“± Wake lock request failed:', error);
             this.retryCount++;
             
             if (this.retryCount < this.maxRetries) {
-                console.log(`📱 Retrying wake lock request (${this.retryCount}/${this.maxRetries})`);
+                console.log(`ðŸ“± Retrying wake lock request (${this.retryCount}/${this.maxRetries})`);
                 setTimeout(() => this.requestWakeLock(), this.retryDelay);
                 return false;
             } else {
-                console.log('📱 Max retries reached, falling back to NoSleep');
+                console.log('ðŸ“± Max retries reached, falling back to NoSleep');
                 return this.startNoSleepFallback();
             }
         }
@@ -166,7 +166,7 @@ class MobileWakeLockManager {
 
     startNoSleepFallback() {
         if (!this.noSleepInstance) {
-            console.warn('📱 NoSleep fallback not available');
+            console.warn('ðŸ“± NoSleep fallback not available');
             return false;
         }
 
@@ -174,10 +174,10 @@ class MobileWakeLockManager {
             this.noSleepInstance.start();
             this.fallbackActive = true;
             this.isActive = true;
-            console.log('📱 NoSleep fallback activated');
+            console.log('ðŸ“± NoSleep fallback activated');
             return true;
         } catch (error) {
-            console.warn('📱 NoSleep fallback failed:', error);
+            console.warn('ðŸ“± NoSleep fallback failed:', error);
             return false;
         }
     }
@@ -194,12 +194,12 @@ class MobileWakeLockManager {
         }
         
         this.isActive = false;
-        console.log('📱 Wake lock released');
+        console.log('ðŸ“± Wake lock released');
     }
 
     handleWakeLockRelease() {
         // Handle when wake lock is released (e.g., user switches tabs)
-        console.log('📱 Wake lock was released, attempting to reacquire...');
+        console.log('ðŸ“± Wake lock was released, attempting to reacquire...');
         
         // Try to reacquire after a short delay
         setTimeout(() => {
@@ -213,10 +213,10 @@ class MobileWakeLockManager {
         // Handle visibility changes (tab switching, app backgrounding)
         this.visibilityChangeHandler = () => {
             if (document.hidden) {
-                console.log('📱 Page hidden, maintaining wake lock');
+                console.log('ðŸ“± Page hidden, maintaining wake lock');
                 // Keep wake lock active when page is hidden
             } else {
-                console.log('📱 Page visible, ensuring wake lock is active');
+                console.log('ðŸ“± Page visible, ensuring wake lock is active');
                 // Ensure wake lock is active when page becomes visible
                 if (this.isActive && !this.wakeLock && !this.fallbackActive) {
                     this.requestWakeLock();
@@ -233,7 +233,7 @@ class MobileWakeLockManager {
             // Only handle touch/click events
             if (event.type === 'touchstart' || event.type === 'click') {
                 if (this.isActive && !this.wakeLock && !this.fallbackActive) {
-                    console.log('📱 User interaction detected, reacquiring wake lock');
+                    console.log('ðŸ“± User interaction detected, reacquiring wake lock');
                     this.requestWakeLock();
                 }
             }
@@ -244,7 +244,7 @@ class MobileWakeLockManager {
     }
 
     async start() {
-        console.log('📱 Starting mobile wake lock...');
+        console.log('ðŸ“± Starting mobile wake lock...');
         
         // Setup event handlers
         this.setupVisibilityHandling();
@@ -254,16 +254,16 @@ class MobileWakeLockManager {
         const success = await this.requestWakeLock();
         
         if (success) {
-            console.log('📱 Mobile wake lock started successfully');
+            console.log('ðŸ“± Mobile wake lock started successfully');
         } else {
-            console.warn('📱 Failed to start mobile wake lock');
+            console.warn('ðŸ“± Failed to start mobile wake lock');
         }
         
         return success;
     }
 
     stop() {
-        console.log('📱 Stopping mobile wake lock...');
+        console.log('ðŸ“± Stopping mobile wake lock...');
         
         // Remove event handlers
         if (this.visibilityChangeHandler) {
@@ -280,7 +280,7 @@ class MobileWakeLockManager {
         // Release wake lock
         this.releaseWakeLock();
         
-        console.log('📱 Mobile wake lock stopped');
+        console.log('ðŸ“± Mobile wake lock stopped');
     }
 
     getStatus() {
@@ -295,13 +295,13 @@ class MobileWakeLockManager {
 
     // Method to be called when game starts
     enableForGame() {
-        console.log('📱 Enabling wake lock for game session');
+        console.log('ðŸ“± Enabling wake lock for game session');
         return this.start();
     }
 
     // Method to be called when game ends or user leaves
     disableForGame() {
-        console.log('📱 Disabling wake lock for game session');
+        console.log('ðŸ“± Disabling wake lock for game session');
         this.stop();
     }
 
@@ -314,7 +314,7 @@ class MobileWakeLockManager {
             this.noSleepInstance = null;
         }
         
-        console.log('📱 Mobile wake lock manager destroyed');
+        console.log('ðŸ“± Mobile wake lock manager destroyed');
     }
 }
 
@@ -327,13 +327,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (isMobile) {
-        console.log('📱 Mobile device detected, auto-starting wake lock');
+        console.log('ðŸ“± Mobile device detected, auto-starting wake lock');
         // Start wake lock after a short delay to ensure page is fully loaded
         setTimeout(() => {
             window.mobileWakeLock.enableForGame();
         }, 1000);
     } else {
-        console.log('📱 Desktop device detected, wake lock available but not auto-started');
+        console.log('ðŸ“± Desktop device detected, wake lock available but not auto-started');
     }
 });
 
@@ -341,3 +341,5 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = MobileWakeLockManager;
 }
+
+

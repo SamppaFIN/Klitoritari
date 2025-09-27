@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Session Persistence Manager - lightweight per-session state storage
  * Stores: map view, path polyline, quest adventure mode/objectives
  */
@@ -10,7 +10,7 @@ class SessionPersistenceManager {
 
     init() {
         // Initialize session persistence manager
-        console.log('💾 Session Persistence Manager initialized');
+        console.log('ðŸ’¾ Session Persistence Manager initialized');
     }
 
     computeSessionPrefix() {
@@ -221,3 +221,5 @@ class SessionPersistenceManager {
 }
 
 window.sessionPersistence = new SessionPersistenceManager();
+
+

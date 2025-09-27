@@ -1,4 +1,4 @@
-/**
+﻿/**
  * LayerTests - Comprehensive testing suite for the layered rendering system
  * Tests layer isolation, event communication, and performance
  */
