@@ -926,19 +926,35 @@ class StepCurrencySystem {
         }
     }
     
-    // Test function to add steps (for development)
+    // Test function to add steps (for development) - bypasses automatic detection check
     addTestSteps(amount = 1000) {
         console.log(`🧪 Adding ${amount} test steps...`);
         console.log(`🧪 Before: Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
         
-        this.totalSteps += amount;
-        this.sessionSteps += amount;
+        // Temporarily enable step detection for manual test steps
+        const wasAutoEnabled = this.autoStepDetectionEnabled;
+        this.autoStepDetectionEnabled = true;
+        
+        // Add steps one by one to trigger milestone checking
+        for (let i = 0; i < amount; i++) {
+            this.totalSteps++;
+            this.sessionSteps++;
+            
+            // Check milestones every 100 steps to avoid too much logging
+            if (i % 100 === 0 || i === amount - 1) {
+                this.checkMilestones();
+            }
+        }
+        
+        // Restore original auto detection setting
+        this.autoStepDetectionEnabled = wasAutoEnabled;
+        
         this.saveSteps();
         this.updateStepCounter();
         
         console.log(`🧪 After: Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
         
-        // Check for milestones
+        // Final milestone check
         this.checkMilestones();
     }
     
@@ -1057,12 +1073,11 @@ class StepCurrencySystem {
         this.stepDetectionActive = true;
         console.log('🚶‍♂️ Step detection started');
         
-        // Enable automatic step detection for testing
-        this.autoStepDetectionEnabled = true;
-        console.log('🧪 Automatic step detection enabled for testing');
+        // Disable automatic step detection - only manual steps allowed
+        this.autoStepDetectionEnabled = false;
+        console.log('🧪 Automatic step detection disabled - only manual steps allowed');
         
-        // Enable fallback mode for testing (slower rate)
-        this.enableFallbackMode();
+        // Do not enable fallback mode - we want manual control only
     }
     
     stopStepDetection() {
