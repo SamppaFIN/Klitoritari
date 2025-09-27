@@ -523,7 +523,7 @@ class Tablist {
                         <button class="abandon-base-btn" onclick="window.tablist.abandonBase()">Abandon Base</button>
                     ` : `
                         <p>No base established yet.</p>
-                        <button class="establish-base-btn" onclick="window.tablist.establishBase()">Establish Base</button>
+                        <button class="establish-base-btn" onclick="window.tablist.establishBase()">Establish Base for 1000 Steps</button>
                     `}
                 </div>
                 <div class="base-stats">

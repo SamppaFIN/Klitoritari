@@ -362,7 +362,7 @@
             } else {
                 baseList.innerHTML = `
                     <div style="opacity:0.7;">No base established</div>
-                    <button onclick="window.UIPanels.openBaseManagement()" style="margin-top:4px; padding:2px 6px; font-size:0.7em;">Establish Base</button>
+                    <button onclick="window.UIPanels.openBaseManagement()" style="margin-top:4px; padding:2px 6px; font-size:0.7em;">Establish Base for 1000 Steps</button>
                 `;
             }
         } catch (e) {
@@ -958,7 +958,7 @@
                 <div class="base-info">
                     <h4>Current Base</h4>
                     <p>No base established yet.</p>
-                    <button class="establish-base-btn">Establish Base</button>
+                    <button class="establish-base-btn">Establish Base for 1000 Steps</button>
                 </div>
                 <div class="base-stats">
                     <h4>Base Statistics</h4>
