@@ -74,6 +74,12 @@ class MapLayer extends BaseLayer {
             return;
         }
 
+        // Check if map is already initialized
+        if (this.map) {
+            console.log('🗺️ MapLayer: Map already initialized, skipping');
+            return;
+        }
+
         try {
             // Initialize Leaflet map
             this.map = L.map(this.mapContainer, {

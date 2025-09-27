@@ -812,15 +812,17 @@ class StepCurrencySystem {
             </div>
         `;
 
-        // Add to control panel
+        // Add to control panel or fallback to body
         const stepContainer = document.getElementById('step-counter-container');
         if (stepContainer) {
             stepContainer.appendChild(stepCounter);
             console.log('🚶‍♂️ Step counter created and added to control panel');
-            this.setupStepControls();
         } else {
-            console.error('🚶‍♂️ Step counter container not found, cannot create step counter');
+            // Fallback to adding to body
+            document.body.appendChild(stepCounter);
+            console.log('🚶‍♂️ Step counter created and added to body (fallback)');
         }
+        this.setupStepControls();
     }
 
     setupStepControls() {
