@@ -10,6 +10,20 @@
 
 Eldritch Sanctuary is an immersive cosmic exploration platform that combines infinite scrolling maps, real-time geolocation tracking, base building, RPG combat, and rich storytelling. Built with sacred principles of community healing and wisdom sharing, it transforms exploration into a meaningful journey of discovery and connection.
 
+## 🔧 Development Rules
+
+### PowerShell Commands
+- **Use `Invoke-WebRequest`** instead of `curl` for API calls
+- **No `&&` operator** - use separate commands or `;` for chaining
+- **Debug Logs API:** `Invoke-WebRequest -Uri "http://localhost:3000/api/debug-logs" -UseBasicParsing | Select-Object -ExpandProperty Content`
+
+### Pre-Commit Workflow
+1. **Add to README and aurora log** the debug log API call URL
+2. **Check demo API** for all errors before committing
+3. **Fix any errors** found in the API response
+4. **Update aurora log** with session progress
+5. **Commit changes** with descriptive message
+
 ## 🚀 Features
 
 ### 🗺️ Infinite Cosmic Maps
