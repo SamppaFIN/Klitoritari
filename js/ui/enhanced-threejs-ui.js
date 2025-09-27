@@ -86,23 +86,13 @@ class EnhancedThreeJSUI {
     }
     
     setupControls() {
-        if (typeof THREE.OrbitControls !== 'undefined') {
-            this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-            this.controls.enableDamping = true;
-            this.controls.dampingFactor = 0.05;
-            this.controls.enableZoom = false;
-            this.controls.enablePan = false;
-            this.controls.enableRotate = true;
-            this.controls.maxPolarAngle = Math.PI / 2;
-            this.controls.minPolarAngle = Math.PI / 4;
-        } else {
-            console.warn('⚠️ OrbitControls not available, using fallback');
-            this.controls = {
-                update: () => {
-                    this.camera.lookAt(0, 0, 0);
-                }
-            };
-        }
+        // Disable 3D controls to prevent flickering during map interactions
+        console.log('🎮 Disabling 3D controls to prevent map interaction conflicts');
+        this.controls = {
+            update: () => {
+                // No-op: controls disabled
+            }
+        };
     }
     
     setupLighting() {

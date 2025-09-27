@@ -182,6 +182,12 @@ class GeolocationLayer extends BaseLayer {
         if (this.eventBus) {
             this.eventBus.emit('geolocation:permission:granted', this.currentPosition);
             this.eventBus.emit('geolocation:position:update', this.currentPosition);
+            // Also emit player position update for player layer
+            this.eventBus.emit('player:position:update', {
+                x: this.currentPosition.lat,
+                y: this.currentPosition.lng,
+                immediate: true
+            });
         }
     }
 
@@ -283,6 +289,12 @@ class GeolocationLayer extends BaseLayer {
         // Emit event
         if (this.eventBus) {
             this.eventBus.emit('geolocation:position:update', this.currentPosition);
+            // Also emit player position update for player layer
+            this.eventBus.emit('player:position:update', {
+                x: this.currentPosition.latitude,
+                y: this.currentPosition.longitude,
+                immediate: true
+            });
         }
     }
 

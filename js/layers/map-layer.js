@@ -33,6 +33,9 @@ class MapLayer extends BaseLayer {
         // Initialize Leaflet map
         this.initializeMap();
         
+        // Initialize player marker
+        this.initializePlayerMarker();
+        
         console.log('🗺️ MapLayer: Map system initialized');
     }
     
@@ -46,9 +49,14 @@ class MapLayer extends BaseLayer {
     }
 
     createMapContainer() {
-        // Create a container for the Leaflet map
-        this.mapContainer = document.createElement('div');
-        this.mapContainer.id = 'leaflet-map-container';
+        // Use existing map container
+        this.mapContainer = document.getElementById('map');
+        if (!this.mapContainer) {
+            console.error('🗺️ MapLayer: Map container not found!');
+            return;
+        }
+        
+        // Style the existing map container
         this.mapContainer.style.position = 'absolute';
         this.mapContainer.style.top = '0';
         this.mapContainer.style.left = '0';
@@ -57,10 +65,7 @@ class MapLayer extends BaseLayer {
         this.mapContainer.style.zIndex = this.zIndex;
         this.mapContainer.style.pointerEvents = 'auto'; // MapLayer handles all mouse events
         
-        // Add to canvas container
-        if (this.canvas.parentNode) {
-            this.canvas.parentNode.appendChild(this.mapContainer);
-        }
+        console.log('🗺️ MapLayer: Using existing map container');
     }
 
     initializeMap() {
@@ -154,13 +159,8 @@ class MapLayer extends BaseLayer {
 
         // Map context menu event
         this.map.on('contextmenu', (e) => {
-            if (this.eventBus) {
-                this.eventBus.emit('map:contextmenu', {
-                    latlng: e.latlng,
-                    layerPoint: e.layerPoint,
-                    containerPoint: e.containerPoint
-                });
-            }
+            e.originalEvent.preventDefault();
+            this.showContextMenu(e);
         });
     }
 
@@ -413,6 +413,9 @@ class MapLayer extends BaseLayer {
     }
 
     destroy() {
+        // Hide context menu
+        this.hideContextMenu();
+        
         // Remove all markers
         this.markers.forEach((marker, id) => {
             this.removeMarker(id);
@@ -422,6 +425,18 @@ class MapLayer extends BaseLayer {
         this.overlays.forEach((overlay, id) => {
             this.removeOverlay(id);
         });
+        
+        // Remove step markers
+        if (this.stepMarkers) {
+            this.stepMarkers.forEach(marker => marker.remove());
+            this.stepMarkers = [];
+        }
+        
+        // Remove path markers
+        if (this.pathMarkers) {
+            this.pathMarkers.forEach(marker => marker.remove());
+            this.pathMarkers = [];
+        }
         
         // Remove map
         if (this.map) {
@@ -436,6 +451,293 @@ class MapLayer extends BaseLayer {
         
         super.destroy();
         console.log('🗺️ MapLayer: Destroyed');
+    }
+
+    // Player Marker Methods
+    initializePlayerMarker() {
+        console.log('🗺️ MapLayer: Initializing player marker...');
+        
+        // Listen for geolocation position updates
+        if (this.eventBus) {
+            this.eventBus.on('geolocation:position:update', this.handlePositionUpdate.bind(this));
+        }
+        
+        // Create initial player marker at default position
+        this.createPlayerMarker(this.initialPosition);
+    }
+
+    handlePositionUpdate(position) {
+        console.log('🗺️ MapLayer: Position update received:', position);
+        
+        if (this.map && this.mapReady) {
+            this.updatePlayerMarker({
+                lat: position.latitude || position.lat,
+                lng: position.longitude || position.lng,
+                accuracy: position.accuracy
+            });
+        }
+    }
+
+    createPlayerMarker(position) {
+        if (!this.map || !this.mapReady) {
+            console.warn('🗺️ MapLayer: Map not ready, cannot create player marker');
+            return;
+        }
+
+        // Create player marker icon
+        const playerIcon = L.divIcon({
+            className: 'player-marker',
+            html: this.createPlayerMarkerHTML(),
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+        // Create marker
+        const marker = L.marker([position.lat, position.lng], { 
+            icon: playerIcon,
+            zIndexOffset: 1000
+        }).addTo(this.map);
+
+        // Add popup
+        marker.bindPopup('<b>Your Location</b><br>You are here in the cosmic realm');
+
+        // Store marker
+        this.markers.set('player', marker);
+        
+        console.log('🗺️ MapLayer: Player marker created at:', position);
+    }
+
+    updatePlayerMarker(position) {
+        const marker = this.markers.get('player');
+        if (marker) {
+            marker.setLatLng([position.lat, position.lng]);
+            console.log('🗺️ MapLayer: Player marker updated to:', position);
+        } else {
+            // Create marker if it doesn't exist
+            this.createPlayerMarker(position);
+        }
+    }
+
+    createPlayerMarkerHTML() {
+        return `
+            <div style="position: relative; width: 40px; height: 40px;">
+                <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, #00ff004D 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
+                <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #00ff00; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 15px #00ff00;"></div>
+                <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 5px rgba(0,0,0,0.8);">👤</div>
+            </div>
+        `;
+    }
+
+    // Context Menu Methods
+    showContextMenu(e) {
+        // Remove existing context menu
+        this.hideContextMenu();
+        
+        // Create context menu
+        const contextMenu = document.createElement('div');
+        contextMenu.id = 'map-context-menu';
+        contextMenu.style.cssText = `
+            position: fixed;
+            top: ${e.containerPoint.y}px;
+            left: ${e.containerPoint.x}px;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(40, 40, 60, 0.95));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px 0;
+            z-index: 10000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-width: 150px;
+        `;
+        
+        // Add "Move Here" option
+        const moveHereOption = document.createElement('div');
+        moveHereOption.style.cssText = `
+            padding: 12px 16px;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        `;
+        moveHereOption.innerHTML = '🚀 Move Here';
+        moveHereOption.addEventListener('click', () => {
+            this.teleportPlayer(e.latlng);
+            this.hideContextMenu();
+        });
+        moveHereOption.addEventListener('mouseenter', () => {
+            moveHereOption.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        });
+        moveHereOption.addEventListener('mouseleave', () => {
+            moveHereOption.style.backgroundColor = 'transparent';
+        });
+        
+        contextMenu.appendChild(moveHereOption);
+        document.body.appendChild(contextMenu);
+        
+        // Store reference for cleanup
+        this.contextMenu = contextMenu;
+        
+        // Hide menu when clicking elsewhere
+        setTimeout(() => {
+            document.addEventListener('click', this.hideContextMenu.bind(this), { once: true });
+        }, 100);
+    }
+
+    hideContextMenu() {
+        if (this.contextMenu) {
+            this.contextMenu.remove();
+            this.contextMenu = null;
+        }
+    }
+
+    // Player Teleportation Methods
+    teleportPlayer(targetPosition) {
+        console.log('🚀 Teleporting player to:', targetPosition);
+        
+        // Get current player position
+        const currentPosition = this.getCurrentPlayerPosition();
+        
+        // Update player marker position
+        this.updatePlayerMarker({
+            lat: targetPosition.lat,
+            lng: targetPosition.lng,
+            accuracy: 1
+        });
+        
+        // Create step markers between positions
+        this.createStepMarkers(currentPosition, targetPosition);
+        
+        // Add path marker at new position
+        this.addPathMarker(targetPosition);
+        
+        // Center map on new position
+        this.map.setView([targetPosition.lat, targetPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+        
+        // Emit teleportation event
+        if (this.eventBus) {
+            this.eventBus.emit('player:teleported', {
+                from: currentPosition,
+                to: targetPosition
+            });
+        }
+    }
+
+    getCurrentPlayerPosition() {
+        const playerMarker = this.markers.get('player');
+        if (playerMarker) {
+            const latlng = playerMarker.getLatLng();
+            return { lat: latlng.lat, lng: latlng.lng };
+        }
+        return this.initialPosition;
+    }
+
+    createStepMarkers(fromPosition, toPosition) {
+        console.log('👣 Creating step markers from', fromPosition, 'to', toPosition);
+        
+        // Calculate distance and number of steps
+        const distance = this.calculateDistance(fromPosition.lat, fromPosition.lng, toPosition.lat, toPosition.lng);
+        const stepCount = Math.max(1, Math.floor(distance / 10)); // One marker every 10 meters
+        
+        // Create step markers
+        for (let i = 1; i <= stepCount; i++) {
+            const ratio = i / (stepCount + 1);
+            const stepLat = fromPosition.lat + (toPosition.lat - fromPosition.lat) * ratio;
+            const stepLng = fromPosition.lng + (toPosition.lng - fromPosition.lng) * ratio;
+            
+            this.addStepMarker({ lat: stepLat, lng: stepLng }, i);
+        }
+    }
+
+    addStepMarker(position, stepNumber) {
+        const stepIcon = L.divIcon({
+            className: 'step-marker',
+            html: `
+                <div style="
+                    width: 20px; 
+                    height: 20px; 
+                    background: #ff6b6b; 
+                    border: 2px solid #ffffff; 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 10px; 
+                    color: white; 
+                    font-weight: bold;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                ">
+                    ${stepNumber}
+                </div>
+            `,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+        
+        const marker = L.marker([position.lat, position.lng], { 
+            icon: stepIcon,
+            zIndexOffset: 500
+        }).addTo(this.map);
+        
+        // Store step marker
+        if (!this.stepMarkers) this.stepMarkers = [];
+        this.stepMarkers.push(marker);
+        
+        console.log('👣 Added step marker', stepNumber, 'at', position);
+    }
+
+    addPathMarker(position) {
+        const pathIcon = L.divIcon({
+            className: 'path-marker',
+            html: `
+                <div style="
+                    width: 30px; 
+                    height: 30px; 
+                    background: #003580; 
+                    border: 3px solid #ffffff; 
+                    border-radius: 4px; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 16px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                ">
+                    🇫🇮
+                </div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        
+        const marker = L.marker([position.lat, position.lng], { 
+            icon: pathIcon,
+            zIndexOffset: 600
+        }).addTo(this.map);
+        
+        // Add popup
+        marker.bindPopup(`
+            <b>Path Marker</b><br>
+            <small>Finnish Flag</small><br>
+            <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+        `);
+        
+        // Store path marker
+        if (!this.pathMarkers) this.pathMarkers = [];
+        this.pathMarkers.push(marker);
+        
+        console.log('🇫🇮 Added path marker at', position);
+    }
+
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
     }
 }
 

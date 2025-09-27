@@ -141,50 +141,13 @@ class ThreeJSSceneManager {
     }
     
     setupControls() {
-        // Check if OrbitControls is available
-        if (typeof THREE.OrbitControls === 'undefined') {
-            console.warn('⚠️ OrbitControls not available, creating fallback controls');
-            // Create a simple fallback controls object
-            this.controls = {
-                enableDamping: true,
-                dampingFactor: 0.05,
-                enableZoom: true,
-                enablePan: true,
-                enableRotate: true,
-                update: function() {
-                    // Simple camera movement fallback
-                    if (this.camera) {
-                        this.camera.lookAt(0, 0, 0);
-                    }
-                }.bind(this)
-            };
-            return;
-        }
-        
-        if (this.isMobile) {
-            // Touch-optimized controls for mobile
-            this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-            this.controls.enableDamping = true;
-            this.controls.dampingFactor = 0.1;
-            this.controls.enableZoom = true;
-            this.controls.enablePan = true;
-            this.controls.enableRotate = true;
-            this.controls.minDistance = 5;
-            this.controls.maxDistance = 50;
-            this.controls.maxPolarAngle = Math.PI / 2;
-        } else {
-            // Desktop controls
-            this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-            this.controls.enableDamping = true;
-            this.controls.dampingFactor = 0.05;
-            this.controls.enableZoom = true;
-            this.controls.enablePan = true;
-            this.controls.enableRotate = true;
-            this.controls.minDistance = 3;
-            this.controls.maxDistance = 100;
-        }
-        
-        console.log('🎮 Controls setup:', { mobile: this.isMobile });
+        // Disable 3D controls to prevent flickering during map interactions
+        console.log('🎮 Disabling 3D controls to prevent map interaction conflicts');
+        this.controls = {
+            update: () => {
+                // No-op: controls disabled
+            }
+        };
     }
     
     setupEventListeners() {
