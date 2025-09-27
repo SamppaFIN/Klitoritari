@@ -661,6 +661,12 @@ class HeaderIntegration {
         const container = document.createElement('div');
         container.style.cssText = 'display: flex; flex-direction: column; gap: 10px;';
         
+        // Check current GPS state
+        const mapLayer = this.findMapLayer();
+        const isGPSDisabled = mapLayer ? mapLayer.isGPSTrackingDisabled() : false;
+        const gpsStatus = isGPSDisabled ? 'OFF' : 'ON';
+        const gpsColor = isGPSDisabled ? '#ff4444' : '#00ff00';
+        
         container.innerHTML = `
             <label style="color: #ffffff; font-size: 0.9rem; margin-bottom: 5px; display: block;">Map Controls:</label>
             <div style="display: flex; flex-direction: column; gap: 8px;">
@@ -670,7 +676,7 @@ class HeaderIntegration {
                 <button id="debug-toggle-layers" style="padding: 8px 12px; background: #9C27B0; color: white; border: none; border-radius: 5px; cursor: pointer;">Toggle Layers</button>
                 <div style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
                     <span style="color: #ffffff; font-size: 0.8rem;">GPS:</span>
-                    <button id="debug-toggle-gps" style="padding: 6px 10px; background: #00ff00; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">ON</button>
+                    <button id="debug-toggle-gps" style="padding: 6px 10px; background: ${gpsColor}; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem;">${gpsStatus}</button>
                 </div>
             </div>
         `;

@@ -790,6 +790,22 @@ class MapLayer extends BaseLayer {
                 geolocation.resumeLocationUpdates();
                 console.log('📍 GPS tracking resumed');
             }
+            
+            // Move player back to current GPS location
+            const currentGPSPosition = geolocation.getCurrentPositionSafe();
+            if (currentGPSPosition) {
+                console.log('📍 Moving player back to GPS location:', currentGPSPosition);
+                this.updatePlayerMarker({
+                    lat: currentGPSPosition.lat,
+                    lng: currentGPSPosition.lng,
+                    accuracy: currentGPSPosition.accuracy
+                });
+                
+                // Center map on GPS location
+                if (this.map) {
+                    this.map.setView([currentGPSPosition.lat, currentGPSPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+                }
+            }
         }
         
         // Update header GPS indicator
