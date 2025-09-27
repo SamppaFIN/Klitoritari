@@ -3095,6 +3095,7 @@ class EldritchSanctuaryApp {
         window.encounterSystem = this.systems.encounter;
         window.npcSystem = this.systems.npc;
         window.pathPaintingSystem = this.systems.pathPainting;
+        window.stepCurrencySystem = this.systems.stepCurrency; // Add step currency system to global scope
         window.app = this; // Make app instance globally available
     }
     

@@ -561,16 +561,19 @@ class StepCurrencySystem {
         
         // Check for flag creation (every 50 steps)
         if (this.sessionSteps % this.milestones.flag === 0) {
+            console.log(`🇫🇮 Flag milestone triggered! Session steps: ${this.sessionSteps}`);
             this.triggerFlagCreation();
         }
         
         // Check for celebration (every 100 steps)
         if (this.sessionSteps % this.milestones.celebration === 0) {
+            console.log(`🎉 Celebration milestone triggered! Session steps: ${this.sessionSteps}`);
             this.triggerCelebration();
         }
         
         // Check for quest unlock (every 500 steps)
         if (this.totalSteps % this.milestones.quest === 0) {
+            console.log(`📜 Quest milestone triggered! Total steps: ${this.totalSteps}`);
             this.triggerQuestUnlock();
         }
         
@@ -1037,6 +1040,10 @@ class StepCurrencySystem {
     startStepDetection() {
         this.stepDetectionActive = true;
         console.log('🚶‍♂️ Step detection started');
+        
+        // Force enable fallback mode for testing
+        console.log('🧪 Forcing fallback mode for testing...');
+        this.enableFallbackMode();
     }
     
     stopStepDetection() {
@@ -1078,6 +1085,13 @@ class StepCurrencySystem {
     // Manual step addition for testing
     addManualStep() {
         this.addStep();
+    }
+    
+    // Test milestone checking manually
+    testMilestoneChecking() {
+        console.log('🧪 Testing milestone checking manually...');
+        console.log(`Current state - Total: ${this.totalSteps}, Session: ${this.sessionSteps}, Area unlocked: ${this.areaUnlocked}`);
+        this.checkMilestones();
     }
     
     subtractSteps(count) {
