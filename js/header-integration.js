@@ -821,6 +821,8 @@ class HeaderIntegration {
      * Toggle GPS tracking
      */
     toggleGPS() {
+        console.log('🔧 GPS toggle clicked');
+        
         // Find the map layer to control GPS
         const mapLayer = this.findMapLayer();
         if (!mapLayer) {
@@ -831,14 +833,18 @@ class HeaderIntegration {
         const isDisabled = mapLayer.isGPSTrackingDisabled();
         const gpsButton = document.getElementById('debug-toggle-gps');
         
+        console.log('🔧 Current GPS state:', isDisabled ? 'DISABLED' : 'ENABLED');
+        
         if (isDisabled) {
             // Enable GPS
+            console.log('🔧 Enabling GPS tracking...');
             mapLayer.enableGPSTracking();
             gpsButton.textContent = 'ON';
             gpsButton.style.background = '#00ff00';
             console.log('🔧 GPS tracking enabled');
         } else {
             // Disable GPS
+            console.log('🔧 Disabling GPS tracking...');
             mapLayer.disableGPSTracking();
             gpsButton.textContent = 'OFF';
             gpsButton.style.background = '#ff4444';

@@ -782,17 +782,25 @@ class MapLayer extends BaseLayer {
         
         // Set flag to enable GPS updates
         this.gpsTrackingDisabled = false;
+        console.log('📍 GPS tracking flag set to:', this.gpsTrackingDisabled);
         
         // Resume geolocation tracking if available
         if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
             const geolocation = window.eldritchApp.systems.geolocation;
+            console.log('📍 Found geolocation system:', !!geolocation);
+            
             if (geolocation.resumeLocationUpdates) {
                 geolocation.resumeLocationUpdates();
                 console.log('📍 GPS tracking resumed');
+            } else {
+                console.warn('📍 resumeLocationUpdates method not found');
             }
             
             // Immediately request fresh GPS position from device
+            console.log('📍 Requesting fresh GPS position...');
             this.requestFreshGPSPosition();
+        } else {
+            console.warn('📍 Geolocation system not found in app');
         }
         
         // Update header GPS indicator
@@ -809,6 +817,7 @@ class MapLayer extends BaseLayer {
      */
     requestFreshGPSPosition() {
         console.log('📍 Requesting fresh GPS position from device...');
+        console.log('📍 Navigator geolocation available:', !!navigator.geolocation);
         
         if (navigator.geolocation) {
             const options = {
@@ -816,6 +825,8 @@ class MapLayer extends BaseLayer {
                 timeout: 10000,
                 maximumAge: 0 // Force fresh position
             };
+            
+            console.log('📍 GPS options:', options);
             
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -827,34 +838,53 @@ class MapLayer extends BaseLayer {
                         timestamp: Date.now()
                     };
                     
+                    console.log('📍 Fresh position data:', freshPosition);
+                    
                     // Update player marker immediately
+                    console.log('📍 Updating player marker...');
                     this.updatePlayerMarker(freshPosition);
                     
                     // Center map on fresh GPS location
                     if (this.map) {
+                        console.log('📍 Centering map on fresh position...');
                         this.map.setView([freshPosition.lat, freshPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+                    } else {
+                        console.warn('📍 Map not available for centering');
                     }
                     
                     // Update geolocation system with fresh position
                     if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
                         const geolocation = window.eldritchApp.systems.geolocation;
                         if (geolocation.handlePositionUpdate) {
+                            console.log('📍 Updating geolocation system with fresh position...');
                             geolocation.handlePositionUpdate(position);
+                        } else {
+                            console.warn('📍 handlePositionUpdate method not found');
                         }
+                    } else {
+                        console.warn('📍 Geolocation system not found for position update');
                     }
                 },
                 (error) => {
                     console.error('📍 Failed to get fresh GPS position:', error);
+                    console.error('📍 Error details:', {
+                        code: error.code,
+                        message: error.message
+                    });
                     
                     // Fallback to cached position
-                    const geolocation = window.eldritchApp.systems.geolocation;
-                    const cachedPosition = geolocation.getCurrentPositionSafe();
-                    if (cachedPosition) {
-                        console.log('📍 Using cached GPS position as fallback:', cachedPosition);
-                        this.updatePlayerMarker(cachedPosition);
-                        
-                        if (this.map) {
-                            this.map.setView([cachedPosition.lat, cachedPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+                    if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
+                        const geolocation = window.eldritchApp.systems.geolocation;
+                        const cachedPosition = geolocation.getCurrentPositionSafe();
+                        if (cachedPosition) {
+                            console.log('📍 Using cached GPS position as fallback:', cachedPosition);
+                            this.updatePlayerMarker(cachedPosition);
+                            
+                            if (this.map) {
+                                this.map.setView([cachedPosition.lat, cachedPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+                            }
+                        } else {
+                            console.warn('📍 No cached position available');
                         }
                     }
                 },
@@ -864,14 +894,18 @@ class MapLayer extends BaseLayer {
             console.warn('📍 Geolocation not supported, using cached position');
             
             // Fallback to cached position
-            const geolocation = window.eldritchApp.systems.geolocation;
-            const cachedPosition = geolocation.getCurrentPositionSafe();
-            if (cachedPosition) {
-                console.log('📍 Using cached GPS position:', cachedPosition);
-                this.updatePlayerMarker(cachedPosition);
-                
-                if (this.map) {
-                    this.map.setView([cachedPosition.lat, cachedPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+            if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
+                const geolocation = window.eldritchApp.systems.geolocation;
+                const cachedPosition = geolocation.getCurrentPositionSafe();
+                if (cachedPosition) {
+                    console.log('📍 Using cached GPS position:', cachedPosition);
+                    this.updatePlayerMarker(cachedPosition);
+                    
+                    if (this.map) {
+                        this.map.setView([cachedPosition.lat, cachedPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
+                    }
+                } else {
+                    console.warn('📍 No cached position available');
                 }
             }
         }
