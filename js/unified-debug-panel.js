@@ -131,7 +131,7 @@ class UnifiedDebugPanel {
                     </div>
                     <div class="stat-row">
                         <span>Steps: <span id="debug-steps">100</span></span>
-                        <button id="add-steps" class="debug-btn small">+50 Steps</button>
+                        <button id="add-steps" class="debug-btn small">+100 Steps</button>
                     </div>
                     <div class="stat-row">
                         <span>Level: <span id="debug-level">1</span></span>
@@ -425,7 +425,13 @@ class UnifiedDebugPanel {
             // Mystery encounter test removed as requested
             document.getElementById('test-heavy').addEventListener('click', () => window.encounterSystem.testHeavyEncounter());
             document.getElementById('force-heavy-spawn').addEventListener('click', () => window.encounterSystem.forceHeavySpawn());
-            document.getElementById('add-steps').addEventListener('click', () => window.encounterSystem.addSteps(50));
+            document.getElementById('add-steps').addEventListener('click', () => {
+                if (window.stepCurrencySystem) {
+                    window.stepCurrencySystem.addTestSteps(100); // Add 100 steps for testing
+                } else {
+                    console.warn('Step currency system not available');
+                }
+            });
             
             // Player stats controls
             document.getElementById('heal-player').addEventListener('click', () => this.healPlayer());

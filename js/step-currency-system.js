@@ -944,7 +944,7 @@ class StepCurrencySystem {
         
         // Test button removed - using existing debug mechanism
 
-        // Create step counter element
+        // Create step counter element (display only - controls handled by unified debug panel)
         const stepCounter = document.createElement('div');
         stepCounter.id = 'step-counter';
         stepCounter.innerHTML = `
@@ -953,9 +953,8 @@ class StepCurrencySystem {
                 <div class="step-number" id="step-number">${this.totalSteps}</div>
                 <div class="step-label">COSMIC STEPS</div>
                 <div class="step-session" id="step-session">+${this.sessionSteps}</div>
-                <div class="step-controls" id="step-controls">
-                    <button id="step-decrement" class="step-ctrl-btn" title="-1 step">−</button>
-                    <button id="step-increment" class="step-ctrl-btn" title="+1 step">+</button>
+                <div class="step-info" style="font-size: 0.8em; color: #888; margin-top: 4px;">
+                    Use Debug Panel for controls
                 </div>
             </div>
         `;
@@ -970,13 +969,21 @@ class StepCurrencySystem {
             document.body.appendChild(stepCounter);
             console.log('🚶‍♂️ Step counter created and added to body (fallback)');
         }
-        this.setupStepControls();
+        // Step controls now handled by unified debug panel
     }
 
     setupStepControls() {
         const incBtn = document.getElementById('step-increment');
         const decBtn = document.getElementById('step-decrement');
         if (!incBtn || !decBtn) return;
+
+        // Remove any existing event listeners to prevent conflicts
+        incBtn.replaceWith(incBtn.cloneNode(true));
+        decBtn.replaceWith(decBtn.cloneNode(true));
+        
+        // Get fresh references after cloning
+        const newIncBtn = document.getElementById('step-increment');
+        const newDecBtn = document.getElementById('step-decrement');
 
         const startHold = (direction) => {
             let amount = 1;
@@ -1013,8 +1020,8 @@ class StepCurrencySystem {
             ['mouseup','mouseleave','touchend','touchcancel'].forEach(evt => button.addEventListener(evt, onUp));
         };
 
-        bindHold(incBtn, +1);
-        bindHold(decBtn, -1);
+        bindHold(newIncBtn, +1);
+        bindHold(newDecBtn, -1);
     }
     
     updateStepCounter() {

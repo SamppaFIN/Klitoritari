@@ -2417,33 +2417,34 @@ class EldritchSanctuaryApp {
             add100: !!add100StepsBtn
         });
         
-        if (addStepBtn) {
-            addStepBtn.addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    window.stepCurrencySystem.addManualStep();
-                }
-            });
-        }
+        // Step addition now handled by unified debug panel to prevent conflicts
+        // if (addStepBtn) {
+        //     addStepBtn.addEventListener('click', () => {
+        //         if (window.stepCurrencySystem) {
+        //             window.stepCurrencySystem.addManualStep();
+        //         }
+        //     });
+        // }
         
-        if (add50StepsBtn) {
-            add50StepsBtn.addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    for (let i = 0; i < 50; i++) {
-                        window.stepCurrencySystem.addManualStep();
-                    }
-                }
-            });
-        }
+        // if (add50StepsBtn) {
+        //     add50StepsBtn.addEventListener('click', () => {
+        //         if (window.stepCurrencySystem) {
+        //             for (let i = 0; i < 50; i++) {
+        //                 window.stepCurrencySystem.addManualStep();
+        //             }
+        //         }
+        //     });
+        // }
         
-        if (add100StepsBtn) {
-            add100StepsBtn.addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    for (let i = 0; i < 100; i++) {
-                        window.stepCurrencySystem.addManualStep();
-                    }
-                }
-            });
-        }
+        // if (add100StepsBtn) {
+        //     add100StepsBtn.addEventListener('click', () => {
+        //         if (window.stepCurrencySystem) {
+        //             for (let i = 0; i < 100; i++) {
+        //                 window.stepCurrencySystem.addManualStep();
+        //             }
+        //         }
+        //     });
+        // }
         
         // Game control buttons
         const resetStepsBtn = document.getElementById('debug-reset-steps');
