@@ -388,12 +388,12 @@ class StepCurrencySystem {
     
     enableFallbackMode() {
         console.log('🚶‍♂️ Using fallback step detection mode');
-        // Simulate steps for testing
+        // Simulate steps for testing (slower rate for easier testing)
         setInterval(() => {
             if (this.stepDetectionActive) {
                 this.addStep();
             }
-        }, 2000); // Add step every 2 seconds for testing
+        }, 5000); // Add step every 5 seconds for testing
     }
     
     handleDeviceMotion(event) {
@@ -1057,8 +1057,12 @@ class StepCurrencySystem {
         this.stepDetectionActive = true;
         console.log('🚶‍♂️ Step detection started');
         
-        // Fallback mode will be enabled automatically if device motion fails
-        // No need to force it for testing
+        // Enable automatic step detection for testing
+        this.autoStepDetectionEnabled = true;
+        console.log('🧪 Automatic step detection enabled for testing');
+        
+        // Enable fallback mode for testing (slower rate)
+        this.enableFallbackMode();
     }
     
     stopStepDetection() {
