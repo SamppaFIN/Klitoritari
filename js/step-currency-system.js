@@ -758,14 +758,159 @@ class StepCurrencySystem {
     
     triggerBaseEstablishmentDialog() {
         // Check if base system is available
-        if (window.eldritchApp && window.eldritchApp.systems.base) {
-            console.log('🏗️ Triggering base establishment dialog...');
-            window.eldritchApp.systems.base.showBaseEstablishmentModal();
-        } else if (window.baseSystem) {
+        if (window.baseSystem && typeof window.baseSystem.showBaseEstablishmentModal === 'function') {
             console.log('🏗️ Triggering base establishment dialog (legacy)...');
             window.baseSystem.showBaseEstablishmentModal();
+        } else if (window.eldritchApp && window.eldritchApp.systems.base) {
+            console.log('🏗️ Triggering base establishment dialog...');
+            window.eldritchApp.systems.base.showBaseEstablishmentModal();
+        } else if (window.SimpleBaseInit) {
+            console.log('🏗️ Triggering base establishment dialog (SimpleBaseInit)...');
+            // Create a simple base establishment modal
+            this.createSimpleBaseEstablishmentModal();
         } else {
-            console.warn('⚠️ Base system not available for establishment dialog');
+            console.warn('⚠️ No base system available for establishment dialog');
+        }
+    }
+    
+    createSimpleBaseEstablishmentModal() {
+        // Create a simple modal for base establishment
+        const modal = document.createElement('div');
+        modal.id = 'simple-base-establishment-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        `;
+        
+        modal.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 2px solid #8b5cf6;
+                border-radius: 16px;
+                padding: 32px;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            ">
+                <h2 style="color: #8b5cf6; margin-bottom: 16px; font-size: 24px;">
+                    🏗️ Establish Your Cosmic Base
+                </h2>
+                <p style="color: #e0e0e0; margin-bottom: 24px; line-height: 1.6;">
+                    The cosmic energies have aligned! You have accumulated enough steps to establish a base in this realm. 
+                    This will serve as your sanctuary and command center for future expeditions.
+                </p>
+                <div style="
+                    background: rgba(139, 92, 246, 0.1);
+                    border: 1px solid #8b5cf6;
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 24px;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #f0f0f0;">Establish Base Cost:</span>
+                        <span style="color: #e94560; font-weight: bold; font-size: 18px;">1000 Steps</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                        <span style="color: #f0f0f0;">Your Current Steps:</span>
+                        <span style="color: #00ff88; font-weight: bold; font-size: 18px;">${this.totalSteps}</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 16px; justify-content: center;">
+                    <button id="confirm-simple-base-establishment" style="
+                        background: linear-gradient(135deg, rgb(245, 158, 11), rgb(251, 191, 36));
+                        color: white;
+                        border: none;
+                        padding: 16px 24px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: 600;
+                        transition: 0.2s;
+                        box-shadow: rgba(245, 158, 11, 0.3) 0px 4px 12px;
+                    ">
+                        <span class="icon">🏗️</span> Establish Base for 1000 Steps
+                    </button>
+                    <button id="cancel-simple-base-establishment" style="
+                        background: rgba(255, 255, 255, 0.1);
+                        color: #e0e0e0;
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        padding: 16px 24px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        font-weight: 600;
+                        transition: 0.2s;
+                    ">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        document.getElementById('confirm-simple-base-establishment').onclick = () => {
+            this.establishSimpleBase();
+            modal.remove();
+        };
+        
+        document.getElementById('cancel-simple-base-establishment').onclick = () => {
+            modal.remove();
+        };
+    }
+    
+    establishSimpleBase() {
+        console.log('🏗️ Establishing simple base...');
+        
+        // Check if player has enough steps
+        if (this.totalSteps < 1000) {
+            alert('Not enough steps to establish a base!');
+            return;
+        }
+        
+        // Deduct steps
+        this.totalSteps -= 1000;
+        this.saveSteps();
+        this.updateStepCounter();
+        
+        // Get current position
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            const position = window.eldritchApp.systems.geolocation.getCurrentPosition();
+            if (position) {
+                // Create base data
+                const baseData = {
+                    lat: position.lat,
+                    lng: position.lng,
+                    name: 'My Cosmic Base',
+                    established_at: new Date().toISOString()
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('playerBase', JSON.stringify(baseData));
+                
+                // Create base marker using SimpleBaseInit
+                if (window.SimpleBaseInit) {
+                    const simpleBase = new window.SimpleBaseInit();
+                    simpleBase.createNewBase({ lat: position.lat, lng: position.lng });
+                }
+                
+                console.log('🏗️ Simple base established successfully!');
+                alert('Base established successfully!');
+            } else {
+                alert('Location required to establish base. Please enable GPS first.');
+            }
+        } else {
+            alert('Geolocation not available. Please enable GPS first.');
         }
     }
     
