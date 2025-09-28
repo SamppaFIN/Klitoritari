@@ -288,74 +288,26 @@ class EldritchSanctuaryApp {
         // Add layers to the layer manager in order (lowest z-index first)
         console.log('🎨 STEP 5.3: Adding layers...');
         
-        if (window.BackgroundLayer) {
-            const backgroundLayer = new BackgroundLayer();
-            this.layerManager.addLayer(backgroundLayer);
-            console.log('🎨 STEP 5.4 ✓: Added BackgroundLayer');
-        }
-        
-        if (window.TerrainLayer) {
-            const terrainLayer = new TerrainLayer();
-            this.layerManager.addLayer(terrainLayer);
-            console.log('🎨 STEP 5.5 ✓: Added TerrainLayer');
-        }
-        
-        if (window.TerritoryLayer) {
-            const territoryLayer = new TerritoryLayer();
-            this.layerManager.addLayer(territoryLayer);
-            console.log('🎨 STEP 5.6 ✓: Added TerritoryLayer');
-        }
-        
-        if (window.PathLayer) {
-            const pathLayer = new PathLayer();
-            this.layerManager.addLayer(pathLayer);
-            console.log('🎨 STEP 5.7 ✓: Added PathLayer');
-        }
-        
+        // Only add MapLayer - all other layers converted to Leaflet layers
         if (window.MapLayer) {
             const mapLayer = new MapLayer();
             this.layerManager.addLayer(mapLayer);
-            console.log('🎨 STEP 5.8 ✓: Added MapLayer');
-        }
-        
-        if (window.InteractionLayer) {
-            const interactionLayer = new InteractionLayer();
-            this.layerManager.addLayer(interactionLayer);
-            console.log('🎨 STEP 5.9 ✓: Added InteractionLayer');
-        }
-        
-        if (window.PlayerLayer) {
-            const playerLayer = new PlayerLayer();
-            this.layerManager.addLayer(playerLayer);
-            console.log('🎨 STEP 5.10 ✓: Added PlayerLayer');
-        }
-        
-        if (window.InformationLayer) {
-            const informationLayer = new InformationLayer();
-            this.layerManager.addLayer(informationLayer);
-            console.log('🎨 STEP 5.11 ✓: Added InformationLayer');
-        }
-        
-        if (window.UILayer) {
-            const uiLayer = new UILayer();
-            this.layerManager.addLayer(uiLayer);
-            console.log('🎨 STEP 5.12 ✓: Added UILayer');
-        }
-        
-        if (window.DebugLayer) {
-            const debugLayer = new DebugLayer();
-            this.layerManager.addLayer(debugLayer);
-            console.log('🎨 STEP 5.13 ✓: Added DebugLayer');
-        }
-        
-        if (window.GeolocationLayer) {
-            console.log('🎨 STEP 5.14: GeolocationLayer class found, creating instance...');
-            const geolocationLayer = new GeolocationLayer();
-            this.layerManager.addLayer(geolocationLayer);
-            console.log('🎨 STEP 5.14 ✓: Added GeolocationLayer');
+            console.log('🎨 STEP 5.4 ✓: Added MapLayer (only layer needed)');
         } else {
-            console.error('🎨 STEP 5.14 ❌: GeolocationLayer class not found!');
+            console.error('🎨 STEP 5.4 ❌: MapLayer class not found!');
         }
+        
+        // Skip all canvas layers - they're now handled by Leaflet Layer Manager
+        console.log('🎨 STEP 5.5 ✓: Skipped BackgroundLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.6 ✓: Skipped TerrainLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.7 ✓: Skipped TerritoryLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.8 ✓: Skipped PathLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.9 ✓: Skipped InteractionLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.10 ✓: Skipped PlayerLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.11 ✓: Skipped InformationLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.12 ✓: Skipped UILayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.13 ✓: Skipped DebugLayer (converted to Leaflet)');
+        console.log('🎨 STEP 5.14 ✓: Skipped GeolocationLayer (converted to Leaflet)');
         
         // Add Three.js UI Layer
         if (window.ThreeJSUILayer) {

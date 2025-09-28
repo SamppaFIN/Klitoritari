@@ -39,6 +39,12 @@ class MapLayer extends BaseLayer {
         // Initialize Leaflet map
         this.initializeMap();
         
+        // Initialize Leaflet Layer Manager for canvas layer replacement
+        if (this.mapReady) {
+            this.leafletLayerManager = new LeafletLayerManager(this.map);
+            console.log('🗺️ MapLayer: Leaflet Layer Manager initialized');
+        }
+        
         // Initialize player marker after map is ready
         if (this.mapReady) {
             this.initializePlayerMarker();

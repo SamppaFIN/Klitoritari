@@ -706,6 +706,7 @@ Check console for full localStorage contents.`);
         
         <!-- UI Overlay -->
         <!-- LEGACY HEADER - HIDDEN (Using Three.js UI) -->
+         <!-- let's disable thi whole div fo now -->
         <div id="ui-overlay">
             <header id="header">
                 <!-- Game Logo and Title -->
@@ -1451,18 +1452,10 @@ Check console for full localStorage contents.`);
     <script src="js/core/base-layer.js"></script>
     <script src="js/core/layer-manager.js"></script>
     
-    <!-- Layer System -->
-    <script src="js/layers/background-layer.js"></script>
-    <script src="js/layers/terrain-layer.js"></script>
-    <script src="js/layers/territory-layer.js"></script>
-    <script src="js/layers/path-layer.js"></script>
+    <!-- Layer System - Converted to Leaflet Layers -->
+    <script src="js/layers/leaflet-layer-manager.js"></script>
     <script src="js/layers/map-layer.js"></script>
-    <script src="js/layers/interaction-layer.js"></script>
-    <script src="js/layers/player-layer.js"></script>
-    <script src="js/layers/information-layer.js"></script>
-    <script src="js/layers/ui-layer.js"></script>
-    <script src="js/layers/debug-layer.js"></script>
-    <script src="js/layers/geolocation-layer.js?v=2"></script>
+    <!-- Canvas layers disabled - converted to Leaflet layers for perfect synchronization -->
     
     <!-- Data Models -->
     <script src="js/models/player-model.js"></script>
