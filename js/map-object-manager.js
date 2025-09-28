@@ -177,7 +177,7 @@ class MapObjectManager {
         try {
             // Create multilayered marker similar to player marker
             const markerIcon = L.divIcon({
-                className: `map-object-marker ${objectType.category}-marker`,
+                className: objectType.id === 'BASE' ? 'base-marker multilayered' : `map-object-marker ${objectType.category}-marker`,
                 html: `
                     <div style="position: relative; width: ${objectType.size[0]}px; height: ${objectType.size[1]}px;">
                         <!-- Object aura -->
@@ -209,6 +209,15 @@ class MapObjectManager {
                 icon: markerIcon,
                 zIndexOffset: objectType.zIndex
             }).addTo(map);
+
+            // Debug logging
+            console.log(`🗺️ MapObjectManager: Marker added to map:`, {
+                position: [position.lat, position.lng],
+                zIndexOffset: objectType.zIndex,
+                mapCenter: map.getCenter(),
+                mapZoom: map.getZoom(),
+                markerElement: marker.getElement()
+            });
 
             // Center map on new marker for better visibility
             map.setView([position.lat, position.lng], map.getZoom(), {

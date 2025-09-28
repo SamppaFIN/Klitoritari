@@ -33,6 +33,8 @@ class ContextMenuSystem {
             display: none;
             font-family: 'Arial', sans-serif;
             backdrop-filter: blur(10px);
+            overflow: visible;
+            max-height: 80vh;
         `;
 
         // Create menu items
@@ -105,7 +107,11 @@ class ContextMenuSystem {
                 display: flex;
                 flex-direction: column;
                 gap: 2px;
-                min-height: 32px;
+                min-height: 40px;
+                position: relative;
+                z-index: 1;
+                align-items: flex-start;
+                justify-content: center;
             `;
             
             menuItem.innerHTML = `
