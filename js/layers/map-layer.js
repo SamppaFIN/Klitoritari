@@ -670,40 +670,7 @@ class MapLayer extends BaseLayer {
             min-width: 150px;
         `;
         
-        // Add "Move Here" option
-        const moveHereOption = document.createElement('div');
-        moveHereOption.className = 'context-menu-item';
-        moveHereOption.style.cssText = `
-            padding: 8px 16px;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-bottom: 1px solid rgba(74, 158, 255, 0.2);
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-height: 40px;
-            position: relative;
-            z-index: 1;
-            align-items: flex-start;
-            justify-content: center;
-        `;
-        moveHereOption.innerHTML = `
-            <div style="font-weight: bold; font-size: 13px;">🚀 Move Here</div>
-            <div style="font-size: 11px; color: #a0a0a0;">Teleport player to this location</div>
-        `;
-        moveHereOption.addEventListener('click', () => {
-            this.teleportPlayer(e.latlng);
-            this.hideContextMenu();
-        });
-        moveHereOption.addEventListener('mouseenter', () => {
-            moveHereOption.style.background = 'rgba(74, 158, 255, 0.2)';
-        });
-        moveHereOption.addEventListener('mouseleave', () => {
-            moveHereOption.style.background = 'transparent';
-        });
-        
-        contextMenu.appendChild(moveHereOption);
+        // Move Here button is now handled by context-menu-system.js
         document.body.appendChild(contextMenu);
         
         // Store reference for cleanup

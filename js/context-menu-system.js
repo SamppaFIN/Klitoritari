@@ -40,6 +40,12 @@ class ContextMenuSystem {
         // Create menu items
         const menuItems = [
             {
+                id: 'move-here',
+                text: '🚀 Move Here',
+                description: 'Teleport player to this location',
+                action: () => this.movePlayerHere()
+            },
+            {
                 id: 'establish-base',
                 text: '🏗️ Establish Base',
                 description: 'Create a new base at this location',
@@ -420,6 +426,26 @@ class ContextMenuSystem {
             }
         } catch (error) {
             console.error(`❌ Error creating ${type} marker:`, error);
+        }
+        
+        this.hideContextMenu();
+    }
+
+    movePlayerHere() {
+        console.log('🚀 Moving player to:', this.currentPosition);
+        
+        if (!this.currentPosition) {
+            console.error('❌ No position available for player movement');
+            this.hideContextMenu();
+            return;
+        }
+
+        // Use MapLayer's teleportPlayer method if available
+        if (window.mapLayer && typeof window.mapLayer.teleportPlayer === 'function') {
+            window.mapLayer.teleportPlayer(this.currentPosition);
+            console.log('🚀 Player teleported successfully');
+        } else {
+            console.error('❌ MapLayer teleportPlayer method not available');
         }
         
         this.hideContextMenu();
