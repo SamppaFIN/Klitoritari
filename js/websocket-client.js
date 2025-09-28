@@ -856,7 +856,17 @@ class WebSocketClient {
      * 
      * @param {Object} marker - Server marker data with position and properties
      */
-    // Show player trails on the map
+    /**
+     * BRDC: Show player movement trails on the map
+     * 
+     * Creates animated polylines showing other players' movement paths.
+     * Implements the "Sacred Pattern" for social exploration features.
+     * 
+     * Implements: #enhancement-social-exploration
+     * Uses: #feature-marker-system
+     * 
+     * @returns {void}
+     */
     showPlayerTrails() {
         console.log('🛤️ Showing player trails...');
         
@@ -917,7 +927,16 @@ class WebSocketClient {
         console.log('🛤️ Player trails displayed');
     }
     
-    // Hide player trails
+    /**
+     * BRDC: Hide player movement trails from the map
+     * 
+     * Removes all trail polylines and cleans up the trail layer.
+     * 
+     * Implements: #enhancement-social-exploration
+     * Uses: #feature-marker-system
+     * 
+     * @returns {void}
+     */
     hidePlayerTrails() {
         if (this.trailLayer) {
             this.trailLayer.clearLayers();
@@ -925,7 +944,17 @@ class WebSocketClient {
         }
     }
 
-    // Get current player ID
+    /**
+     * BRDC: Get current player ID for ownership detection
+     * 
+     * Retrieves or generates a unique player ID for base ownership and multiplayer features.
+     * Implements the "Sacred Pattern" for player identification.
+     * 
+     * Implements: #feature-player-identification
+     * Uses: #feature-persistence-system
+     * 
+     * @returns {string} - Current player ID
+     */
     getCurrentPlayerId() {
         // Try to get player ID from various sources
         const playerId = localStorage.getItem('playerId') || 

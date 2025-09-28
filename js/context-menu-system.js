@@ -557,7 +557,17 @@ class ContextMenuSystem {
      * 
      * @param {Object} position - {lat: number, lng: number} coordinates
      */
-    // Get current player ID
+    /**
+     * BRDC: Get current player ID for base ownership
+     * 
+     * Retrieves or generates a unique player ID for base ownership detection.
+     * Implements the "Sacred Pattern" for player identification.
+     * 
+     * Implements: #feature-player-identification
+     * Uses: #feature-persistence-system
+     * 
+     * @returns {string} - Current player ID
+     */
     getCurrentPlayerId() {
         // Try to get player ID from various sources
         const playerId = localStorage.getItem('playerId') || 

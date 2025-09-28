@@ -282,7 +282,17 @@ class SimpleBaseInit {
         this.map.setView([lat, lng], 18);
     }
 
-    // Get current player ID
+    /**
+     * BRDC: Get current player ID for base ownership
+     * 
+     * Retrieves or generates a unique player ID for base ownership detection.
+     * Implements the "Sacred Pattern" for player identification.
+     * 
+     * Implements: #feature-player-identification
+     * Uses: #feature-persistence-system
+     * 
+     * @returns {string} - Current player ID
+     */
     getCurrentPlayerId() {
         // Try to get player ID from various sources
         const playerId = localStorage.getItem('playerId') || 
@@ -694,7 +704,17 @@ window.refreshBaseTab = () => {
     }
 };
 
-// Toggle player trails
+/**
+ * BRDC: Toggle player movement trails visibility
+ * 
+ * Global function to show/hide player movement trails on the map.
+ * Implements the "Sacred Pattern" for social exploration features.
+ * 
+ * Implements: #enhancement-social-exploration
+ * Uses: #feature-marker-system
+ * 
+ * @returns {void}
+ */
 window.togglePlayerTrails = () => {
     if (window.websocketClient) {
         if (window.websocketClient.trailLayer && window.websocketClient.trailLayer.getLayers().length > 0) {
@@ -705,7 +725,17 @@ window.togglePlayerTrails = () => {
     }
 };
 
-// Show other bases (refresh markers)
+/**
+ * BRDC: Refresh and display other players' bases
+ * 
+ * Global function to request fresh marker data from server and display other players' bases.
+ * Implements the "Sacred Pattern" for multiplayer synchronization.
+ * 
+ * Implements: #enhancement-multiplayer-bases
+ * Uses: #feature-websocket-communication
+ * 
+ * @returns {void}
+ */
 window.showOtherBases = () => {
     console.log('🏗️ Refreshing other players bases...');
     if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
@@ -714,7 +744,17 @@ window.showOtherBases = () => {
     }
 };
 
-// Debug function to clear all base data
+/**
+ * BRDC: Clear all base data for debugging and testing
+ * 
+ * Global debug function to reset all base-related data and markers.
+ * Useful for testing and development purposes.
+ * 
+ * Implements: #enhancement-debug-tools
+ * Uses: #feature-persistence-system
+ * 
+ * @returns {void}
+ */
 window.clearAllBaseData = () => {
     console.log('🧹 Clearing all base data...');
     const keys = ['playerBase', 'base_bases', 'eldritch-player-base'];
