@@ -805,10 +805,22 @@ class MapLayer extends BaseLayer {
             iconAnchor: [15, 15]
         });
         
+        // DEBUG: Log path marker details
+        console.log(`🇫🇮 PathMarker DEBUG: Creating path marker`);
+        console.log(`🇫🇮 PathMarker DEBUG: Position:`, position);
+        console.log(`🇫🇮 PathMarker DEBUG: Map reference:`, this.map);
+        console.log(`🇫🇮 PathMarker DEBUG: Map center:`, this.map.getCenter());
+        console.log(`🇫🇮 PathMarker DEBUG: Map zoom:`, this.map.getZoom());
+
         const marker = L.marker([position.lat, position.lng], { 
             icon: pathIcon,
             zIndexOffset: 600
         }).addTo(this.map);
+        
+        // DEBUG: Log marker details after creation
+        console.log(`🇫🇮 PathMarker DEBUG: Marker created:`, marker);
+        console.log(`🇫🇮 PathMarker DEBUG: Marker position:`, marker.getLatLng());
+        console.log(`🇫🇮 PathMarker DEBUG: Marker element:`, marker.getElement());
         
         // Add popup
         marker.bindPopup(`
@@ -845,7 +857,7 @@ class MapLayer extends BaseLayer {
             console.warn('🗺️ MapLayer: Map not ready, cannot create base marker');
             return null;
         }
-
+        
         // Remove existing base marker if it exists
         const existingBaseMarker = this.markers.get('base');
         if (existingBaseMarker) {
@@ -854,60 +866,100 @@ class MapLayer extends BaseLayer {
             this.markers.delete('base');
         }
 
-        // Create base marker icon using SAME simple approach as path markers
+        // Create base marker icon using EXACT same approach as path markers
         const baseIcon = L.divIcon({
             className: 'base-marker',
             html: `
                 <div style="
-                    width: 40px; 
-                    height: 40px; 
+                    width: 30px; 
+                    height: 30px; 
                     background: #8b5cf6; 
                     border: 3px solid #ffffff; 
                     border-radius: 50%; 
                     display: flex; 
                     align-items: center; 
                     justify-content: center; 
-                    font-size: 20px;
+                    font-size: 16px;
                     color: white;
                     text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
-                    box-shadow: 0 0 15px #8b5cf6;
-                    animation: basePulse 2s ease-in-out infinite;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
                 ">🏗️</div>
             `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
         });
 
-        // Create marker using EXACT same method as path markers
+        // DEBUG: Log base marker details (same as path markers)
+        console.log(`🏗️ BaseMarker DEBUG: Creating base marker`);
+        console.log(`🏗️ BaseMarker DEBUG: Position:`, position);
+        console.log(`🏗️ BaseMarker DEBUG: Map reference:`, this.map);
+        console.log(`🏗️ BaseMarker DEBUG: Map center:`, this.map.getCenter());
+        console.log(`🏗️ BaseMarker DEBUG: Map zoom:`, this.map.getZoom());
+
+        // Create marker using EXACT same method as path markers - DIRECT to map
         const marker = L.marker([position.lat, position.lng], { 
             icon: baseIcon,
-            zIndexOffset: 2000  // Higher than player marker to ensure visibility
-        });
+            zIndexOffset: 600  // SAME as path markers
+        }).addTo(this.map);  // DIRECT addition like path markers
 
-        // Add to territory layer group if available, otherwise add to map
-        if (this.leafletLayerManager && this.leafletLayerManager.layers.has('territory')) {
-            const territoryLayer = this.leafletLayerManager.layers.get('territory');
-            marker.addTo(territoryLayer);
-            console.log('🏗️ MapLayer: Base marker added to territory layer group');
-        } else {
-            marker.addTo(this.map);
-            console.log('🏗️ MapLayer: Base marker added directly to map (territory layer not available)');
-        }
+        // DEBUG: Log marker details after creation (same as path markers)
+        console.log(`🏗️ BaseMarker DEBUG: Marker created:`, marker);
+        console.log(`🏗️ BaseMarker DEBUG: Marker position:`, marker.getLatLng());
+        console.log(`🏗️ BaseMarker DEBUG: Marker element:`, marker.getElement());
 
-        // Add popup using SAME simple approach as path markers
+        // Add popup (same as path markers)
         marker.bindPopup(`
-            <b>🏗️ My Cosmic Base</b><br>
-            <small>Established: ${new Date().toLocaleDateString()}</small><br>
-            <small>Level: 1</small>
+            <b>Base Marker</b><br>
+            <small>🏗️ Base</small><br>
+            <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
         `);
         
         // Store marker in SAME way as path markers
         this.markers.set('base', marker);
         
+        // Send base marker to server for persistence (same as path markers)
+        if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+            console.log('🏗️ Sending base marker to server for persistence...');
+            window.websocketClient.createMarker({
+                type: 'base',
+                position: { lat: position.lat, lng: position.lng },
+                data: {
+                    symbol: '🏗️',
+                    markerId: `base_${Date.now()}`
+                }
+            });
+        } else {
+            console.log('🏗️ WebSocket not connected, base marker not persisted to server');
+        }
+        
         console.log('🏗️ MapLayer: Base marker created at:', position);
-        console.log('🏗️ MapLayer: Base marker zIndexOffset:', marker.options.zIndexOffset);
+        console.log('🏗️ MapLayer: Base marker added directly to map (same as path markers)');
         
         return marker;
+    }
+
+    getCurrentPlayerPosition() {
+        console.log('🗺️ MapLayer: Getting current player position...');
+        
+        // Try to get from player marker
+        const playerMarker = this.markers.get('player');
+        if (playerMarker) {
+            const latlng = playerMarker.getLatLng();
+            const position = { lat: latlng.lat, lng: latlng.lng };
+            console.log('🗺️ MapLayer: Player position from marker:', position);
+            return position;
+        }
+        
+        // Fallback: use map center
+        if (this.map) {
+            const center = this.map.getCenter();
+            const position = { lat: center.lat, lng: center.lng };
+            console.log('🗺️ MapLayer: Using map center as player position:', position);
+            return position;
+        }
+        
+        console.warn('🗺️ MapLayer: No player position available');
+        return null;
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {

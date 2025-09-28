@@ -175,24 +175,25 @@ class MapObjectManager {
      */
     createMarkerVisual(objectType, position, objectData) {
         try {
-            // Create multilayered marker similar to player marker
+            // Create marker using EXACT same approach as working path markers
             const markerIcon = L.divIcon({
-                className: objectType.id === 'BASE' ? 'base-marker multilayered' : `map-object-marker ${objectType.category}-marker`,
+                className: objectType.id === 'BASE' ? 'base-marker' : `map-object-marker ${objectType.category}-marker`,
                 html: `
-                    <div style="position: relative; width: ${objectType.size[0]}px; height: ${objectType.size[1]}px;">
-                        <!-- Object aura -->
-                        <div style="position: absolute; top: -5px; left: -5px; width: ${objectType.size[0] + 10}px; height: ${objectType.size[1] + 10}px; 
-                             background: radial-gradient(circle, ${objectType.color}40 0%, transparent 70%); 
-                             border-radius: 50%; animation: objectPulse 2s infinite;"></div>
-                        <!-- Object body -->
-                        <div style="position: absolute; top: 2px; left: 2px; width: ${objectType.size[0] - 4}px; height: ${objectType.size[1] - 4}px; 
-                             background: ${objectType.color}; border: 3px solid #ffffff; border-radius: 50%; 
-                             box-shadow: 0 0 10px ${objectType.color}80;"></div>
-                        <!-- Object emoji -->
-                        <div style="position: absolute; top: 5px; left: 5px; width: ${objectType.size[0] - 10}px; height: ${objectType.size[1] - 10}px; 
-                             display: flex; align-items: center; justify-content: center; font-size: ${Math.min(objectType.size[0], objectType.size[1]) * 0.4}px; 
-                             text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">${objectType.icon}</div>
-                    </div>
+                    <div style="
+                        width: ${objectType.size[0]}px; 
+                        height: ${objectType.size[1]}px; 
+                        background: ${objectType.color}; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: ${Math.min(objectType.size[0], objectType.size[1]) * 0.4}px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                        position: relative;
+                    ">${objectType.icon}</div>
                 `,
                 iconSize: objectType.size,
                 iconAnchor: [objectType.size[0] / 2, objectType.size[1] / 2]
@@ -205,27 +206,27 @@ class MapObjectManager {
                 return null;
             }
 
-            const marker = L.marker([position.lat, position.lng], {
+            // DEBUG: Log map and position details
+            console.log(`🗺️ MapObjectManager DEBUG: Creating ${objectType.name} marker`);
+            console.log(`🗺️ MapObjectManager DEBUG: Position:`, position);
+            console.log(`🗺️ MapObjectManager DEBUG: Map reference:`, map);
+            console.log(`🗺️ MapObjectManager DEBUG: Map center:`, map.getCenter());
+            console.log(`🗺️ MapObjectManager DEBUG: Map zoom:`, map.getZoom());
+
+            // Create marker using proper 3D positioning for globe
+            const marker = L.marker([position.lat, position.lng], { 
                 icon: markerIcon,
                 zIndexOffset: objectType.zIndex
-            });
-
-            // Add to appropriate layer based on object type
-            if (objectType.id === 'BASE' && window.mapLayer && window.mapLayer.leafletLayerManager) {
-                // Add base markers to territory layer group
-                const territoryLayer = window.mapLayer.leafletLayerManager.layers.get('territory');
-                if (territoryLayer) {
-                    marker.addTo(territoryLayer);
-                    console.log(`🗺️ MapObjectManager: ${objectType.name} added to territory layer group`);
-                } else {
-                    marker.addTo(map);
-                    console.log(`🗺️ MapObjectManager: ${objectType.name} added to map (territory layer not available)`);
-                }
-            } else {
-                // Add other markers directly to map
-                marker.addTo(map);
-                console.log(`🗺️ MapObjectManager: ${objectType.name} added to map`);
-            }
+            }).addTo(map);
+            console.log(`🗺️ MapObjectManager: ${objectType.name} added to map`);
+            
+            // Force Leaflet to update marker positioning for 3D globe
+            marker.update();
+            
+            // DEBUG: Log marker details after creation
+            console.log(`🗺️ MapObjectManager DEBUG: Marker created:`, marker);
+            console.log(`🗺️ MapObjectManager DEBUG: Marker position:`, marker.getLatLng());
+            console.log(`🗺️ MapObjectManager DEBUG: Marker element:`, marker.getElement());
 
             // Debug logging
             console.log(`🗺️ MapObjectManager: Marker added to map:`, {
@@ -421,16 +422,13 @@ class MapObjectManager {
      * Get the current map instance (prefer new map system)
      */
     getMap() {
-        // Try new map system first
+        // ONLY use new map system - old map system is disabled
         if (window.mapLayer && window.mapLayer.map && window.mapLayer.mapReady) {
+            console.log('🗺️ MapObjectManager: Using MapLayer map reference');
             return window.mapLayer.map;
         }
         
-        // Fallback to old map system
-        if (window.mapEngine && window.mapEngine.map) {
-            return window.mapEngine.map;
-        }
-        
+        console.error('❌ MapObjectManager: MapLayer map not available');
         return null;
     }
 

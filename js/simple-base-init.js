@@ -33,9 +33,38 @@ class SimpleBaseInit {
         }
     }
 
+    // Clear invalid base data
+    clearInvalidBaseData() {
+        try {
+            const keys = ['playerBase', 'base_bases', 'eldritch-player-base'];
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    // Clear if not a valid established base
+                    if (Array.isArray(parsed)) {
+                        const hasValidBase = parsed.some(base => base && base.established === true);
+                        if (!hasValidBase) {
+                            localStorage.removeItem(key);
+                            console.log('🧹 Cleared invalid base data from', key);
+                        }
+                    } else if (parsed && typeof parsed === 'object' && parsed.established !== true) {
+                        localStorage.removeItem(key);
+                        console.log('🧹 Cleared invalid base data from', key);
+                    }
+                }
+            });
+        } catch (error) {
+            console.warn('⚠️ Error clearing invalid base data:', error);
+        }
+    }
+
     // Get base data from localStorage
     getBaseData() {
         try {
+            // First clear any invalid data
+            this.clearInvalidBaseData();
+            
             // Try different localStorage keys
             const keys = ['playerBase', 'base_bases', 'eldritch-player-base'];
             
@@ -46,11 +75,15 @@ class SimpleBaseInit {
                     
                     // Handle array format
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        return parsed[0];
+                        const baseData = parsed[0];
+                        // Only return if it's a valid established base
+                        if (baseData && baseData.established === true) {
+                            return baseData;
+                        }
                     }
                     
                     // Handle object format
-                    if (parsed && typeof parsed === 'object') {
+                    if (parsed && typeof parsed === 'object' && parsed.established === true) {
                         return parsed;
                     }
                 }
@@ -128,38 +161,76 @@ class SimpleBaseInit {
         }
     }
 
-    // Create SVG-based base marker
+    /**
+     * BRDC: Create SVG-based base marker using the new SVG Base Graphics system
+     * 
+     * This method integrates with the SVGBaseGraphics class to create animated,
+     * cosmic-themed base markers with territory circles, flags, and particle effects.
+     * 
+     * Implements: #feature-base-building
+     * Uses: #enhancement-svg-graphics
+     * 
+     * @param {number} lat - Latitude coordinate
+     * @param {number} lng - Longitude coordinate
+     */
     createSVGBaseMarker(lat, lng) {
-        const svgGraphics = new window.SVGBaseGraphics();
+        console.log('🎨 Creating SVG base marker with new graphics system');
+        
+        // Initialize SVG graphics system if not already done
+        if (!window.svgBaseGraphics) {
+            window.svgBaseGraphics = new window.SVGBaseGraphics();
+        }
         
         // Get base configuration from localStorage
         const baseLogoType = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
         const baseColor = localStorage.getItem('eldritch_player_color') || '#8b5cf6';
         
-        // Configure base appearance
+        // Configure base appearance with cosmic theming
         const baseConfig = {
-            flagType: baseLogoType,
+            size: 240, // 3x player icon size as specified in plan
             colors: {
                 primary: baseColor,
                 secondary: '#3b82f6',
                 accent: '#f59e0b',
-                territory: `${baseColor}30`, // Semi-transparent
-                flag: '#ffffff'
+                energy: '#10b981'
+            },
+            animations: {
+                territoryPulse: true,
+                flagWave: true,
+                particleEffects: true,
+                energyGlow: true
             }
         };
         
-        // Create Leaflet icon using SVG graphics
-        const baseIcon = L.divIcon(svgGraphics.createLeafletBaseIcon(baseConfig));
+        // Create animated base marker using SVG graphics system
+        this.baseMarker = window.svgBaseGraphics.createAnimatedBaseMarker(
+            { lat: lat, lng: lng },
+            baseConfig,
+            'finnish', // Force Finnish flag
+            this.map, // Pass the map instance for zoom detection
+            'own' // This is always the player's own base
+        );
         
-        // Create marker
-        this.baseMarker = L.marker([lat, lng], { icon: baseIcon }).addTo(this.map);
+        // Add to map
+        this.baseMarker.addTo(this.map);
+        
+        // Create enhanced popup with base information
         this.baseMarker.bindPopup(`
-            <div style="text-align: center; padding: 10px;">
-                <h3 style="margin: 0 0 10px 0; color: #8b5cf6;">🏗️ My Cosmic Base</h3>
-                <p style="margin: 0 0 5px 0;">Level: ${this.baseData.level || 1}</p>
-                <p style="margin: 0 0 10px 0;">Territory: ${this.baseData.territorySize || 'Small'}</p>
+            <div style="text-align: center; padding: 15px; min-width: 200px;">
+                <h3 style="margin: 0 0 10px 0; color: #8b5cf6; font-size: 18px;">
+                    🏗️ My Cosmic Base
+                </h3>
+                <div style="margin: 10px 0; padding: 8px; background: rgba(139, 92, 246, 0.1); border-radius: 8px;">
+                    <p style="margin: 0 0 5px 0; color: #e5e7eb;">Level: <strong>${this.baseData.level || 1}</strong></p>
+                    <p style="margin: 0 0 5px 0; color: #e5e7eb;">Territory: <strong>${this.baseData.territorySize || 'Small'}</strong></p>
+                    <p style="margin: 0; color: #e5e7eb;">Flag: <strong>${baseLogoType.charAt(0).toUpperCase() + baseLogoType.slice(1)}</strong></p>
+                </div>
                 <button onclick="window.SimpleBaseInit?.openBaseMenu?.()" 
-                        style="background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                        style="background: linear-gradient(135deg, #8b5cf6, #3b82f6); 
+                               color: white; border: none; padding: 10px 20px; 
+                               border-radius: 8px; cursor: pointer; font-weight: bold;
+                               box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                               transition: all 0.3s ease;">
                     Manage Base
                 </button>
             </div>
@@ -167,13 +238,14 @@ class SimpleBaseInit {
         
         // Add click handler for base menu
         this.baseMarker.on('click', () => {
+            console.log('🎨 Base marker clicked - opening management menu');
             this.openBaseMenu();
         });
         
-        console.log('🎨 SVG base marker created successfully');
+        console.log('🎨 SVG base marker created successfully with animations');
         
-        // Center map on base
-        this.map.setView([lat, lng], 18);
+        // Center map on base with smooth animation
+        this.map.setView([lat, lng], 18, { animate: true, duration: 1.0 });
     }
 
     // Create simple base marker (fallback)
@@ -210,6 +282,25 @@ class SimpleBaseInit {
         this.map.setView([lat, lng], 18);
     }
 
+    // Get current player ID
+    getCurrentPlayerId() {
+        // Try to get player ID from various sources
+        const playerId = localStorage.getItem('playerId') || 
+                        localStorage.getItem('eldritch-player-id') ||
+                        localStorage.getItem('player_id') ||
+                        'default-player';
+        
+        // If no player ID exists, generate one
+        if (!localStorage.getItem('playerId')) {
+            const newPlayerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('playerId', newPlayerId);
+            console.log('🆔 Generated new player ID:', newPlayerId);
+            return newPlayerId;
+        }
+        
+        return playerId;
+    }
+
     // Open base management menu
     openBaseMenu() {
         console.log('🏗️ Opening base management menu...');
@@ -224,58 +315,150 @@ class SimpleBaseInit {
             }
         }
         
-        // Fallback: Show simple base info
-        this.showBaseInfo();
+        // If Three.js UI not available, try alternative methods
+        console.warn('⚠️ Three.js UI not available, trying alternative tab switching');
+        
+        // Try to find and click the base tab directly
+        const baseTab = document.querySelector('[data-tab="base"]') || 
+                       document.querySelector('button[onclick*="base"]') ||
+                       document.querySelector('button:contains("Base")');
+        
+        if (baseTab) {
+            baseTab.click();
+            console.log('🎮 Opened base tab via direct click');
+        } else {
+            console.error('❌ Could not find base tab to open');
+        }
     }
 
-    // Show simple base info (fallback)
-    showBaseInfo() {
-        const baseInfo = `
-            <div style="
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, #1a1a2e, #16213e);
-                border: 2px solid #8b5cf6;
-                border-radius: 16px;
-                padding: 24px;
-                max-width: 400px;
-                width: 90%;
-                z-index: 10000;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            ">
-                <h2 style="color: #8b5cf6; margin-bottom: 16px; text-align: center;">
-                    🏗️ Base Management
-                </h2>
-                <div style="color: #e0e0e0; margin-bottom: 20px;">
-                    <p><strong>Level:</strong> ${this.baseData.level || 1}</p>
-                    <p><strong>Location:</strong> ${this.baseData.lat?.toFixed(4)}, ${this.baseData.lng?.toFixed(4)}</p>
-                    <p><strong>Established:</strong> ${new Date(this.baseData.timestamp).toLocaleDateString()}</p>
-                </div>
-                <div style="text-align: center;">
-                    <button onclick="this.parentElement.parentElement.remove()" 
-                            style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; margin-right: 10px;">
-                        Close
-                    </button>
-                    <button onclick="window.SimpleBaseInit?.relocateBase?.()" 
-                            style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer;">
-                        Relocate Base
-                    </button>
-                </div>
-            </div>
-        `;
+    // Establish base at current location
+    establishBaseAtCurrentLocation() {
+        console.log('🏗️ Establishing base at current location...');
+        console.log('🔍 Debug - this.baseData before check:', this.baseData);
         
-        // Remove any existing base info
-        const existing = document.getElementById('base-info-modal');
-        if (existing) existing.remove();
+        // Check if player already has a base
+        if (this.baseData) {
+            console.warn('⚠️ Player already has a base! Only 1 base allowed.');
+            alert('You can only have one base at a time! Please remove your existing base first.');
+            return;
+        }
         
-        // Add new base info
-        const modal = document.createElement('div');
-        modal.id = 'base-info-modal';
-        modal.innerHTML = baseInfo;
-        document.body.appendChild(modal);
+        // Get current player position
+        if (window.mapLayer && window.mapLayer.map) {
+            const currentPos = window.mapLayer.getCurrentPlayerPosition();
+            if (currentPos) {
+                console.log('🏗️ Using current player position:', currentPos);
+                this.establishBaseAtPosition(currentPos);
+            } else {
+                console.error('❌ Could not get current player position');
+                alert('Could not determine your current location. Please try using the map to select a location.');
+            }
+        } else {
+            console.error('❌ Map not available');
+            alert('Map not available. Please try again later.');
+        }
     }
+    
+    // Show base location selector
+    showBaseLocationSelector() {
+        console.log('🗺️ Showing base location selector...');
+        
+        // Check if player already has a base
+        if (this.baseData) {
+            console.warn('⚠️ Player already has a base! Only 1 base allowed.');
+            alert('You can only have one base at a time! Please remove your existing base first.');
+            return;
+        }
+        
+        // Show instructions for map selection
+        alert('🗺️ Base Location Selector\n\nRight-click on the map where you want to establish your base, then select "Create Base Marker" from the context menu.\n\nThis will establish your cosmic base at that location.');
+        
+        // Focus on map
+        if (window.mapLayer && window.mapLayer.map) {
+            window.mapLayer.map.invalidateSize();
+        }
+    }
+    
+    // Establish base at specific position
+    establishBaseAtPosition(position) {
+        console.log('🏗️ Establishing base at position:', position);
+        
+        // Check step requirements
+        const stepSystem = window.stepCurrencySystem;
+        if (stepSystem && stepSystem.totalSteps < 1000) {
+            console.warn('⚠️ Insufficient steps for base establishment');
+            alert(`Insufficient steps! You need 1,000 steps to establish a base.\n\nCurrent steps: ${stepSystem.totalSteps}\nRequired: 1,000`);
+            return;
+        }
+        
+        // Create base data
+        const baseData = {
+            id: `base_${Date.now()}`,
+            name: 'My Cosmic Base',
+            position: position,
+            level: 1,
+            territorySize: 'Small',
+            established: true,
+            establishedAt: new Date().toISOString(),
+            cosmicEnergy: 100,
+            communityConnections: 0,
+            isOwnBase: true,
+            owner: 'You',
+            playerId: this.getCurrentPlayerId()
+        };
+        
+        // Save base data
+        this.baseData = baseData;
+        localStorage.setItem('playerBase', JSON.stringify(baseData));
+        console.log('🏗️ Base data saved to localStorage');
+        
+        // Create base marker
+        this.createBaseMarker();
+        
+        // Deduct steps
+        if (stepSystem) {
+            stepSystem.totalSteps -= 1000;
+            stepSystem.saveSteps();
+            stepSystem.updateStepCounter();
+            console.log('🏗️ Deducted 1,000 steps for base establishment');
+        }
+        
+        // Send to server for persistence
+        if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+            console.log('🏗️ Sending base marker to server for persistence...');
+            window.websocketClient.createMarker({
+                type: 'base',
+                position: position,
+                data: baseData
+            });
+        }
+        
+        // Show success message
+        alert('🏗️ Cosmic Base Established!\n\nYour base has been successfully established at this location. You can now manage it through the Base Management tab.');
+        
+        // Refresh the UI to show the new base
+        console.log('🔄 Refreshing UI to show new base...');
+        setTimeout(() => {
+            if (window.eldritchApp && window.eldritchApp.layerManager) {
+                const threejsUI = window.eldritchApp.layerManager.getLayer('threejs-ui');
+                if (threejsUI) {
+                    // Try both refresh methods
+                    if (threejsUI.enhancedUI && threejsUI.enhancedUI.refreshCurrentTab) {
+                        threejsUI.enhancedUI.refreshCurrentTab();
+                    }
+                    if (threejsUI.forceRefreshBaseTab) {
+                        threejsUI.forceRefreshBaseTab();
+                    }
+                    console.log('🔄 UI refreshed successfully');
+                } else {
+                    console.warn('⚠️ Three.js UI not available for refresh');
+                }
+            } else {
+                console.warn('⚠️ EldritchApp not available for refresh');
+            }
+        }, 500);
+    }
+
 
     // Relocate base
     relocateBase() {
@@ -339,7 +522,217 @@ class SimpleBaseInit {
         
         console.log('🏗️ New base created and saved');
     }
+    
+    // Relocate base to new position
+    relocateBase() {
+        console.log('📍 Relocating base...');
+        
+        if (!this.baseData) {
+            console.warn('⚠️ No base to relocate');
+            alert('You need to have a base first before relocating it.');
+            return;
+        }
+        
+        // Check step requirements for relocation
+        const stepSystem = window.stepCurrencySystem;
+        if (stepSystem && stepSystem.totalSteps < 500) {
+            console.warn('⚠️ Insufficient steps for base relocation');
+            alert(`Insufficient steps! You need 500 steps to relocate your base.\n\nCurrent steps: ${stepSystem.totalSteps}\nRequired: 500`);
+            return;
+        }
+        
+        // Show instructions for relocation
+        alert('📍 Base Relocation\n\nRight-click on the map where you want to relocate your base, then select "Create Base Marker" from the context menu.\n\nThis will move your cosmic base to that new location.');
+        
+        // Focus on map
+        if (window.mapLayer && window.mapLayer.map) {
+            window.mapLayer.map.invalidateSize();
+        }
+    }
+    
+    // Purchase shop item
+    purchaseShopItem(itemId) {
+        console.log('🛒 Purchasing shop item:', itemId);
+        
+        if (!this.baseData) {
+            console.warn('⚠️ No base to purchase items for');
+            alert('You need to have a base first before purchasing items.');
+            return;
+        }
+        
+        // Define shop items
+        const shopItems = {
+            'energy-core': {
+                name: 'Energy Core',
+                cost: 500,
+                description: 'Increases base energy production by 25%',
+                effect: { energyMultiplier: 1.25 }
+            },
+            'shield-generator': {
+                name: 'Shield Generator',
+                cost: 750,
+                description: 'Provides base defense against cosmic threats',
+                effect: { defenseBonus: 15 }
+            },
+            'crystal-matrix': {
+                name: 'Crystal Matrix',
+                cost: 1000,
+                description: 'Advanced cosmic technology for base enhancement',
+                effect: { techLevel: 2 }
+            },
+            'void-portal': {
+                name: 'Void Portal',
+                cost: 1500,
+                description: 'Interdimensional travel capabilities (coming soon)',
+                effect: { voidAccess: true }
+            }
+        };
+        
+        const item = shopItems[itemId];
+        if (!item) {
+            console.error('❌ Unknown shop item:', itemId);
+            return;
+        }
+        
+        // Check step requirements
+        const stepSystem = window.stepCurrencySystem;
+        if (stepSystem && stepSystem.totalSteps < item.cost) {
+            console.warn('⚠️ Insufficient steps for purchase');
+            alert(`Insufficient steps! You need ${item.cost} steps to purchase ${item.name}.\n\nCurrent steps: ${stepSystem.totalSteps}\nRequired: ${item.cost}`);
+            return;
+        }
+        
+        // Deduct steps
+        if (stepSystem) {
+            stepSystem.totalSteps -= item.cost;
+            stepSystem.saveSteps();
+            stepSystem.updateStepCounter();
+            console.log(`🛒 Deducted ${item.cost} steps for ${item.name}`);
+        }
+        
+        // Add item to base data
+        if (!this.baseData.purchasedItems) {
+            this.baseData.purchasedItems = [];
+        }
+        
+        this.baseData.purchasedItems.push({
+            id: itemId,
+            name: item.name,
+            purchasedAt: new Date().toISOString(),
+            effect: item.effect
+        });
+        
+        // Save updated base data
+        localStorage.setItem('playerBase', JSON.stringify(this.baseData));
+        console.log(`🛒 Purchased ${item.name} and saved to base data`);
+        
+        // Show success message
+        alert(`🛒 Purchase Successful!\n\nYou have purchased ${item.name}!\n\n${item.description}\n\nYour base has been enhanced with cosmic technology.`);
+        
+        // Refresh the UI to show updated base
+        if (window.eldritchApp && window.eldritchApp.layerManager) {
+            const threejsUI = window.eldritchApp.layerManager.getLayer('threejs-ui');
+            if (threejsUI && threejsUI.enhancedUI) {
+                threejsUI.enhancedUI.refreshCurrentTab();
+            }
+        }
+    }
 }
 
-// Make it globally available
-window.SimpleBaseInit = SimpleBaseInit;
+// Make it globally available as an instance
+window.SimpleBaseInit = new SimpleBaseInit();
+
+// Initialize the instance
+window.SimpleBaseInit.init();
+
+// Expose global functions for UI buttons
+window.establishBaseAtCurrentLocation = () => {
+    console.log('🔍 Global establishBaseAtCurrentLocation called');
+    console.log('🔍 window.SimpleBaseInit exists:', !!window.SimpleBaseInit);
+    if (window.SimpleBaseInit) {
+        window.SimpleBaseInit.establishBaseAtCurrentLocation();
+    } else {
+        console.error('❌ SimpleBaseInit not available');
+    }
+};
+
+window.showBaseLocationSelector = () => {
+    if (window.SimpleBaseInit) {
+        window.SimpleBaseInit.showBaseLocationSelector();
+    }
+};
+
+window.relocateBase = () => {
+    if (window.SimpleBaseInit) {
+        window.SimpleBaseInit.relocateBase();
+    }
+};
+
+window.purchaseShopItem = (itemId) => {
+    if (window.SimpleBaseInit) {
+        window.SimpleBaseInit.purchaseShopItem(itemId);
+    }
+};
+
+// Debug function to manually refresh base tab
+window.refreshBaseTab = () => {
+    console.log('🔄 Manual base tab refresh requested');
+    if (window.eldritchApp && window.eldritchApp.layerManager) {
+        const threejsUI = window.eldritchApp.layerManager.getLayer('threejs-ui');
+        if (threejsUI) {
+            if (threejsUI.forceRefreshBaseTab) {
+                threejsUI.forceRefreshBaseTab();
+                console.log('🔄 Base tab refreshed manually');
+            } else {
+                console.warn('⚠️ forceRefreshBaseTab method not available');
+            }
+        } else {
+            console.warn('⚠️ Three.js UI not available');
+        }
+    } else {
+        console.warn('⚠️ EldritchApp not available');
+    }
+};
+
+// Toggle player trails
+window.togglePlayerTrails = () => {
+    if (window.websocketClient) {
+        if (window.websocketClient.trailLayer && window.websocketClient.trailLayer.getLayers().length > 0) {
+            window.websocketClient.hidePlayerTrails();
+        } else {
+            window.websocketClient.showPlayerTrails();
+        }
+    }
+};
+
+// Show other bases (refresh markers)
+window.showOtherBases = () => {
+    console.log('🏗️ Refreshing other players bases...');
+    if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+        // Request fresh marker data from server
+        window.websocketClient.requestMarkerData();
+    }
+};
+
+// Debug function to clear all base data
+window.clearAllBaseData = () => {
+    console.log('🧹 Clearing all base data...');
+    const keys = ['playerBase', 'base_bases', 'eldritch-player-base'];
+    keys.forEach(key => {
+        localStorage.removeItem(key);
+        console.log('🧹 Cleared', key);
+    });
+    
+    // Clear from SimpleBaseInit
+    if (window.SimpleBaseInit) {
+        window.SimpleBaseInit.baseData = null;
+        if (window.SimpleBaseInit.baseMarker) {
+            window.SimpleBaseInit.baseMarker.remove();
+            window.SimpleBaseInit.baseMarker = null;
+        }
+    }
+    
+    // Refresh the base tab
+    window.refreshBaseTab();
+    console.log('🧹 All base data cleared');
+};

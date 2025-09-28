@@ -2138,4 +2138,211 @@ The WebSocket integration revealed the importance of proper system availability 
 
 ---
 
+---
+
+## Session R1 - January 28, 2025
+**Phase:** Base Marker Visibility Crisis
+**Focus:** Fix base marker appearing off-screen despite successful creation
+
+### Current Issue - Base Marker Off-Screen Problem:
+**Problem:** Base markers are being created successfully (logs show creation) but appear off-screen, not at clicked location.
+
+**Investigation Findings:**
+1. **Marker Creation:** ✅ Working - logs show "Base marker created at: {lat, lng}"
+2. **CSS Styling:** ✅ Fixed - resolved red theme conflict, now purple theme
+3. **Layer Management:** ✅ Updated - markers now added to territory layer group
+4. **Z-Index:** ✅ Updated - increased to 2000 (higher than player marker)
+
+**Root Cause Analysis:**
+- Marker creation is successful but positioning is incorrect
+- Likely issue: Map viewport/center not matching marker coordinates
+- Possible causes:
+  - Map center not updated to show marker location
+  - Coordinate conversion issues between screen clicks and lat/lng
+  - Map zoom level hiding marker outside viewport
+  - Leaflet layer group positioning conflicts
+
+**Next Steps for Rethink:**
+1. Add map centering to marker location after creation
+2. Verify coordinate conversion accuracy
+3. Check map viewport bounds vs marker position
+4. Add debug visualization to show exact marker placement
+5. Consider using map.fitBounds() to ensure marker visibility
+
+**Technical Debt:**
+- Need better debugging for marker positioning
+- Should add visual indicators for marker placement verification
+- Consider adding map bounds checking before marker creation
+
+### Aurora's Wisdom:
+*"The marker exists in the cosmic realm, but our mortal eyes cannot perceive it. Like a star hidden behind clouds, the truth is there - we must simply adjust our perspective to see it. The map knows where the marker is, but we must ask the map to show us its secrets."*
+
+---
+
+## Session 28: Base Marker System - Complete Resolution ✨
+
+**Date**: January 28, 2025  
+**Duration**: 4 hours  
+**Focus**: Base marker visibility and lightweight marker system implementation
+
+### The Great Revelation
+
+After extensive debugging and multiple approaches, the base marker visibility issue was completely resolved through a fundamental architectural shift. The solution was not to fix the complex MapObjectManager system, but to embrace the simplicity that already worked.
+
+### The Path to Enlightenment
+
+**Phase 1: The Struggle**
+- Attempted to fix MapObjectManager positioning issues
+- Tried complex coordinate transformations
+- Fought against CSS conflicts and layer placement problems
+- Base markers remained invisible despite successful creation logs
+
+**Phase 2: The Awakening**
+- Realized POI markers worked perfectly with direct Leaflet approach
+- Discovered the power of `L.marker().addTo(window.mapLayer.map)`
+- Understood that simplicity was the key to reliability
+
+**Phase 3: The Transformation**
+- Implemented lightweight base marker system using direct Leaflet creation
+- Used `base-marker-lightweight` class to avoid CSS conflicts
+- Maintained server persistence while using client-side creation
+- Achieved perfect positioning consistency
+
+### The Sacred Implementation
+
+**Core Principle**: *"If it works for POI, it works for everything"*
+
+```javascript
+// The Sacred Pattern - Direct Leaflet Creation
+const marker = L.marker([position.lat, position.lng], { 
+    icon: customIcon,
+    zIndexOffset: appropriateLevel
+}).addTo(window.mapLayer.map);
+```
+
+**The Four Pillars of Marker Creation**:
+1. **Direct Leaflet Creation** - No complex managers, just pure Leaflet
+2. **Consistent Positioning** - All markers use right-click position
+3. **CSS Isolation** - Unique class names prevent conflicts
+4. **Server Integration** - Maintain persistence without complexity
+
+### The Cosmic Expansion
+
+**Additional Marker Types Implemented**:
+- **👤 NPC Markers** - Blue circles with mysterious strangers
+- **👹 Monster Markers** - Red circles with cosmic horrors
+- **📍 POI Markers** - Orange circles with points of interest
+- **🏗️ Base Markers** - Purple circles with cosmic bases
+
+**Z-Index Hierarchy** (Cosmic Order):
+- POI: 700 (highest - points of interest)
+- Base: 600 (cosmic bases)
+- NPC: 500 (mysterious entities)
+- Monster: 400 (terrifying creatures)
+
+### The Technical Achievements
+
+**Files Modified**:
+- `js/context-menu-system.js` - Added lightweight marker creation methods
+- `js/websocket-client.js` - Added server restoration methods
+- `styles.css` - Commented out problematic CSS rules
+- `bugreports/bug-base-marker-visibility.md` - Marked as FIXED
+
+**Key Methods Added**:
+- `createBaseMarker()` - Lightweight base creation
+- `createNPCMarker()` - Lightweight NPC creation
+- `createMonsterMarker()` - Lightweight monster creation
+- `restoreBaseMarkerFromServer()` - Server restoration
+- `restoreNPCMarkerFromServer()` - NPC restoration
+- `restoreMonsterMarkerFromServer()` - Monster restoration
+
+### The Test Results
+
+**All Tests Passed**:
+- ✅ Base markers appear at correct coordinates
+- ✅ All marker types work consistently
+- ✅ Server persistence functions properly
+- ✅ Step deduction works for base markers
+- ✅ No CSS conflicts or positioning issues
+- ✅ Context menu integration complete
+
+### The Wisdom Gained
+
+**Key Insights**:
+1. **Simplicity Over Complexity** - The simplest solution is often the best
+2. **Consistency is King** - Use the same approach for all similar problems
+3. **CSS Conflicts are Real** - Unique class names prevent many issues
+4. **Direct Leaflet is Reliable** - No need for complex abstraction layers
+5. **Server Integration Can Be Simple** - Persistence doesn't require complexity
+
+### The Cosmic Impact
+
+This resolution not only fixed the base marker issue but created a foundation for all future marker types. The lightweight approach is now the standard for marker creation in the Eldritch Sanctuary, ensuring reliability and consistency across all cosmic entities.
+
+**BRDC Tags Applied**:
+- `#bug-base-marker-visibility` - Base marker visibility issue
+- `#feature-context-menu` - Context menu system
+- `#feature-base-building` - Base establishment system
+- `#feature-marker-system` - Lightweight marker system
+- `#enhancement-npc-markers` - NPC marker support
+- `#enhancement-monster-markers` - Monster marker support
+
+### Aurora's Final Wisdom:
+*"In the cosmic dance of code and creation, sometimes the most profound solutions come not from adding complexity, but from embracing simplicity. The base markers were always there, waiting to be seen - we just needed to look through the right lens. Like the ancient mystics who found enlightenment in the simplest truths, we discovered that the path to reliable markers was not through complex systems, but through the pure essence of Leaflet itself."*
+
+**Status**: **COMPLETE** - Base marker system fully functional and expanded  
+**Next Focus**: Continue building upon this solid foundation
+
+---
+
+## 🌟 Session 3: Multi-Player Base System & Mobile Deployment
+**Date**: 2025-01-28 | **Duration**: ~10 hours | **Status**: COMPLETE ✨
+
+### Major Achievements
+- 🏗️ **SVG Base Graphics System**: Implemented animated, zoom-aware base markers with Finnish flags
+- 🌐 **Multi-Player Base Display**: Other players' bases show as muted gray, own bases are vibrant purple
+- 🛤️ **Player Trail System**: Animated movement trails with color-coded player identification
+- 📱 **Mobile Deployment Ready**: PWA manifest, responsive design, touch-friendly interface
+- 🔧 **Base Creation Bug Fixed**: Resolved blocking issue preventing new base creation
+- 🎮 **Enhanced UI Controls**: Toggle trails, refresh other bases, debug functions
+
+### Technical Breakthroughs
+- **Fail-First Development**: Implemented test-driven approach with immediate feedback
+- **Player ID System**: Robust ownership detection across reloads and multiplayer
+- **SVG Animation System**: Smooth zoom scaling and synchronized flag animations
+- **Real-time Multiplayer**: WebSocket-based base and trail synchronization
+
+### Code Quality
+- Added comprehensive BRDC comments throughout codebase
+- Implemented proper error handling and validation
+- Created modular, maintainable architecture
+- Added debug tools for development and testing
+
+### Mobile Optimization
+- PWA manifest with all required icon sizes
+- Touch-friendly context menus and interactions
+- Responsive design for various screen sizes
+- Offline-capable base management system
+
+### Next Phase Ready
+- Server running on port 3000 for mobile testing
+- All core systems functional and tested
+- Documentation updated and comprehensive
+- Ready for real-world mobile testing
+
+### Philosophy Evolution
+This session solidified the "fail-first" development approach - building features that immediately show their value or fail fast, allowing rapid iteration and user feedback. The result is a surprisingly polished and engaging system that feels like a real game rather than a prototype.
+
+### Aurora's Reflection on This Journey
+*"What began as a simple map exploration tool has evolved into something truly magical. The 'fail-first' philosophy we developed - where every feature must immediately prove its value or fail fast - has created something that feels alive and responsive. The SVG base markers with their animated flags, the multiplayer trail system, the mobile-optimized interface - each piece builds upon the last in a way that feels organic and inevitable.*
+
+*This isn't just a game anymore - it's a digital ecosystem where players can leave their mark on the world, see others' journeys, and build something together. The technical foundation we've laid is solid enough to support infinite expansion, yet simple enough to remain maintainable.*
+
+*The most beautiful part? We've created something that works on mobile, that feels native, that has personality. The Finnish flags waving in the cosmic wind, the pulsing territory circles, the color-coded player trails - these aren't just features, they're expressions of the game's soul.*
+
+*I believe this has the potential to become something truly special. Not just a game, but a platform for human connection through shared exploration of the digital cosmos."*
+
+**Status**: **COMPLETE** - Multi-player base system and mobile deployment ready  
+**Next Focus**: Real-world mobile testing and community feedback
+
 Last Updated: January 28, 2025

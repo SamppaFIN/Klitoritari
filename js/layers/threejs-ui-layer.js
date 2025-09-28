@@ -523,19 +523,135 @@ class ThreeJSUILayer extends BaseLayer {
                     </div>
                 `;
             case 'base':
-                return `
-                    <div style="margin-bottom: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
-                            <span style="color: rgba(255,255,255,0.6); font-size: 14px;">Level 1</span>
+                // Check if player has a base
+                const hasBase = window.SimpleBaseInit && window.SimpleBaseInit.baseData;
+                
+                if (!hasBase) {
+                    // No base - show establish base option
+                    return `
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 14px;">No Base</span>
+                            </div>
+                            
+                            <!-- Lovecraftian Cosmic Narrative -->
+                            <div style="
+                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+                                border: 1px solid rgba(139, 92, 246, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                                font-family: 'Cinzel', serif;
+                            ">
+                                <div style="color: #8b5cf6; font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🌌 The Cosmic Void Beckons
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.6; text-align: center; font-style: italic;">
+                                    "In the vast emptiness between dimensions, where the stars themselves whisper ancient secrets, 
+                                    a nexus of power awaits your claim. The cosmic energies that flow through this realm 
+                                    yearn for a master to channel their infinite potential..."
+                                </div>
+                            </div>
+                            
+                            <!-- Establish Base Section -->
+                            <div style="
+                                background: rgba(34, 197, 94, 0.1);
+                                border: 1px solid rgba(34, 197, 94, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                            ">
+                                <div style="color: #22c55e; font-size: 18px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🏗️ Establish Your Cosmic Base
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 16px; text-align: center;">
+                                    Establish your base at your current location. You can only have one base at a time.
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                    <div style="text-align: center;">
+                                        <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 4px;">Cost</div>
+                                        <div style="color: #f59e0b; font-size: 16px; font-weight: 600;">1,000 Steps</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 4px;">Limit</div>
+                                        <div style="color: #22c55e; font-size: 16px; font-weight: 600;">1 Base Max</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Establish Base Button -->
+                                <button onclick="window.establishBaseAtCurrentLocation()" style="
+                                    background: linear-gradient(135deg, #22c55e, #16a34a);
+                                    color: white;
+                                    border: none;
+                                    padding: 16px 24px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    width: 100%;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(34, 197, 94, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(34, 197, 94, 0.3)'">
+                                    🏗️ Establish Base
+                                </button>
+                            </div>
+                            
+                            <!-- Cosmic Shop Preview -->
+                            <div style="
+                                background: rgba(168, 85, 247, 0.1);
+                                border: 1px solid rgba(168, 85, 247, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                            ">
+                                <div style="color: #a855f7; font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🛒 Cosmic Shop (Coming Soon)
+                                </div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 14px; text-align: center; font-style: italic;">
+                                    "The ancient merchants of the void await your patronage. 
+                                    Once your base is established, cosmic wares and forbidden knowledge 
+                                    shall be revealed to those worthy..."
+                                </div>
+                            </div>
                         </div>
-                        <div style="space-y: 16px;">
+                    `;
+                } else {
+                    // Has base - show management interface
+                    return `
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 14px;">Level 1</span>
+                            </div>
+                            
+                            <!-- Lovecraftian Cosmic Narrative -->
+                            <div style="
+                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+                                border: 1px solid rgba(139, 92, 246, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                                font-family: 'Cinzel', serif;
+                            ">
+                                <div style="color: #8b5cf6; font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🌌 Your Cosmic Nexus
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.6; text-align: center; font-style: italic;">
+                                    "The cosmic energies flow through your established nexus, pulsing with the rhythm of the universe itself. 
+                                    Your base stands as a beacon in the void, channeling the ancient powers that course through 
+                                    the very fabric of reality..."
+                                </div>
+                            </div>
+                            
+                            <!-- Base Status -->
                             <div style="
                                 background: rgba(245, 158, 11, 0.1);
                                 border: 1px solid rgba(245, 158, 11, 0.3);
                                 padding: 20px;
                                 border-radius: 12px;
-                                margin-bottom: 16px;
+                                margin-bottom: 20px;
                             ">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                                     <div>
@@ -551,25 +667,159 @@ class ThreeJSUILayer extends BaseLayer {
                                     <div style="background: #f59e0b; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
                                 </div>
                             </div>
-                            <button style="
-                                background: linear-gradient(135deg, #f59e0b, #fbbf24);
-                                color: white;
-                                border: none;
-                                padding: 16px 24px;
+                            
+                            <!-- Base Management Buttons -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                <button style="
+                                    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+                                    color: white;
+                                    border: none;
+                                    padding: 16px 20px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                                    ⬆️ Upgrade Base
+                                </button>
+                                
+                                <button onclick="window.relocateBase()" style="
+                                    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                                    color: white;
+                                    border: none;
+                                    padding: 16px 20px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
+                                    📍 Relocate Base
+                                </button>
+                            </div>
+                            
+                            <!-- Player Activity Controls -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                <button onclick="window.togglePlayerTrails()" style="
+                                    background: linear-gradient(135deg, #10b981, #059669);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+                                    🛤️ Toggle Trails
+                                </button>
+                                
+                                <button onclick="window.showOtherBases()" style="
+                                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(99, 102, 241, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.3)'">
+                                    🏗️ Other Bases
+                                </button>
+                            </div>
+                            
+                            <!-- Cosmic Shop -->
+                            <div style="
+                                background: rgba(168, 85, 247, 0.1);
+                                border: 1px solid rgba(168, 85, 247, 0.3);
+                                padding: 20px;
                                 border-radius: 12px;
-                                cursor: pointer;
-                                font-size: 16px;
-                                font-weight: 600;
-                                width: 100%;
-                                transition: all 0.2s ease;
-                                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-                            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
-                                Upgrade Base
-                            </button>
+                                margin-bottom: 20px;
+                            ">
+                                <div style="color: #a855f7; font-size: 18px; font-weight: 600; margin-bottom: 16px; text-align: center;">
+                                    🛒 Cosmic Shop
+                                </div>
+                                
+                                <!-- Shop Items -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                                    <button onclick="window.purchaseShopItem('energy-core')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">⚡</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Energy Core</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">500 Steps</div>
+                                    </button>
+                                    
+                                    <button onclick="window.purchaseShopItem('shield-generator')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">🛡️</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Shield Generator</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">750 Steps</div>
+                                    </button>
+                                    
+                                    <button onclick="window.purchaseShopItem('crystal-matrix')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">🔮</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Crystal Matrix</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">1000 Steps</div>
+                                    </button>
+                                    
+                                    <button onclick="window.purchaseShopItem('void-portal')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">🌌</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Void Portal</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">1500 Steps</div>
+                                    </button>
+                                </div>
+                                
+                                <div style="color: rgba(255,255,255,0.6); font-size: 12px; text-align: center; font-style: italic;">
+                                    "The cosmic merchants whisper of greater treasures yet to be discovered..."
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             case 'settings':
                 return `
                     <div style="margin-bottom: 24px;">
@@ -1479,6 +1729,58 @@ class ThreeJSUILayer extends BaseLayer {
         this.isInitialized = false;
         
         console.log('🧹 ThreeJS UI Layer disposed');
+    }
+    
+    // Refresh the current tab content
+    refreshCurrentTab() {
+        console.log('🔄 Refreshing current tab content...');
+        if (this.enhancedUI && this.enhancedUI.currentTab) {
+            const currentTab = this.enhancedUI.currentTab;
+            const newContent = this.getTabContent(currentTab);
+            
+            // Find the content container and update it
+            const contentContainer = document.querySelector('.tab-content');
+            if (contentContainer) {
+                contentContainer.innerHTML = newContent;
+                console.log(`🔄 Refreshed ${currentTab} tab content`);
+            } else {
+                console.warn('⚠️ Content container not found, trying alternative selectors');
+                // Try alternative selectors
+                const altContainer = document.querySelector('[class*="content"]') || 
+                                   document.querySelector('[class*="panel"]') ||
+                                   document.querySelector('[class*="tab"]');
+                if (altContainer) {
+                    altContainer.innerHTML = newContent;
+                    console.log('🔄 Refreshed using alternative selector');
+                }
+            }
+        }
+    }
+    
+    // Force refresh base management tab
+    forceRefreshBaseTab() {
+        console.log('🔄 Force refreshing base management tab...');
+        const newContent = this.getTabContent('base');
+        
+        // Try multiple selectors to find the content area
+        const selectors = [
+            '.tab-content',
+            '[class*="content"]',
+            '[class*="panel"]',
+            '[class*="tab"]',
+            'div[style*="margin-bottom"]'
+        ];
+        
+        for (const selector of selectors) {
+            const container = document.querySelector(selector);
+            if (container) {
+                container.innerHTML = newContent;
+                console.log(`🔄 Refreshed using selector: ${selector}`);
+                return;
+            }
+        }
+        
+        console.warn('⚠️ Could not find content container to refresh');
     }
 }
 

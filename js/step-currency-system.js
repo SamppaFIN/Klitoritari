@@ -1746,8 +1746,18 @@ class StepCurrencySystem {
                 // Use EXACT same method as player marker creation
                 const baseMarker = L.marker([position.lat, position.lng], {
                     icon: baseIcon,
-                    zIndexOffset: 1000
-                }).addTo(window.mapLayer.map);
+                    zIndexOffset: 2000  // Higher than player marker to ensure visibility
+                });
+
+                // Add to territory layer group if available, otherwise add to map
+                if (window.mapLayer.leafletLayerManager && window.mapLayer.leafletLayerManager.layers.has('territory')) {
+                    const territoryLayer = window.mapLayer.leafletLayerManager.layers.get('territory');
+                    baseMarker.addTo(territoryLayer);
+                    console.log('🏗️ Base marker added to territory layer group');
+                } else {
+                    baseMarker.addTo(window.mapLayer.map);
+                    console.log('🏗️ Base marker added directly to map (territory layer not available)');
+                }
                 
                 baseMarker.bindPopup(`
                     <b>🏗️ My Cosmic Base</b><br>

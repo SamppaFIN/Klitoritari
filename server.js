@@ -1080,14 +1080,44 @@ class EldritchSanctuaryServer {
         // Set base in player's game state
         this.setPlayerBase(playerId, { position });
         
-        // Create base marker
+        // Create base marker with icon data
         const baseMarker = this.addMarkerToPlayer(playerId, {
             type: 'base',
             position: position,
             data: {
                 level: 1,
                 established: true,
-                name: 'My Cosmic Base'
+                name: 'My Cosmic Base',
+                symbol: '🏗️',
+                icon: {
+                    className: 'base-marker',
+                    html: `
+                        <div style="
+                            width: 30px; 
+                            height: 30px; 
+                            background: #8b5cf6; 
+                            border: 3px solid #ffffff; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 16px;
+                            color: white;
+                            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                        ">🏗️</div>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                },
+                popup: {
+                    title: 'Base Marker',
+                    content: `
+                        <b>Base Marker</b><br>
+                        <small>🏗️ Base</small><br>
+                        <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+                    `
+                }
             }
         });
         

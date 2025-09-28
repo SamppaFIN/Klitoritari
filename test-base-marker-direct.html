@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Base Marker Direct Creation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border: 2px solid #333;
+        }
+        .test-controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Base Marker Direct Creation (Like POI)</h1>
+    
+    <div class="test-controls">
+        <h3>Test Controls:</h3>
+        <button onclick="testPOIMarker()">Create POI Marker</button>
+        <button onclick="testBaseMarker()">Create Base Marker</button>
+        <button onclick="clearMap()">Clear Map</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="map"></div>
+    
+    <div class="log" id="log"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Mock the required global objects
+        window.mapLayer = {
+            map: null
+        };
+
+        // Initialize map
+        const map = L.map('map').setView([60.1699, 24.9384], 10); // Helsinki
+        window.mapLayer.map = map;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Mock WebSocket client
+        window.websocketClient = {
+            isConnectedToServer: () => false, // Simulate offline mode
+            createMarker: (data) => {
+                log(`📤 Would send to server: ${JSON.stringify(data)}`);
+            }
+        };
+
+        // Mock step system
+        window.stepCurrencySystem = {
+            totalSteps: 5000,
+            saveSteps: () => log('💾 Steps saved'),
+            updateStepCounter: () => log('🔄 Step counter updated')
+        };
+
+        // Logging function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Test POI marker creation (working method)
+        function testPOIMarker() {
+            log('📍 Testing POI marker creation...');
+            
+            const position = {
+                lat: 60.1699 + (Math.random() - 0.5) * 0.1,
+                lng: 24.9384 + (Math.random() - 0.5) * 0.1
+            };
+            
+            createPOIMarker(position);
+        }
+
+        // Test base marker creation (new method)
+        function testBaseMarker() {
+            log('🏗️ Testing base marker creation...');
+            
+            const position = {
+                lat: 60.1699 + (Math.random() - 0.5) * 0.1,
+                lng: 24.9384 + (Math.random() - 0.5) * 0.1
+            };
+            
+            createBaseMarker(position);
+        }
+
+        // POI marker creation (working method)
+        function createPOIMarker(position) {
+            log('📍 Creating POI marker at: ' + JSON.stringify(position));
+            
+            if (window.mapLayer && window.mapLayer.map) {
+                const poiIcon = L.divIcon({
+                    className: 'poi-marker',
+                    html: `
+                        <div style="
+                            width: 30px; 
+                            height: 30px; 
+                            background: #ff6b35; 
+                            border: 3px solid #ffffff; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 16px;
+                            color: white;
+                            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                        ">❓</div>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                const marker = L.marker([position.lat, position.lng], { 
+                    icon: poiIcon,
+                    zIndexOffset: 700
+                }).addTo(window.mapLayer.map);
+
+                marker.bindPopup(`
+                    <b>Point of Interest</b><br>
+                    <small>❓ Mystery Location</small><br>
+                    <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+                `);
+
+                log('✅ POI marker created successfully');
+            }
+        }
+
+        // Base marker creation (new method - same as POI)
+        function createBaseMarker(position) {
+            log('🏗️ Creating base marker at: ' + JSON.stringify(position));
+            
+            if (window.mapLayer && window.mapLayer.map) {
+                const baseIcon = L.divIcon({
+                    className: 'base-marker',
+                    html: `
+                        <div style="
+                            width: 30px; 
+                            height: 30px; 
+                            background: #8b5cf6; 
+                            border: 3px solid #ffffff; 
+                            border-radius: 50%; 
+                            display: flex; 
+                            align-items: center; 
+                            justify-content: center; 
+                            font-size: 16px;
+                            color: white;
+                            text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                        ">🏗️</div>
+                    `,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                const marker = L.marker([position.lat, position.lng], { 
+                    icon: baseIcon,
+                    zIndexOffset: 600
+                }).addTo(window.mapLayer.map);
+
+                marker.bindPopup(`
+                    <b>Base Marker</b><br>
+                    <small>🏗️ My Cosmic Base</small><br>
+                    <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+                `);
+
+                log('✅ Base marker created successfully');
+            }
+
+            // Simulate step deduction
+            if (window.stepCurrencySystem) {
+                window.stepCurrencySystem.totalSteps -= 1000;
+                window.stepCurrencySystem.saveSteps();
+                window.stepCurrencySystem.updateStepCounter();
+                log('💸 Deducted 1000 steps for base establishment');
+            }
+
+            // Simulate server persistence
+            if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+                window.websocketClient.createMarker({
+                    type: 'base',
+                    position: { lat: position.lat, lng: position.lng },
+                    data: {
+                        level: 1,
+                        established: true,
+                        name: 'My Cosmic Base',
+                        symbol: '🏗️',
+                        markerId: `base_${Date.now()}`
+                    }
+                });
+                log('📤 Base marker sent to server for persistence');
+            } else {
+                log('⚠️ WebSocket not connected, base marker not persisted to server');
+            }
+        }
+
+        function clearMap() {
+            window.mapLayer.map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    window.mapLayer.map.removeLayer(layer);
+                }
+            });
+            log('🗑️ Map cleared');
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Initial log
+        log('🚀 Test page loaded. Click buttons to test marker creation.');
+        log('📍 POI markers: Orange circles with ❓');
+        log('🏗️ Base markers: Purple circles with 🏗️');
+    </script>
+</body>
+</html>

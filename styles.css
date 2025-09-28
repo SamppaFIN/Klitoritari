@@ -1934,7 +1934,6 @@ html, body {
     #header {
         background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 40, 0.95));
     }
-}
     
     .header-top h1 {
         font-size: 1rem;
@@ -2480,11 +2479,26 @@ html, body {
     filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8)) drop-shadow(0 0 20px rgba(0, 255, 0, 0.4));
 }
 
-/* Base marker specific styling */
+/* 
+ * BRDC: Base marker specific styling - COMMENTED OUT FOR LIGHTWEIGHT VERSION
+ * 
+ * These CSS rules were causing positioning conflicts with Leaflet markers.
+ * The `position: relative !important` rule was overriding Leaflet's absolute
+ * positioning system, causing base markers to appear "way off" from their
+ * intended coordinates.
+ * 
+ * Solution: Use lightweight markers with inline styles and unique class names
+ * to avoid CSS conflicts while maintaining visual consistency.
+ * 
+ * Resolves: #bug-base-marker-visibility
+ * Implements: #feature-marker-system
+ * 
+ * Original complex styling (commented out):
+ */
+/*
 .base-marker {
     filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
     z-index: 2000 !important;
-    position: relative !important;
     background: #8b5cf6 !important;
     border-radius: 50% !important;
     display: block !important;
@@ -2504,6 +2518,7 @@ html, body {
         opacity: 0.8;
     }
 }
+*/
 
 /* Base popup styling */
 .base-popup {
@@ -2544,7 +2559,7 @@ html, body {
     z-index: 1000;
 }
 
-/* Object pulse animation */
+/* Object pulse animation - 2D only */
 @keyframes objectPulse {
     0% {
         transform: scale(1);
@@ -2776,7 +2791,8 @@ html, body {
     }
 }
 
-/* Base marker click handling */
+/* Base marker click handling - COMMENTED OUT FOR LIGHTWEIGHT VERSION */
+/*
 .base-marker {
     z-index: 2000 !important;
     pointer-events: auto !important;
@@ -2790,6 +2806,7 @@ html, body {
 .base-marker.multilayered > div {
     pointer-events: auto !important;
 }
+*/
 
 .multilayered {
     background: transparent !important;
@@ -7470,6 +7487,20 @@ input[type="range"]::-moz-range-thumb {
 .svg-base-marker {
     background: transparent !important;
     border: none !important;
+    cursor: pointer;
+}
+
+/* Trail animations */
+@keyframes trailPulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.7; }
+}
+
+/* Other player base styling */
+.other-player-base {
+    opacity: 0.8;
+    filter: grayscale(0.3);
 }
 
 .svg-base-marker svg {

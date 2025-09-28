@@ -515,43 +515,65 @@ class WebSocketClient {
     }
     
     /**
-     * Create base marker from server response
+     * Create base marker from server response using LIGHTWEIGHT approach (exactly like POI)
      * @param {Object} baseMarker - Base marker data from server
      * @param {Object} position - Position data
      */
     createBaseMarkerFromServer(baseMarker, position) {
-        console.log('🏗️ Creating base marker from server response:', { baseMarker, position });
-        console.log('🏗️ MapObjectManager available:', !!window.mapObjectManager);
-        console.log('🏗️ MapObjectManager.createObject function:', typeof window.mapObjectManager?.createObject);
+        console.log('🏗️ Creating LIGHTWEIGHT base marker from server response:', { baseMarker, position });
         
-        // Use MapObjectManager to create the base marker
-        if (window.mapObjectManager && typeof window.mapObjectManager.createObject === 'function') {
-            try {
-                console.log('🏗️ Calling MapObjectManager.createObject with BASE and position:', position);
-                // Create base marker using MapObjectManager
-                const marker = window.mapObjectManager.createObject('BASE', position);
-                console.log('🏗️ Base marker created successfully from server response:', marker);
-                
-                // Check if marker is actually visible on map
-                if (marker && marker._map) {
-                    console.log('🏗️ Base marker is attached to map:', marker._map);
-                    console.log('🏗️ Base marker position on map:', marker.getLatLng());
-                    console.log('🏗️ Base marker element:', marker.getElement());
-                } else {
-                    console.warn('⚠️ Base marker created but not attached to map or missing map reference');
-                }
-                
-                // Center map on the base marker for better visibility
-                this.centerMapOnBase(position);
-                
-                return marker;
-            } catch (error) {
-                console.error('❌ Failed to create base marker from server response:', error);
-                console.error('❌ Error details:', error.stack);
-            }
-        } else {
-            console.error('❌ MapObjectManager not available for base marker creation');
-            console.error('❌ MapObjectManager:', window.mapObjectManager);
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('⚠️ MapLayer not available for base marker restoration');
+            return;
+        }
+        
+        try {
+            // Use EXACTLY the same approach as POI markers
+            const baseIcon = L.divIcon({
+                className: 'base-marker-lightweight', // Different class name to avoid CSS conflicts
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #8b5cf6; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">${baseMarker.data?.symbol || '🏗️'}</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([position.lat, position.lng], { 
+                icon: baseIcon,
+                zIndexOffset: 600
+            }).addTo(window.mapLayer.map);
+
+            // Add popup (simple like POI)
+            const name = baseMarker.data?.name || 'My Cosmic Base';
+            const symbol = baseMarker.data?.symbol || '🏗️';
+            
+            marker.bindPopup(`
+                <b>Base Marker</b><br>
+                <small>${symbol} ${name}</small><br>
+                <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+            `);
+
+            console.log('🏗️ LIGHTWEIGHT base marker restored successfully from server');
+            
+            // Center map on the base marker for better visibility
+            this.centerMapOnBase(position);
+            
+            return marker;
+        } catch (error) {
+            console.error('❌ Failed to restore base marker from server:', error);
         }
     }
     
@@ -643,8 +665,9 @@ class WebSocketClient {
         markers.forEach(marker => {
             try {
                 if (marker.type === 'base' && marker.position) {
-                    // Skip base markers - they are restored separately via restoreBaseFromServer()
-                    console.log('🏗️ Skipping base marker restoration (handled separately):', marker.position);
+                    // Restore base marker using direct Leaflet approach (same as POI)
+                    console.log('🏗️ Restoring base marker:', marker.position);
+                    this.restoreBaseMarkerFromServer(marker);
                     restoredCount++;
                 } else if (marker.type === 'flag' && marker.position) {
                     // Restore flag marker
@@ -672,6 +695,21 @@ class WebSocketClient {
                     // Restore path marker
                     console.log('🛤️ Restoring path marker:', marker.position);
                     window.mapLayer.addPathMarker(marker.position);
+                    restoredCount++;
+                } else if (marker.type === 'poi' && marker.position) {
+                    // Restore POI marker
+                    console.log('📍 Restoring POI marker:', marker.position);
+                    this.restorePOIMarkerFromServer(marker);
+                    restoredCount++;
+                } else if (marker.type === 'npc' && marker.position) {
+                    // Restore NPC marker
+                    console.log('👤 Restoring NPC marker:', marker.position);
+                    this.restoreNPCMarkerFromServer(marker);
+                    restoredCount++;
+                } else if (marker.type === 'monster' && marker.position) {
+                    // Restore Monster marker
+                    console.log('👹 Restoring Monster marker:', marker.position);
+                    this.restoreMonsterMarkerFromServer(marker);
                     restoredCount++;
                 } else {
                     console.log('❓ Unknown marker type:', marker.type, marker);
@@ -708,10 +746,19 @@ class WebSocketClient {
         
         // Handle different marker types
         if (marker.type === 'base' || marker.type === 'BASE') {
-            this.createBaseMarkerFromServer(marker, marker.position);
+            this.restoreBaseMarkerFromServer(marker);
         } else if (marker.type === 'path' || marker.type === 'step') {
             // Handle path/step markers
             this.createPathMarkerFromServer(marker);
+        } else if (marker.type === 'poi') {
+            // Handle POI markers
+            this.restorePOIMarkerFromServer(marker);
+        } else if (marker.type === 'npc') {
+            // Handle NPC markers
+            this.restoreNPCMarkerFromServer(marker);
+        } else if (marker.type === 'monster') {
+            // Handle Monster markers
+            this.restoreMonsterMarkerFromServer(marker);
         } else {
             console.log('📍 Unknown marker type from other player:', marker.type);
         }
@@ -733,6 +780,420 @@ class WebSocketClient {
             } catch (error) {
                 console.error('❌ Failed to create path marker from server:', error);
             }
+        }
+    }
+    
+    /**
+     * Restore POI marker from server
+     * @param {Object} marker - POI marker data
+     */
+    restorePOIMarkerFromServer(marker) {
+        console.log('📍 Restoring POI marker from server:', marker);
+        
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('⚠️ MapLayer not available for POI marker restoration');
+            return;
+        }
+        
+        try {
+            const poiIcon = L.divIcon({
+                className: 'poi-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #ff6b35; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">${marker.data?.symbol || '❓'}</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const poiMarker = L.marker([marker.position.lat, marker.position.lng], { 
+                icon: poiIcon,
+                zIndexOffset: 700
+            }).addTo(window.mapLayer.map);
+
+            // Add popup with marker data
+            const name = marker.data?.name || 'Mystery Location';
+            const description = marker.data?.description || 'A mysterious point of interest';
+            
+            poiMarker.bindPopup(`
+                <b>Point of Interest</b><br>
+                <small>${marker.data?.symbol || '❓'} ${name}</small><br>
+                <small>${description}</small><br>
+                <small>${marker.position.lat.toFixed(6)}, ${marker.position.lng.toFixed(6)}</small>
+            `);
+
+            console.log('📍 POI marker restored successfully from server');
+            return poiMarker;
+        } catch (error) {
+            console.error('❌ Failed to restore POI marker from server:', error);
+        }
+    }
+
+    /**
+     * BRDC: Restore lightweight base marker from server using direct Leaflet approach
+     * 
+     * This method implements server-side marker restoration using the "Sacred Pattern":
+     * 1. Direct Leaflet creation (L.marker().addTo())
+     * 2. Consistent positioning (server coordinates)
+     * 3. CSS isolation (unique class name)
+     * 4. Server data integration (marker properties)
+     * 
+     * Resolves: #bug-base-marker-visibility
+     * Implements: #feature-base-building
+     * Uses: #feature-marker-system
+     * 
+     * @param {Object} marker - Server marker data with position and properties
+     */
+    // Show player trails on the map
+    showPlayerTrails() {
+        console.log('🛤️ Showing player trails...');
+        
+        // Create a trail layer if it doesn't exist
+        if (!this.trailLayer) {
+            this.trailLayer = L.layerGroup().addTo(window.mapLayer.map);
+        }
+        
+        // For now, create some sample trails (in a real implementation, this would come from server)
+        const sampleTrails = [
+            {
+                playerId: 'other_player_1',
+                playerName: 'Cosmic Explorer',
+                path: [
+                    [61.4720, 23.7240],
+                    [61.4725, 23.7245],
+                    [61.4730, 23.7250],
+                    [61.4735, 23.7255]
+                ],
+                color: '#3b82f6'
+            },
+            {
+                playerId: 'other_player_2', 
+                playerName: 'Void Walker',
+                path: [
+                    [61.4710, 23.7230],
+                    [61.4715, 23.7235],
+                    [61.4720, 23.7240],
+                    [61.4725, 23.7245]
+                ],
+                color: '#10b981'
+            }
+        ];
+        
+        sampleTrails.forEach(trail => {
+            // Create polyline for the trail
+            const polyline = L.polyline(trail.path, {
+                color: trail.color,
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '5, 10'
+            }).addTo(this.trailLayer);
+            
+            // Add popup with player info
+            polyline.bindPopup(`
+                <div style="text-align: center; padding: 10px;">
+                    <h4 style="margin: 0 0 8px 0; color: ${trail.color};">${trail.playerName}</h4>
+                    <p style="margin: 0; color: #e5e7eb; font-size: 12px;">Movement Trail</p>
+                </div>
+            `);
+            
+            // Add pulsing animation
+            polyline.on('add', () => {
+                polyline.getElement().style.animation = 'trailPulse 2s ease-in-out infinite';
+            });
+        });
+        
+        console.log('🛤️ Player trails displayed');
+    }
+    
+    // Hide player trails
+    hidePlayerTrails() {
+        if (this.trailLayer) {
+            this.trailLayer.clearLayers();
+            console.log('🛤️ Player trails hidden');
+        }
+    }
+
+    // Get current player ID
+    getCurrentPlayerId() {
+        // Try to get player ID from various sources
+        const playerId = localStorage.getItem('playerId') || 
+                        localStorage.getItem('eldritch-player-id') ||
+                        localStorage.getItem('player_id') ||
+                        'default-player';
+        
+        // If no player ID exists, generate one
+        if (!localStorage.getItem('playerId')) {
+            const newPlayerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            localStorage.setItem('playerId', newPlayerId);
+            console.log('🆔 Generated new player ID:', newPlayerId);
+            return newPlayerId;
+        }
+        
+        return playerId;
+    }
+
+    restoreBaseMarkerFromServer(marker) {
+        console.log('🏗️ Restoring SVG base marker from server:', marker);
+        
+        if (!window.mapLayer || !window.mapLayer.map || !window.SVGBaseGraphics) {
+            console.warn('⚠️ MapLayer or SVG graphics not available for base marker restoration');
+            return;
+        }
+        
+        try {
+            // Use SVG graphics system for base marker restoration
+            const baseConfig = {
+                size: 120,
+                colors: {
+                    primary: '#8b5cf6',
+                    secondary: '#3b82f6',
+                    accent: '#fbbf24',
+                    energy: '#ffffff',
+                    territory: '#8b5cf6'
+                },
+                animations: {
+                    territoryPulse: true,
+                    energyGlow: true,
+                    flagWave: true,
+                    particleEffects: true
+                }
+            };
+            
+            const baseMarker = new window.SVGBaseGraphics().createAnimatedBaseMarker(
+                marker.position,
+                baseConfig,
+                'finnish', // Use Finnish flag
+                window.mapLayer.map,
+                isOwnBase ? 'own' : 'other' // Pass base type
+            );
+            
+            // Add to map
+            baseMarker.addTo(window.mapLayer.map);
+
+            // Add simple stats popup
+            const name = marker.data?.name || 'My Cosmic Base';
+            const buttonId = `manage-base-btn-${Date.now()}`;
+            
+            // Check if this is the player's own base
+            const currentPlayerId = this.getCurrentPlayerId();
+            const markerPlayerId = marker.data?.playerId || marker.data?.ownerId;
+            const isOwnBase = marker.data?.isOwnBase || (markerPlayerId && markerPlayerId === currentPlayerId);
+            
+            console.log('🔍 Base ownership check:', {
+                currentPlayerId,
+                markerPlayerId,
+                isOwnBase,
+                markerData: marker.data
+            });
+            
+            const popupContent = `
+                <div style="text-align: center; padding: 15px; min-width: 200px;">
+                    <h3 style="margin: 0 0 10px 0; color: #8b5cf6; font-size: 18px;">
+                        🏗️ ${name}
+                    </h3>
+                    <div style="margin: 10px 0; padding: 8px; background: rgba(139, 92, 246, 0.1); border-radius: 8px;">
+                        <p style="margin: 0 0 5px 0; color: #e5e7eb;">Level: <strong>${marker.data?.level || 1}</strong></p>
+                        <p style="margin: 0 0 5px 0; color: #e5e7eb;">Territory: <strong>${marker.data?.territorySize || 'Small'}</strong></p>
+                        <p style="margin: 0 0 5px 0; color: #e5e7eb;">Flag: <strong>Finnish</strong></p>
+                        <p style="margin: 0 0 5px 0; color: #e5e7eb;">Location: <strong>${marker.position.lat.toFixed(4)}, ${marker.position.lng.toFixed(4)}</strong></p>
+                        <p style="margin: 0 0 5px 0; color: #e5e7eb;">Owner: <strong>${isOwnBase ? 'You' : 'Other Player'}</strong></p>
+                        ${isOwnBase ? `<p style="margin: 0; color: #e5e7eb;">Steps: <strong>${window.stepCurrencySystem?.totalSteps || 0}</strong></p>` : ''}
+                    </div>
+                    ${isOwnBase ? `
+                        <button id="${buttonId}" 
+                                style="background: linear-gradient(135deg, #8b5cf6, #3b82f6); 
+                                       color: white; border: none; padding: 10px 20px; 
+                                       border-radius: 8px; cursor: pointer; font-weight: bold;
+                                       box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                                       transition: all 0.3s ease;">
+                            Manage Base
+                        </button>
+                    ` : `
+                        <div style="color: #e5e7eb; font-size: 14px; padding: 10px; background: rgba(139, 92, 246, 0.1); border-radius: 8px;">
+                            This is another player's base
+                        </div>
+                    `}
+                </div>
+            `;
+            
+            baseMarker.bindPopup(popupContent);
+            
+            // Add click handler for base menu
+            baseMarker.on('click', () => {
+                console.log('🎨 SVG base marker clicked - opening management menu');
+                if (window.SimpleBaseInit && window.SimpleBaseInit.openBaseMenu) {
+                    window.SimpleBaseInit.openBaseMenu();
+                }
+            });
+            
+            // Add popup open handler to attach button event listener
+            baseMarker.on('popupopen', () => {
+                setTimeout(() => {
+                    const manageBtn = document.getElementById(buttonId);
+                    if (manageBtn) {
+                        manageBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            console.log('🎨 Manage Base button clicked');
+                            if (window.SimpleBaseInit && window.SimpleBaseInit.openBaseMenu) {
+                                window.SimpleBaseInit.openBaseMenu();
+                            }
+                        });
+                    }
+                }, 100);
+            });
+
+            console.log('🏗️ SVG base marker restored successfully from server');
+            return baseMarker;
+        } catch (error) {
+            console.error('❌ Failed to restore base marker from server:', error);
+        }
+    }
+
+    /**
+     * BRDC: Restore lightweight NPC marker from server using direct Leaflet approach
+     * 
+     * Implements server-side marker restoration using the "Sacred Pattern":
+     * - Direct Leaflet creation for reliability
+     * - Consistent positioning from server data
+     * - CSS isolation to prevent conflicts
+     * - Server data integration for marker properties
+     * 
+     * Implements: #enhancement-npc-markers
+     * Uses: #feature-marker-system
+     * 
+     * @param {Object} marker - Server marker data with position and properties
+     */
+    restoreNPCMarkerFromServer(marker) {
+        console.log('👤 Restoring LIGHTWEIGHT NPC marker from server:', marker);
+        
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('⚠️ MapLayer not available for NPC marker restoration');
+            return;
+        }
+        
+        try {
+            // Use EXACTLY the same approach as POI marker restoration
+            const npcIcon = L.divIcon({
+                className: 'npc-marker-lightweight', // Different class name to avoid CSS conflicts
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #3b82f6; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">${marker.data?.symbol || '👤'}</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const npcMarker = L.marker([marker.position.lat, marker.position.lng], { 
+                icon: npcIcon,
+                zIndexOffset: 500
+            }).addTo(window.mapLayer.map);
+
+            // Add popup (simple like POI)
+            const name = marker.data?.name || 'Mysterious Stranger';
+            const symbol = marker.data?.symbol || '👤';
+            
+            npcMarker.bindPopup(`
+                <b>NPC Marker</b><br>
+                <small>${symbol} ${name}</small><br>
+                <small>${marker.position.lat.toFixed(6)}, ${marker.position.lng.toFixed(6)}</small>
+            `);
+
+            console.log('👤 LIGHTWEIGHT NPC marker restored successfully from server');
+            return npcMarker;
+        } catch (error) {
+            console.error('❌ Failed to restore NPC marker from server:', error);
+        }
+    }
+
+    /**
+     * BRDC: Restore lightweight Monster marker from server using direct Leaflet approach
+     * 
+     * Implements server-side marker restoration using the "Sacred Pattern":
+     * - Direct Leaflet creation for reliability
+     * - Consistent positioning from server data
+     * - CSS isolation to prevent conflicts
+     * - Server data integration for marker properties
+     * 
+     * Implements: #enhancement-monster-markers
+     * Uses: #feature-marker-system
+     * 
+     * @param {Object} marker - Server marker data with position and properties
+     */
+    restoreMonsterMarkerFromServer(marker) {
+        console.log('👹 Restoring LIGHTWEIGHT Monster marker from server:', marker);
+        
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('⚠️ MapLayer not available for Monster marker restoration');
+            return;
+        }
+        
+        try {
+            // Use EXACTLY the same approach as POI marker restoration
+            const monsterIcon = L.divIcon({
+                className: 'monster-marker-lightweight', // Different class name to avoid CSS conflicts
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #dc2626; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">${marker.data?.symbol || '👹'}</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const monsterMarker = L.marker([marker.position.lat, marker.position.lng], { 
+                icon: monsterIcon,
+                zIndexOffset: 400
+            }).addTo(window.mapLayer.map);
+
+            // Add popup (simple like POI)
+            const name = marker.data?.name || 'Cosmic Horror';
+            const symbol = marker.data?.symbol || '👹';
+            
+            monsterMarker.bindPopup(`
+                <b>Monster Marker</b><br>
+                <small>${symbol} ${name}</small><br>
+                <small>${marker.position.lat.toFixed(6)}, ${marker.position.lng.toFixed(6)}</small>
+            `);
+
+            console.log('👹 LIGHTWEIGHT Monster marker restored successfully from server');
+            return monsterMarker;
+        } catch (error) {
+            console.error('❌ Failed to restore Monster marker from server:', error);
         }
     }
 
