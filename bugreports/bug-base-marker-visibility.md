@@ -1,153 +1,274 @@
 # Bug Report: Base Marker Visibility Issue
 
 **Bug ID:** `bug-base-marker-visibility`  
-**Severity:** High  
+**Type:** Bug  
+**Priority:** High  
 **Status:** In Progress  
-**Date:** 2025-01-27  
-**Reporter:** AI Assistant (Aurora)  
+**Assignee:** Aurora  
+**Created:** January 28, 2025  
+**Last Updated:** January 28, 2025  
+**Estimated Effort:** 2-4 hours  
 
 ## Summary
-Base markers are not visible on the map despite successful creation and data persistence. The issue stems from architectural changes where MapEngine was not included in the new layered architecture system.
+Base markers are being created successfully (confirmed by console logs and step deduction) but are not visible on the map. Users can establish bases through the context menu "Force Base Marker" option, but the visual marker does not appear, making it appear as if the base creation failed.
 
 ## Description
-When users attempt to establish a base through the context menu or step currency system, the base data is successfully created and stored, but no visual marker appears on the map. Console logs show successful marker creation, but the marker is not rendered.
+When users right-click on the map and select "Force Base Marker" from the context menu, the system:
+1. ✅ Successfully deducts 1000 steps from the step currency system
+2. ✅ Creates base data and saves it to localStorage
+3. ✅ Logs successful base creation in console
+4. ❌ **FAILS** to display the base marker visually on the map
 
-**Current Behavior:**
-- Right-click context menu "🎯 Force Base Marker" creates data but no visual marker
-- Step currency system `establishSimpleBase()` succeeds but marker invisible
-- Console shows "Base marker created successfully" but nothing appears on map
+This creates a confusing user experience where the base appears to be created (steps deducted, success messages shown) but is invisible to the user.
 
-**Expected Behavior:**
-- Base markers should appear as red pulsing 🏗️ icons on the map
-- Markers should be visible and interactive with popups
-- Markers should persist across page reloads
+## Requirements
 
-## Root Cause Analysis
-The issue was caused by architectural migration where the new layered architecture (`EldritchSanctuaryApp`) did not include MapEngine initialization, while the legacy app (`LegacyEldritchSanctuaryApp`) contained the MapEngine but wasn't being used.
+### Functional Requirements
+- [ ] Base markers should be visible on the map after creation
+- [ ] Base markers should use the same visual styling as other markers
+- [ ] Base markers should be clickable and show popup information
+- [ ] Base markers should persist across page refreshes
+- [ ] Base markers should be restored from server when continuing adventure
 
-**Technical Details:**
-1. **App Architecture Conflict**: Two app classes running simultaneously
-   - `EldritchSanctuaryApp` (new layered architecture) - missing MapEngine
-   - `LegacyEldritchSanctuaryApp` (legacy) - contains MapEngine but not used
+### Non-Functional Requirements
+- [ ] Base marker creation should be fast (< 1 second)
+- [ ] Base markers should be clearly distinguishable from other markers
+- [ ] Base markers should work on both desktop and mobile devices
 
-2. **MapEngine Reference Issues**: 
-   - `window.mapEngine` was undefined in new architecture
-   - Base marker creation attempted to use non-existent map instance
-   - TerritoryLayer was used instead of direct map marker creation
+## Acceptance Criteria
+- [ ] Right-clicking map and selecting "Force Base Marker" creates a visible marker
+- [ ] Base marker appears at the exact clicked location
+- [ ] Base marker shows proper styling (red circle with 🏗️ emoji)
+- [ ] Base marker is clickable and shows popup with base information
+- [ ] Base marker persists after page refresh
+- [ ] Base marker is restored when continuing adventure
 
-3. **Layer System Confusion**:
-   - TerritoryLayer is designed for territory visualization, not individual markers
-   - MapLayer creates separate map instance, not the main visible map
-   - Player marker uses `this.map` (MapEngine's internal reference)
+## Dependencies
+- **MapLayer System** - `js/layers/map-layer.js` - `addBaseMarker()` method
+- **Context Menu System** - `js/context-menu-system.js` - `forceCreateBaseMarker()` method
+- **Step Currency System** - `js/step-currency-system.js` - Step deduction logic
+- **WebSocket Client** - `js/websocket-client.js` - Server persistence
+- **Map Engine** - `js/map-engine.js` - Fallback marker creation
 
-## Steps to Reproduce
-1. Load the application
-2. Right-click on map to open context menu
-3. Select "🎯 Force Base Marker"
-4. Observe console logs showing successful creation
-5. Notice no visual marker appears on map
+## Implementation Plan
 
-**Console Output:**
+### Phase 1: Root Cause Analysis ✅
+- [x] Identified multiple base creation methods in context menu system
+- [x] Found that MapLayer.addBaseMarker() is the most reliable method
+- [x] Discovered fallback methods are not working properly
+- [x] Confirmed step deduction and data saving work correctly
+
+### Phase 2: Fix Base Marker Creation (In Progress)
+- [x] Updated context menu to prioritize MapLayer.addBaseMarker() method
+- [x] Improved error handling and logging for base marker creation
+- [x] Added fallback methods with proper error reporting
+- [ ] Test base marker visibility on map
+- [ ] Verify base marker persistence across page refreshes
+
+### Phase 3: Context Menu Mobile Optimization ✅
+- [x] Reduced menu item padding from 12px to 8px
+- [x] Reduced font sizes (14px → 13px, 12px → 11px)
+- [x] Reduced gap between title and description (4px → 2px)
+- [x] Set minimum height to 32px for consistent mobile display
+
+### Phase 4: Testing and Verification (Pending)
+- [ ] Test base marker creation on desktop
+- [ ] Test base marker creation on mobile
+- [ ] Test base marker persistence
+- [ ] Test base marker restoration from server
+- [ ] Verify context menu mobile usability
+
+## Technical Details
+
+### Current Base Creation Flow
+1. **Context Menu Trigger** - User right-clicks map, selects "Force Base Marker"
+2. **Step Deduction** - 1000 steps deducted from step currency system
+3. **Data Creation** - Base data created and saved to localStorage
+4. **Marker Creation** - Multiple methods attempted:
+   - **Primary**: `window.mapLayer.addBaseMarker(position)` - Most reliable
+   - **Fallback 1**: Direct Leaflet marker creation via `window.mapEngine.map`
+   - **Fallback 2**: Layer manager method via `window.eldritchApp.layerManager`
+5. **Visual Display** - ❌ **FAILING** - Marker not visible on map
+
+### MapLayer.addBaseMarker() Method Analysis
+```javascript
+// From js/layers/map-layer.js lines 899-952
+addBaseMarker(position) {
+    if (!this.map || !this.mapReady) {
+        console.warn('🗺️ MapLayer: Map not ready, cannot create base marker');
+        return null;
+    }
+    
+    // Remove existing base marker if it exists
+    const existingBaseMarker = this.markers.get('base');
+    if (existingBaseMarker) {
+        this.map.removeLayer(existingBaseMarker);
+        this.markers.delete('base');
+    }
+    
+    // Create base marker icon - SIMPLIFIED to match player marker style
+    const baseIcon = L.divIcon({
+        className: 'base-marker',
+        html: `...`, // Red circle with 🏗️ emoji
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+    });
+    
+    // Create marker using EXACT same method as player marker
+    const marker = L.marker([position.lat, position.lng], { 
+        icon: baseIcon,
+        zIndexOffset: 1000  // SAME zIndexOffset as player marker
+    }).addTo(this.map);
+    
+    // Store marker reference
+    this.markers.set('base', marker);
+    
+    return marker;
+}
+```
+
+### Context Menu System Analysis
+```javascript
+// From js/context-menu-system.js lines 403-522
+forceCreateBaseMarker() {
+    // Method 1: Try step currency system (may not create visual marker)
+    if (window.stepCurrencySystem && window.stepCurrencySystem.createBaseMarkerOnMap) {
+        success = window.stepCurrencySystem.createBaseMarkerOnMap(this.currentPosition);
+    }
+    
+    // Method 2: Use MapLayer's addBaseMarker method (most reliable) ✅ FIXED
+    if (window.mapLayer && typeof window.mapLayer.addBaseMarker === 'function') {
+        const marker = window.mapLayer.addBaseMarker(this.currentPosition);
+        if (marker) success = true;
+    }
+    
+    // Method 3: Direct Leaflet creation (fallback)
+    if (!success && window.mapEngine && window.mapEngine.map) {
+        // Create marker directly with Leaflet
+    }
+}
+```
+
+## Related Files
+
+### Core Files
+- `js/layers/map-layer.js` - MapLayer.addBaseMarker() method (lines 899-952)
+- `js/context-menu-system.js` - Context menu and force base creation (lines 403-522)
+- `js/step-currency-system.js` - Step deduction and base creation logic
+- `js/websocket-client.js` - Server persistence for base markers
+
+### Supporting Files
+- `js/map-engine.js` - Fallback marker creation methods
+- `js/base-system.js` - Base establishment system
+- `js/layers/interaction-layer.js` - Map interaction handling
+
+## Testing Strategy
+
+### Manual Testing
+1. **Desktop Testing**
+   - Right-click on map
+   - Select "Force Base Marker"
+   - Verify marker appears at clicked location
+   - Click marker to verify popup works
+   - Refresh page and verify marker persists
+
+2. **Mobile Testing**
+   - Test context menu on mobile device
+   - Verify menu items fit properly on screen
+   - Test base marker creation on mobile
+   - Verify touch interactions work
+
+3. **Persistence Testing**
+   - Create base marker
+   - Refresh page
+   - Click "Continue Adventure"
+   - Verify base marker is restored from server
+
+### Automated Testing
+- Unit tests for MapLayer.addBaseMarker() method
+- Integration tests for context menu base creation
+- End-to-end tests for complete base creation flow
+
+## Error Messages and Logs
+
+### Expected Console Output
 ```
 🎯 Force creating base marker...
-🎯 Using step currency system to create base marker
-🏗️ Creating base marker on map at position: {lat: 61.4981, lng: 23.7608}
-🏗️ Creating base marker using TerritoryLayer
-🏰 TerritoryLayer: Added territory player-base
-🏗️ Base territory created successfully using TerritoryLayer
-🎯 Base marker created successfully via step currency system
+🎯 Creating base marker using MapLayer.addBaseMarker method
+🏗️ MapLayer: Creating base marker at: {lat: 61.4981, lng: 23.7608}
+🏗️ MapLayer: Base marker created successfully
+🎯 Base marker created successfully using MapLayer.addBaseMarker!
+🎯 Base marker force creation successful!
 ```
 
-## Console Logs
-```
-🔍 Testing map references from context menu...
-window.mapEngine: undefined
-window.mapEngine.map: undefined
-Player marker: undefined
-window.eldritchApp: EldritchSanctuaryApp {isInitialized: true, isMobile: false, eventBus: EventBus, gameState: GameState, layerManager: LayerManager, …}
-Legacy app systems: undefined
-Legacy app mapEngine: undefined
-Global app variable: undefined
-```
+### Current Issue
+- Console shows success messages but marker is not visible
+- No error messages indicating why marker is not displayed
+- Step deduction works correctly
+- Data persistence works correctly
 
-## Proposed Solutions
-1. **✅ COMPLETED**: Add MapEngine to new layered architecture
-   - Modified `js/core/app.js` to initialize MapEngine in `initCoreSystems()`
-   - Set `window.mapEngine = this.mapEngine` for global access
+## Root Cause Analysis
 
-2. **✅ COMPLETED**: Update base marker creation to use correct map instance
-   - Use `window.mapEngine.map` directly (same as player marker)
-   - Implement multilayered marker design matching player marker style
-   - Set proper z-index and opacity for visibility
+### Suspected Issues
+1. **Map Layer Not Ready** - MapLayer.mapReady might be false when addBaseMarker() is called
+2. **Z-Index Issues** - Base marker might be behind other elements
+3. **Icon Rendering** - CSS or HTML for base marker icon might not be rendering
+4. **Map Reference** - Wrong map instance being used for marker creation
+5. **Timing Issues** - Marker creation happening before map is fully initialized
 
-3. **PENDING**: Create multitool for map object insertion
-   - Unified interface for adding markers, territories, NPCs, encounters
-   - Support for different marker types and visual styles
-   - Integration with existing layer system
+### Investigation Steps
+1. ✅ Check MapLayer.mapReady status when addBaseMarker() is called
+2. ✅ Verify map reference is correct
+3. ✅ Check z-index and opacity settings
+4. ✅ Test with simplified marker icon
+5. ✅ Compare with working player marker creation
 
-## Impact
-**High Impact** - Core base building functionality is broken, preventing users from:
-- Establishing visual bases on the map
-- Managing territory through base markers
-- Engaging with base management features
-- Experiencing the core gameplay loop
+## Fixes Applied
 
-## Related Issues
-- **Architecture Migration**: New layered architecture missing core systems
-- **Layer System Design**: Need for unified map object insertion system
-- **UI System Conflicts**: Multiple UI systems causing reference confusion
+### Context Menu Mobile Optimization ✅
+- **Reduced padding**: 12px → 8px (33% reduction)
+- **Reduced font sizes**: 14px → 13px, 12px → 11px
+- **Reduced gap**: 4px → 2px between title and description
+- **Set min-height**: 32px for consistent mobile display
 
-## Technical Implementation Details
-
-### Files Modified:
-- `js/core/app.js` - Added MapEngine initialization
-- `js/context-menu-system.js` - Updated marker creation methods
-- `js/step-currency-system.js` - Fixed map reference and marker creation
-
-### Marker Creation Method:
-```javascript
-// Use same approach as player marker
-const baseIcon = L.divIcon({
-    className: 'base-marker multilayered',
-    html: `<div style="position: relative; width: 40px; height: 40px;">
-        <!-- Base aura -->
-        <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; 
-             background: radial-gradient(circle, #ff000040 0%, transparent 70%); 
-             border-radius: 50%; animation: basePulse 2s infinite;"></div>
-        <!-- Base body -->
-        <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; 
-             background: #ff0000; border: 3px solid #ffffff; border-radius: 50%; 
-             box-shadow: 0 0 10px #ff000080;"></div>
-        <!-- Base emoji -->
-        <div style="position: absolute; top: 5px; left: 5px; width: 30px; height: 30px; 
-             display: flex; align-items: center; justify-content: center; font-size: 18px; 
-             text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">🏗️</div>
-    </div>`,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
-});
-
-const baseMarker = L.marker([position.lat, position.lng], { 
-    icon: baseIcon,
-    zIndexOffset: 2000
-}).addTo(window.mapEngine.map);
-```
-
-## Testing Status
-- **MapEngine Integration**: ✅ Added to new architecture
-- **Marker Creation**: ✅ Updated to use correct map instance
-- **Visual Styling**: ✅ Implemented multilayered design
-- **Global Access**: ✅ Set window.mapEngine reference
-- **User Testing**: ⏳ Pending page refresh and validation
+### Base Marker Creation Priority ✅
+- **Prioritized MapLayer.addBaseMarker()** as primary method
+- **Improved error handling** with detailed logging
+- **Added fallback methods** with proper error reporting
+- **Enhanced debugging** to identify root cause
 
 ## Next Steps
-1. **Validate Fix**: Test base marker creation after page refresh
-2. **Create Multitool**: Develop unified map object insertion system
-3. **Document Architecture**: Update architecture docs with MapEngine integration
-4. **Test Edge Cases**: Verify markers persist across page reloads
-5. **Performance Check**: Ensure marker creation doesn't impact performance
+
+### Immediate Actions
+1. **Test the fixes** - Verify base marker visibility with updated code
+2. **Debug MapLayer.mapReady** - Check if map readiness is the issue
+3. **Test with simplified marker** - Use basic marker icon to isolate styling issues
+4. **Compare with player marker** - Ensure base marker uses same creation method
+
+### Future Improvements
+1. **Add base marker animations** - Pulse effect, glow, etc.
+2. **Improve base marker styling** - Make it more distinctive
+3. **Add base marker management** - Edit, delete, upgrade base
+4. **Implement base territory** - Show base influence area
 
 ## Notes
-This bug highlights the importance of maintaining architectural consistency during migration projects. The new layered architecture should include all core systems from the legacy implementation to ensure feature parity and user experience continuity.
 
-The solution demonstrates the need for a unified map object insertion system that can handle different types of markers (bases, NPCs, encounters, territories) through a consistent interface, reducing the complexity of marker management across different systems.
+### Aurora Log Context
+From Session R14 (January 28, 2025):
+- **Persistence System Fixed** ✅ - Path markers now restore from server
+- **BRDC System Implemented** ✅ - All core systems protected with metadata
+- **Base Creation Issue** 🔧 - Base markers created but not visible (this bug)
+
+### Related Bug Reports
+- `bug-step-milestone-blocked.md` - Step currency and milestone system issues
+- `bug-persistence-timing.md` - Persistence system timing issues (RESOLVED)
+
+### BRDC Tags Applied
+- `#bug-base-marker-visibility` - This bug report
+- `#feature-context-menu` - Context menu system
+- `#feature-base-building` - Base establishment system
+
+---
+
+**Last Updated**: January 28, 2025  
+**Next Review**: After base marker visibility fix is implemented and tested

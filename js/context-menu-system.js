@@ -97,19 +97,20 @@ class ContextMenuSystem {
             const menuItem = document.createElement('div');
             menuItem.className = 'context-menu-item';
             menuItem.style.cssText = `
-                padding: 12px 20px;
+                padding: 8px 16px;
                 color: #ffffff;
                 cursor: pointer;
                 transition: all 0.2s ease;
                 border-bottom: 1px solid rgba(74, 158, 255, 0.2);
                 display: flex;
                 flex-direction: column;
-                gap: 4px;
+                gap: 2px;
+                min-height: 32px;
             `;
             
             menuItem.innerHTML = `
-                <div style="font-weight: bold; font-size: 14px;">${item.text}</div>
-                <div style="font-size: 12px; color: #a0a0a0;">${item.description}</div>
+                <div style="font-weight: bold; font-size: 13px;">${item.text}</div>
+                <div style="font-size: 11px; color: #a0a0a0;">${item.description}</div>
             `;
 
             menuItem.addEventListener('click', (e) => {
@@ -423,9 +424,25 @@ class ContextMenuSystem {
             }
         }
 
-        // Method 2: Use SAME approach as player marker
-        if (window.mapEngine && window.mapEngine.map && typeof L === 'object') {
-            console.log('🎯 Creating base marker using SAME method as player marker');
+        // Method 2: Use MapLayer's addBaseMarker method (most reliable)
+        if (window.mapLayer && typeof window.mapLayer.addBaseMarker === 'function') {
+            console.log('🎯 Creating base marker using MapLayer.addBaseMarker method');
+            try {
+                const marker = window.mapLayer.addBaseMarker(this.currentPosition);
+                if (marker) {
+                    console.log('🎯 Base marker created successfully using MapLayer.addBaseMarker!');
+                    success = true;
+                } else {
+                    console.error('🎯 MapLayer.addBaseMarker returned null');
+                }
+            } catch (error) {
+                console.error('🎯 Error creating base marker using MapLayer.addBaseMarker:', error);
+            }
+        }
+        
+        // Method 3: Use SAME approach as player marker (fallback)
+        if (!success && window.mapEngine && window.mapEngine.map && typeof L === 'object') {
+            console.log('🎯 Creating base marker using SAME method as player marker (fallback)');
             try {
                 // Create base marker icon similar to player marker
                 const baseIcon = L.divIcon({
