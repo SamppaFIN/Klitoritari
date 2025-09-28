@@ -497,12 +497,20 @@ class WebSocketClient {
      */
     handleBaseEstablished(payload) {
         console.log('🏗️ Base established on server:', payload);
+        console.log('🏗️ Payload details:', {
+            hasBaseMarker: !!payload.baseMarker,
+            hasPosition: !!payload.position,
+            position: payload.position,
+            baseMarker: payload.baseMarker
+        });
         
         // Create base marker on client side using MapObjectManager
         if (payload.baseMarker && payload.position) {
+            console.log('🏗️ Creating base marker from server response...');
             this.createBaseMarkerFromServer(payload.baseMarker, payload.position);
         } else {
             console.warn('⚠️ Base establishment payload missing baseMarker or position data');
+            console.warn('⚠️ Payload structure:', JSON.stringify(payload, null, 2));
         }
     }
     
@@ -513,13 +521,16 @@ class WebSocketClient {
      */
     createBaseMarkerFromServer(baseMarker, position) {
         console.log('🏗️ Creating base marker from server response:', { baseMarker, position });
+        console.log('🏗️ MapObjectManager available:', !!window.mapObjectManager);
+        console.log('🏗️ MapObjectManager.createObject function:', typeof window.mapObjectManager?.createObject);
         
         // Use MapObjectManager to create the base marker
         if (window.mapObjectManager && typeof window.mapObjectManager.createObject === 'function') {
             try {
+                console.log('🏗️ Calling MapObjectManager.createObject with BASE and position:', position);
                 // Create base marker using MapObjectManager
                 const marker = window.mapObjectManager.createObject('BASE', position);
-                console.log('🏗️ Base marker created successfully from server response');
+                console.log('🏗️ Base marker created successfully from server response:', marker);
                 
                 // Center map on the base marker for better visibility
                 this.centerMapOnBase(position);
@@ -527,9 +538,11 @@ class WebSocketClient {
                 return marker;
             } catch (error) {
                 console.error('❌ Failed to create base marker from server response:', error);
+                console.error('❌ Error details:', error.stack);
             }
         } else {
             console.error('❌ MapObjectManager not available for base marker creation');
+            console.error('❌ MapObjectManager:', window.mapObjectManager);
         }
     }
     
