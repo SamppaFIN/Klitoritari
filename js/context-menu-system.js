@@ -283,8 +283,8 @@ class ContextMenuSystem {
             return;
         }
 
-        // Try different base establishment methods
-        this.tryEstablishBase(this.currentPosition);
+        // Send base establishment command to server
+        this.sendBaseEstablishToServer(this.currentPosition);
         this.hideContextMenu();
     }
 
@@ -460,8 +460,22 @@ class ContextMenuSystem {
             return;
         }
 
-        // Use MapObjectManager for consistent marker creation and positioning
-        this.createMapObject('BASE');
+        // Send base establishment command to server (same as establishBase but without step check)
+        this.sendBaseEstablishToServer(this.currentPosition);
+    }
+
+    sendBaseEstablishToServer(position) {
+        console.log('🏗️ Sending base establishment command to server:', position);
+        
+        // Check if WebSocket client is available
+        if (window.websocketClient && typeof window.websocketClient.establishBase === 'function') {
+            window.websocketClient.establishBase(position);
+            console.log('🏗️ Base establishment command sent to server');
+        } else {
+            console.error('❌ WebSocket client not available for base establishment');
+            // Fallback to local creation if server is not available
+            this.createMapObject('BASE');
+        }
     }
 
     // Simple test function
