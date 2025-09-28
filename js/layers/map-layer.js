@@ -910,18 +910,25 @@ class MapLayer extends BaseLayer {
             this.markers.delete('base');
         }
 
-        // Create base marker icon - SIMPLIFIED to match player marker style
+        // Create base marker icon - SIMPLIFIED for debugging
         const baseIcon = L.divIcon({
             className: 'base-marker',
             html: `
-                <div style="position: relative; width: 40px; height: 40px;">
-                    <!-- Base aura -->
-                    <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, #ff000040 0%, transparent 70%); border-radius: 50%; animation: basePulse 2s infinite;"></div>
-                    <!-- Base body -->
-                    <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #ff0000; border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 0 10px #ff000080;"></div>
-                    <!-- Base emoji -->
-                    <div style="position: absolute; top: 5px; left: 5px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 18px; text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">🏗️</div>
-                </div>
+                <div style="
+                    width: 40px; 
+                    height: 40px; 
+                    background: #ff0000; 
+                    border: 3px solid #ffffff; 
+                    border-radius: 50%; 
+                    box-shadow: 0 0 15px #ff0000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    color: white;
+                    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                    z-index: 1000;
+                ">🏗️</div>
             `,
             iconSize: [40, 40],
             iconAnchor: [20, 20]
@@ -948,6 +955,18 @@ class MapLayer extends BaseLayer {
         console.log('🏗️ MapLayer: Base marker created at:', position);
         console.log('🏗️ MapLayer: Base marker zIndexOffset:', marker.options.zIndexOffset);
         console.log('🏗️ MapLayer: Base marker map reference:', marker._map);
+        console.log('🏗️ MapLayer: Base marker element:', marker.getElement());
+        console.log('🏗️ MapLayer: Base marker visible:', marker.getElement() ? marker.getElement().style.display : 'no element');
+        console.log('🏗️ MapLayer: Base marker opacity:', marker.getElement() ? marker.getElement().style.opacity : 'no element');
+        
+        // Force marker to be visible
+        if (marker.getElement()) {
+            marker.getElement().style.display = 'block';
+            marker.getElement().style.opacity = '1';
+            marker.getElement().style.visibility = 'visible';
+            console.log('🏗️ MapLayer: Forced base marker visibility');
+        }
+        
         return marker;
     }
 
