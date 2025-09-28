@@ -738,6 +738,41 @@ class ThreeJSUILayer extends BaseLayer {
                                 </button>
                             </div>
                             
+                            <!-- Debug Tools -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                <button onclick="window.exportDeviceLogs()" style="
+                                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                                    📱 Export Logs
+                                </button>
+                                
+                                <button onclick="window.clearAllBaseData()" style="
+                                    background: linear-gradient(135deg, #ef4444, #dc2626);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
+                                    🧹 Clear Data
+                                </button>
+                            </div>
+                            
                             <!-- Cosmic Shop -->
                             <div style="
                                 background: rgba(168, 85, 247, 0.1);

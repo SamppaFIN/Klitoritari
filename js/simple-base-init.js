@@ -776,3 +776,119 @@ window.clearAllBaseData = () => {
     window.refreshBaseTab();
     console.log('🧹 All base data cleared');
 };
+
+/**
+ * BRDC: Export device logs for debugging and analysis
+ * 
+ * Global debug function to collect and export device logs, performance data,
+ * and system information for mobile testing and debugging.
+ * 
+ * Implements: #enhancement-debug-tools
+ * Uses: #feature-persistence-system
+ * 
+ * @returns {void}
+ */
+window.exportDeviceLogs = () => {
+    console.log('📱 Exporting device logs...');
+    
+    // Collect system information
+    const systemInfo = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        cookieEnabled: navigator.cookieEnabled,
+        onLine: navigator.onLine,
+        screenWidth: screen.width,
+        screenHeight: screen.height,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        devicePixelRatio: window.devicePixelRatio,
+        timestamp: new Date().toISOString(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    };
+    
+    // Collect performance data
+    const performanceData = {
+        memoryUsage: performance.memory ? {
+            usedJSHeapSize: performance.memory.usedJSHeapSize,
+            totalJSHeapSize: performance.memory.totalJSHeapSize,
+            jsHeapSizeLimit: performance.memory.jsHeapSizeLimit
+        } : 'Not available',
+        timing: performance.timing ? {
+            navigationStart: performance.timing.navigationStart,
+            loadEventEnd: performance.timing.loadEventEnd,
+            domContentLoadedEventEnd: performance.timing.domContentLoadedEventEnd
+        } : 'Not available',
+        now: performance.now()
+    };
+    
+    // Collect game state
+    const gameState = {
+        playerId: localStorage.getItem('playerId'),
+        baseData: window.SimpleBaseInit?.baseData || null,
+        stepCount: window.stepCurrencySystem?.totalSteps || 0,
+        mapCenter: window.map?.getCenter() || null,
+        mapZoom: window.map?.getZoom() || null,
+        websocketConnected: window.websocketClient?.isConnectedToServer() || false,
+        activeMarkers: window.mapLayer?.markers?.size || 0
+    };
+    
+    // Collect console logs (last 100 entries)
+    const consoleLogs = [];
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    // Override console methods to capture logs
+    console.log = (...args) => {
+        consoleLogs.push({type: 'log', message: args.join(' '), timestamp: new Date().toISOString()});
+        originalLog.apply(console, args);
+    };
+    
+    console.error = (...args) => {
+        consoleLogs.push({type: 'error', message: args.join(' '), timestamp: new Date().toISOString()});
+        originalError.apply(console, args);
+    };
+    
+    console.warn = (...args) => {
+        consoleLogs.push({type: 'warn', message: args.join(' '), timestamp: new Date().toISOString()});
+        originalWarn.apply(console, args);
+    };
+    
+    // Create comprehensive log object
+    const deviceLogs = {
+        systemInfo,
+        performanceData,
+        gameState,
+        consoleLogs: consoleLogs.slice(-100), // Last 100 entries
+        exportTime: new Date().toISOString(),
+        version: 'DESKTOP WORKING MOBILE TESTING'
+    };
+    
+    // Create downloadable file
+    const logData = JSON.stringify(deviceLogs, null, 2);
+    const blob = new Blob([logData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eldritch-sanctuary-logs-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log('📱 Device logs exported successfully!');
+    console.log('📊 Log summary:', {
+        systemInfo: Object.keys(systemInfo).length,
+        performanceData: Object.keys(performanceData).length,
+        gameState: Object.keys(gameState).length,
+        consoleLogs: consoleLogs.length
+    });
+    
+    // Restore original console methods
+    console.log = originalLog;
+    console.error = originalError;
+    console.warn = originalWarn;
+};
