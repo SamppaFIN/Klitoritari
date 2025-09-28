@@ -497,7 +497,36 @@ class WebSocketClient {
      */
     handleBaseEstablished(payload) {
         console.log('🏗️ Base established on server:', payload);
-        // Base is already established locally, just confirm
+        
+        // Create base marker on client side using MapObjectManager
+        if (payload.baseMarker && payload.position) {
+            this.createBaseMarkerFromServer(payload.baseMarker, payload.position);
+        } else {
+            console.warn('⚠️ Base establishment payload missing baseMarker or position data');
+        }
+    }
+    
+    /**
+     * Create base marker from server response
+     * @param {Object} baseMarker - Base marker data from server
+     * @param {Object} position - Position data
+     */
+    createBaseMarkerFromServer(baseMarker, position) {
+        console.log('🏗️ Creating base marker from server response:', { baseMarker, position });
+        
+        // Use MapObjectManager to create the base marker
+        if (window.mapObjectManager && typeof window.mapObjectManager.createObject === 'function') {
+            try {
+                // Create base marker using MapObjectManager
+                const marker = window.mapObjectManager.createObject('BASE', position);
+                console.log('🏗️ Base marker created successfully from server response');
+                return marker;
+            } catch (error) {
+                console.error('❌ Failed to create base marker from server response:', error);
+            }
+        } else {
+            console.error('❌ MapObjectManager not available for base marker creation');
+        }
     }
     
     /**
@@ -621,9 +650,36 @@ class WebSocketClient {
      * @param {Object} marker - Marker object
      */
     addMarkerFromOtherPlayer(marker) {
-        // This would be implemented based on marker type
-        // For now, just log the marker
         console.log('📍 Adding marker from other player:', marker);
+        
+        // Handle different marker types
+        if (marker.type === 'base' || marker.type === 'BASE') {
+            this.createBaseMarkerFromServer(marker, marker.position);
+        } else if (marker.type === 'path' || marker.type === 'step') {
+            // Handle path/step markers
+            this.createPathMarkerFromServer(marker);
+        } else {
+            console.log('📍 Unknown marker type from other player:', marker.type);
+        }
+    }
+    
+    /**
+     * Create path marker from server
+     * @param {Object} marker - Path marker data
+     */
+    createPathMarkerFromServer(marker) {
+        console.log('🛤️ Creating path marker from server:', marker);
+        
+        // Use MapObjectManager to create path marker
+        if (window.mapObjectManager && typeof window.mapObjectManager.createObject === 'function') {
+            try {
+                const pathMarker = window.mapObjectManager.createObject('PATH', marker.position);
+                console.log('🛤️ Path marker created successfully from server');
+                return pathMarker;
+            } catch (error) {
+                console.error('❌ Failed to create path marker from server:', error);
+            }
+        }
     }
 
     handleZoneEntry(payload) {
