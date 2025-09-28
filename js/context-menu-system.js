@@ -220,20 +220,38 @@ class ContextMenuSystem {
     }
 
     getMapCoordinates(x, y) {
-        // Try to get coordinates from the map if available
-        const map = window.mapEngine?.map || window.eldritchApp?.systems?.mapEngine?.map;
+        // Get the map from the correct reference
+        const map = window.mapLayer?.map || window.mapEngine?.map;
+        
         if (map && typeof map.containerPointToLatLng === 'function') {
             try {
-                const point = L.point(x, y);
+                // Get the map container's position and size
+                const mapContainer = map.getContainer();
+                const rect = mapContainer.getBoundingClientRect();
+                
+                // Convert screen coordinates to map container coordinates
+                const containerX = x - rect.left;
+                const containerY = y - rect.top;
+                
+                console.log('🎯 Converting coordinates:', {
+                    screenX: x, screenY: y,
+                    containerX: containerX, containerY: containerY,
+                    mapRect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+                });
+                
+                // Convert container point to lat/lng
+                const point = L.point(containerX, containerY);
                 const latLng = map.containerPointToLatLng(point);
+                
+                console.log('🎯 Converted to lat/lng:', latLng);
                 return { lat: latLng.lat, lng: latLng.lng };
             } catch (error) {
                 console.warn('⚠️ Error converting coordinates:', error);
             }
         }
 
-        // Fallback: return approximate coordinates (this is a simplified version)
-        // In a real implementation, you'd need to convert screen coordinates to lat/lng
+        // Fallback: return approximate coordinates
+        console.warn('⚠️ Using fallback coordinates - map not available');
         return { lat: 61.4981, lng: 23.7608 }; // Default to Tampere coordinates
     }
 
