@@ -910,25 +910,52 @@ class MapLayer extends BaseLayer {
             this.markers.delete('base');
         }
 
-        // Create base marker icon - SIMPLIFIED for debugging
+        // Create base marker icon using SVG
         const baseIcon = L.divIcon({
             className: 'base-marker',
             html: `
                 <div style="
                     width: 40px; 
                     height: 40px; 
-                    background: #ff0000; 
-                    border: 3px solid #ffffff; 
-                    border-radius: 50%; 
-                    box-shadow: 0 0 15px #ff0000;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 20px;
-                    color: white;
-                    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
                     z-index: 1000;
-                ">🏗️</div>
+                ">
+                    <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <radialGradient id="baseGradient" cx="50%" cy="30%" r="70%">
+                                <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+                            </radialGradient>
+                            <filter id="baseGlow">
+                                <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+                                <feMerge> 
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+                        
+                        <!-- Outer ring -->
+                        <circle cx="15" cy="15" r="14" fill="none" stroke="#2F4F2F" stroke-width="2"/>
+                        
+                        <!-- Main circle -->
+                        <circle cx="15" cy="15" r="11" fill="url(#baseGradient)" filter="url(#baseGlow)"/>
+                        
+                        <!-- Building structure -->
+                        <rect x="10" y="12" width="10" height="8" rx="1" fill="#2F4F2F"/>
+                        <rect x="11" y="13" width="2" height="2" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="14" y="13" width="2" height="2" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="17" y="13" width="2" height="2" fill="rgba(255,255,255,0.3)"/>
+                        
+                        <!-- Roof -->
+                        <polygon points="8,12 15,6 22,12" fill="#654321"/>
+                        
+                        <!-- Inner highlight -->
+                        <circle cx="15" cy="15" r="8" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                    </svg>
+                </div>
             `,
             iconSize: [40, 40],
             iconAnchor: [20, 20]
