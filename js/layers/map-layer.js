@@ -239,10 +239,10 @@ class MapLayer extends BaseLayer {
             }
         });
 
-        // Map context menu event
+        // Map context menu event - now handled by context-menu-system.js
         this.map.on('contextmenu', (e) => {
             e.originalEvent.preventDefault();
-            this.showContextMenu(e);
+            // Context menu is now handled by the unified context-menu-system.js
         });
     }
 
@@ -648,46 +648,7 @@ class MapLayer extends BaseLayer {
         `;
     }
 
-    // Context Menu Methods
-    showContextMenu(e) {
-        // Remove existing context menu
-        this.hideContextMenu();
-        
-        // Create context menu
-        const contextMenu = document.createElement('div');
-        contextMenu.id = 'map-context-menu';
-        contextMenu.style.cssText = `
-            position: fixed;
-            top: ${e.containerPoint.y}px;
-            left: ${e.containerPoint.x}px;
-            background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(40, 40, 60, 0.95));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 8px 0;
-            z-index: 10000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            min-width: 150px;
-        `;
-        
-        // Move Here button is now handled by context-menu-system.js
-        document.body.appendChild(contextMenu);
-        
-        // Store reference for cleanup
-        this.contextMenu = contextMenu;
-        
-        // Hide menu when clicking elsewhere
-        setTimeout(() => {
-            document.addEventListener('click', this.hideContextMenu.bind(this), { once: true });
-        }, 100);
-    }
-
-    hideContextMenu() {
-        if (this.contextMenu) {
-            this.contextMenu.remove();
-            this.contextMenu = null;
-        }
-    }
+    // Context Menu Methods - now handled by context-menu-system.js
 
     // Player Teleportation Methods
     teleportPlayer(targetPosition) {
