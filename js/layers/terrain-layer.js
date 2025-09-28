@@ -218,6 +218,10 @@ class TerrainLayer extends BaseLayer {
     }
 
     doRender(deltaTime) {
+        // DISABLED: Terrain layer causing positioning issues with map
+        // The map layer should be the primary visual element
+        return;
+        
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 

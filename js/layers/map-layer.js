@@ -967,6 +967,27 @@ class MapLayer extends BaseLayer {
             console.log('🏗️ MapLayer: Forced base marker visibility');
         }
         
+        // Center map on base marker to ensure it's visible
+        console.log('🏗️ MapLayer: Centering map on base marker...');
+        console.log('🏗️ MapLayer: Current map center:', this.map.getCenter());
+        console.log('🏗️ MapLayer: Current map zoom:', this.map.getZoom());
+        console.log('🏗️ MapLayer: Base marker position:', position);
+        
+        this.map.setView([position.lat, position.lng], 16, { animate: true });
+        
+        // Verify the marker is actually on the map
+        setTimeout(() => {
+            console.log('🏗️ MapLayer: Map center after centering:', this.map.getCenter());
+            console.log('🏗️ MapLayer: Map zoom after centering:', this.map.getZoom());
+            console.log('🏗️ MapLayer: Base marker latlng:', marker.getLatLng());
+            console.log('🏗️ MapLayer: Distance between map center and base marker:', 
+                this.calculateDistance(
+                    this.map.getCenter().lat, this.map.getCenter().lng,
+                    marker.getLatLng().lat, marker.getLatLng().lng
+                ) + ' meters'
+            );
+        }, 1000);
+        
         return marker;
     }
 

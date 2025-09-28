@@ -131,6 +131,10 @@ class BackgroundLayer extends BaseLayer {
     }
 
     doRender(deltaTime) {
+        // DISABLED: Background layer causing positioning issues with map
+        // The map layer should be the primary visual element
+        return;
+        
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 

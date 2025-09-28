@@ -442,6 +442,10 @@ class GeolocationLayer extends BaseLayer {
     }
 
     doRender(deltaTime) {
+        // DISABLED: Geolocation layer causing positioning issues with map
+        // The map layer should be the primary visual element
+        return;
+        
         if (!this.ctx) return;
         
         // Render location indicator if available
