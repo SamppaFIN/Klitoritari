@@ -2487,6 +2487,9 @@ html, body {
     position: relative !important;
     background: rgba(255, 0, 0, 0.2) !important;
     border-radius: 50% !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
     border: 3px solid #ff0000 !important;
     animation: basePulse 2s ease-in-out infinite !important;
 }
@@ -2775,12 +2778,12 @@ html, body {
 
 /* Base marker click handling */
 .base-marker {
-    z-index: 1000 !important;
+    z-index: 2000 !important;
     pointer-events: auto !important;
 }
 
 .base-marker.multilayered {
-    z-index: 1000 !important;
+    z-index: 2000 !important;
     pointer-events: auto !important;
 }
 
