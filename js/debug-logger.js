@@ -25,7 +25,8 @@ class DebugLogger {
             // Capture logs that start with specific prefixes
             const message = args.join(' ');
             if (message.includes('🏗️') || message.includes('🎮') || message.includes('📍') || 
-                message.includes('🌌') || message.includes('🎭') || message.includes('👤')) {
+                message.includes('🌌') || message.includes('🎭') || message.includes('👤') ||
+                message.includes('🚶‍♂️') || message.includes('🎯') || message.includes('🧪')) {
                 self.addLog(message);
             }
         };

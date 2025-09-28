@@ -718,7 +718,7 @@ Check console for full localStorage contents.`);
                 <div class="header-center">
                     <div class="step-section" role="button" tabindex="0" aria-label="Step Counter">
                         <div class="step-icon" aria-hidden="true">👣</div>
-                        <div class="step-count" id="step-count" aria-live="polite">0</div>
+                        <div class="step-count" id="step-count-legacy-1" aria-live="polite">0</div>
                     </div>
                     <div class="player-name" id="player-name" aria-label="Player Name">Wanderer</div>
                     <div class="base-flag" id="base-flag" role="button" tabindex="0" aria-label="Base Flag Selection">
@@ -891,7 +891,7 @@ Check console for full localStorage contents.`);
                 <div class="header-center">
                     <div class="step-section" role="button" tabindex="0" aria-label="Step Counter">
                         <div class="step-icon" aria-hidden="true">👣</div>
-                        <div class="step-count" id="step-count" aria-live="polite">0</div>
+                        <div class="step-count" id="step-count-legacy-1" aria-live="polite">0</div>
                     </div>
                     <div class="player-name" id="player-name" aria-label="Player Name">Wanderer</div>
                     <div class="base-flag" id="base-flag" role="button" tabindex="0" aria-label="Base Flag Selection">
@@ -1441,7 +1441,7 @@ Check console for full localStorage contents.`);
     <script src="js/tutorial-encounter-system.js"></script>
     <script src="js/health-bar.js"></script>
     <!-- Legacy map engine removed - using new MapLayer instead -->
-    <!-- <script src="js/map-engine.js"></script> -->
+    <script src="js/map-engine.js"></script>
     <script src="js/webgl-map-renderer.js"></script>
     <script src="js/webgl-map-integration.js"></script>
     <script src="js/webgl-test.js"></script>
@@ -1489,12 +1489,18 @@ Check console for full localStorage contents.`);
     <!-- Loading System -->
     <script src="js/ui/loading-system.js?v=2"></script>
     
+    <!-- Step Currency System -->
+    <script src="js/step-currency-system.js"></script>
+    
+    <!-- Context Menu System -->
+    <script src="js/context-menu-system.js"></script>
+    <script src="js/map-object-manager.js"></script>
+    
     <script src="js/core/app.js"></script>
     
     <!-- Legacy Systems (temporary) -->
     <!-- <script src="js/app.js"></script> -->
     <!-- <script src="js/simple-base-init.js"></script> -->
-    <script src="js/step-currency-system.js"></script>
     <!-- <script src="js/tablist.js"></script> -->
     <!-- <script src="js/ui-panels.js"></script> -->
     

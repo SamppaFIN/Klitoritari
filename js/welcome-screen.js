@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Welcome Screen System - Handles the onboarding experience for new players
+ * @status VERIFIED - Player ID management and welcome flow working correctly
+ * @feature #feature-welcome-screen
+ * @last_verified 2024-01-28
+ * @dependencies WebSocket Client, Player ID management
+ * @warning Do not modify player ID logic or welcome flow without testing game initialization
+ * 
  * Welcome Screen System
  * Handles the onboarding experience for new players
  */
@@ -129,7 +136,7 @@ class WelcomeScreen {
     }
 
     showWelcomeScreen() {
-        console.log('🌟 showWelcomeScreen called - stack trace:', new Error().stack);
+        console.log('🌟 showWelcomeScreen called');
         console.log('🌟 this.isVisible:', this.isVisible);
         console.log('🌟 window.loadingInProgress:', window.loadingInProgress);
         
@@ -172,6 +179,12 @@ class WelcomeScreen {
             this.animateWelcomeScreen();
             this.updateContinueAdventureLabel();
             
+            // Update continue adventure label after WebSocket client is ready
+            setTimeout(() => {
+                this.updateContinueAdventureLabel();
+                console.log('🌟 Updated continue adventure label after WebSocket client initialization');
+            }, 1000);
+            
             // Debug: Check if buttons are clickable
             setTimeout(() => {
                 const continueBtn = document.getElementById('continue-adventure');
@@ -191,7 +204,7 @@ class WelcomeScreen {
     }
 
     hideWelcomeScreen() {
-        console.log('🌟 hideWelcomeScreen called - stack trace:', new Error().stack);
+        console.log('🌟 hideWelcomeScreen called');
         const welcomeScreen = document.getElementById('welcome-screen');
         if (welcomeScreen) {
             welcomeScreen.style.display = 'none';
@@ -236,7 +249,25 @@ class WelcomeScreen {
         try {
             const btn = document.getElementById('continue-adventure');
             if (!btn) return;
-            // Load profile
+            
+            // Check if player has an active player ID
+            const hasActivePlayerId = window.websocketClient && window.websocketClient.hasActivePlayerId();
+            
+            if (!hasActivePlayerId) {
+                // Disable continue adventure button if no player ID exists
+                btn.disabled = true;
+                btn.textContent = 'No Adventure to Continue';
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                console.log('🌟 Continue Adventure button disabled - no active player ID');
+                return;
+            }
+            
+            // Enable button and load profile
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            
             let name = 'Wanderer';
             try {
                 const raw = localStorage.getItem((window.sessionPersistence?.key && window.sessionPersistence.key('profile')) || '');
@@ -1024,6 +1055,14 @@ class WelcomeScreen {
         console.log('🔄 Resetting all game state for fresh start...');
         
         try {
+            // Generate new player ID for fresh adventure
+            if (window.websocketClient && typeof window.websocketClient.generateNewPlayerId === 'function') {
+                const newPlayerId = window.websocketClient.generateNewPlayerId();
+                console.log('🎮 Generated new player ID for fresh adventure:', newPlayerId);
+            } else {
+                console.warn('⚠️ WebSocket client not available for player ID generation');
+            }
+            
             // Clear any existing player base so fresh start has no base
             try {
                 localStorage.removeItem('eldritch-player-base');

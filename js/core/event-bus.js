@@ -8,6 +8,7 @@ class EventBus {
         this.eventHistory = [];
         this.maxHistorySize = 100;
         this.debugMode = false;
+        this.instanceId = Math.random().toString(36).substr(2, 9);
     }
 
     /**
@@ -16,7 +17,18 @@ class EventBus {
      * @param {*} data - Event data payload
      */
     emit(event, data = null) {
-        if (this.debugMode) {
+        // Filter out repetitive events that cause console spam
+        const filteredEvents = [
+            'map:move', 
+            'interaction:mouse:down', 
+            'interaction:mouse:move',
+            'interaction:mouse:up',
+            'interaction:click',
+            'map:click',
+            'player:position:update'
+        ];
+        
+        if (this.debugMode && !filteredEvents.includes(event)) {
             console.log(`🔔 EventBus: ${event}`, data);
         }
 

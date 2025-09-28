@@ -346,7 +346,7 @@ class LoadingSystem {
                     
                     // Remove loading mask to reveal welcome screen content
                     console.log('🌟 Removing loading mask...');
-                    welcomeScreen.removeLoadingMask();
+                    // Note: removeLoadingMask function not implemented in welcome screen
                     
                     // Initialize the main app after welcome screen is ready
                     console.log('🚀 Initializing main app after welcome screen...');

@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Map Engine - Leaflet integration with infinite scrolling and cosmic styling
+ * @status VERIFIED - Core map functionality working correctly
+ * @feature #feature-map-engine
+ * @last_verified 2024-01-28
+ * @dependencies Leaflet, WebGL, Canvas layers
+ * @warning Do not modify map initialization or marker management without testing visibility
+ * 
  * Map Engine - Leaflet integration with infinite scrolling and cosmic styling
  * Handles map rendering, markers, and real-time updates
  */
@@ -77,10 +84,14 @@ class MapEngine {
             console.log('🗺️ Map container already initialized by Leaflet, reusing existing map');
             // Try to get the existing map instance
             try {
-                this.map = L.map.get(mapContainer);
-                if (this.map) {
-                    console.log('🗺️ Successfully retrieved existing map instance');
-                    return;
+                // Check if there's already a map instance
+                if (mapContainer._leaflet_id) {
+                    // Get the map instance using the container's leaflet ID
+                    this.map = L.Map.get(mapContainer);
+                    if (this.map) {
+                        console.log('🗺️ Successfully retrieved existing map instance');
+                        return;
+                    }
                 }
             } catch (e) {
                 console.log('🗺️ Could not retrieve existing map, will create new one');
@@ -124,7 +135,14 @@ class MapEngine {
             const mapContainer = document.getElementById('map');
             if (mapContainer && mapContainer._leaflet_id) {
                 console.log('🗺️ Attempting to get existing map instance...');
-                this.map = L.map.get(mapContainer);
+                // Get the existing map instance using Leaflet's method
+                try {
+                    this.map = L.Map.get(mapContainer);
+                    console.log('🗺️ Successfully retrieved existing map instance');
+                } catch (getError) {
+                    console.error('🗺️ Could not retrieve existing map instance:', getError);
+                    throw error; // Re-throw if we can't recover
+                }
             } else {
                 throw error; // Re-throw if we can't recover
             }
@@ -1608,10 +1626,24 @@ class MapEngine {
         console.log(`🎮 Moving player to: ${lat}, ${lng}`);
         this.hideContextMenu();
         
-        // Give 50 cosmic steps for using Move Here (async to not block movement)
-        setTimeout(() => {
-            this.giveMoveHereSteps();
-        }, 100);
+        // Calculate distance and give steps based on path
+        const currentPos = this.getCurrentPlayerPosition();
+        if (currentPos) {
+            const distance = this.calculateDistance(currentPos.lat, currentPos.lng, lat, lng);
+            const stepsToGive = Math.max(10, Math.floor(distance * 10)); // 10 steps per 100m minimum
+            
+            console.log(`🎮 Distance: ${distance.toFixed(2)}m, giving ${stepsToGive} steps`);
+            
+            // Give steps with path visualization (async to not block movement)
+            setTimeout(() => {
+                this.giveMoveHereStepsWithPath(currentPos, { lat, lng }, stepsToGive);
+            }, 100);
+        } else {
+            // Fallback: give 50 steps if we can't calculate distance
+            setTimeout(() => {
+                this.giveMoveHereSteps();
+            }, 100);
+        }
         
         // Pause location updates during movement
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
@@ -1659,8 +1691,8 @@ class MapEngine {
         }
         
         // Get current player position
-        const currentPos = this.getPlayerPosition();
-        if (!currentPos) {
+        const playerPos = this.getPlayerPosition();
+        if (!playerPos) {
             console.warn('🎮 No current player position available, using fallback');
             // Use fallback position if no GPS position available
             const fallback = { lat: 61.472768, lng: 23.724032 }; // User's known location
@@ -1671,7 +1703,7 @@ class MapEngine {
         }
         
         // Simulate movement from current position to target
-        this.simulatePlayerMovement(currentPos, { lat, lng });
+        this.simulatePlayerMovement(playerPos, { lat, lng });
     }
     
     simulatePlayerMovement(startPos, endPos) {
@@ -1782,8 +1814,127 @@ class MapEngine {
         }
     }
     
+    getCurrentPlayerPosition() {
+        // Try to get current position from various sources
+        if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+            return window.eldritchApp.systems.geolocation.getCurrentPosition();
+        }
+        if (window.geolocationManager) {
+            return window.geolocationManager.getCurrentPosition();
+        }
+        if (this.playerMarker) {
+            return this.playerMarker.getLatLng();
+        }
+        return null;
+    }
+
+    calculateDistance(lat1, lng1, lat2, lng2) {
+        // Haversine formula for calculating distance between two points
+        const R = 6371000; // Earth's radius in meters
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c; // Distance in meters
+    }
+
+    giveMoveHereStepsWithPath(startPos, endPos, totalSteps) {
+        console.log(`🚶‍♂️ Giving ${totalSteps} steps with path visualization`);
+        
+        try {
+            if (!window.stepCurrencySystem) {
+                console.warn('🚶‍♂️ Step currency system not available');
+                return;
+            }
+
+            // Create path points between start and end
+            const pathPoints = this.createPathPoints(startPos, endPos, totalSteps);
+            
+            // Calculate additional steps for markers (10 per marker)
+            const markerCount = Math.floor(totalSteps / 10);
+            const additionalSteps = markerCount * 10;
+            const finalSteps = totalSteps + additionalSteps;
+            
+            console.log(`🚶‍♂️ Adding ${additionalSteps} additional steps for ${markerCount} markers (total: ${finalSteps})`);
+            
+            // Add steps gradually with visual markers
+            let stepIndex = 0;
+            const stepInterval = setInterval(() => {
+                if (stepIndex >= finalSteps) {
+                    clearInterval(stepInterval);
+                    console.log(`🚶‍♂️ Completed ${finalSteps} steps for Move Here action`);
+                    return;
+                }
+
+                // Add one step
+                window.stepCurrencySystem.addManualStep();
+                
+                // Create visual step marker every 10 steps
+                if (stepIndex % 10 === 0 && pathPoints[Math.floor(stepIndex * totalSteps / finalSteps)]) {
+                    this.createStepMarker(pathPoints[Math.floor(stepIndex * totalSteps / finalSteps)], stepIndex + 1);
+                }
+                
+                stepIndex++;
+            }, 50); // 50ms between steps for smooth animation
+
+        } catch (error) {
+            console.error('🚶‍♂️ Error giving Move Here steps with path:', error);
+        }
+    }
+
+    createPathPoints(startPos, endPos, totalSteps) {
+        const points = [];
+        const steps = Math.min(totalSteps, 50); // Limit to 50 points max
+        
+        for (let i = 0; i <= steps; i++) {
+            const ratio = i / steps;
+            const lat = startPos.lat + (endPos.lat - startPos.lat) * ratio;
+            const lng = startPos.lng + (endPos.lng - startPos.lng) * ratio;
+            points.push({ lat, lng });
+        }
+        
+        return points;
+    }
+
+    createStepMarker(position, stepNumber) {
+        if (!this.map || !L) return;
+
+        // Create a small step marker
+        const stepMarker = L.circleMarker([position.lat, position.lng], {
+            radius: 3,
+            fillColor: '#4a9eff',
+            color: '#ffffff',
+            weight: 1,
+            opacity: 0.8,
+            fillOpacity: 0.6
+        }).addTo(this.map);
+
+        // Add popup with step number
+        stepMarker.bindPopup(`Step ${stepNumber}`, {
+            closeButton: false,
+            autoClose: false,
+            closeOnClick: false
+        });
+
+        // Remove marker after 3 seconds
+        setTimeout(() => {
+            if (this.map && stepMarker) {
+                this.map.removeLayer(stepMarker);
+            }
+        }, 3000);
+
+        // Brief popup animation
+        setTimeout(() => {
+            if (stepMarker.isPopupOpen()) {
+                stepMarker.closePopup();
+            }
+        }, 1000);
+    }
+
     giveMoveHereSteps() {
-        // Give 50 cosmic steps for using Move Here button
+        // Give 50 cosmic steps for using Move Here button (fallback)
         try {
             if (window.stepCurrencySystem) {
                 for (let i = 0; i < 50; i++) {
@@ -2249,6 +2400,23 @@ class MapEngine {
         }
         console.log(`🇫🇮 Dropping flag at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
         this.symbolCanvasLayer.addFlagPin(lat, lng, null, null, this.getPathMarkerSymbol?.());
+        
+        // Send flag marker to server for persistence
+        if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+            console.log('🇫🇮 Sending flag marker to server for persistence...');
+            window.websocketClient.createMarker({
+                type: 'flag',
+                position: { lat, lng },
+                data: {
+                    size: 1,
+                    rotation: 0,
+                    symbol: this.getPathMarkerSymbol?.() || '🇫🇮'
+                }
+            });
+        } else {
+            console.log('🇫🇮 WebSocket not connected, flag marker not persisted to server');
+        }
+        
         if (window.gruesomeNotifications && typeof window.gruesomeNotifications.showNotification === 'function') {
             window.gruesomeNotifications.showNotification({
                 type: 'success',

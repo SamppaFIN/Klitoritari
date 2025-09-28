@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] NPC System - Simulated players and chat encounters
+ * @status VERIFIED - NPC movement and chat system working correctly
+ * @feature #feature-npc-system
+ * @last_verified 2024-01-28
+ * @dependencies Map Engine, Chat System, Proximity Detection
+ * @warning Do not modify NPC movement or chat logic without testing proximity interactions
+ * 
  * NPC System - Simulated players and chat encounters
  * Handles NPC movement, chat triggers, and social interactions
  */

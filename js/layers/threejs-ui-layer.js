@@ -23,6 +23,7 @@ class ThreeJSUILayer extends BaseLayer {
         this.isInitialized = false;
         this.uiElements = new Map();
         this.activeTab = null; // Track currently active tab for toggle behavior
+        this.playerCreated = false; // Track if player has been created
         
         console.log('🎮 ThreeJS UI Layer: Initialized');
     }
@@ -661,7 +662,7 @@ class ThreeJSUILayer extends BaseLayer {
                                 <small style="color: rgba(255,255,255,0.6);">Receive quest updates and achievements</small>
                             </div>
                             
-                            <button style="
+                            <button id="settings-action-button" style="
                                 background: linear-gradient(135deg, #8b5cf6, #a78bfa);
                                 color: white;
                                 border: none;
@@ -675,8 +676,8 @@ class ThreeJSUILayer extends BaseLayer {
                                 box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
                             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'"
-                               onclick="window.eldritchApp?.layerManager?.getLayer?.('threejs-ui')?.handlePlayerCreationComplete?.()">
-                                Create Player And Enter Sanctuary
+                               onclick="window.eldritchApp?.layerManager?.getLayer?.('threejs-ui')?.handleSettingsAction?.()">
+                                ${this.playerCreated ? 'Save Settings' : 'Create Player And Enter Sanctuary'}
                             </button>
                         </div>
                     </div>
@@ -1112,6 +1113,9 @@ class ThreeJSUILayer extends BaseLayer {
     handlePlayerCreationComplete() {
         console.log('🎮 Player creation completed - closing settings tab');
         
+        // Mark player as created
+        this.playerCreated = true;
+        
         // Close the settings tab by switching to it again (toggle behavior)
         if (this.enhancedUI && this.enhancedUI.switchTab) {
             this.enhancedUI.switchTab('settings'); // This will toggle it off since it's already active
@@ -1120,6 +1124,117 @@ class ThreeJSUILayer extends BaseLayer {
         // Also emit an event to start the game
         if (this.eventBus) {
             this.eventBus.emit('game:start');
+        }
+    }
+
+    handleSettingsAction() {
+        if (this.playerCreated) {
+            console.log('🎮 Saving settings - closing settings tab');
+            // Save settings logic here if needed
+        } else {
+            console.log('🎮 Creating player - closing settings tab');
+            // Mark player as created
+            this.playerCreated = true;
+            
+            // Emit game start event
+            if (this.eventBus) {
+                this.eventBus.emit('game:start');
+            }
+        }
+        
+        // Close the settings tab by switching to it again (toggle behavior)
+        console.log('🎮 Attempting to close settings tab...');
+        console.log('🎮 enhancedUI available:', !!this.enhancedUI);
+        console.log('🎮 switchTab method available:', !!(this.enhancedUI && this.enhancedUI.switchTab));
+        
+        if (this.enhancedUI && this.enhancedUI.switchTab) {
+            console.log('🎮 Calling switchTab("settings") to close tab');
+            this.enhancedUI.switchTab('settings'); // This will toggle it off since it's already active
+        } else {
+            console.warn('🎮 Enhanced UI or switchTab method not available, using basic 2D UI method');
+            // Use the basic 2D UI method to close the tab
+            this.switchTab('settings'); // This will toggle it off since it's already active
+        }
+    }
+
+    // Method to refresh settings content when tab is opened
+    refreshSettingsContent() {
+        if (this.enhancedUI && this.enhancedUI.updateTabContent) {
+            this.enhancedUI.updateTabContent('settings', this.getTabContent('settings'));
+        }
+    }
+
+    // Fallback method to hide all tabs
+    hideAllTabs() {
+        console.log('🎮 Hiding all tabs as fallback');
+        
+        // Try multiple approaches to hide the settings tab
+        let hidden = false;
+        
+        // Method 1: Try enhanced UI if available
+        if (this.enhancedUI && this.enhancedUI.hideAllPanels) {
+            console.log('🎮 Using enhanced UI hideAllPanels');
+            this.enhancedUI.hideAllPanels();
+            this.enhancedUI.activeTab = null;
+            hidden = true;
+        }
+        
+        // Method 2: Try to find and hide the settings tab directly
+        if (!hidden) {
+            console.log('🎮 Trying to hide settings tab directly');
+            
+            // Look for settings tab content
+            const settingsTab = document.querySelector('[data-tab="settings"]');
+            const settingsContent = document.querySelector('.settings-tab-content');
+            const tabContent = document.querySelector('.tab-content');
+            const magneticTabs = document.querySelector('.magnetic-tabs');
+            
+            if (settingsTab) {
+                console.log('🎮 Found settings tab, hiding it');
+                settingsTab.style.display = 'none';
+                settingsTab.classList.remove('active');
+                hidden = true;
+            }
+            
+            if (settingsContent) {
+                console.log('🎮 Found settings content, hiding it');
+                settingsContent.style.display = 'none';
+                hidden = true;
+            }
+            
+            if (tabContent) {
+                console.log('🎮 Found tab content, hiding it');
+                tabContent.style.display = 'none';
+                hidden = true;
+            }
+            
+            if (magneticTabs) {
+                console.log('🎮 Found magnetic tabs, hiding them');
+                magneticTabs.style.display = 'none';
+                hidden = true;
+            }
+        }
+        
+        // Method 3: Try to hide any visible panels
+        if (!hidden) {
+            console.log('🎮 Trying to hide any visible panels');
+            const panels = document.querySelectorAll('.panel, .tab-panel, .ui-panel');
+            panels.forEach(panel => {
+                if (panel.style.display !== 'none') {
+                    console.log('🎮 Hiding panel:', panel.className);
+                    panel.style.display = 'none';
+                    hidden = true;
+                }
+            });
+        }
+        
+        // Method 4: Reset active tab state
+        this.activeTab = null;
+        
+        if (hidden) {
+            console.log('🎮 Successfully hid tabs using fallback method');
+        } else {
+            console.warn('🎮 Could not hide tabs - no suitable elements found');
         }
     }
     

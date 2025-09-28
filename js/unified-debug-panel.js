@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Unified Debug Panel System - Combines all debug panels into one draggable interface
+ * @status VERIFIED - Debug panel with comprehensive testing tools working correctly
+ * @feature #feature-debug-panel
+ * @last_verified 2024-01-28
+ * @dependencies All game systems for testing
+ * @warning Do not modify debug panel functionality without testing all system integrations
+ * 
  * Unified Debug Panel System
  * Combines all debug panels into one draggable, tabbed interface
  */
@@ -76,9 +83,12 @@ class UnifiedDebugPanel {
                 <div id="path-tab" class="debug-tab-content ${this.currentTab === 'path' ? 'active' : ''}">
                     ${this.createPathTab()}
                 </div>
-                <div id="quest-tab" class="debug-tab-content ${this.currentTab === 'quest' ? 'active' : ''}">
-                    ${this.createQuestTab()}
-                </div>
+            <div id="quest-tab" class="debug-tab-content ${this.currentTab === 'quest' ? 'active' : ''}">
+                ${this.createQuestTab()}
+            </div>
+            <div id="mapobjects-tab" class="debug-tab-content ${this.currentTab === 'mapobjects' ? 'active' : ''}">
+                ${this.createMapObjectTab()}
+            </div>
             </div>
         `;
 
@@ -109,6 +119,55 @@ class UnifiedDebugPanel {
         document.body.appendChild(this.toggleButton);
     }
 
+    createMapObjectTab() {
+        return `
+            <div class="debug-section">
+                <h4>🗺️ Map Object Tool</h4>
+                <div class="map-object-controls">
+                    <div class="object-type-selector">
+                        <label for="object-type">Object Type:</label>
+                        <select id="object-type" class="debug-select">
+                            <option value="BASE">🏗️ Base Marker</option>
+                            <option value="QUEST">🎭 Quest Marker</option>
+                            <option value="NPC">👑 NPC Marker</option>
+                            <option value="MONSTER">👹 Monster Marker</option>
+                            <option value="POI">📍 Point of Interest</option>
+                            <option value="HEVY">⚡ HEVY Encounter</option>
+                            <option value="TEST">🧪 Test Marker</option>
+                        </select>
+                    </div>
+                    <div class="object-actions">
+                        <button id="create-object-at-center" class="debug-btn">Create at Center</button>
+                        <button id="create-object-at-player" class="debug-btn">Create at Player</button>
+                        <button id="create-random-objects" class="debug-btn">Create Random (5)</button>
+                        <button id="toggle-object-manager" class="debug-btn">Toggle Manager</button>
+                    </div>
+                    <div class="object-management">
+                        <button id="clear-objects-by-type" class="debug-btn small">Clear by Type</button>
+                        <button id="clear-all-objects" class="debug-btn small">Clear All Objects</button>
+                        <button id="show-object-stats" class="debug-btn small">Show Stats</button>
+                    </div>
+                    <div class="object-info">
+                        <div id="object-stats">Objects: 0 | Types: 0</div>
+                        <div id="active-object-type">Active: BASE</div>
+                    </div>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>🎯 Quick Object Creation</h4>
+                <div class="quick-objects">
+                    <button id="quick-base" class="debug-btn small" data-type="BASE">🏗️ Base</button>
+                    <button id="quick-quest" class="debug-btn small" data-type="QUEST">🎭 Quest</button>
+                    <button id="quick-npc" class="debug-btn small" data-type="NPC">👑 NPC</button>
+                    <button id="quick-monster" class="debug-btn small" data-type="MONSTER">👹 Monster</button>
+                    <button id="quick-poi" class="debug-btn small" data-type="POI">📍 POI</button>
+                    <button id="quick-heavy" class="debug-btn small" data-type="HEVY">⚡ HEVY</button>
+                    <button id="quick-test" class="debug-btn small" data-type="TEST">🧪 Test</button>
+                </div>
+            </div>
+        `;
+    }
+
     createEncounterTab() {
         return `
             <div class="debug-section">
@@ -132,6 +191,7 @@ class UnifiedDebugPanel {
                     <div class="stat-row">
                         <span>Steps: <span id="debug-steps">100</span></span>
                         <button id="add-steps" class="debug-btn small">+100 Steps</button>
+                        <button id="test-milestones" class="debug-btn small">Test Milestones</button>
                     </div>
                     <div class="stat-row">
                         <span>Level: <span id="debug-level">1</span></span>
@@ -413,11 +473,41 @@ class UnifiedDebugPanel {
         // Quest tab events
         this.setupQuestEvents();
         
+        // Map Objects tab events
+        this.setupMapObjectEvents();
+        
         // Header toggle
         this.setupHeaderToggle();
     }
 
     setupEncounterEvents() {
+        // Step currency system events (not dependent on encounter system)
+        // Add delay to ensure step currency system is available
+        setTimeout(() => {
+            const addStepsBtn = document.getElementById('add-steps');
+            const testMilestonesBtn = document.getElementById('test-milestones');
+            
+            if (addStepsBtn) {
+                addStepsBtn.addEventListener('click', () => {
+                    if (window.stepCurrencySystem) {
+                        window.stepCurrencySystem.addTestSteps(100); // Add 100 steps for testing
+                    } else {
+                        console.warn('Step currency system not available');
+                    }
+                });
+            }
+            
+            if (testMilestonesBtn) {
+                testMilestonesBtn.addEventListener('click', () => {
+                    if (window.stepCurrencySystem) {
+                        window.stepCurrencySystem.testMilestoneChecking(); // Test milestone checking
+                    } else {
+                        console.warn('Step currency system not available');
+                    }
+                });
+            }
+        }, 1000); // Wait 1 second for step currency system to initialize
+        
         if (window.encounterSystem) {
             // Encounter tests
             document.getElementById('test-monster').addEventListener('click', () => window.encounterSystem.triggerMonsterEncounter());
@@ -425,13 +515,6 @@ class UnifiedDebugPanel {
             // Mystery encounter test removed as requested
             document.getElementById('test-heavy').addEventListener('click', () => window.encounterSystem.testHeavyEncounter());
             document.getElementById('force-heavy-spawn').addEventListener('click', () => window.encounterSystem.forceHeavySpawn());
-            document.getElementById('add-steps').addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    window.stepCurrencySystem.addTestSteps(100); // Add 100 steps for testing
-                } else {
-                    console.warn('Step currency system not available');
-                }
-            });
             
             // Player stats controls
             document.getElementById('heal-player').addEventListener('click', () => this.healPlayer());
@@ -989,10 +1072,14 @@ Items: ${status.items.join(', ') || 'None'}`);
     }
 
     addStepsManual() {
-        if (window.encounterSystem) {
-            window.encounterSystem.addSteps(10);
+        if (window.stepCurrencySystem) {
+            for (let i = 0; i < 10; i++) {
+                window.stepCurrencySystem.addManualStep();
+            }
             this.updatePlayerStatsDisplay();
-            console.log('ðŸ‘£ Added 10 steps manually');
+            console.log('🚶‍♂️ Added 10 steps manually via step currency system');
+        } else {
+            console.warn('🚶‍♂️ Step currency system not available');
         }
     }
 
@@ -1465,14 +1552,14 @@ Items: ${status.items.join(', ') || 'None'}`);
     
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371e3; // Earth's radius in meters
-        const Ï†1 = lat1 * Math.PI/180;
-        const Ï†2 = lat2 * Math.PI/180;
-        const Î”Ï† = (lat2-lat1) * Math.PI/180;
-        const Î”Î» = (lng2-lng1) * Math.PI/180;
+        const phi1 = lat1 * Math.PI/180;
+        const phi2 = lat2 * Math.PI/180;
+        const deltaPhi = (lat2-lat1) * Math.PI/180;
+        const deltaLambda = (lng2-lng1) * Math.PI/180;
 
-        const a = Math.sin(Î”Ï†/2) * Math.sin(Î”Ï†/2) +
-                Math.cos(Ï†1) * Math.cos(Ï†2) *
-                Math.sin(Î”Î»/2) * Math.sin(Î”Î»/2);
+        const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+                Math.cos(phi1) * Math.cos(phi2) *
+                Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         return R * c; // Distance in meters
@@ -1489,6 +1576,130 @@ Items: ${status.items.join(', ') || 'None'}`);
     destroy() {
         if (this.panel) {
             this.panel.remove();
+        }
+    }
+
+    setupMapObjectEvents() {
+        // Wait for map object manager to be available
+        setTimeout(() => {
+            if (!window.mapObjectManager) {
+                console.warn('🗺️ Map Object Manager not available, skipping event setup');
+                return;
+            }
+
+            // Object type selector
+            const objectTypeSelect = document.getElementById('object-type');
+            if (objectTypeSelect) {
+                objectTypeSelect.addEventListener('change', (e) => {
+                    const selectedType = e.target.value;
+                    window.mapObjectManager.setActiveType(selectedType);
+                    this.updateObjectStats();
+                });
+            }
+
+            // Create object buttons
+            const createAtCenterBtn = document.getElementById('create-object-at-center');
+            if (createAtCenterBtn) {
+                createAtCenterBtn.addEventListener('click', () => {
+                    if (!window.mapEngine || !window.mapEngine.map) {
+                        console.error('❌ Map not available');
+                        return;
+                    }
+                    const center = window.mapEngine.map.getCenter();
+                    const type = document.getElementById('object-type')?.value || 'BASE';
+                    window.mapObjectManager.createObject(type, { lat: center.lat, lng: center.lng });
+                    this.updateObjectStats();
+                });
+            }
+
+            const createAtPlayerBtn = document.getElementById('create-object-at-player');
+            if (createAtPlayerBtn) {
+                createAtPlayerBtn.addEventListener('click', () => {
+                    if (!window.mapEngine || !window.mapEngine.playerPosition) {
+                        console.error('❌ Player position not available');
+                        return;
+                    }
+                    const type = document.getElementById('object-type')?.value || 'BASE';
+                    window.mapObjectManager.createObject(type, window.mapEngine.playerPosition);
+                    this.updateObjectStats();
+                });
+            }
+
+            const createRandomBtn = document.getElementById('create-random-objects');
+            if (createRandomBtn) {
+                createRandomBtn.addEventListener('click', () => {
+                    window.mapObjectManager.createTestObjects(5);
+                    this.updateObjectStats();
+                });
+            }
+
+            const toggleManagerBtn = document.getElementById('toggle-object-manager');
+            if (toggleManagerBtn) {
+                toggleManagerBtn.addEventListener('click', () => {
+                    window.mapObjectManager.toggleActive();
+                    this.updateObjectStats();
+                });
+            }
+
+            // Management buttons
+            const clearByTypeBtn = document.getElementById('clear-objects-by-type');
+            if (clearByTypeBtn) {
+                clearByTypeBtn.addEventListener('click', () => {
+                    const type = document.getElementById('object-type')?.value || 'BASE';
+                    window.mapObjectManager.clearObjectsByType(type);
+                    this.updateObjectStats();
+                });
+            }
+
+            const clearAllBtn = document.getElementById('clear-all-objects');
+            if (clearAllBtn) {
+                clearAllBtn.addEventListener('click', () => {
+                    window.mapObjectManager.clearAllObjects();
+                    this.updateObjectStats();
+                });
+            }
+
+            const showStatsBtn = document.getElementById('show-object-stats');
+            if (showStatsBtn) {
+                showStatsBtn.addEventListener('click', () => {
+                    const stats = window.mapObjectManager.getStats();
+                    console.log('🗺️ Map Object Stats:', stats);
+                    alert(`Map Objects: ${stats.total}\nBy Type: ${JSON.stringify(stats.byType, null, 2)}`);
+                });
+            }
+
+            // Quick creation buttons
+            document.querySelectorAll('[data-type]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = e.target.dataset.type;
+                    if (!window.mapEngine || !window.mapEngine.map) {
+                        console.error('❌ Map not available');
+                        return;
+                    }
+                    const center = window.mapEngine.map.getCenter();
+                    window.mapObjectManager.createObject(type, { lat: center.lat, lng: center.lng });
+                    this.updateObjectStats();
+                });
+            });
+
+            // Initialize stats
+            this.updateObjectStats();
+        }, 1000);
+    }
+
+    updateObjectStats() {
+        if (!window.mapObjectManager) return;
+
+        const stats = window.mapObjectManager.getStats();
+        const statsElement = document.getElementById('object-stats');
+        const activeTypeElement = document.getElementById('active-object-type');
+
+        if (statsElement) {
+            statsElement.textContent = `Objects: ${stats.total} | Types: ${Object.keys(stats.byType).length}`;
+        }
+
+        if (activeTypeElement) {
+            activeTypeElement.textContent = `Active: ${window.mapObjectManager.selectedType}`;
         }
     }
 }

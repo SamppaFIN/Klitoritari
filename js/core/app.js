@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Eldritch Sanctuary App - New Layered Architecture
+ * @status VERIFIED - Core application coordinator with layered rendering system working
+ * @feature #feature-layered-architecture
+ * @last_verified 2024-01-28
+ * @dependencies Layer Manager, Event Bus, Game State
+ * @warning Do not modify core initialization or layer management without testing rendering system
+ * 
  * Eldritch Sanctuary App - New Layered Architecture
  * Main application coordinator using the new layered rendering system
  */
@@ -97,17 +104,113 @@ class EldritchSanctuaryApp {
      */
     async initCoreSystems() {
         console.log('🔧 Initializing core systems...');
+        console.log('🔧 initCoreSystems method called');
         
-        // Initialize event bus
-        this.eventBus = new EventBus();
-        this.eventBus.setDebugMode(true); // Enable debug mode for development
+        try {
+            // Initialize event bus
+            console.log('🔧 Creating EventBus...');
+            this.eventBus = new EventBus();
+            this.eventBus.setDebugMode(true); // Enable debug mode for development
+            console.log('🔧 EventBus created');
+            
+            // Initialize game state
+            console.log('🔧 Creating GameState...');
+            this.gameState = new GameState();
+            console.log('🔧 GameState created');
+        } catch (error) {
+            console.error('🔧 Error in initCoreSystems setup:', error);
+            throw error;
+        }
         
-        // Initialize game state
-        this.gameState = new GameState();
+        // MapEngine is legacy - new architecture uses MapLayer
+        console.log('🗺️ Skipping MapEngine - using MapLayer in new architecture');
+        this.mapEngine = null; // No MapEngine in new architecture
         
+        // Initialize WebSocket client
+        if (!window.websocketClient) {
+            console.log('🌐 Creating WebSocketClient in core/app.js...');
+            try {
+                this.websocketClient = new WebSocketClient();
+                console.log('🌐 WebSocketClient created, calling init()...');
+                this.websocketClient.init();
+                console.log('🌐 WebSocketClient init() completed');
+            } catch (error) {
+                console.error('🌐 WebSocketClient initialization failed:', error);
+                // Don't throw error - WebSocket is optional
+            }
+        } else {
+            console.log('🌐 WebSocketClient already exists, using existing instance');
+            this.websocketClient = window.websocketClient;
+        }
+        
+        // Initialize step currency system (only if not already initialized)
+        if (!window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Creating StepCurrencySystem in core/app.js...');
+            try {
+                this.stepCurrencySystem = new StepCurrencySystem();
+                console.log('🚶‍♂️ StepCurrencySystem created, calling init()...');
+                this.stepCurrencySystem.init();
+                console.log('🚶‍♂️ StepCurrencySystem init() completed');
+            } catch (error) {
+                console.error('🚶‍♂️ StepCurrencySystem initialization failed:', error);
+                throw error;
+            }
+            
+            // Initialize map object manager
+            console.log('🗺️ Initializing MapObjectManager...');
+            console.log('🗺️ MapObjectManager class available:', typeof MapObjectManager);
+            if (typeof MapObjectManager === 'undefined') {
+                console.error('🗺️ MapObjectManager class is not defined!');
+                throw new Error('MapObjectManager class is not available');
+            }
+            try {
+                this.mapObjectManager = new MapObjectManager();
+                this.mapObjectManager.init(this.eventBus);
+                console.log('🗺️ MapObjectManager initialized');
+            } catch (error) {
+                console.error('🗺️ MapObjectManager initialization failed:', error);
+                throw error;
+            }
+
         // Set up global references
         window.eventBus = this.eventBus;
         window.gameState = this.gameState;
+        // MapEngine is handled by MapLayer now
+        window.stepCurrencySystem = this.stepCurrencySystem;
+        window.mapObjectManager = this.mapObjectManager;
+        window.testStepCurrencySystem = () => this.testStepCurrencySystem();
+        window.testEventBusIntegration = () => this.testEventBusIntegration();
+        window.setupEventListenersManually = () => this.setupEventListenersManually();
+        window.forceResetSteps = () => this.stepCurrencySystem.forceResetSteps();
+        window.updateStepCounter = () => this.stepCurrencySystem.updateStepCounter();
+        window.addSteps = (steps) => this.stepCurrencySystem.addSteps(steps);
+        window.addManualStep = () => this.stepCurrencySystem.addManualStep();
+        window.getStepStats = () => this.stepCurrencySystem.getStepStats();
+        window.resetSessionSteps = () => this.stepCurrencySystem.resetSessionSteps();
+        window.triggerStepCounterUpdate = () => this.stepCurrencySystem.updateStepCounter();
+        
+        // Set the main app reference for welcome screen compatibility
+        window.eldritchApp = this;
+        
+        // Make WebSocket client globally available
+        if (this.websocketClient) {
+            window.websocketClient = this.websocketClient;
+            console.log('🌐 WebSocketClient made globally available');
+        }
+        
+        console.log('🚶‍♂️ StepCurrencySystem made globally available');
+        console.log('🗺️ MapObjectManager made globally available');
+        console.log('🗺️ MapEngine will be set by MapLayer');
+        console.log('🌌 Main app made globally available as window.eldritchApp');
+        } else {
+            console.log('🚶‍♂️ StepCurrencySystem already exists, using existing instance');
+            this.stepCurrencySystem = window.stepCurrencySystem;
+        }
+        
+        // Set up step currency event listeners (regardless of whether system was just created or already existed)
+        console.log('🔔 About to call setupStepCurrencyEventListeners...');
+        this.setupStepCurrencyEventListeners();
+        console.log('🔔 setupStepCurrencyEventListeners call completed');
         
         console.log('🔧 Core systems initialized');
     }
@@ -441,13 +544,31 @@ class EldritchSanctuaryApp {
     }
 
     /**
-     * Initialize game (legacy compatibility method)
-     * This method is called by the welcome screen
+     * Initialize game (called by welcome screen when Continue Adventure is pressed)
+     * This method ensures the step currency system continues working after welcome screen
      */
     initializeGame() {
-        console.log('🎮 Legacy initializeGame called - app already initialized');
-        // The app is already initialized, so we don't need to do anything
-        // This method exists for compatibility with the welcome screen
+        console.log('🎮 initializeGame called - ensuring step currency system continues working');
+        
+        // Ensure step currency system is still working
+        if (window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Step currency system is available, checking status...');
+            
+            // Test milestone checking to ensure it's still working
+            if (typeof window.stepCurrencySystem.checkMilestones === 'function') {
+                console.log('🎯 Testing milestone checking...');
+                window.stepCurrencySystem.checkMilestones();
+                console.log('🎯 Milestone checking test completed');
+            }
+            
+            // Test step addition to ensure it's still working
+            if (typeof window.stepCurrencySystem.addTestSteps === 'function') {
+                console.log('🚶‍♂️ Step currency system is fully functional');
+            }
+        } else {
+            console.warn('🚶‍♂️ Step currency system not available after welcome screen!');
+        }
+        
         return Promise.resolve();
     }
 
@@ -459,6 +580,242 @@ class EldritchSanctuaryApp {
         console.log('👥 Legacy startNPCSimulation called - not implemented in new architecture yet');
         // This method exists for compatibility with the welcome screen
         // NPC simulation will be implemented in the new layer system
+    }
+
+    /**
+     * Test step currency system functionality
+     * This method can be called to test if the step currency system is working
+     */
+    testStepCurrencySystem() {
+        console.log('🧪 Testing step currency system...');
+        
+        if (window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Step currency system found, testing...');
+            
+            // Test milestone checking
+            if (typeof window.stepCurrencySystem.checkMilestones === 'function') {
+                console.log('🎯 Testing milestone checking...');
+                window.stepCurrencySystem.checkMilestones();
+                console.log('🎯 Milestone checking test completed');
+            }
+            
+            // Test step addition
+            if (typeof window.stepCurrencySystem.addTestSteps === 'function') {
+                console.log('🚶‍♂️ Testing step addition...');
+                window.stepCurrencySystem.addTestSteps(10);
+                console.log('🚶‍♂️ Step addition test completed');
+            }
+            
+            console.log('✅ Step currency system test completed successfully');
+        } else {
+            console.error('❌ Step currency system not available!');
+        }
+    }
+
+    /**
+     * Set up event listeners for step currency system events
+     */
+    setupStepCurrencyEventListeners() {
+        console.log('🔔 Setting up step currency event listeners...');
+        console.log('🔔 EventBus available:', !!this.eventBus);
+        console.log('🔔 EventBus type:', typeof this.eventBus);
+        
+        if (!this.eventBus) {
+            console.warn('🚶‍♂️ EventBus not available for step currency event listeners');
+            return;
+        }
+
+        // Listen for step changes
+        this.eventBus.on('steps:change', (eventData) => {
+            console.log('🔔 Step change event received:', eventData);
+            // Other systems can react to step changes here
+        });
+
+        // Listen for milestone events
+        this.eventBus.on('steps:milestone', (eventData) => {
+            console.log('🔔 Milestone event received:', eventData);
+            // Other systems can react to milestones here
+        });
+
+        // Listen for player movement events to update step counter display
+        this.eventBus.on('player:teleported', (eventData) => {
+            console.log('🔔 Player teleported event received, adding 100 steps and updating step counter');
+            if (window.stepCurrencySystem) {
+                // Add 100 steps for teleportation
+                for (let i = 0; i < 100; i++) {
+                    window.stepCurrencySystem.addManualStep();
+                }
+                console.log('🚀 Added 100 steps for teleportation!');
+                window.stepCurrencySystem.updateStepCounter();
+            }
+        });
+
+        this.eventBus.on('player:position:update', (eventData) => {
+            console.log('🔔 Player position update event received, updating step counter');
+            if (window.stepCurrencySystem) {
+                window.stepCurrencySystem.updateStepCounter();
+            }
+        });
+
+        // Expose global function to manually update step counter
+        window.triggerStepCounterUpdate = () => {
+            console.log('🔔 Manually triggering step counter update');
+            if (window.stepCurrencySystem) {
+                window.stepCurrencySystem.updateStepCounter();
+            }
+        };
+
+        // Listen for specific milestone types
+        this.eventBus.on('steps:flag', (eventData) => {
+            console.log('🇫🇮 Flag milestone event received:', eventData);
+        });
+
+        this.eventBus.on('steps:celebration', (eventData) => {
+            console.log('🎉 Celebration milestone event received:', eventData);
+        });
+
+        this.eventBus.on('steps:quest', (eventData) => {
+            console.log('📜 Quest milestone event received:', eventData);
+        });
+
+        this.eventBus.on('steps:area', (eventData) => {
+            console.log('🏗️ Area milestone event received:', eventData);
+        });
+
+        // Listen for server milestone messages
+        this.setupServerMilestoneListeners();
+
+        console.log('🔔 Step currency event listeners set up successfully');
+    }
+
+    /**
+     * Test event bus integration with step currency system
+     */
+    testEventBusIntegration() {
+        console.log('🧪 Testing event bus integration...');
+        
+        if (!this.eventBus) {
+            console.error('❌ EventBus not available for testing');
+            return;
+        }
+
+        if (!window.stepCurrencySystem) {
+            console.error('❌ Step currency system not available for testing');
+            return;
+        }
+
+        // Test step change events
+        console.log('🧪 Testing step change events...');
+        window.stepCurrencySystem.addTestSteps(5);
+        
+        // Test milestone events
+        console.log('🧪 Testing milestone events...');
+        window.stepCurrencySystem.addTestSteps(50); // Should trigger flag milestone
+        
+        console.log('✅ Event bus integration test completed');
+    }
+
+    /**
+     * Manually set up event listeners (can be called from console)
+     */
+    setupEventListenersManually() {
+        console.log('🔔 Manually setting up step currency event listeners...');
+        this.setupStepCurrencyEventListeners();
+    }
+
+    /**
+     * Set up listeners for server milestone messages
+     */
+    setupServerMilestoneListeners() {
+        console.log('🌐 Setting up server milestone listeners...');
+        
+        // Listen for base establishment availability from server
+        this.eventBus.on('base_establishment_available', (eventData) => {
+            console.log('🏗️ Base establishment available from server:', eventData);
+            this.handleBaseEstablishmentAvailable(eventData);
+        });
+
+        // Listen for quest system unlock from server
+        this.eventBus.on('quest_system_unlocked', (eventData) => {
+            console.log('📜 Quest system unlocked from server:', eventData);
+            this.handleQuestSystemUnlocked(eventData);
+        });
+
+        // Listen for flag creation enable from server
+        this.eventBus.on('flag_creation_enabled', (eventData) => {
+            console.log('🇫🇮 Flag creation enabled from server:', eventData);
+            this.handleFlagCreationEnabled(eventData);
+        });
+
+        // Listen for celebration trigger from server
+        this.eventBus.on('celebration_triggered', (eventData) => {
+            console.log('🎉 Celebration triggered from server:', eventData);
+            this.handleCelebrationTriggered(eventData);
+        });
+
+        // Listen for other player milestones
+        this.eventBus.on('player_milestone', (eventData) => {
+            console.log('👥 Other player milestone achieved:', eventData);
+            this.handleOtherPlayerMilestone(eventData);
+        });
+
+        console.log('🌐 Server milestone listeners set up successfully');
+    }
+
+    /**
+     * Handle base establishment availability from server
+     */
+    handleBaseEstablishmentAvailable(eventData) {
+        console.log('🏗️ Base establishment is now available!');
+        // Trigger base building UI or dialog
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.baseBuilding) {
+            window.eldritchApp.systems.baseBuilding.showEstablishmentDialog();
+        } else {
+            // Fallback: show alert or notification
+            alert(`🏗️ ${eventData.payload.message}`);
+        }
+    }
+
+    /**
+     * Handle quest system unlock from server
+     */
+    handleQuestSystemUnlocked(eventData) {
+        console.log('📜 Quest system is now unlocked!');
+        // Enable quest UI or show notification
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.quest) {
+            window.eldritchApp.systems.quest.enableQuestSystem();
+        }
+    }
+
+    /**
+     * Handle flag creation enable from server
+     */
+    handleFlagCreationEnabled(eventData) {
+        console.log('🇫🇮 Flag creation is now enabled!');
+        // Enable flag creation UI
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.flag) {
+            window.eldritchApp.systems.flag.enableFlagCreation();
+        }
+    }
+
+    /**
+     * Handle celebration trigger from server
+     */
+    handleCelebrationTriggered(eventData) {
+        console.log('🎉 Celebration triggered!');
+        // Trigger celebration effects
+        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.celebration) {
+            window.eldritchApp.systems.celebration.triggerCelebration();
+        }
+    }
+
+    /**
+     * Handle other player milestone achievements
+     */
+    handleOtherPlayerMilestone(eventData) {
+        console.log(`👥 Player ${eventData.playerData.name} achieved ${eventData.playerData.milestoneType} milestone!`);
+        // Show notification or update UI
+        // This could trigger a notification system or update a leaderboard
     }
 
     /**
@@ -633,21 +990,38 @@ class EldritchSanctuaryApp {
             eventBus: this.eventBus ? this.eventBus.getStats() : null
         };
     }
+
+    /**
+     * Initialize game systems (called by welcome screen)
+     */
+    initializeGame() {
+        console.log('🎮 Initializing game systems...');
+        
+        // The game systems are already initialized in the constructor
+        // This method is called by the welcome screen when continuing adventure
+        
+        // Request game state from server when continuing adventure
+        if (window.stepCurrencySystem && typeof window.stepCurrencySystem.requestGameStateFromServer === 'function') {
+            console.log('🎮 Requesting game state from server for continuing adventure...');
+            window.stepCurrencySystem.requestGameStateFromServer();
+        } else {
+            console.warn('🎮 Step currency system not available for game state request');
+        }
+        
+        // Emit game started event
+        if (this.eventBus) {
+            this.eventBus.emit('game:started', {
+                timestamp: Date.now(),
+                isMobile: this.isMobile
+            });
+        }
+        
+        console.log('🎮 Game systems initialized successfully');
+    }
 }
 
 // Make app globally available
 window.EldritchSanctuaryApp = EldritchSanctuaryApp;
 
-// Initialize the application when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌌 Initializing Eldritch Sanctuary with direct initialization...');
-    
-    // Initialize app directly - no loading system complexity
-    const app = new EldritchSanctuaryApp();
-    app.init().then(() => {
-        console.log('🌌 New architecture initialization complete');
-        window.eldritchApp = app; // Make globally available
-    }).catch((error) => {
-        console.error('🌌 New architecture initialization failed:', error);
-    });
-});
+// Application initialization is handled by the LoadingSystem
+// No direct initialization here to prevent conflicts

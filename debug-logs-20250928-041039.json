@@ -1,0 +1,256 @@
+﻿{
+    "timestamp":  "2025-09-28T01:10:26.072Z",
+    "totalLogs":  110,
+    "logs":  [
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.023Z",
+                     "message":  "🎮 ThreeJS UI Layer: Initialized",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.024Z",
+                     "message":  "🎮 ThreeJS UI Layer: DISABLED - Using 2D UI instead",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.024Z",
+                     "message":  "🎮 ThreeJS UI Layer: Skipped (2D UI active)",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.030Z",
+                     "message":  "🌌 STEP 5 ✓: Layer manager initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.030Z",
+                     "message":  "🌌 STEP 6: Initializing mobile optimization...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.034Z",
+                     "message":  "🌌 STEP 6 ✓: Mobile optimization initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.034Z",
+                     "message":  "🌌 STEP 7: Starting application...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.036Z",
+                     "message":  "🌌 STEP 8 ✓: Eldritch Sanctuary App: Initialized successfully in 450ms",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.064Z",
+                     "message":  "🚶‍♂️ Accelerometer permission granted",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.064Z",
+                     "message":  "🚶‍♂️ Setting up advanced step detection",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.091Z",
+                     "message":  "🚶‍♂️ Accelerometer permission granted",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.091Z",
+                     "message":  "🚶‍♂️ Setting up advanced step detection",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.091Z",
+                     "message":  "📍 GeolocationLayer: Starting location tracking...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.136Z",
+                     "message":  "📍 GeolocationLayer: Position updated: [object Object]",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.154Z",
+                     "message":  "🚶‍♂️ Adjusted step sensitivity for unknown: threshold=2.5, interval=1000ms",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:31.154Z",
+                     "message":  "🚶‍♂️ Adjusted step sensitivity for unknown: threshold=2.5, interval=1000ms",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.028Z",
+                     "message":  "📍 GeolocationLayer: Testing direct event emission...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.028Z",
+                     "message":  "📍 STEP GPS.REQUEST: GeolocationLayer: GPS request received!",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.028Z",
+                     "message":  "📍 STEP GPS.REQUEST: EventBus available: true",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.029Z",
+                     "message":  "📍 STEP GPS.REQUEST: GeolocationLayer state: [object Object]",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.031Z",
+                     "message":  "📍 STEP GPS.PERMISSION: Requesting location permission...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.032Z",
+                     "message":  "📍 STEP GPS.SUCCESS: Permission granted, position received",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.032Z",
+                     "message":  "📍 GeolocationLayer: Permission granted",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.032Z",
+                     "message":  "📍 STEP GPS.1: Showing geolocation success...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.032Z",
+                     "message":  "📍 STEP GPS.3: Enabling game buttons...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.033Z",
+                     "message":  "📍 STEP GPS.4 ✓: Continue adventure button enabled",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.033Z",
+                     "message":  "🎮 Enabling canvas interactions...",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.034Z",
+                     "message":  "🎮 Canvas interactions enabled",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.034Z",
+                     "message":  "📍 STEP GPS.6 ✓: GPS enabled event emitted",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.035Z",
+                     "message":  "📍 STEP GPS.2 ✓: Geolocation success UI updated",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:32.038Z",
+                     "message":  "📍 GeolocationLayer: Already tracking",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:33.108Z",
+                     "message":  "📍 GeolocationLayer: Position updated: [object Object]",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:55.794Z",
+                     "message":  "🎮 Initializing game systems... (continuing)",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:09:55.795Z",
+                     "message":  "🌌 Available window objects: onappinstalled,debugAppState,EldritchSanctuaryApp",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:00.911Z",
+                     "message":  "🎯 Context menu shown at: [object Object]",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:02.255Z",
+                     "message":  "🎯 Force creating base marker...",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:02.255Z",
+                     "message":  "🎯 Using step currency system to create base marker",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:02.256Z",
+                     "message":  "🏗️ Creating base marker on map at position: [object Object]",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:02.256Z",
+                     "message":  "🏗️ Creating base marker using SAME method as player marker",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:02.258Z",
+                     "message":  "🏗️ Base marker created successfully using SAME method as player!",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:02.261Z",
+                     "message":  "🎯 Base marker created successfully via step currency system",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:17.723Z",
+                     "message":  "🎯 Context menu shown at: [object Object]",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:19.338Z",
+                     "message":  "🏗️ Establishing base via context menu...",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:25.017Z",
+                     "message":  "🎯 Context menu shown at: [object Object]",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:26.070Z",
+                     "message":  "🎯 Force creating base marker...",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:26.070Z",
+                     "message":  "🎯 Using step currency system to create base marker",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:26.070Z",
+                     "message":  "🏗️ Creating base marker on map at position: [object Object]",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:26.070Z",
+                     "message":  "🏗️ Creating base marker using SAME method as player marker",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:26.072Z",
+                     "message":  "🏗️ Base marker created successfully using SAME method as player!",
+                     "type":  "base"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T01:10:26.072Z",
+                     "message":  "🎯 Base marker created successfully via step currency system",
+                     "type":  "general"
+                 }
+             ]
+}

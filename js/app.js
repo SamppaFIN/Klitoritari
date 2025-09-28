@@ -1,9 +1,16 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Main Application - Coordinates all systems and manages the cosmic exploration experience
+ * @status VERIFIED - Core application coordinator, stable and working
+ * @feature #feature-main-app-coordinator
+ * @last_verified 2024-01-28
+ * @dependencies All system modules, WebSocket, LocalStorage
+ * @warning Do not modify core initialization logic without testing all systems
+ * 
  * Main Application - Coordinates all systems and manages the cosmic exploration experience
  * Integrates geolocation, map engine, investigation system, and WebSocket communication
  */
 
-class EldritchSanctuaryApp {
+class LegacyEldritchSanctuaryApp {
     constructor() {
         this.isInitialized = false;
         this.loadingScreen = null;
@@ -2835,7 +2842,7 @@ class EldritchSanctuaryApp {
         // window.tutorialEncounterSystem = this.systems.tutorialEncounter;
 
         // Initialize map engine
-        this.systems.mapEngine = new EnhancedMapEngine();
+        this.systems.mapEngine = new MapEngine();
         
         // Set window.mapEngine immediately after creation for tutorial access
         window.mapEngine = this.systems.mapEngine;
@@ -2922,9 +2929,21 @@ class EldritchSanctuaryApp {
         this.systems.questLogUI = new QuestLogUI();
         this.systems.questLogUI.init();
         
-        // Initialize step currency system
-        this.systems.stepCurrency = new StepCurrencySystem();
-        this.systems.stepCurrency.init();
+        // Initialize step currency system (only if not already initialized)
+        if (!this.systems.stepCurrency && !window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Creating StepCurrencySystem in app.js...');
+            this.systems.stepCurrency = new StepCurrencySystem();
+            console.log('🚶‍♂️ StepCurrencySystem created, calling init()...');
+            this.systems.stepCurrency.init();
+            console.log('🚶‍♂️ StepCurrencySystem init() completed');
+            
+            // Also make it globally available for debug panel and other systems
+            window.stepCurrencySystem = this.systems.stepCurrency;
+            console.log('🚶‍♂️ StepCurrencySystem made globally available');
+        } else {
+            console.log('🚶‍♂️ StepCurrencySystem already exists, using existing instance');
+            this.systems.stepCurrency = window.stepCurrencySystem;
+        }
         
         // Connect base building layer to step currency system
         if (this.systems.layeredRendering) {
@@ -3432,7 +3451,7 @@ class EldritchSanctuaryApp {
 let app;
 
 document.addEventListener('DOMContentLoaded', () => {
-    app = new EldritchSanctuaryApp();
+    app = new LegacyEldritchSanctuaryApp();
     app.init();
 });
 

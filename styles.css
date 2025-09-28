@@ -2483,11 +2483,141 @@ html, body {
 /* Base marker specific styling */
 .base-marker {
     filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 0, 0, 0.4));
+    z-index: 2000 !important;
+    position: relative !important;
+    background: rgba(255, 0, 0, 0.2) !important;
+    border-radius: 50% !important;
+    border: 3px solid #ff0000 !important;
+    animation: basePulse 2s ease-in-out infinite !important;
+}
+
+@keyframes basePulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
 }
 
 /* Base popup styling */
 .base-popup {
     min-width: 200px;
+}
+
+/* Map Object Manager styles */
+.map-object-marker {
+    z-index: 1000;
+    animation: objectPulse 2s infinite;
+}
+
+.player-marker {
+    z-index: 1000;
+}
+
+.quest-marker {
+    z-index: 1500;
+}
+
+.npc-marker {
+    z-index: 1600;
+}
+
+.encounter-marker {
+    z-index: 1700;
+}
+
+.location-marker {
+    z-index: 1400;
+}
+
+.legendary-marker {
+    z-index: 2500;
+}
+
+.debug-marker {
+    z-index: 1000;
+}
+
+/* Object pulse animation */
+@keyframes objectPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Debug panel map object controls */
+.map-object-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.object-type-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.object-type-selector label {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.debug-select {
+    background: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.object-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.object-management {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.object-info {
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+.object-info div {
+    color: #ffffff;
+    font-size: 12px;
+    margin: 2px 0;
+}
+
+.quick-objects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.quick-objects .debug-btn {
+    min-width: 60px;
+    font-size: 12px;
 }
 
 .popup-header {
@@ -7302,6 +7432,21 @@ input[type="range"]::-moz-range-thumb {
     100% {
         transform: scale(1);
         opacity: 0.6;
+    }
+}
+
+@keyframes playerFlash {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+    }
+    50% {
+        transform: scale(1.3);
+        box-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00, 0 0 120px #00ff00;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
     }
 }
 

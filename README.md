@@ -177,6 +177,390 @@ Eldritch Sanctuary is an immersive cosmic exploration platform that combines inf
 4. **Test Across Systems** - Changes may affect multiple UI systems simultaneously
 5. **Consolidate When Possible** - Remove duplicate systems and standardize patterns
 
+### 🏷️ Development Status Tags & Safeguards
+
+**To prevent development loops and unnecessary testing, all code must be tagged with status indicators:**
+
+#### Status Tags
+- **`[VERIFIED]`** - Code is tested, working, and stable. **DO NOT MODIFY** without explicit user approval
+- **`[IN_DEVELOPMENT]`** - Code is actively being worked on. Changes expected and welcome
+- **`[PROBABLE_BLAME]`** - Code is suspected of causing issues but not yet confirmed. Investigate before modifying
+- **`[DEPRECATED]`** - Code is outdated and should be replaced. Safe to remove when replacement is ready
+- **`[SACRED]`** - Core functionality that must not be touched without reasonable debate and user approval
+- **`[EXPERIMENTAL]`** - New code being tested. May be unstable or incomplete
+- **`[LEGACY]`** - Old code that works but may need refactoring. Handle with care
+
+#### Feature Tags
+- **`#feature`** - Code related to a specific feature implementation
+- **`#bugfix`** - Code that fixes a specific bug
+- **`#refactor`** - Code that improves structure without changing functionality
+- **`#optimization`** - Code that improves performance
+- **`#security`** - Code that addresses security concerns
+
+#### File-Level Status Headers
+Every file must start with a status header:
+```javascript
+/**
+ * @fileoverview [VERIFIED] Player marker management and map rendering
+ * @status VERIFIED - Stable and tested, do not modify without approval
+ * @last_verified 2024-01-15
+ * @dependencies MapLayer, Leaflet, WebSocket
+ * @warning Do not modify marker creation logic without testing visibility
+ */
+```
+
+#### Function-Level Status Comments
+Every function must have status comments:
+```javascript
+/**
+ * Creates player marker on map
+ * @status [VERIFIED] - Working correctly, tested for visibility issues
+ * @last_tested 2024-01-15
+ * @warning Do not modify without testing marker visibility
+ */
+createPlayerMarker(position) {
+    // Implementation
+}
+```
+
+#### Development Workflow Rules
+
+1. **Before Making Changes:**
+   - Check file status header for `[VERIFIED]` or `[SACRED]` tags
+   - If tagged, **ASK USER** before making any modifications
+   - Document why changes are necessary and get explicit approval
+
+2. **When Tagging Code:**
+   - Use `[VERIFIED]` only after thorough testing and user confirmation
+   - Use `[IN_DEVELOPMENT]` for active work
+   - Use `[PROBABLE_BLAME]` when investigating issues
+   - Use `[SACRED]` for core functionality that must be protected
+
+3. **Testing Requirements:**
+   - `[VERIFIED]` code requires user approval before modification
+   - `[IN_DEVELOPMENT]` code should be tested before marking as `[VERIFIED]`
+   - `[PROBABLE_BLAME]` code needs investigation before changes
+   - `[SACRED]` code requires debate and user approval for any changes
+
+4. **Status Updates:**
+   - Update status tags when code changes
+   - Update `@last_verified` or `@last_tested` dates
+   - Document any status changes in Aurora Log
+
+#### Example Status Workflow
+```javascript
+// BEFORE: Untagged code
+function createPlayerMarker(position) {
+    // implementation
+}
+
+// AFTER: Properly tagged code
+/**
+ * Creates player marker on map
+ * @status [VERIFIED] - Working correctly after visibility fixes
+ * @last_verified 2024-01-15
+ * @warning Do not modify without testing marker visibility
+ */
+function createPlayerMarker(position) {
+    // implementation
+}
+```
+
+#### Sacred Code Protection
+Code marked as `[SACRED]` includes:
+- Core map rendering logic
+- WebSocket communication protocols
+- Player marker visibility system
+- Base building core functionality
+- Database schema and migrations
+
+**NEVER modify `[SACRED]` code without:**
+1. Explaining the necessity to the user
+2. Getting explicit approval
+3. Documenting the reasoning
+4. Planning rollback strategy
+
+### 🐛 Bug Report Driven Coding (BRDC)
+
+**Revolutionary approach: Treat every feature request as a bug report until it's confirmed working.**
+
+#### Core Principles
+1. **Feature = Bug**: Every new feature request becomes a bug report
+2. **Bug = Feature**: Every bug fix becomes a feature implementation
+3. **Verification Required**: Nothing is considered complete until bug report is marked "RESOLVED"
+4. **Change Tracking**: All modified code must be tagged with feature/bug identifiers
+5. **Protection**: Modified code cannot be changed without proper authorization
+
+#### BRDC Workflow
+
+##### 1. **Feature Request → Bug Report**
+When user requests a new feature:
+```markdown
+# Bug Report: [Feature Name] Not Implemented
+**Bug ID:** `bug-<feature-name>`
+**Type:** Feature Request
+**Status:** Open
+**Priority:** [Low/Medium/High/Critical]
+```
+
+##### 2. **Implementation Phase**
+During development:
+- Mark all modified files/functions with `#feature-<feature-name>`
+- Use `[IN_DEVELOPMENT]` status for active work
+- Document all changes in bug report
+- Test thoroughly before marking as complete
+
+##### 3. **Verification Phase**
+Before marking as resolved:
+- Test feature thoroughly
+- Verify all acceptance criteria met
+- Check for side effects on other systems
+- Update all affected files with proper tags
+
+##### 4. **Resolution Phase**
+When feature is confirmed working:
+- Mark bug report as "RESOLVED"
+- Tag all modified code with `#feature-<feature-name>` and `[VERIFIED]`
+- Update file status headers
+- Document in Aurora Log
+
+#### BRDC File Tagging System
+
+##### File-Level Tags
+```javascript
+/**
+ * @fileoverview [VERIFIED] Player marker management and map rendering
+ * @status VERIFIED - Stable and tested, do not modify without approval
+ * @feature #feature-player-markers
+ * @last_verified 2024-01-15
+ * @dependencies MapLayer, Leaflet, WebSocket
+ * @warning Do not modify marker creation logic without testing visibility
+ */
+```
+
+##### Function-Level Tags
+```javascript
+/**
+ * Creates player marker on map
+ * @status [VERIFIED] - Working correctly, tested for visibility issues
+ * @feature #feature-player-markers
+ * @bugfix #bug-marker-visibility
+ * @last_tested 2024-01-15
+ * @warning Do not modify without testing marker visibility
+ */
+createPlayerMarker(position) {
+    // Implementation
+}
+```
+
+#### BRDC Change Protection Rules
+
+##### Modified Code Protection
+- **`#feature-<name>`** - Code modified for specific feature
+- **`#bugfix-<id>`** - Code modified to fix specific bug
+- **`[VERIFIED]`** - Code confirmed working and tested
+- **`[CHANGED]`** - Code recently modified, requires review
+
+##### Authorization Required For:
+- Any code tagged with `#feature-*` or `#bugfix-*`
+- Any code marked as `[VERIFIED]` or `[CHANGED]`
+- Any code in files with `[SACRED]` status
+- Any code related to active bug reports
+
+##### Modification Process:
+1. **Check Tags**: Identify all relevant tags and status
+2. **Get Approval**: Request user approval for modifications
+3. **Document Reason**: Explain why changes are necessary
+4. **Update Tags**: Modify tags to reflect new status
+5. **Test Thoroughly**: Verify changes don't break existing functionality
+6. **Update Bug Report**: Document changes in relevant bug report
+
+#### BRDC Benefits
+- **Clear Tracking**: Every change is linked to a specific feature/bug
+- **Quality Assurance**: Nothing is "done" until bug report is resolved
+- **Change History**: Easy to see what was modified for what purpose
+- **Risk Management**: Modified code is protected from accidental changes
+- **Team Coordination**: Clear understanding of what's being worked on
+- **Regression Prevention**: Changes are tracked and can be reverted if needed
+
+#### BRDC Example Workflow
+
+##### User Request: "Add player health bar"
+1. **Create Bug Report**: `bug-player-health-bar-not-implemented.md`
+2. **Implement Feature**: Modify relevant files, tag with `#feature-player-health-bar`
+3. **Test Thoroughly**: Verify health bar works correctly
+4. **Mark Resolved**: Update bug report status to "RESOLVED"
+5. **Tag Code**: Mark all modified code as `[VERIFIED]` and `#feature-player-health-bar`
+6. **Protect Code**: Future changes require approval and documentation
+
+##### Future Modification Attempt:
+- **Check Tags**: Code is tagged `#feature-player-health-bar` and `[VERIFIED]`
+- **Require Approval**: Must get user approval to modify
+- **Document Reason**: Explain why health bar needs changes
+- **Update Tags**: Modify tags to reflect new status
+- **Test Changes**: Verify modifications don't break existing functionality
+
+### 🚫 Preventing Development Loops
+
+**To avoid repetitive testing and development cycles:**
+
+1. **Status Check First** - Always check file/function status before making changes
+2. **User Approval Required** - Get explicit approval for `[VERIFIED]` or `[SACRED]` code changes
+3. **Document Everything** - Record all changes and reasoning in Aurora Log
+4. **Test Once, Mark Verified** - Once code is tested and working, mark as `[VERIFIED]`
+5. **Respect Status Tags** - Do not modify verified code without user permission
+
+#### Loop Prevention Checklist
+- [ ] Check file status header before editing
+- [ ] Verify function status comments
+- [ ] Get user approval for `[VERIFIED]`/`[SACRED]` changes
+- [ ] Document changes in Aurora Log
+- [ ] Update status tags after changes
+- [ ] Test thoroughly before marking as `[VERIFIED]`
+
+#### Common Loop Scenarios to Avoid
+- **"Let me just fix this one thing"** - Check status first!
+- **"This should work now"** - Test before marking as verified
+- **"I'll clean this up later"** - Mark as `[IN_DEVELOPMENT]` if not ready
+- **"This looks wrong"** - Mark as `[PROBABLE_BLAME]` and investigate
+
+### 📊 Current File Status Overview
+
+**Key Files and Their Current Status:**
+
+#### Core Map System
+- `js/layers/map-layer.js` - `[VERIFIED]` - Player marker visibility fixed, working correctly
+- `js/map-engine.js` - `[LEGACY]` - Old map system, being replaced by MapLayer
+- `js/webgl-map-renderer.js` - `[EXPERIMENTAL]` - WebGL integration in development
+
+#### Player & Location
+- `js/geolocation.js` - `[VERIFIED]` - GPS tracking working correctly
+- `js/websocket-client.js` - `[VERIFIED]` - WebSocket communication stable
+- `js/step-currency-system.js` - `[VERIFIED]` - Step counting and base building working
+
+#### UI Systems
+- `js/welcome-screen.js` - `[VERIFIED]` - Welcome screen and player ID management working
+- `js/unified-debug-panel.js` - `[IN_DEVELOPMENT]` - Debug tools being enhanced
+- `styles.css` - `[LEGACY]` - Large CSS file with multiple systems, needs refactoring
+
+#### Server & Backend
+- `server.js` - `[VERIFIED]` - WebSocket server and game state persistence working
+- `js/database-client.js` - `[LEGACY]` - Database integration, may need updates
+
+#### Documentation
+- `docs/aurora-log.md` - `[SACRED]` - Development history, do not modify without approval
+- `docs/Architecture.md` - `[SACRED]` - Core architecture, update with changes
+- `README.md` - `[SACRED]` - Project overview, update with major changes
+
+**Status Legend:**
+- `[VERIFIED]` = Tested and working, do not modify without approval
+- `[IN_DEVELOPMENT]` = Active work in progress
+- `[LEGACY]` = Old but working code, handle with care
+- `[EXPERIMENTAL]` = New code being tested
+- `[SACRED]` = Core functionality, requires debate before changes
+
+### 🔄 Iteration Loop Process
+
+**For every new feature, user story, task, or bug discussion, follow this structured iteration loop:**
+
+#### 1. **Capture & Document** 📝
+- **Vision & Scope** - Create `/docs/features/feature-<name>.md` for new features
+- **User Stories** - Create `/docs/user-stories/story-<name>.md` for user requirements  
+- **Tasks** - Create `/docs/tasks/task-<name>.md` for implementation tasks
+- **Bugs** - Create `/docs/bugs/bug-<name>.md` for bug reports
+- **Problem Statement** - Clearly define goals, constraints, and success criteria
+
+#### 2. **Proof of Concept** 🧪
+- Build minimal viable implementation to test feasibility
+- Document learnings, constraints, and risk areas in `/docs/pocs/poc-<name>.md`
+- Identify technical challenges and architectural decisions needed
+
+#### 3. **Architecture & Design** 🏗️
+- Create comprehensive architectural documentation in `/docs/architecture/`
+- Outline system design, APIs, data flow, and chosen technologies
+- Update main `Architecture.md` with new system components
+
+#### 4. **Developer Guidelines** 📋
+- Establish coding standards and workflow steps
+- Set up ticketing system for epics/features in `/docs/tickets/`
+- Define team roles and responsibilities
+- Create development workflow documentation
+
+#### 5. **Implementation** ⚡
+- Implement features in focused, frequent batches
+- Always update tickets and document changes as they happen
+- Maintain live documentation in `/docs/implementation/`
+- Track progress and decisions in Aurora Log
+
+#### 6. **Testing & Debugging** 🔍
+- Maintain live testing and debugging log in `/docs/testing/`
+- Track all decisions, bugs discovered, fixes, and testing evidence
+- Document test results and validation steps
+
+#### 7. **Review & Refine** 🔄
+- Review output with stakeholders
+- Gather feedback and refine requirements
+- Update documentation based on learnings
+- Plan next iteration cycle
+
+#### 8. **Repeat Until Complete** ♻️
+- Continue cycle until product is stable
+- Ensure requirements are met
+- Complete release documentation
+- Archive completed iterations
+
+### 🎫 Task Ticket Workflow
+
+**For every new implementation task, create a task ticket:**
+
+1. **Create Task Ticket** - Use the format in `/docs/tasks/task-<shortname>.md`
+2. **Define Requirements** - Clearly specify what needs to be implemented
+3. **Identify Dependencies** - List any systems or components that will be affected
+4. **Estimate Complexity** - Rate the task complexity (Low/Medium/High/Epic)
+5. **Plan Implementation** - Break down into smaller, manageable steps
+6. **Update Aurora Log** - Document the task creation and reasoning
+
+**Task Ticket Template:**
+```markdown
+# Task Ticket: [Brief Description]
+
+**Task ID:** `task-<shortname>`  
+**Type:** Feature/Enhancement/Bugfix/Refactor  
+**Priority:** Low/Medium/High/Critical  
+**Status:** Open/In Progress/Review/Completed  
+**Assignee:** [Name/Team]  
+**Created:** YYYY-MM-DD  
+**Estimated Effort:** [Hours/Days]  
+
+## Summary
+[One-line description of the task]
+
+## Requirements
+[Detailed description of what needs to be implemented]
+
+## Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+## Dependencies
+[List of systems, files, or components that will be affected]
+
+## Implementation Plan
+1. Step 1
+2. Step 2
+3. Step 3
+
+## Testing Strategy
+[How the implementation will be tested]
+
+## Related Files
+[List of files that will be modified]
+
+## Notes
+[Additional context, considerations, or constraints]
+```
+
 ### 🐛 Bug Reporting Protocol
 
 **When encountering bugs or issues:**
@@ -267,6 +651,7 @@ Eldritch Sanctuary is built on sacred principles that guide every feature:
 
 **⚠️ Architecture documents are actively maintained and updated with each user request and feature implementation.**
 
+- [Aurora Developer Guide](docs/Developer-Guide-Aurora.md) - **🌟 ESSENTIAL** Sacred development instructions and common gotchas
 - [Architecture Guide](docs/Architecture.md) - **LIVE** Technical architecture and design decisions
 - [UI System Audit](docs/UI-System-Audit.md) - **CRITICAL** Complete breakdown of all UI systems and conflicts
 - [Aurora Log](docs/aurora-log.md) - **LIVE** Development journey, decisions, and session progress
