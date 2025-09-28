@@ -150,15 +150,18 @@ class BackgroundLayer extends BaseLayer {
     }
 
     drawCosmicBackground() {
+        // Only draw cosmic background in areas not covered by the map
+        // The map layer should be visible, so we'll make this more subtle
         const gradient = this.ctx.createRadialGradient(
             this.canvas.width / 2, this.canvas.height / 2, 0,
             this.canvas.width / 2, this.canvas.height / 2, Math.max(this.canvas.width, this.canvas.height) / 2
         );
 
-        gradient.addColorStop(0, '#0a0a0a');
-        gradient.addColorStop(0.3, '#1a1a2e');
-        gradient.addColorStop(0.6, '#16213e');
-        gradient.addColorStop(1, '#0f0f23');
+        // Make background more transparent so map shows through
+        gradient.addColorStop(0, 'rgba(10, 10, 10, 0.1)');
+        gradient.addColorStop(0.3, 'rgba(26, 26, 46, 0.1)');
+        gradient.addColorStop(0.6, 'rgba(22, 33, 62, 0.1)');
+        gradient.addColorStop(1, 'rgba(15, 15, 35, 0.1)');
 
         this.ctx.fillStyle = gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
