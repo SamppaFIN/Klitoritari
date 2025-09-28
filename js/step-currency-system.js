@@ -1617,6 +1617,23 @@ class StepCurrencySystem {
         if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
             console.log('🎮 Creating base marker via server...');
             window.websocketClient.establishBase(position);
+            
+            // ALSO create visual marker on map
+            if (window.mapLayer && window.mapLayer.addBaseMarker) {
+                console.log('🏗️ Creating visual base marker using MapLayer.addBaseMarker method');
+                try {
+                    const marker = window.mapLayer.addBaseMarker(position);
+                    if (marker) {
+                        console.log('🏗️ Visual base marker created successfully!');
+                        return true;
+                    } else {
+                        console.error('🏗️ MapLayer.addBaseMarker returned null');
+                    }
+                } catch (error) {
+                    console.error('🏗️ Error creating visual base marker:', error);
+                }
+            }
+            
             return true;
         }
         

@@ -62,6 +62,7 @@ This creates a confusing user experience where the base appears to be created (s
 - [x] Updated context menu to prioritize MapLayer.addBaseMarker() method
 - [x] Improved error handling and logging for base marker creation
 - [x] Added fallback methods with proper error reporting
+- [x] **FIXED**: Step currency system now creates visual marker even when using WebSocket
 - [ ] Test base marker visibility on map
 - [ ] Verify base marker persistence across page refreshes
 
@@ -209,12 +210,18 @@ forceCreateBaseMarker() {
 
 ## Root Cause Analysis
 
-### Suspected Issues
-1. **Map Layer Not Ready** - MapLayer.mapReady might be false when addBaseMarker() is called
-2. **Z-Index Issues** - Base marker might be behind other elements
-3. **Icon Rendering** - CSS or HTML for base marker icon might not be rendering
-4. **Map Reference** - Wrong map instance being used for marker creation
-5. **Timing Issues** - Marker creation happening before map is fully initialized
+### ✅ **ROOT CAUSE IDENTIFIED**
+**Issue**: Step currency system's `createBaseMarkerOnMap()` method only creates visual markers when WebSocket is NOT connected. When WebSocket IS connected, it only saves to server via `establishBase()` but doesn't create a visual marker on the map.
+
+**Fix Applied**: Modified step currency system to create visual marker using `MapLayer.addBaseMarker()` even when using WebSocket method.
+
+### Suspected Issues (Resolved)
+1. ~~**Map Layer Not Ready**~~ - MapLayer.mapReady was true
+2. ~~**Z-Index Issues**~~ - Not the problem
+3. ~~**Icon Rendering**~~ - Not the problem  
+4. ~~**Map Reference**~~ - Not the problem
+5. ~~**Timing Issues**~~ - Not the problem
+6. ✅ **WebSocket Method Missing Visual Creation** - **THIS WAS THE ISSUE**
 
 ### Investigation Steps
 1. ✅ Check MapLayer.mapReady status when addBaseMarker() is called
