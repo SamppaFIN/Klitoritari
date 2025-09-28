@@ -198,7 +198,7 @@ class MapObjectManager {
                 iconAnchor: [objectType.size[0] / 2, objectType.size[1] / 2]
             });
 
-            // Create marker and add to map (use new map system)
+            // Create marker and add to appropriate layer
             const map = this.getMap();
             if (!map) {
                 console.error('❌ No map available for marker creation');
@@ -208,7 +208,24 @@ class MapObjectManager {
             const marker = L.marker([position.lat, position.lng], {
                 icon: markerIcon,
                 zIndexOffset: objectType.zIndex
-            }).addTo(map);
+            });
+
+            // Add to appropriate layer based on object type
+            if (objectType.id === 'BASE' && window.mapLayer && window.mapLayer.leafletLayerManager) {
+                // Add base markers to territory layer group
+                const territoryLayer = window.mapLayer.leafletLayerManager.layers.get('territory');
+                if (territoryLayer) {
+                    marker.addTo(territoryLayer);
+                    console.log(`🗺️ MapObjectManager: ${objectType.name} added to territory layer group`);
+                } else {
+                    marker.addTo(map);
+                    console.log(`🗺️ MapObjectManager: ${objectType.name} added to map (territory layer not available)`);
+                }
+            } else {
+                // Add other markers directly to map
+                marker.addTo(map);
+                console.log(`🗺️ MapObjectManager: ${objectType.name} added to map`);
+            }
 
             // Debug logging
             console.log(`🗺️ MapObjectManager: Marker added to map:`, {
