@@ -304,15 +304,22 @@ addTestSteps(100);
 
 ---
 
-## 🔄 **CURRENT PERSISTENCE STORAGE COMMUNICATION ISSUE** (January 28, 2025)
+## 🔄 **PERSISTENCE STORAGE COMMUNICATION ISSUE** (January 28, 2025)
 
-### **Status**: In Progress - Close to Resolution
-**Issue Type**: Initialization/Listener Problem  
+### **Status**: ✅ **RESOLVED** - Persistence system working correctly
+**Issue Type**: Timing/Initialization Problem  
 **Severity**: High  
 **Last Updated**: January 28, 2025
 
 ### **Problem Description**
-The persistence storage communication system appears to have an initialization or listener problem. While the WebSocket communication is working correctly, there seems to be a timing or setup issue preventing proper data persistence and restoration.
+The persistence storage communication system had a timing issue where map systems weren't being detected as ready, causing an infinite waiting loop and preventing marker restoration from the server.
+
+### **Resolution Summary**
+**Root Cause**: Map readiness checks were looking for `window.mapEngine.finnishFlagLayer` which doesn't exist in the new layered architecture.
+
+**Fix Applied**: Updated timing checks to use `window.mapLayer.mapReady` and corrected marker restoration methods.
+
+**Result**: ✅ **Path markers now successfully restore from server database**
 
 ### **Current State Analysis**
 

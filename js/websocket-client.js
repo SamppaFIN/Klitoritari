@@ -1,10 +1,12 @@
 ﻿/**
  * @fileoverview [VERIFIED] WebSocket Client - Real-time multiplayer communication
- * @status VERIFIED - WebSocket communication stable and working
+ * @status VERIFIED - WebSocket communication, persistence, and marker restoration working correctly
  * @feature #feature-websocket-communication
+ * @feature #feature-persistence-system
+ * @bugfix #bug-persistence-timing
  * @last_verified 2024-01-28
- * @dependencies Server WebSocket, Player ID management
- * @warning Do not modify connection logic or message handling without testing multiplayer features
+ * @dependencies Server WebSocket, Player ID management, Map Layer
+ * @warning Do not modify connection logic, message handling, or persistence restoration without testing complete flow
  * 
  * WebSocket Client - Real-time multiplayer communication
  * Handles connection to server, position sharing, and investigation updates

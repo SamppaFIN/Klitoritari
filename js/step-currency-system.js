@@ -1,11 +1,12 @@
 ﻿/**
  * @fileoverview [VERIFIED] Step Currency System - Manages real-world step counting as the primary game currency
- * @status VERIFIED - Step counting and milestone checking working correctly
+ * @status VERIFIED - Step counting, milestone checking, and persistence timing working correctly
  * @feature #feature-step-currency-system
  * @bugfix #bug-milestone-blocked
+ * @bugfix #bug-persistence-timing
  * @last_verified 2024-01-28
- * @dependencies WebSocket, Base System, Event Bus
- * @warning Do not modify milestone logic or step counting without testing base establishment
+ * @dependencies WebSocket, Base System, Event Bus, Map Layer
+ * @warning Do not modify milestone logic, step counting, or persistence timing without testing complete flow
  * 
  * Step Currency System
  * Manages real-world step counting as the primary game currency

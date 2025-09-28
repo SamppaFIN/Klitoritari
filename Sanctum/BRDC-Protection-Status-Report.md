@@ -275,6 +275,18 @@ All core working systems in the Eldritch Sanctuary project have been protected w
 
 ---
 
+## 🔧 **Recent Bug Fixes Applied**
+
+### **Persistence System Resolution** ✅
+- **Issue**: `#bug-persistence-timing` - Map systems never detected as ready
+- **Root Cause**: Timing checks looking for non-existent `window.mapEngine.finnishFlagLayer`
+- **Fix**: Updated to check `window.mapLayer.mapReady` in new layered architecture
+- **Result**: Path markers now successfully restore from server database
+- **Files Updated**: `js/step-currency-system.js`, `js/websocket-client.js`
+- **Status**: `[VERIFIED]` - Persistence system working correctly
+
+---
+
 ## 🎉 Conclusion
 
 The Eldritch Sanctuary project now has comprehensive BRDC protection applied to all core working systems. This ensures that:
@@ -293,7 +305,8 @@ Future AI assistants and developers will now have clear guidance on the status o
 
 ---
 
-**Document Status**: `[VERIFIED]` - All core systems protected  
+**Document Status**: `[VERIFIED]` - All core systems protected, persistence system resolved  
 **Feature Tag**: `#feature-brdc-protection`  
+**Bug Fix**: `#bug-persistence-timing` - Resolved persistence timing issues  
 **Last Updated**: January 28, 2025  
 **Next Review**: As needed for additional system protection
