@@ -910,19 +910,20 @@ class MapLayer extends BaseLayer {
             this.markers.delete('base');
         }
 
-        // Create base marker icon using SVG
+        // Create base marker icon using layered Finnish base assets
         const baseIcon = L.divIcon({
             className: 'base-marker',
             html: `
                 <div style="
-                    width: 40px; 
-                    height: 40px; 
+                    width: 50px; 
+                    height: 50px; 
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     z-index: 1000;
+                    position: relative;
                 ">
-                    <svg width="30" height="30" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <radialGradient id="baseGradient" cx="50%" cy="30%" r="70%">
                                 <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
@@ -937,28 +938,44 @@ class MapLayer extends BaseLayer {
                             </filter>
                         </defs>
                         
-                        <!-- Outer ring -->
-                        <circle cx="15" cy="15" r="14" fill="none" stroke="#2F4F2F" stroke-width="2"/>
+                        <!-- Territory Circle (Animated) -->
+                        <circle cx="25" cy="25" r="20" fill="rgba(139, 92, 246, 0.3)" stroke="#8b5cf6" stroke-width="2">
+                            <animate attributeName="r" values="20;24;20" dur="2s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.6;0.8;0.6" dur="2s" repeatCount="indefinite"/>
+                        </circle>
                         
-                        <!-- Main circle -->
-                        <circle cx="15" cy="15" r="11" fill="url(#baseGradient)" filter="url(#baseGlow)"/>
+                        <!-- Base Center Circle -->
+                        <circle cx="25" cy="25" r="6" fill="#8b5cf6" stroke="#3b82f6" stroke-width="2"/>
                         
-                        <!-- Building structure -->
-                        <rect x="10" y="12" width="10" height="8" rx="1" fill="#2F4F2F"/>
-                        <rect x="11" y="13" width="2" height="2" fill="rgba(255,255,255,0.3)"/>
-                        <rect x="14" y="13" width="2" height="2" fill="rgba(255,255,255,0.3)"/>
-                        <rect x="17" y="13" width="2" height="2" fill="rgba(255,255,255,0.3)"/>
+                        <!-- Building structure (scaled up) -->
+                        <rect x="18" y="20" width="14" height="10" rx="1" fill="#2F4F2F"/>
+                        <rect x="19" y="21" width="3" height="3" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="23" y="21" width="3" height="3" fill="rgba(255,255,255,0.3)"/>
+                        <rect x="27" y="21" width="3" height="3" fill="rgba(255,255,255,0.3)"/>
                         
                         <!-- Roof -->
-                        <polygon points="8,12 15,6 22,12" fill="#654321"/>
+                        <polygon points="15,20 25,12 35,20" fill="#654321"/>
+                        
+                        <!-- Finnish Flag (small) -->
+                        <g transform="translate(30, 5) scale(0.3)">
+                            <rect width="24" height="16" fill="white"/>
+                            <rect x="9.6" y="0" width="4.8" height="16" fill="#003580"/>
+                            <rect x="0" y="6.4" width="24" height="3.2" fill="#003580"/>
+                        </g>
+                        
+                        <!-- Add-on position indicators -->
+                        <circle cx="25" cy="8" r="2" fill="none" stroke="#f59e0b" stroke-width="1" opacity="0.7"/>
+                        <circle cx="42" cy="25" r="2" fill="none" stroke="#8b5cf6" stroke-width="1" opacity="0.7"/>
+                        <circle cx="25" cy="42" r="2" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.7"/>
+                        <circle cx="8" cy="25" r="2" fill="none" stroke="#6b7280" stroke-width="1" opacity="0.7"/>
                         
                         <!-- Inner highlight -->
-                        <circle cx="15" cy="15" r="8" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                        <circle cx="25" cy="25" r="12" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
                     </svg>
                 </div>
             `,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
+            iconSize: [50, 50],
+            iconAnchor: [25, 25]
         });
 
         // Create marker using EXACT same method as player marker
