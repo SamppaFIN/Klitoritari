@@ -1744,22 +1744,16 @@ class StepCurrencySystem {
                 });
                 
                 // Use EXACT same method as player marker creation
-                const baseMarker = L.marker([position.lat, position.lng], { 
+                const baseMarker = L.marker([position.lat, position.lng], {
                     icon: baseIcon,
-                    zIndexOffset: 2000
+                    zIndexOffset: 1000
                 }).addTo(window.mapLayer.map);
                 
                 baseMarker.bindPopup(`
-                    <div style="text-align: center;">
-                        <h3>🏗️ My Cosmic Base</h3>
-                        <p>Established: ${new Date().toLocaleDateString()}</p>
-                        <p>Level: 1</p>
-                    </div>
+                    <b>🏗️ My Cosmic Base</b><br>
+                    <small>Established: ${new Date().toLocaleDateString()}</small><br>
+                    <small>Level: 1</small>
                 `);
-                
-                // Ensure marker is visible (same as player marker)
-                baseMarker.setOpacity(1);
-                baseMarker.setZIndexOffset(2000);
                 
                 console.log('🏗️ Base marker created successfully using EXACT SAME MAP as player marker!');
                 console.log('🏗️ Base marker position:', baseMarker.getLatLng());

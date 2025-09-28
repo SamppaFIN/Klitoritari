@@ -940,51 +940,24 @@ class MapLayer extends BaseLayer {
             iconAnchor: [20, 20]
         });
 
-        // Create marker using EXACT same method as player marker
+        // Create marker using EXACT same method as path markers
         const marker = L.marker([position.lat, position.lng], { 
             icon: baseIcon,
-            zIndexOffset: 1000  // SAME zIndexOffset as player marker
+            zIndexOffset: 1000
         }).addTo(this.map);
 
-        // Add popup
+        // Add popup using SAME simple approach as path markers
         marker.bindPopup(`
-            <div style="text-align: center;">
-                <h3>🏗️ My Cosmic Base</h3>
-                <p>Established: ${new Date().toLocaleDateString()}</p>
-                <p>Level: 1</p>
-            </div>
+            <b>🏗️ My Cosmic Base</b><br>
+            <small>Established: ${new Date().toLocaleDateString()}</small><br>
+            <small>Level: 1</small>
         `);
-
-        // Store marker in SAME way as player marker
+        
+        // Store marker in SAME way as path markers
         this.markers.set('base', marker);
         
         console.log('🏗️ MapLayer: Base marker created at:', position);
         console.log('🏗️ MapLayer: Base marker zIndexOffset:', marker.options.zIndexOffset);
-        console.log('🏗️ MapLayer: Base marker map reference:', marker._map);
-        console.log('🏗️ MapLayer: Base marker element:', marker.getElement());
-        console.log('🏗️ MapLayer: Base marker visible:', marker.getElement() ? marker.getElement().style.display : 'no element');
-        console.log('🏗️ MapLayer: Base marker opacity:', marker.getElement() ? marker.getElement().style.opacity : 'no element');
-        
-        // Force marker to be visible
-        if (marker.getElement()) {
-            marker.getElement().style.display = 'block';
-            marker.getElement().style.opacity = '1';
-            marker.getElement().style.visibility = 'visible';
-            console.log('🏗️ MapLayer: Forced base marker visibility');
-        }
-        
-        // Log marker creation details for debugging
-        console.log('🏗️ MapLayer: Base marker created at:', position);
-        console.log('🏗️ MapLayer: Current map center:', this.map.getCenter());
-        console.log('🏗️ MapLayer: Current map zoom:', this.map.getZoom());
-        console.log('🏗️ MapLayer: Base marker latlng:', marker.getLatLng());
-        
-        // Calculate distance between map center and base marker
-        const distance = this.calculateDistance(
-            this.map.getCenter().lat, this.map.getCenter().lng,
-            marker.getLatLng().lat, marker.getLatLng().lng
-        );
-        console.log('🏗️ MapLayer: Distance between map center and base marker:', distance + ' meters');
         
         return marker;
     }

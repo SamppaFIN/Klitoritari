@@ -479,23 +479,17 @@ class ContextMenuSystem {
                     iconAnchor: [20, 20]
                 });
                 
-                const baseMarker = L.marker([this.currentPosition.lat, this.currentPosition.lng], { 
+                const baseMarker = L.marker([this.currentPosition.lat, this.currentPosition.lng], {
                     icon: baseIcon,
-                    zIndexOffset: 2000
+                    zIndexOffset: 1000
                 }).addTo(window.mapEngine.map);
                 
                 baseMarker.bindPopup(`
-                    <div style="text-align: center;">
-                        <h3>🏗️ My Cosmic Base</h3>
-                        <p>Established: ${new Date().toLocaleDateString()}</p>
-                        <p>Level: 1</p>
-                        <p>Force Created</p>
-                    </div>
+                    <b>🏗️ My Cosmic Base</b><br>
+                    <small>Established: ${new Date().toLocaleDateString()}</small><br>
+                    <small>Level: 1</small><br>
+                    <small>Force Created</small>
                 `);
-                
-                // Ensure marker is visible (same as player marker)
-                baseMarker.setOpacity(1);
-                baseMarker.setZIndexOffset(2000);
                 
                 console.log('🎯 Base marker created using SAME method as player!');
                 console.log('🎯 Position:', this.currentPosition);
