@@ -198,11 +198,23 @@ class MapObjectManager {
                 iconAnchor: [objectType.size[0] / 2, objectType.size[1] / 2]
             });
 
-            // Create marker and add to map
+            // Create marker and add to map (use new map system)
+            const map = this.getMap();
+            if (!map) {
+                console.error('❌ No map available for marker creation');
+                return null;
+            }
+
             const marker = L.marker([position.lat, position.lng], {
                 icon: markerIcon,
                 zIndexOffset: objectType.zIndex
-            }).addTo(window.mapEngine.map);
+            }).addTo(map);
+
+            // Center map on new marker for better visibility
+            map.setView([position.lat, position.lng], map.getZoom(), {
+                animate: true,
+                duration: 0.5
+            });
 
             // Add popup with object information
             marker.bindPopup(`
@@ -249,7 +261,10 @@ class MapObjectManager {
         try {
             // Remove marker from map
             if (object.marker) {
-                window.mapEngine.map.removeLayer(object.marker);
+                const map = this.getMap();
+                if (map) {
+                    map.removeLayer(object.marker);
+                }
             }
 
             // Remove from objects map
@@ -376,7 +391,24 @@ class MapObjectManager {
      * Check if map is available
      */
     isMapAvailable() {
-        return window.mapEngine && window.mapEngine.map;
+        return this.getMap() !== null;
+    }
+
+    /**
+     * Get the current map instance (prefer new map system)
+     */
+    getMap() {
+        // Try new map system first
+        if (window.mapLayer && window.mapLayer.map && window.mapLayer.mapReady) {
+            return window.mapLayer.map;
+        }
+        
+        // Fallback to old map system
+        if (window.mapEngine && window.mapEngine.map) {
+            return window.mapEngine.map;
+        }
+        
+        return null;
     }
 
     /**
