@@ -61,19 +61,20 @@ class ThreeJSUILayer extends BaseLayer {
         this.tabsContainer.id = 'magnetic-tabs-container';
         this.tabsContainer.style.cssText = `
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
+            justify-content: center;
             gap: 12px;
             z-index: 1000;
             pointer-events: auto;
-            background: rgba(0, 0, 0, 0.8);
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 100%);
             backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 0;
+            padding: 20px 16px 16px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
         `;
         
         // Create magnetic tab buttons
@@ -87,13 +88,30 @@ class ThreeJSUILayer extends BaseLayer {
         // Store tab data for later use
         this.tabData = tabs;
         
-        tabs.forEach(tab => {
+        console.log('🎨 Creating', tabs.length, 'magnetic tabs...');
+        tabs.forEach((tab, index) => {
+            console.log(`🎨 Creating tab ${index + 1}:`, tab.id, tab.label);
             const tabElement = this.createMagneticTab(tab);
             this.tabsContainer.appendChild(tabElement);
         });
         
         // Add to document
         document.body.appendChild(this.tabsContainer);
+        console.log('🎨 Tabs container added to document');
+        
+        // Debug: Check if tabs are visible after a delay
+        setTimeout(() => {
+            const visibleTabs = document.querySelectorAll('.magnetic-tab');
+            console.log('🎨 Debug: Found', visibleTabs.length, 'visible tabs');
+            visibleTabs.forEach((tab, index) => {
+                const rect = tab.getBoundingClientRect();
+                console.log(`🎨 Tab ${index + 1}:`, {
+                    id: tab.dataset.tabId,
+                    visible: rect.width > 0 && rect.height > 0,
+                    position: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+                });
+            });
+        }, 1000);
         
         // Add keyboard shortcuts
         this.setupKeyboardShortcuts();

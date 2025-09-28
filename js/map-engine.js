@@ -967,8 +967,25 @@ class MapEngine {
         // Update player position immediately
         this.updatePlayerPosition(position);
         
-        // Center map on player
+        // Center map on player with mobile-specific handling
+        console.log('🗺️ Centering map on player position...');
         this.map.setView([position.lat, position.lng], 18);
+        
+        // Ensure centering worked - add a small delay for mobile
+        setTimeout(() => {
+            const currentCenter = this.map.getCenter();
+            console.log('🗺️ Map center after centering:', {
+                target: { lat: position.lat, lng: position.lng },
+                actual: { lat: currentCenter.lat, lng: currentCenter.lng },
+                zoom: this.map.getZoom()
+            });
+            
+            // If centering didn't work, try again
+            if (Math.abs(currentCenter.lat - position.lat) > 0.001 || Math.abs(currentCenter.lng - position.lng) > 0.001) {
+                console.log('🗺️ Recentering map - first attempt failed');
+                this.map.setView([position.lat, position.lng], 18);
+            }
+        }, 100);
         
         // Start proximity detection
         this.startProximityDetection();
