@@ -672,25 +672,35 @@ class MapLayer extends BaseLayer {
         
         // Add "Move Here" option
         const moveHereOption = document.createElement('div');
+        moveHereOption.className = 'context-menu-item';
         moveHereOption.style.cssText = `
-            padding: 12px 16px;
+            padding: 8px 16px;
             color: #ffffff;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(74, 158, 255, 0.2);
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            gap: 2px;
+            min-height: 40px;
+            position: relative;
+            z-index: 1;
+            align-items: flex-start;
+            justify-content: center;
         `;
-        moveHereOption.innerHTML = '🚀 Move Here';
+        moveHereOption.innerHTML = `
+            <div style="font-weight: bold; font-size: 13px;">🚀 Move Here</div>
+            <div style="font-size: 11px; color: #a0a0a0;">Teleport player to this location</div>
+        `;
         moveHereOption.addEventListener('click', () => {
             this.teleportPlayer(e.latlng);
             this.hideContextMenu();
         });
         moveHereOption.addEventListener('mouseenter', () => {
-            moveHereOption.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            moveHereOption.style.background = 'rgba(74, 158, 255, 0.2)';
         });
         moveHereOption.addEventListener('mouseleave', () => {
-            moveHereOption.style.backgroundColor = 'transparent';
+            moveHereOption.style.background = 'transparent';
         });
         
         contextMenu.appendChild(moveHereOption);
@@ -943,8 +953,18 @@ class MapLayer extends BaseLayer {
         // Create marker using EXACT same method as path markers
         const marker = L.marker([position.lat, position.lng], { 
             icon: baseIcon,
-            zIndexOffset: 1000
-        }).addTo(this.map);
+            zIndexOffset: 2000  // Higher than player marker to ensure visibility
+        });
+
+        // Add to territory layer group if available, otherwise add to map
+        if (this.leafletLayerManager && this.leafletLayerManager.layers.has('territory')) {
+            const territoryLayer = this.leafletLayerManager.layers.get('territory');
+            marker.addTo(territoryLayer);
+            console.log('🏗️ MapLayer: Base marker added to territory layer group');
+        } else {
+            marker.addTo(this.map);
+            console.log('🏗️ MapLayer: Base marker added directly to map (territory layer not available)');
+        }
 
         // Add popup using SAME simple approach as path markers
         marker.bindPopup(`
