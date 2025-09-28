@@ -219,11 +219,8 @@ class MapObjectManager {
                 markerElement: marker.getElement()
             });
 
-            // Center map on new marker for better visibility
-            map.setView([position.lat, position.lng], map.getZoom(), {
-                animate: true,
-                duration: 0.5
-            });
+            // Note: Map centering is handled by the calling system (e.g., base creation)
+            // to avoid conflicts with other map centering operations
 
             // Add popup with object information
             marker.bindPopup(`

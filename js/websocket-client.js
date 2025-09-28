@@ -520,12 +520,45 @@ class WebSocketClient {
                 // Create base marker using MapObjectManager
                 const marker = window.mapObjectManager.createObject('BASE', position);
                 console.log('🏗️ Base marker created successfully from server response');
+                
+                // Center map on the base marker for better visibility
+                this.centerMapOnBase(position);
+                
                 return marker;
             } catch (error) {
                 console.error('❌ Failed to create base marker from server response:', error);
             }
         } else {
             console.error('❌ MapObjectManager not available for base marker creation');
+        }
+    }
+    
+    /**
+     * Center map on base marker position
+     * @param {Object} position - Base position
+     */
+    centerMapOnBase(position) {
+        console.log('🎯 Centering map on base marker:', position);
+        
+        // Try different map references
+        let map = null;
+        
+        if (window.mapLayer && window.mapLayer.map) {
+            map = window.mapLayer.map;
+            console.log('🎯 Using window.mapLayer.map for centering');
+        } else if (window.mapEngine && window.mapEngine.map) {
+            map = window.mapEngine.map;
+            console.log('🎯 Using window.mapEngine.map for centering');
+        }
+        
+        if (map && typeof map.setView === 'function') {
+            map.setView([position.lat, position.lng], map.getZoom(), {
+                animate: true,
+                duration: 0.8
+            });
+            console.log('🎯 Map centered on base marker successfully');
+        } else {
+            console.warn('⚠️ No map available for centering on base marker');
         }
     }
     
