@@ -621,9 +621,8 @@ class WebSocketClient {
         markers.forEach(marker => {
             try {
                 if (marker.type === 'base' && marker.position) {
-                    // Restore base marker
-                    console.log('🏗️ Restoring base marker:', marker.position);
-                    window.mapLayer.addBaseMarker(marker.position);
+                    // Skip base markers - they are restored separately via restoreBaseFromServer()
+                    console.log('🏗️ Skipping base marker restoration (handled separately):', marker.position);
                     restoredCount++;
                 } else if (marker.type === 'flag' && marker.position) {
                     // Restore flag marker
