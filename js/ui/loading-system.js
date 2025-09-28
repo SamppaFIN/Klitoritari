@@ -200,17 +200,15 @@ class LoadingSystem {
     
     loadLayers() {
         return new Promise((resolve) => {
-            // Wait for all layer classes to be available
+            // Only wait for the layers we actually need (converted to Leaflet layers)
             const requiredLayers = [
-                'BackgroundLayer', 'TerrainLayer', 'TerritoryLayer', 'PathLayer',
-                'MapLayer', 'InteractionLayer', 'PlayerLayer', 'InformationLayer',
-                'UILayer', 'DebugLayer', 'GeolocationLayer', 'ThreeJSUILayer'
+                'LeafletLayerManager', 'MapLayer', 'ThreeJSUILayer'
             ];
             
             const checkLayers = () => {
                 const loadedLayers = requiredLayers.filter(layer => window[layer]);
                 if (loadedLayers.length === requiredLayers.length) {
-                    console.log('✅ All layers loaded successfully');
+                    console.log('✅ All layers loaded successfully (Leaflet-based)');
                     resolve();
                 } else {
                     console.log(`🔄 Loading layers... ${loadedLayers.length}/${requiredLayers.length}`);
