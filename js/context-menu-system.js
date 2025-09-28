@@ -267,13 +267,51 @@ class ContextMenuSystem {
         return { lat: 61.4981, lng: 23.7608 }; // Default to Tampere coordinates
     }
 
+    getPlayerCurrentPosition() {
+        console.log('🎯 Getting player current position for base establishment...');
+        
+        // Try to get player position from MapLayer first
+        if (window.mapLayer && typeof window.mapLayer.getCurrentPlayerPosition === 'function') {
+            const playerPos = window.mapLayer.getCurrentPlayerPosition();
+            console.log('🎯 Player position from MapLayer:', playerPos);
+            return playerPos;
+        }
+        
+        // Fallback: try mapEngine
+        if (window.mapEngine && typeof window.mapEngine.getCurrentPlayerPosition === 'function') {
+            const playerPos = window.mapEngine.getCurrentPlayerPosition();
+            console.log('🎯 Player position from mapEngine:', playerPos);
+            return playerPos;
+        }
+        
+        // Fallback: try to get from player marker directly
+        if (window.mapLayer && window.mapLayer.markers) {
+            const playerMarker = window.mapLayer.markers.get('player');
+            if (playerMarker) {
+                const latlng = playerMarker.getLatLng();
+                const playerPos = { lat: latlng.lat, lng: latlng.lng };
+                console.log('🎯 Player position from marker:', playerPos);
+                return playerPos;
+            }
+        }
+        
+        // Last resort: use current map center
+        console.warn('⚠️ Could not get player position, using map center as fallback');
+        return this.getMapCoordinates(window.innerWidth / 2, window.innerHeight / 2);
+    }
+
     establishBase() {
         console.log('🏗️ Establishing base via context menu...');
         
-        if (!this.currentPosition) {
-            console.error('❌ No position available for base establishment');
+        // Get player's current position instead of right-click position
+        const playerPosition = this.getPlayerCurrentPosition();
+        if (!playerPosition) {
+            console.error('❌ No player position available for base establishment');
+            this.hideContextMenu();
             return;
         }
+
+        console.log('🏗️ Using player position for base establishment:', playerPosition);
 
         // Check if player has enough steps
         const stepSystem = window.stepCurrencySystem;
@@ -283,8 +321,8 @@ class ContextMenuSystem {
             return;
         }
 
-        // Send base establishment command to server
-        this.sendBaseEstablishToServer(this.currentPosition);
+        // Send base establishment command to server using player position
+        this.sendBaseEstablishToServer(playerPosition);
         this.hideContextMenu();
     }
 
@@ -454,14 +492,18 @@ class ContextMenuSystem {
     forceCreateBaseMarker() {
         console.log('🎯 Force creating base marker...');
         
-        if (!this.currentPosition) {
-            console.error('❌ No position available for base marker');
+        // Get player's current position instead of right-click position
+        const playerPosition = this.getPlayerCurrentPosition();
+        if (!playerPosition) {
+            console.error('❌ No player position available for base marker');
             this.hideContextMenu();
             return;
         }
 
+        console.log('🎯 Using player position for force base marker:', playerPosition);
+
         // Send base establishment command to server (same as establishBase but without step check)
-        this.sendBaseEstablishToServer(this.currentPosition);
+        this.sendBaseEstablishToServer(playerPosition);
     }
 
     sendBaseEstablishToServer(position) {
