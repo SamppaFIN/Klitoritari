@@ -517,10 +517,16 @@ class WebSocketClient {
      */
     waitForMapSystemsReady(callback) {
         const checkMapReady = () => {
+            // Check for the actual map systems in the new layered architecture
             const mapReady = window.mapLayer && 
-                           window.mapEngine && 
-                           window.mapEngine.map && 
-                           window.mapEngine.finnishFlagLayer;
+                           window.mapLayer.map && 
+                           window.mapLayer.mapReady;
+            
+            console.log('🗺️ Map readiness check for marker restoration:', {
+                mapLayer: !!window.mapLayer,
+                map: !!(window.mapLayer && window.mapLayer.map),
+                mapReady: !!(window.mapLayer && window.mapLayer.mapReady)
+            });
             
             if (mapReady) {
                 console.log('✅ Map systems ready for marker restoration');
@@ -558,18 +564,19 @@ class WebSocketClient {
                 } else if (marker.type === 'flag' && marker.position) {
                     // Restore flag marker
                     console.log('🇫🇮 Restoring flag marker:', marker.position);
-                    if (window.mapEngine && window.mapEngine.finnishFlagLayer) {
-                        window.mapEngine.finnishFlagLayer.addFlagPin(
+                    // Use the map engine's dropFlagHere method for flag restoration
+                    if (window.mapEngine && typeof window.mapEngine.dropFlagHere === 'function') {
+                        window.mapEngine.dropFlagHere(
                             marker.position.lat,
-                            marker.position.lng,
-                            marker.data?.size || 1,
-                            marker.data?.rotation || 0,
-                            marker.data?.symbol || '🇫🇮',
-                            marker.playerId,
-                            true,
-                            marker.createdAt
+                            marker.position.lng
                         );
                         restoredCount++;
+                    } else if (window.mapLayer && typeof window.mapLayer.addFlagMarker === 'function') {
+                        // Fallback to map layer method
+                        window.mapLayer.addFlagMarker(marker.position);
+                        restoredCount++;
+                    } else {
+                        console.warn('🇫🇮 No flag restoration method available');
                     }
                 } else if (marker.type === 'step' && marker.position) {
                     // Restore step marker

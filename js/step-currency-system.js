@@ -1237,10 +1237,16 @@ class StepCurrencySystem {
         console.log('🗺️ Waiting for map systems to be ready...');
         
         const checkMapReady = () => {
+            // Check for the actual map systems in the new layered architecture
             const mapReady = window.mapLayer && 
-                           window.mapEngine && 
-                           window.mapEngine.map && 
-                           window.mapEngine.finnishFlagLayer;
+                           window.mapLayer.map && 
+                           window.mapLayer.mapReady;
+            
+            console.log('🗺️ Map readiness check:', {
+                mapLayer: !!window.mapLayer,
+                map: !!(window.mapLayer && window.mapLayer.map),
+                mapReady: !!(window.mapLayer && window.mapLayer.mapReady)
+            });
             
             if (mapReady) {
                 console.log('✅ Map systems ready, proceeding with game state request');
