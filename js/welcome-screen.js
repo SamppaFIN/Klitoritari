@@ -248,10 +248,20 @@ class WelcomeScreen {
     updateContinueAdventureLabel() {
         try {
             const btn = document.getElementById('continue-adventure');
-            if (!btn) return;
+            if (!btn) {
+                console.log('🌟 Continue Adventure button not found in DOM');
+                return;
+            }
             
             // Check if player has an active player ID
             const hasActivePlayerId = window.websocketClient && window.websocketClient.hasActivePlayerId();
+            
+            console.log('🌟 Continue Adventure button check:', {
+                websocketClient: !!window.websocketClient,
+                hasActivePlayerId: hasActivePlayerId,
+                playerId: localStorage.getItem('playerId'),
+                eldritch_player_id: localStorage.getItem('eldritch_player_id')
+            });
             
             if (!hasActivePlayerId) {
                 // Disable continue adventure button if no player ID exists

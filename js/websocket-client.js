@@ -72,8 +72,12 @@ class WebSocketClient {
      * Check if player has an active player ID
      */
     hasActivePlayerId() {
-        const storedPlayerId = localStorage.getItem('eldritch_player_id');
-        return !!storedPlayerId;
+        // Check multiple possible player ID keys
+        const playerId = localStorage.getItem('playerId') || 
+                        localStorage.getItem('eldritch_player_id') ||
+                        localStorage.getItem('eldritch-player-id') ||
+                        localStorage.getItem('player_id');
+        return !!playerId;
     }
 
     connect() {
