@@ -231,29 +231,8 @@ class LeafletLayerManager {
         try {
             const zoom = this.map.getZoom();
             
-            // Update layer visibility based on zoom level
-            this.layers.forEach((layer, name) => {
-                try {
-                    if (zoom < 10) {
-                        // Hide detailed layers at low zoom by setting CSS opacity
-                        if (['terrain', 'geolocation'].includes(name)) {
-                            const element = layer.getElement();
-                            if (element) {
-                                element.style.opacity = '0.3';
-                            }
-                        }
-                    } else {
-                        // Show all layers at high zoom
-                        const element = layer.getElement();
-                        if (element) {
-                            element.style.opacity = '1.0';
-                        }
-                    }
-                } catch (layerError) {
-                    console.warn(`🗺️ LeafletLayerManager: Error updating layer ${name}:`, layerError);
-                }
-            });
-            
+            // For now, just log the zoom level - opacity changes can be added later
+            // when we have proper layer identification system
             console.log(`🗺️ LeafletLayerManager: Updated layers for zoom level ${zoom}`);
         } catch (error) {
             console.warn('🗺️ LeafletLayerManager: Error in updateLayersForZoom:', error);
