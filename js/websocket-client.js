@@ -532,6 +532,15 @@ class WebSocketClient {
                 const marker = window.mapObjectManager.createObject('BASE', position);
                 console.log('🏗️ Base marker created successfully from server response:', marker);
                 
+                // Check if marker is actually visible on map
+                if (marker && marker._map) {
+                    console.log('🏗️ Base marker is attached to map:', marker._map);
+                    console.log('🏗️ Base marker position on map:', marker.getLatLng());
+                    console.log('🏗️ Base marker element:', marker.getElement());
+                } else {
+                    console.warn('⚠️ Base marker created but not attached to map or missing map reference');
+                }
+                
                 // Center map on the base marker for better visibility
                 this.centerMapOnBase(position);
                 

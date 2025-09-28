@@ -33,7 +33,7 @@ class MapObjectManager {
                 id: 'BASE',
                 name: 'Base Marker',
                 icon: '🏗️',
-                color: '#ff0000',
+                color: '#8b5cf6',
                 layer: 'territory',
                 size: [40, 40],
                 zIndex: 2000,
