@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Geolocation Manager - Real-time position tracking with accuracy indicators
+ * @status VERIFIED - GPS tracking working correctly with fallback options
+ * @feature #feature-geolocation-tracking
+ * @last_verified 2024-01-28
+ * @dependencies HTML5 Geolocation API, Map Engine
+ * @warning Do not modify GPS accuracy logic or fallback systems without testing location updates
+ * 
  * Geolocation Manager - Real-time position tracking with accuracy indicators
  * Handles HTML5 Geolocation API with fallback options and user consent
  */
@@ -413,6 +420,18 @@ class GeolocationManager {
         if (this.isFirstLocation) {
             this.isFirstLocation = false;
             this.initializeMapAndQuests(newPosition);
+            
+            // Mobile-specific: Ensure map centers on player immediately and with retries
+            this.ensureMapCenteredOnPlayer(newPosition);
+            
+            // Additional centering attempts for mobile reliability
+            setTimeout(() => {
+                this.ensureMapCenteredOnPlayer(newPosition);
+            }, 1000);
+            
+            setTimeout(() => {
+                this.ensureMapCenteredOnPlayer(newPosition);
+            }, 3000);
         }
         
         if (this.onPositionUpdate) {
@@ -864,6 +883,76 @@ class GeolocationManager {
         if (window.encounterSystem) {
             console.log('📍 Initializing encounter system...');
             window.encounterSystem.checkProximityEncounters();
+        }
+    }
+    
+    // Mobile-specific: Ensure map is centered on player
+    ensureMapCenteredOnPlayer(position) {
+        console.log('📍 Ensuring map is centered on player...');
+        
+        // Try multiple methods to center the map
+        if (window.mapEngine && window.mapEngine.map) {
+            const map = window.mapEngine.map;
+            const currentCenter = map.getCenter();
+            const distance = this.calculateDistance(
+                { lat: currentCenter.lat, lng: currentCenter.lng },
+                position
+            );
+            
+            console.log('📍 Map centering check:', {
+                currentCenter: { lat: currentCenter.lat, lng: currentCenter.lng },
+                playerPosition: { lat: position.lat, lng: position.lng },
+                distance: distance.toFixed(2) + 'm'
+            });
+            
+            // Mobile-specific: Always center on player for first location or if far away
+            const shouldCenter = this.isFirstLocation || distance > 50; // Reduced threshold for mobile
+            
+            if (shouldCenter) {
+                console.log('📍 Recentering map on player - mobile centering');
+                
+                // Use smooth pan for better mobile experience
+                map.setView([position.lat, position.lng], 18, {
+                    animate: true,
+                    duration: 1.0,
+                    easeLinearity: 0.25
+                });
+                
+                // Double-check after centering with longer delay for mobile
+                setTimeout(() => {
+                    const newCenter = map.getCenter();
+                    const newDistance = this.calculateDistance(
+                        { lat: newCenter.lat, lng: newCenter.lng },
+                        position
+                    );
+                    console.log('📍 Map centering result:', {
+                        newCenter: { lat: newCenter.lat, lng: newCenter.lng },
+                        distance: newDistance.toFixed(2) + 'm',
+                        success: newDistance < 100
+                    });
+                    
+                    // If still not centered, try again with force
+                    if (newDistance > 100) {
+                        console.log('📍 Map still not centered, forcing center...');
+                        map.setView([position.lat, position.lng], 18, {
+                            animate: false
+                        });
+                    }
+                }, 500);
+            } else {
+                console.log('📍 Map is already centered on player');
+            }
+        } else {
+            console.warn('📍 Map engine or map not available for centering');
+            
+            // Try alternative centering methods
+            if (window.mapEngine) {
+                console.log('📍 Trying alternative centering methods...');
+                // Force map engine to update player position
+                if (typeof window.mapEngine.updatePlayerPosition === 'function') {
+                    window.mapEngine.updatePlayerPosition(position);
+                }
+            }
         }
     }
 

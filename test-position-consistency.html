@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Position Consistency - POI vs Base</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border: 2px solid #333;
+        }
+        .test-controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Position Consistency - POI vs Base</h1>
+    
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <p><strong>Right-click anywhere on the map</strong> to open context menu, then:</p>
+        <ul>
+            <li>Click "Create POI Marker" - should appear at right-click position</li>
+            <li>Click "Establish Base" - should appear at SAME right-click position</li>
+        </ul>
+        <p>Both markers should appear at the exact same coordinates!</p>
+    </div>
+
+    <div class="test-controls">
+        <h3>Test Controls:</h3>
+        <button onclick="testAtSpecificLocation()">Test at Specific Location</button>
+        <button onclick="clearMap()">Clear Map</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="map"></div>
+    
+    <div class="log" id="log"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([60.1699, 24.9384], 10); // Helsinki
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Mock context menu system
+        let currentPosition = null;
+
+        // Logging function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Simulate right-click to set position
+        map.on('contextmenu', function(e) {
+            currentPosition = {
+                lat: e.latlng.lat,
+                lng: e.latlng.lng
+            };
+            log(`🖱️ Right-clicked at: ${currentPosition.lat.toFixed(6)}, ${currentPosition.lng.toFixed(6)}`);
+            showContextMenu(e.originalEvent);
+        });
+
+        // Show context menu
+        function showContextMenu(event) {
+            const menu = document.createElement('div');
+            menu.style.cssText = `
+                position: fixed;
+                left: ${event.clientX}px;
+                top: ${event.clientY}px;
+                background: white;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                z-index: 1000;
+            `;
+            
+            const poiButton = document.createElement('button');
+            poiButton.textContent = 'Create POI Marker';
+            poiButton.onclick = () => {
+                createPOIMarker(currentPosition);
+                document.body.removeChild(menu);
+            };
+            
+            const baseButton = document.createElement('button');
+            baseButton.textContent = 'Establish Base';
+            baseButton.onclick = () => {
+                createBaseMarker(currentPosition);
+                document.body.removeChild(menu);
+            };
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Cancel';
+            cancelButton.onclick = () => {
+                document.body.removeChild(menu);
+            };
+            
+            menu.appendChild(poiButton);
+            menu.appendChild(document.createElement('br'));
+            menu.appendChild(baseButton);
+            menu.appendChild(document.createElement('br'));
+            menu.appendChild(cancelButton);
+            
+            document.body.appendChild(menu);
+            
+            // Remove menu when clicking elsewhere
+            setTimeout(() => {
+                document.addEventListener('click', function removeMenu() {
+                    if (document.body.contains(menu)) {
+                        document.body.removeChild(menu);
+                    }
+                    document.removeEventListener('click', removeMenu);
+                });
+            }, 100);
+        }
+
+        // POI marker creation (using right-click position)
+        function createPOIMarker(position) {
+            log('📍 Creating POI marker at RIGHT-CLICK position: ' + JSON.stringify(position));
+            
+            const poiIcon = L.divIcon({
+                className: 'poi-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #ff6b35; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">❓</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([position.lat, position.lng], { 
+                icon: poiIcon,
+                zIndexOffset: 700
+            }).addTo(map);
+
+            marker.bindPopup(`
+                <b>POI Marker</b><br>
+                <small>❓ Mystery Location</small><br>
+                <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+            `);
+
+            log('✅ POI marker created at: ' + position.lat.toFixed(6) + ', ' + position.lng.toFixed(6));
+        }
+
+        // Base marker creation (using SAME right-click position)
+        function createBaseMarker(position) {
+            log('🏗️ Creating base marker at SAME RIGHT-CLICK position: ' + JSON.stringify(position));
+            
+            const baseIcon = L.divIcon({
+                className: 'base-marker-lightweight',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #8b5cf6; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">🏗️</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([position.lat, position.lng], { 
+                icon: baseIcon,
+                zIndexOffset: 600
+            }).addTo(map);
+
+            marker.bindPopup(`
+                <b>Base Marker</b><br>
+                <small>🏗️ My Cosmic Base</small><br>
+                <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+            `);
+
+            log('✅ Base marker created at: ' + position.lat.toFixed(6) + ', ' + position.lng.toFixed(6));
+        }
+
+        // Test at specific location
+        function testAtSpecificLocation() {
+            const position = {
+                lat: 60.1699,
+                lng: 24.9384
+            };
+            currentPosition = position;
+            
+            log('🎯 Testing at specific location: ' + JSON.stringify(position));
+            createPOIMarker(position);
+            createBaseMarker(position);
+            log('✅ Both markers should be at EXACT same coordinates');
+        }
+
+        function clearMap() {
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+            log('🗑️ Map cleared');
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Initial log
+        log('🚀 Position Consistency Test loaded');
+        log('🖱️ Right-click anywhere on the map to test');
+        log('📍 POI: Orange circles with ❓');
+        log('🏗️ Base: Purple circles with 🏗️');
+        log('🎯 Both should appear at SAME coordinates!');
+    </script>
+</body>
+</html>

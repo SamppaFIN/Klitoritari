@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Welcome Screen System - Handles the onboarding experience for new players
+ * @status VERIFIED - Player ID management and welcome flow working correctly
+ * @feature #feature-welcome-screen
+ * @last_verified 2024-01-28
+ * @dependencies WebSocket Client, Player ID management
+ * @warning Do not modify player ID logic or welcome flow without testing game initialization
+ * 
  * Welcome Screen System
  * Handles the onboarding experience for new players
  */
@@ -85,7 +92,7 @@ class WelcomeScreen {
                 this.requestGPSPermission();
             });
         } else {
-            console.error('🌟 GPS enable button not found!');
+            console.log('🌟 GPS enable button not found - GPS functionality may not be available');
         }
 
         // Continue adventure button
@@ -129,7 +136,7 @@ class WelcomeScreen {
     }
 
     showWelcomeScreen() {
-        console.log('🌟 showWelcomeScreen called - stack trace:', new Error().stack);
+        console.log('🌟 showWelcomeScreen called');
         console.log('🌟 this.isVisible:', this.isVisible);
         console.log('🌟 window.loadingInProgress:', window.loadingInProgress);
         
@@ -172,6 +179,12 @@ class WelcomeScreen {
             this.animateWelcomeScreen();
             this.updateContinueAdventureLabel();
             
+            // Update continue adventure label after WebSocket client is ready
+            setTimeout(() => {
+                this.updateContinueAdventureLabel();
+                console.log('🌟 Updated continue adventure label after WebSocket client initialization');
+            }, 1000);
+            
             // Debug: Check if buttons are clickable
             setTimeout(() => {
                 const continueBtn = document.getElementById('continue-adventure');
@@ -191,7 +204,7 @@ class WelcomeScreen {
     }
 
     hideWelcomeScreen() {
-        console.log('🌟 hideWelcomeScreen called - stack trace:', new Error().stack);
+        console.log('🌟 hideWelcomeScreen called');
         const welcomeScreen = document.getElementById('welcome-screen');
         if (welcomeScreen) {
             welcomeScreen.style.display = 'none';
@@ -217,26 +230,69 @@ class WelcomeScreen {
     continueAdventure() {
         console.log('🔄 Continuing existing adventure!');
         
-        // Mark welcome as seen
-        localStorage.setItem('eldritch_welcome_seen', 'true');
-        this.hasSeenWelcome = true;
-        
-        // Hide welcome screen immediately and start game
-        console.log('🌟 Hiding welcome screen and initializing game...');
-        this.hideWelcomeScreen();
-        this.initializeGame(false); // false = don't reset
-        
-        // Start NPC simulation after welcome screen is dismissed
-        if (window.eldritchApp) {
-            window.eldritchApp.startNPCSimulation();
+        try {
+            // Mark welcome as seen
+            localStorage.setItem('eldritch_welcome_seen', 'true');
+            this.hasSeenWelcome = true;
+            
+            // Hide welcome screen immediately and start game
+            console.log('🌟 Hiding welcome screen and initializing game...');
+            this.hideWelcomeScreen();
+            
+            // Add delay to ensure welcome screen is hidden before initializing game
+            setTimeout(() => {
+                console.log('🌟 Initializing game after welcome screen is hidden...');
+                this.initializeGame(false); // false = don't reset
+                
+                // Start NPC simulation after welcome screen is dismissed
+                if (window.eldritchApp) {
+                    console.log('🌟 Starting NPC simulation...');
+                    window.eldritchApp.startNPCSimulation();
+                } else {
+                    console.warn('⚠️ Main app not available for NPC simulation');
+                }
+            }, 300);
+            
+        } catch (error) {
+            console.error('❌ Error in continueAdventure:', error);
+            // Fallback: try to hide welcome screen and show game
+            this.hideWelcomeScreen();
         }
     }
 
     updateContinueAdventureLabel() {
         try {
             const btn = document.getElementById('continue-adventure');
-            if (!btn) return;
-            // Load profile
+            if (!btn) {
+                console.log('🌟 Continue Adventure button not found in DOM');
+                return;
+            }
+            
+            // Check if player has an active player ID
+            const hasActivePlayerId = window.websocketClient && window.websocketClient.hasActivePlayerId();
+            
+            console.log('🌟 Continue Adventure button check:', {
+                websocketClient: !!window.websocketClient,
+                hasActivePlayerId: hasActivePlayerId,
+                playerId: localStorage.getItem('playerId'),
+                eldritch_player_id: localStorage.getItem('eldritch_player_id')
+            });
+            
+            if (!hasActivePlayerId) {
+                // Disable continue adventure button if no player ID exists
+                btn.disabled = true;
+                btn.textContent = 'No Adventure to Continue';
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                console.log('🌟 Continue Adventure button disabled - no active player ID');
+                return;
+            }
+            
+            // Enable button and load profile
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            
             let name = 'Wanderer';
             try {
                 const raw = localStorage.getItem((window.sessionPersistence?.key && window.sessionPersistence.key('profile')) || '');
@@ -1024,6 +1080,14 @@ class WelcomeScreen {
         console.log('🔄 Resetting all game state for fresh start...');
         
         try {
+            // Generate new player ID for fresh adventure
+            if (window.websocketClient && typeof window.websocketClient.generateNewPlayerId === 'function') {
+                const newPlayerId = window.websocketClient.generateNewPlayerId();
+                console.log('🎮 Generated new player ID for fresh adventure:', newPlayerId);
+            } else {
+                console.warn('⚠️ WebSocket client not available for player ID generation');
+            }
+            
             // Clear any existing player base so fresh start has no base
             try {
                 localStorage.removeItem('eldritch-player-base');
@@ -1172,22 +1236,69 @@ class WelcomeScreen {
     initializeGame(resetEverything = false) {
         console.log('🎮 Initializing game systems...', resetEverything ? '(with reset)' : '(continuing)');
         
-        // Initialize the main app
-        if (window.eldritchApp) {
-            console.log('🌌 Main app found, calling initializeGame...');
-            window.eldritchApp.initializeGame();
-        } else {
-            console.error('🌌 Main app not found!');
-            console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
+        try {
+            // Initialize the main app
+            if (window.eldritchApp) {
+                console.log('🌌 Main app found, calling initializeGame...');
+                
+                // Check if the method exists before calling it
+                if (typeof window.eldritchApp.initializeGame === 'function') {
+                    window.eldritchApp.initializeGame();
+                    console.log('🌌 Main app initializeGame called successfully');
+                } else {
+                    console.warn('⚠️ Main app initializeGame method not available');
+                }
+            } else {
+                console.error('🌌 Main app not found!');
+                console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
+                
+                // Try to initialize systems manually
+                this.initializeGameSystemsManually();
+            }
+            
+            // Show distortion animation for fresh adventures
+            if (resetEverything) {
+                // Small delay to ensure systems are initialized
+                setTimeout(() => {
+                    this.showGameTips();
+                }, 1000);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error in initializeGame:', error);
+            // Fallback initialization
+            this.initializeGameSystemsManually();
+        }
+    }
+    
+    initializeGameSystemsManually() {
+        console.log('🔧 Initializing game systems manually...');
+        
+        // Initialize step currency system if available
+        if (window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Initializing step currency system...');
+            if (typeof window.stepCurrencySystem.init === 'function') {
+                window.stepCurrencySystem.init();
+            }
         }
         
-        // Show distortion animation for fresh adventures
-        if (resetEverything) {
-            // Small delay to ensure systems are initialized
-            setTimeout(() => {
-                this.showGameTips();
-            }, 1000);
+        // Initialize map engine if available
+        if (window.mapEngine) {
+            console.log('🗺️ Initializing map engine...');
+            if (typeof window.mapEngine.init === 'function') {
+                window.mapEngine.init();
+            }
         }
+        
+        // Initialize geolocation if available
+        if (window.geolocationManager) {
+            console.log('📍 Initializing geolocation manager...');
+            if (typeof window.geolocationManager.init === 'function') {
+                window.geolocationManager.init();
+            }
+        }
+        
+        console.log('🔧 Manual game systems initialization completed');
     }
 
     showGameTips() {

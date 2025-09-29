@@ -48,6 +48,32 @@ playerData: {
 }
 ```
 
+#### **Marker System Data** ✨ **NEW**
+```javascript
+markerData: {
+    type: "poi|base|npc|monster",
+    position: { lat: number, lng: number },
+    data: {
+        name: "Marker Name",
+        symbol: "🏗️|👤|👹|❓",
+        markerId: "unique_id",
+        description: "Marker description",
+        level: 1, // For base markers
+        established: true // For base markers
+    },
+    icon: {
+        className: "marker-lightweight",
+        html: "<div style='...'>symbol</div>",
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    },
+    popup: {
+        title: "Marker Title",
+        content: "Marker content HTML"
+    }
+}
+```
+
 #### **Base Data**
 ```javascript
 baseData: {
@@ -189,6 +215,12 @@ questData: {
 | `welcome-screen.js` | Initial setup and symbol selection | ✅ Complete |
 | `session-persistence.js` | Data persistence management | ✅ Complete |
 
+### **Marker System (2 files)** ✨ **NEW**
+| File | Purpose | Status |
+|------|---------|--------|
+| `context-menu-system.js` | Context menu and marker creation | ✅ Complete |
+| `websocket-client.js` | Marker persistence and restoration | ✅ Complete |
+
 ### **Rendering Systems (8 files)**
 | File | Purpose | Status |
 |------|---------|--------|
@@ -277,6 +309,17 @@ questData: {
 - ✅ Real-time geolocation integration
 - ✅ Extensive debugging and testing tools
 - ✅ Mobile-responsive design
+- ✅ **NEW**: Lightweight marker system with consistent positioning
+- ✅ **NEW**: Complete marker type support (POI, Base, NPC, Monster)
+- ✅ **NEW**: Server persistence for all marker types
+
+### **Recent Achievements** ✨ **January 28, 2025**
+- 🎉 **Fixed Base Marker Visibility Issue** - Complete resolution using lightweight approach
+- 🎉 **Implemented Sacred Pattern** - Direct Leaflet creation for all markers
+- 🎉 **Added NPC & Monster Markers** - Blue and red markers with server persistence
+- 🎉 **Resolved CSS Conflicts** - Unique class names prevent positioning issues
+- 🎉 **Enhanced Context Menu** - Force base at player location functionality
+- 🎉 **BRDC Documentation** - Comprehensive code comments and bug tracking
 
 ### **Challenges**
 - 🔄 Complex system interactions causing conflicts

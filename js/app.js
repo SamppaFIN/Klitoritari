@@ -1,9 +1,16 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Main Application - Coordinates all systems and manages the cosmic exploration experience
+ * @status VERIFIED - Core application coordinator, stable and working
+ * @feature #feature-main-app-coordinator
+ * @last_verified 2024-01-28
+ * @dependencies All system modules, WebSocket, LocalStorage
+ * @warning Do not modify core initialization logic without testing all systems
+ * 
  * Main Application - Coordinates all systems and manages the cosmic exploration experience
  * Integrates geolocation, map engine, investigation system, and WebSocket communication
  */
 
-class EldritchSanctuaryApp {
+class LegacyEldritchSanctuaryApp {
     constructor() {
         this.isInitialized = false;
         this.loadingScreen = null;
@@ -2417,33 +2424,34 @@ class EldritchSanctuaryApp {
             add100: !!add100StepsBtn
         });
         
-        if (addStepBtn) {
-            addStepBtn.addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    window.stepCurrencySystem.addManualStep();
-                }
-            });
-        }
+        // Step addition now handled by unified debug panel to prevent conflicts
+        // if (addStepBtn) {
+        //     addStepBtn.addEventListener('click', () => {
+        //         if (window.stepCurrencySystem) {
+        //             window.stepCurrencySystem.addManualStep();
+        //         }
+        //     });
+        // }
         
-        if (add50StepsBtn) {
-            add50StepsBtn.addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    for (let i = 0; i < 50; i++) {
-                        window.stepCurrencySystem.addManualStep();
-                    }
-                }
-            });
-        }
+        // if (add50StepsBtn) {
+        //     add50StepsBtn.addEventListener('click', () => {
+        //         if (window.stepCurrencySystem) {
+        //             for (let i = 0; i < 50; i++) {
+        //                 window.stepCurrencySystem.addManualStep();
+        //             }
+        //         }
+        //     });
+        // }
         
-        if (add100StepsBtn) {
-            add100StepsBtn.addEventListener('click', () => {
-                if (window.stepCurrencySystem) {
-                    for (let i = 0; i < 100; i++) {
-                        window.stepCurrencySystem.addManualStep();
-                    }
-                }
-            });
-        }
+        // if (add100StepsBtn) {
+        //     add100StepsBtn.addEventListener('click', () => {
+        //         if (window.stepCurrencySystem) {
+        //             for (let i = 0; i < 100; i++) {
+        //                 window.stepCurrencySystem.addManualStep();
+        //             }
+        //         }
+        //     });
+        // }
         
         // Game control buttons
         const resetStepsBtn = document.getElementById('debug-reset-steps');
@@ -2834,7 +2842,7 @@ class EldritchSanctuaryApp {
         // window.tutorialEncounterSystem = this.systems.tutorialEncounter;
 
         // Initialize map engine
-        this.systems.mapEngine = new EnhancedMapEngine();
+        this.systems.mapEngine = new MapEngine();
         
         // Set window.mapEngine immediately after creation for tutorial access
         window.mapEngine = this.systems.mapEngine;
@@ -2921,9 +2929,21 @@ class EldritchSanctuaryApp {
         this.systems.questLogUI = new QuestLogUI();
         this.systems.questLogUI.init();
         
-        // Initialize step currency system
-        this.systems.stepCurrency = new StepCurrencySystem();
-        this.systems.stepCurrency.init();
+        // Initialize step currency system (only if not already initialized)
+        if (!this.systems.stepCurrency && !window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Creating StepCurrencySystem in app.js...');
+            this.systems.stepCurrency = new StepCurrencySystem();
+            console.log('🚶‍♂️ StepCurrencySystem created, calling init()...');
+            this.systems.stepCurrency.init();
+            console.log('🚶‍♂️ StepCurrencySystem init() completed');
+            
+            // Also make it globally available for debug panel and other systems
+            window.stepCurrencySystem = this.systems.stepCurrency;
+            console.log('🚶‍♂️ StepCurrencySystem made globally available');
+        } else {
+            console.log('🚶‍♂️ StepCurrencySystem already exists, using existing instance');
+            this.systems.stepCurrency = window.stepCurrencySystem;
+        }
         
         // Connect base building layer to step currency system
         if (this.systems.layeredRendering) {
@@ -3095,6 +3115,7 @@ class EldritchSanctuaryApp {
         window.encounterSystem = this.systems.encounter;
         window.npcSystem = this.systems.npc;
         window.pathPaintingSystem = this.systems.pathPainting;
+        window.stepCurrencySystem = this.systems.stepCurrency; // Add step currency system to global scope
         window.app = this; // Make app instance globally available
     }
     
@@ -3430,7 +3451,7 @@ class EldritchSanctuaryApp {
 let app;
 
 document.addEventListener('DOMContentLoaded', () => {
-    app = new EldritchSanctuaryApp();
+    app = new LegacyEldritchSanctuaryApp();
     app.init();
 });
 

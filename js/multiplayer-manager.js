@@ -222,6 +222,21 @@ class MultiplayerManager {
             case 'pong':
                 // Heartbeat response
                 break;
+            case 'base_establishment_available':
+                this.handleBaseEstablishmentAvailable(data);
+                break;
+            case 'quest_system_unlocked':
+                this.handleQuestSystemUnlocked(data);
+                break;
+            case 'flag_creation_enabled':
+                this.handleFlagCreationEnabled(data);
+                break;
+            case 'celebration_triggered':
+                this.handleCelebrationTriggered(data);
+                break;
+            case 'player_milestone':
+                this.handleOtherPlayerMilestone(data);
+                break;
             default:
                 console.log(' Unknown message type:', data.type);
         }
@@ -588,6 +603,57 @@ class MultiplayerManager {
             const extra = names.length - shown.length;
             namesEl.textContent = extra > 0 ? `${shown.join(', ')} +${extra}` : shown.join(', ');
         } catch (_) {}
+    }
+
+    /**
+     * Handle base establishment availability from server
+     */
+    handleBaseEstablishmentAvailable(data) {
+        console.log('🏗️ Base establishment available from server:', data);
+        // Emit event to event bus for other systems to handle
+        if (window.eventBus) {
+            window.eventBus.emit('base_establishment_available', data);
+        }
+    }
+
+    /**
+     * Handle quest system unlock from server
+     */
+    handleQuestSystemUnlocked(data) {
+        console.log('📜 Quest system unlocked from server:', data);
+        if (window.eventBus) {
+            window.eventBus.emit('quest_system_unlocked', data);
+        }
+    }
+
+    /**
+     * Handle flag creation enable from server
+     */
+    handleFlagCreationEnabled(data) {
+        console.log('🇫🇮 Flag creation enabled from server:', data);
+        if (window.eventBus) {
+            window.eventBus.emit('flag_creation_enabled', data);
+        }
+    }
+
+    /**
+     * Handle celebration trigger from server
+     */
+    handleCelebrationTriggered(data) {
+        console.log('🎉 Celebration triggered from server:', data);
+        if (window.eventBus) {
+            window.eventBus.emit('celebration_triggered', data);
+        }
+    }
+
+    /**
+     * Handle other player milestone achievements
+     */
+    handleOtherPlayerMilestone(data) {
+        console.log('👥 Other player milestone achieved:', data);
+        if (window.eventBus) {
+            window.eventBus.emit('player_milestone', data);
+        }
     }
 }
 

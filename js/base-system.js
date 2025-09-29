@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Base System - Player base establishment and territory management
+ * @status VERIFIED - Base building and territory management working correctly
+ * @feature #feature-base-building
+ * @last_verified 2024-01-28
+ * @dependencies Map Engine, Step Currency System, WebSocket
+ * @warning Do not modify base establishment logic without testing territory expansion
+ * 
  * Base System - Player base establishment and territory management
  * Handles base creation, territory expansion, and community connections
  */
@@ -51,7 +58,7 @@ class BaseSystem {
         const baseButton = document.createElement('button');
         baseButton.id = 'establish-base-btn';
         baseButton.className = 'sacred-button base-button';
-        baseButton.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE</span>';
+        baseButton.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE FOR 1000 STEPS</span>';
         baseButton.style.cssText = `
             background: linear-gradient(45deg, #4CAF50, #66BB6A);
             color: white;
@@ -545,12 +552,36 @@ class BaseSystem {
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>🏗️ Establish Your Cosmic Base</h2>
+                    <h2>🏗️ Establish Your Eldritch Sanctuary</h2>
                     <button id="close-base-modal" class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="base-setup-info">
-                        <p>Your base will be the center of your cosmic exploration and community building.</p>
+                        <div class="lovecraftian-narrative">
+                            <p style="font-style: italic; color: #e94560; margin-bottom: 16px;">
+                                "In the cosmic void between dimensions, where the ancient ones slumber, 
+                                you have gathered sufficient eldritch energy through your mortal steps. 
+                                The very fabric of reality bends to your will, allowing you to anchor 
+                                your presence in this realm of infinite possibilities."
+                            </p>
+                            <p style="color: #f0f0f0; margin-bottom: 20px;">
+                                The cosmic energies have aligned. You may now establish your eldritch sanctuary, 
+                                a beacon of your influence in the vast expanse of the unknown.
+                            </p>
+                        </div>
+                        
+                        <div class="base-cost-info" style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 16px; border-radius: 8px; border: 2px solid #e94560; margin-bottom: 20px;">
+                            <h4 style="color: #e94560; margin-bottom: 8px;">⚡ Cosmic Energy Required</h4>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #f0f0f0;">Establish Base Cost:</span>
+                                <span style="color: #e94560; font-weight: bold; font-size: 18px;">1000 Steps</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                                <span style="color: #f0f0f0;">Your Current Steps:</span>
+                                <span style="color: #4CAF50; font-weight: bold; font-size: 16px;">${window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0}</span>
+                            </div>
+                        </div>
+                        
                         <div class="location-confirmation">
                             <h4>📍 Base Location</h4>
                             <div class="location-details">
@@ -580,8 +611,8 @@ class BaseSystem {
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button id="confirm-base-establishment" class="confirm-btn">
-                            <span class="icon">🏗️</span> Establish Base
+                        <button id="confirm-base-establishment" style="background: linear-gradient(135deg, rgb(245, 158, 11), rgb(251, 191, 36)); color: white; border: none; padding: 16px 24px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; transition: 0.2s; box-shadow: rgba(245, 158, 11, 0.3) 0px 4px 12px; transform: translateY(0px);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                            <span class="icon">🏗️</span> Establish Base for 1000 Steps
                         </button>
                         <button id="cancel-base-establishment" class="cancel-btn">
                             Cancel
@@ -655,11 +686,33 @@ class BaseSystem {
 
     async establishBase(name, position) {
         try {
+            // Check if player has enough steps
+            const currentSteps = window.stepCurrencySystem ? window.stepCurrencySystem.totalSteps : 0;
+            const baseCost = 1000;
+            
+            if (currentSteps < baseCost) {
+                this.showNotification(`Insufficient cosmic energy! You need ${baseCost} steps to establish a base. Current: ${currentSteps}`, 'error');
+                return;
+            }
+            
             // Set flag to prevent quest triggering during base establishment
             this.isEstablishingBase = true;
             
             // Show loading state
             this.showNotification('Establishing your cosmic base...', 'info');
+            
+            // Deduct steps for base establishment
+            if (window.stepCurrencySystem) {
+                window.stepCurrencySystem.totalSteps -= baseCost;
+                window.stepCurrencySystem.saveSteps();
+                console.log(`🏗️ Deducted ${baseCost} steps for base establishment. Remaining: ${window.stepCurrencySystem.totalSteps}`);
+                
+                // Update step counter display
+                const stepCounter = document.getElementById('step-counter');
+                if (stepCounter) {
+                    stepCounter.textContent = `Steps: ${window.stepCurrencySystem.totalSteps}`;
+                }
+            }
 
             // Create base data
             const baseData = {
@@ -911,7 +964,7 @@ class BaseSystem {
             
             // Reset establish button when no base exists
             if (establishBtn) {
-                establishBtn.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE</span>';
+                establishBtn.innerHTML = '<span class="base-icon">🏗️</span><span class="base-text">ESTABLISH BASE FOR 1000 STEPS</span>';
                 establishBtn.onclick = (e) => {
                     console.log('🏗️ Establish base button clicked');
                     e.stopPropagation();

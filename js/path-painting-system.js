@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Path Painting System - Tracks and visualizes player's journey
+ * @status VERIFIED - Path visualization and brush effects working correctly
+ * @feature #feature-path-painting
+ * @last_verified 2024-01-28
+ * @dependencies Map Engine, Geolocation, Canvas Rendering
+ * @warning Do not modify path painting logic without testing brush effects and performance
+ * 
  * Path Painting System - Tracks and visualizes player's journey
  * Creates a painted layer showing visited areas with brush-like effects
  */

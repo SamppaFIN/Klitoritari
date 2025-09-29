@@ -208,21 +208,13 @@ class InteractionLayer extends BaseLayer {
     }
 
     handleClick(event) {
-        console.log('🎨 InteractionLayer: Click detected at', event.clientX, event.clientY);
-        
         const rect = this.canvas.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
         
-        console.log('🎨 InteractionLayer: Canvas click at (' + x + ', ' + y + ')');
-        console.log('🎨 InteractionLayer: Canvas size:', this.canvas.width, 'x', this.canvas.height);
-        console.log('🎨 InteractionLayer: Canvas rect:', rect);
-        
         const element = this.getElementAtPosition(x, y);
-        console.log('🎨 InteractionLayer: Element at position:', element ? element.id : 'none');
         
         if (element) {
-            console.log('🎨 InteractionLayer: Clicking element:', element.id);
             this.eventBus.emit('ui:element:click', { element, x, y });
             
             // Handle specific button clicks
@@ -233,8 +225,6 @@ class InteractionLayer extends BaseLayer {
                 console.log('☰ Menu button clicked - emitting ui:menu:toggle event');
                 this.eventBus.emit('ui:menu:toggle');
             }
-        } else {
-            console.log('🎨 InteractionLayer: No element found at click position');
         }
         
         this.eventBus.emit('interaction:click', { x, y });
@@ -257,7 +247,8 @@ class InteractionLayer extends BaseLayer {
             }
         }
         
-        this.eventBus.emit('interaction:mouse:move', { x, y });
+        // Disabled mouse movement logging to reduce clutter
+        // this.eventBus.emit('interaction:mouse:move', { x, y });
     }
 
     handleMouseDown(event) {

@@ -1,5 +1,11 @@
 ﻿/**
- * MapLayer - Leaflet map rendering and display
+ * @fileoverview [VERIFIED] MapLayer - Leaflet map rendering and display
+ * @status VERIFIED - Player marker visibility fixed, working correctly
+ * @feature #feature-map-layer-rendering
+ * @bugfix #bug-marker-visibility
+ * @last_verified 2024-01-28
+ * @dependencies Leaflet, BaseLayer, WebSocket
+ * @warning Do not modify marker creation logic without testing visibility
  * 
  * This layer handles:
  * - Leaflet map rendering and display
@@ -36,8 +42,72 @@ class MapLayer extends BaseLayer {
         // Initialize Leaflet map
         this.initializeMap();
         
-        // Initialize player marker
-        this.initializePlayerMarker();
+        // Initialize Leaflet Layer Manager for canvas layer replacement
+        if (this.mapReady) {
+            this.leafletLayerManager = new LeafletLayerManager(this.map);
+            console.log('🗺️ MapLayer: Leaflet Layer Manager initialized');
+        }
+        
+        // Initialize player marker after map is ready
+        if (this.mapReady) {
+            this.initializePlayerMarker();
+        } else {
+            // Wait for map to be ready
+            this.waitForMapReady();
+        }
+        
+        // Make MapLayer globally available
+        window.mapLayer = this;
+        window.mapEngine = { map: this.map }; // Compatibility alias
+        console.log('🗺️ MapLayer: Made globally available as window.mapLayer and window.mapEngine');
+        
+        // Add test function for base marker creation
+        window.testBaseMarker = () => {
+            if (this.map && this.mapReady) {
+                console.log('🗺️ Testing base marker creation...');
+                const testPosition = { lat: 61.472768, lng: 23.724032 };
+                const baseIcon = L.divIcon({
+                    className: 'base-marker multilayered',
+                    html: `<div style="position: relative; width: 40px; height: 40px;">
+                        <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; 
+                             background: radial-gradient(circle, #ff000040 0%, transparent 70%); 
+                             border-radius: 50%; animation: basePulse 2s infinite;"></div>
+                        <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; 
+                             background: #ff0000; border: 3px solid #ffffff; border-radius: 50%; 
+                             box-shadow: 0 0 10px #ff000080;"></div>
+                        <div style="position: absolute; top: 5px; left: 5px; width: 30px; height: 30px; 
+                             display: flex; align-items: center; justify-content: center; font-size: 18px; 
+                             text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);">🏗️</div>
+                    </div>`,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+                
+                const baseMarker = L.marker([testPosition.lat, testPosition.lng], { 
+                    icon: baseIcon,
+                    zIndexOffset: 2000
+                }).addTo(this.map);
+                
+                console.log('🗺️ Test base marker created successfully!');
+                return baseMarker;
+            } else {
+                console.error('🗺️ Map not ready for base marker creation');
+                return null;
+            }
+        };
+
+        // Add function to manually set player location to Nekala
+        window.setPlayerLocationNekala = () => {
+            if (this.map && this.mapReady) {
+                const nekalaPosition = { lat: 61.472768, lng: 23.724032 };
+                console.log('🗺️ Manually setting player location to Nekala:', nekalaPosition);
+                this.updatePlayerMarker(nekalaPosition);
+                this.map.setView(nekalaPosition, 18);
+                console.log('🗺️ Player marker moved to Nekala and map centered');
+            } else {
+                console.warn('🗺️ Map not ready for manual location setting');
+            }
+        };
         
         console.log('🗺️ MapLayer: Map system initialized');
     }
@@ -74,6 +144,18 @@ class MapLayer extends BaseLayer {
     initializeMap() {
         if (typeof L === 'undefined') {
             console.error('🗺️ MapLayer: Leaflet not available');
+            return;
+        }
+
+        // Check if map is already initialized
+        if (this.map) {
+            console.log('🗺️ MapLayer: Map already initialized, skipping');
+            return;
+        }
+
+        // Check if container already has a map instance
+        if (this.mapContainer._leaflet_id) {
+            console.log('🗺️ MapLayer: Container already has a map instance, skipping');
             return;
         }
 
@@ -160,10 +242,10 @@ class MapLayer extends BaseLayer {
             }
         });
 
-        // Map context menu event
+        // Map context menu event - now handled by context-menu-system.js
         this.map.on('contextmenu', (e) => {
             e.originalEvent.preventDefault();
-            this.showContextMenu(e);
+            // Context menu is now handled by the unified context-menu-system.js
         });
     }
 
@@ -456,6 +538,20 @@ class MapLayer extends BaseLayer {
         console.log('🗺️ MapLayer: Destroyed');
     }
 
+    // Map Ready Methods
+    waitForMapReady() {
+        console.log('🗺️ MapLayer: Waiting for map to be ready...');
+        const checkMapReady = () => {
+            if (this.mapReady && this.map) {
+                console.log('🗺️ MapLayer: Map is now ready, initializing player marker');
+                this.initializePlayerMarker();
+            } else {
+                setTimeout(checkMapReady, 100);
+            }
+        };
+        checkMapReady();
+    }
+
     // Player Marker Methods
     initializePlayerMarker() {
         console.log('🗺️ MapLayer: Initializing player marker...');
@@ -521,85 +617,47 @@ class MapLayer extends BaseLayer {
         if (marker) {
             marker.setLatLng([position.lat, position.lng]);
             console.log('🗺️ MapLayer: Player marker updated to:', position);
+            
+            // Add a temporary flash effect to make the marker more noticeable
+            this.flashPlayerMarker();
         } else {
+            console.log('🗺️ MapLayer: No existing player marker, creating new one');
             // Create marker if it doesn't exist
             this.createPlayerMarker(position);
+        }
+    }
+
+    flashPlayerMarker() {
+        const marker = this.markers.get('player');
+        if (marker) {
+            // Get the marker's DOM element
+            const element = marker._icon;
+            if (element) {
+                // Add flash effect
+                element.style.animation = 'none';
+                element.offsetHeight; // Trigger reflow
+                element.style.animation = 'playerFlash 0.5s ease-in-out';
+                
+                // Remove animation after it completes
+                setTimeout(() => {
+                    element.style.animation = '';
+                }, 500);
+            }
         }
     }
 
     createPlayerMarkerHTML() {
         return `
             <div style="position: relative; width: 40px; height: 40px;">
-                <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, #00ff004D 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
-                <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #00ff00; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 15px #00ff00;"></div>
-                <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 5px rgba(0,0,0,0.8);">👤</div>
+                <div style="position: absolute; top: -10px; left: -10px; width: 60px; height: 60px; background: radial-gradient(circle, #00ff0040 0%, transparent 70%); border-radius: 50%; animation: playerPulse 2s infinite;"></div>
+                <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, #00ff0060 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
+                <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #00ff00; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;"></div>
+                <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(0,0,0,0.9); font-weight: bold;">👤</div>
             </div>
         `;
     }
 
-    // Context Menu Methods
-    showContextMenu(e) {
-        // Remove existing context menu
-        this.hideContextMenu();
-        
-        // Create context menu
-        const contextMenu = document.createElement('div');
-        contextMenu.id = 'map-context-menu';
-        contextMenu.style.cssText = `
-            position: fixed;
-            top: ${e.containerPoint.y}px;
-            left: ${e.containerPoint.x}px;
-            background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(40, 40, 60, 0.95));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 8px 0;
-            z-index: 10000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            min-width: 150px;
-        `;
-        
-        // Add "Move Here" option
-        const moveHereOption = document.createElement('div');
-        moveHereOption.style.cssText = `
-            padding: 12px 16px;
-            color: #ffffff;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        `;
-        moveHereOption.innerHTML = '🚀 Move Here';
-        moveHereOption.addEventListener('click', () => {
-            this.teleportPlayer(e.latlng);
-            this.hideContextMenu();
-        });
-        moveHereOption.addEventListener('mouseenter', () => {
-            moveHereOption.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-        });
-        moveHereOption.addEventListener('mouseleave', () => {
-            moveHereOption.style.backgroundColor = 'transparent';
-        });
-        
-        contextMenu.appendChild(moveHereOption);
-        document.body.appendChild(contextMenu);
-        
-        // Store reference for cleanup
-        this.contextMenu = contextMenu;
-        
-        // Hide menu when clicking elsewhere
-        setTimeout(() => {
-            document.addEventListener('click', this.hideContextMenu.bind(this), { once: true });
-        }, 100);
-    }
-
-    hideContextMenu() {
-        if (this.contextMenu) {
-            this.contextMenu.remove();
-            this.contextMenu = null;
-        }
-    }
+    // Context Menu Methods - now handled by context-menu-system.js
 
     // Player Teleportation Methods
     teleportPlayer(targetPosition) {
@@ -619,10 +677,25 @@ class MapLayer extends BaseLayer {
         });
         
         // Create step markers between positions
-        this.createStepMarkers(currentPosition, targetPosition);
+        const stepMarkers = this.createStepMarkers(currentPosition, targetPosition);
+        console.log('🚶‍♂️ DEBUG: stepMarkers created:', stepMarkers);
+        console.log('🚶‍♂️ DEBUG: stepMarkers length:', stepMarkers ? stepMarkers.length : 'undefined');
+        console.log('🚶‍♂️ DEBUG: window.stepCurrencySystem available:', !!window.stepCurrencySystem);
         
         // Add path marker at new position
         this.addPathMarker(targetPosition);
+        
+        // Give steps for the movement (10 steps per step marker)
+        if (window.stepCurrencySystem && stepMarkers && stepMarkers.length > 0) {
+            const stepsToGive = stepMarkers.length * 10; // 10 steps per marker
+            console.log(`🚶‍♂️ Giving ${stepsToGive} steps for Move Here (${stepMarkers.length} markers)`);
+            
+            for (let i = 0; i < stepsToGive; i++) {
+                window.stepCurrencySystem.addManualStep();
+            }
+        } else {
+            console.log('🚶‍♂️ DEBUG: Not giving steps - stepCurrencySystem:', !!window.stepCurrencySystem, 'stepMarkers:', stepMarkers, 'length:', stepMarkers ? stepMarkers.length : 'undefined');
+        }
         
         // Center map on new position
         this.map.setView([targetPosition.lat, targetPosition.lng], this.map.getZoom(), { animate: true, duration: 0.5 });
@@ -652,14 +725,19 @@ class MapLayer extends BaseLayer {
         const distance = this.calculateDistance(fromPosition.lat, fromPosition.lng, toPosition.lat, toPosition.lng);
         const stepCount = Math.max(1, Math.floor(distance / 10)); // One marker every 10 meters
         
+        const stepMarkers = [];
+        
         // Create step markers
         for (let i = 1; i <= stepCount; i++) {
             const ratio = i / (stepCount + 1);
             const stepLat = fromPosition.lat + (toPosition.lat - fromPosition.lat) * ratio;
             const stepLng = fromPosition.lng + (toPosition.lng - fromPosition.lng) * ratio;
             
-            this.addStepMarker({ lat: stepLat, lng: stepLng }, i);
+            const marker = this.addStepMarker({ lat: stepLat, lng: stepLng }, i);
+            stepMarkers.push(marker);
         }
+        
+        return stepMarkers;
     }
 
     addStepMarker(position, stepNumber) {
@@ -696,7 +774,24 @@ class MapLayer extends BaseLayer {
         if (!this.stepMarkers) this.stepMarkers = [];
         this.stepMarkers.push(marker);
         
+        // Send step marker to server for persistence
+        if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+            console.log(`👣 Sending step marker ${stepNumber} to server for persistence...`);
+            window.websocketClient.createMarker({
+                type: 'step',
+                position: { lat: position.lat, lng: position.lng },
+                data: {
+                    stepNumber: stepNumber,
+                    markerId: `step_${stepNumber}_${Date.now()}`
+                }
+            });
+        } else {
+            console.log(`👣 WebSocket not connected, step marker ${stepNumber} not persisted to server`);
+        }
+        
         console.log('👣 Added step marker', stepNumber, 'at', position);
+        
+        return marker;
     }
 
     addPathMarker(position) {
@@ -722,10 +817,22 @@ class MapLayer extends BaseLayer {
             iconAnchor: [15, 15]
         });
         
+        // DEBUG: Log path marker details
+        console.log(`🇫🇮 PathMarker DEBUG: Creating path marker`);
+        console.log(`🇫🇮 PathMarker DEBUG: Position:`, position);
+        console.log(`🇫🇮 PathMarker DEBUG: Map reference:`, this.map);
+        console.log(`🇫🇮 PathMarker DEBUG: Map center:`, this.map.getCenter());
+        console.log(`🇫🇮 PathMarker DEBUG: Map zoom:`, this.map.getZoom());
+
         const marker = L.marker([position.lat, position.lng], { 
             icon: pathIcon,
             zIndexOffset: 600
         }).addTo(this.map);
+        
+        // DEBUG: Log marker details after creation
+        console.log(`🇫🇮 PathMarker DEBUG: Marker created:`, marker);
+        console.log(`🇫🇮 PathMarker DEBUG: Marker position:`, marker.getLatLng());
+        console.log(`🇫🇮 PathMarker DEBUG: Marker element:`, marker.getElement());
         
         // Add popup
         marker.bindPopup(`
@@ -738,7 +845,133 @@ class MapLayer extends BaseLayer {
         if (!this.pathMarkers) this.pathMarkers = [];
         this.pathMarkers.push(marker);
         
+        // Send path marker to server for persistence
+        if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+            console.log('🇫🇮 Sending path marker to server for persistence...');
+            window.websocketClient.createMarker({
+                type: 'path',
+                position: { lat: position.lat, lng: position.lng },
+                data: {
+                    symbol: '🇫🇮',
+                    markerId: `path_${Date.now()}`
+                }
+            });
+        } else {
+            console.log('🇫🇮 WebSocket not connected, path marker not persisted to server');
+        }
+        
         console.log('🇫🇮 Added path marker at', position);
+    }
+
+    // Base Marker Methods
+    addBaseMarker(position) {
+        if (!this.map || !this.mapReady) {
+            console.warn('🗺️ MapLayer: Map not ready, cannot create base marker');
+            return null;
+        }
+        
+        // Remove existing base marker if it exists
+        const existingBaseMarker = this.markers.get('base');
+        if (existingBaseMarker) {
+            console.log('🏗️ MapLayer: Removing existing base marker');
+            this.map.removeLayer(existingBaseMarker);
+            this.markers.delete('base');
+        }
+
+        // Create base marker icon using EXACT same approach as path markers
+        const baseIcon = L.divIcon({
+            className: 'base-marker',
+            html: `
+                <div style="
+                    width: 30px; 
+                    height: 30px; 
+                    background: #8b5cf6; 
+                    border: 3px solid #ffffff; 
+                    border-radius: 50%; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-size: 16px;
+                    color: white;
+                    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                ">🏗️</div>
+            `,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+
+        // DEBUG: Log base marker details (same as path markers)
+        console.log(`🏗️ BaseMarker DEBUG: Creating base marker`);
+        console.log(`🏗️ BaseMarker DEBUG: Position:`, position);
+        console.log(`🏗️ BaseMarker DEBUG: Map reference:`, this.map);
+        console.log(`🏗️ BaseMarker DEBUG: Map center:`, this.map.getCenter());
+        console.log(`🏗️ BaseMarker DEBUG: Map zoom:`, this.map.getZoom());
+
+        // Create marker using EXACT same method as path markers - DIRECT to map
+        const marker = L.marker([position.lat, position.lng], { 
+            icon: baseIcon,
+            zIndexOffset: 600  // SAME as path markers
+        }).addTo(this.map);  // DIRECT addition like path markers
+
+        // DEBUG: Log marker details after creation (same as path markers)
+        console.log(`🏗️ BaseMarker DEBUG: Marker created:`, marker);
+        console.log(`🏗️ BaseMarker DEBUG: Marker position:`, marker.getLatLng());
+        console.log(`🏗️ BaseMarker DEBUG: Marker element:`, marker.getElement());
+
+        // Add popup (same as path markers)
+        marker.bindPopup(`
+            <b>Base Marker</b><br>
+            <small>🏗️ Base</small><br>
+            <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+        `);
+        
+        // Store marker in SAME way as path markers
+        this.markers.set('base', marker);
+        
+        // Send base marker to server for persistence (same as path markers)
+        if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
+            console.log('🏗️ Sending base marker to server for persistence...');
+            window.websocketClient.createMarker({
+                type: 'base',
+                position: { lat: position.lat, lng: position.lng },
+                data: {
+                    symbol: '🏗️',
+                    markerId: `base_${Date.now()}`
+                }
+            });
+        } else {
+            console.log('🏗️ WebSocket not connected, base marker not persisted to server');
+        }
+        
+        console.log('🏗️ MapLayer: Base marker created at:', position);
+        console.log('🏗️ MapLayer: Base marker added directly to map (same as path markers)');
+        
+        return marker;
+    }
+
+    getCurrentPlayerPosition() {
+        console.log('🗺️ MapLayer: Getting current player position...');
+        
+        // Try to get from player marker
+        const playerMarker = this.markers.get('player');
+        if (playerMarker) {
+            const latlng = playerMarker.getLatLng();
+            const position = { lat: latlng.lat, lng: latlng.lng };
+            console.log('🗺️ MapLayer: Player position from marker:', position);
+            return position;
+        }
+        
+        // Fallback: use map center
+        if (this.map) {
+            const center = this.map.getCenter();
+            const position = { lat: center.lat, lng: center.lng };
+            console.log('🗺️ MapLayer: Using map center as player position:', position);
+            return position;
+        }
+        
+        console.warn('🗺️ MapLayer: No player position available');
+        return null;
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {

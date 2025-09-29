@@ -64,6 +64,37 @@
     "type": "zone.entry",
     "payload": { "zoneType": string, "playerId": string }
   }
+- StepMilestone (Client → Server):
+  {
+    "type": "step_milestone",
+    "payload": { "milestoneType": string, "sessionSteps": number, "totalSteps": number, "timestamp": number, "playerId": string }
+  }
+- BaseEstablishmentAvailable (Server → Client):
+  {
+    "type": "base_establishment_available",
+    "payload": { "playerId": string, "totalSteps": number, "timestamp": number, "message": string }
+  }
+- QuestSystemUnlocked (Server → Client):
+  {
+    "type": "quest_system_unlocked",
+    "payload": { "playerId": string, "totalSteps": number, "timestamp": number, "message": string }
+  }
+- FlagCreationEnabled (Server → Client):
+  {
+    "type": "flag_creation_enabled",
+    "payload": { "playerId": string, "totalSteps": number, "timestamp": number, "message": string }
+  }
+- CelebrationTriggered (Server → Client):
+  {
+    "type": "celebration_triggered",
+    "payload": { "playerId": string, "totalSteps": number, "timestamp": number, "message": string }
+  }
+- PlayerMilestone (Server → Client):
+  {
+    "type": "player_milestone",
+    "playerId": string,
+    "playerData": { "name": string, "milestoneType": string, "totalSteps": number, "timestamp": number }
+  }
 - PlayerCount (Server → Client):
   { "type": "playerCount", "payload": { "count": number } }
 

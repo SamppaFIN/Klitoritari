@@ -6,16 +6,7 @@ class LayerManager {
     constructor(eventBus, gameState) {
         this.layers = new Map();
         this.renderOrder = [
-            'background',
-            'terrain', 
-            'territory',
-            'path',
-            'map',
-            'interaction',
-            'player',
-            'information',
-            'ui',
-            'debug'
+            'map'  // Only use map layer - all others converted to Leaflet layers
         ];
         
         this.isRendering = false;

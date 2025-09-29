@@ -218,6 +218,10 @@ class TerrainLayer extends BaseLayer {
     }
 
     doRender(deltaTime) {
+        // DISABLED: Terrain layer causing positioning issues with map
+        // The map layer should be the primary visual element
+        return;
+        
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -261,12 +265,14 @@ class TerrainLayer extends BaseLayer {
             this.terrainCache.set(terrain.biome, texture);
         }
 
-        // Draw texture
+        // Draw texture with transparency so map shows through
+        this.ctx.globalAlpha = 0.3; // Make terrain semi-transparent
         this.ctx.drawImage(texture, x, y, tileSize, tileSize);
+        this.ctx.globalAlpha = 1.0; // Reset alpha
 
-        // Add elevation shading
+        // Add elevation shading (also more transparent)
         const elevationFactor = (terrain.elevation + 100) / 200; // Normalize to 0-1
-        this.ctx.fillStyle = `rgba(0, 0, 0, ${(1 - elevationFactor) * 0.3})`;
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${(1 - elevationFactor) * 0.1})`; // Reduced opacity
         this.ctx.fillRect(x, y, tileSize, tileSize);
     }
 

@@ -23,6 +23,7 @@ class ThreeJSUILayer extends BaseLayer {
         this.isInitialized = false;
         this.uiElements = new Map();
         this.activeTab = null; // Track currently active tab for toggle behavior
+        this.playerCreated = false; // Track if player has been created
         
         console.log('🎮 ThreeJS UI Layer: Initialized');
     }
@@ -60,19 +61,20 @@ class ThreeJSUILayer extends BaseLayer {
         this.tabsContainer.id = 'magnetic-tabs-container';
         this.tabsContainer.style.cssText = `
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
+            justify-content: center;
             gap: 12px;
             z-index: 1000;
             pointer-events: auto;
-            background: rgba(0, 0, 0, 0.8);
+            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 100%);
             backdrop-filter: blur(20px);
-            border-radius: 30px;
-            padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border-radius: 0;
+            padding: 20px 16px 16px 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3);
         `;
         
         // Create magnetic tab buttons
@@ -86,13 +88,30 @@ class ThreeJSUILayer extends BaseLayer {
         // Store tab data for later use
         this.tabData = tabs;
         
-        tabs.forEach(tab => {
+        console.log('🎨 Creating', tabs.length, 'magnetic tabs...');
+        tabs.forEach((tab, index) => {
+            console.log(`🎨 Creating tab ${index + 1}:`, tab.id, tab.label);
             const tabElement = this.createMagneticTab(tab);
             this.tabsContainer.appendChild(tabElement);
         });
         
         // Add to document
         document.body.appendChild(this.tabsContainer);
+        console.log('🎨 Tabs container added to document');
+        
+        // Debug: Check if tabs are visible after a delay
+        setTimeout(() => {
+            const visibleTabs = document.querySelectorAll('.magnetic-tab');
+            console.log('🎨 Debug: Found', visibleTabs.length, 'visible tabs');
+            visibleTabs.forEach((tab, index) => {
+                const rect = tab.getBoundingClientRect();
+                console.log(`🎨 Tab ${index + 1}:`, {
+                    id: tab.dataset.tabId,
+                    visible: rect.width > 0 && rect.height > 0,
+                    position: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+                });
+            });
+        }, 1000);
         
         // Add keyboard shortcuts
         this.setupKeyboardShortcuts();
@@ -161,6 +180,13 @@ class ThreeJSUILayer extends BaseLayer {
         
         // Add click handler with ripple effect
         tab.addEventListener('click', (e) => {
+            this.createRippleEffect(e, tab);
+            this.switchTab(tabData.id);
+        });
+        
+        // Add touch handler for mobile devices
+        tab.addEventListener('touchend', (e) => {
+            e.preventDefault();
             this.createRippleEffect(e, tab);
             this.switchTab(tabData.id);
         });
@@ -522,19 +548,138 @@ class ThreeJSUILayer extends BaseLayer {
                     </div>
                 `;
             case 'base':
-                return `
-                    <div style="margin-bottom: 24px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
-                            <span style="color: rgba(255,255,255,0.6); font-size: 14px;">Level 1</span>
+                // Check if player has a base
+                const hasBase = window.SimpleBaseInit && window.SimpleBaseInit.baseData;
+                
+                if (!hasBase) {
+                    // No base - show establish base option
+                    return `
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 14px;">No Base</span>
+                            </div>
+                            
+                            <!-- Lovecraftian Cosmic Narrative -->
+                            <div style="
+                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+                                border: 1px solid rgba(139, 92, 246, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                                font-family: 'Cinzel', serif;
+                            ">
+                                <div style="color: #8b5cf6; font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🌌 The Cosmic Void Beckons
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.6; text-align: center; font-style: italic;">
+                                    "In the vast emptiness between dimensions, where the stars themselves whisper ancient secrets, 
+                                    a nexus of power awaits your claim. The cosmic energies that flow through this realm 
+                                    yearn for a master to channel their infinite potential..."
+                                </div>
+                            </div>
+                            
+                            <!-- Establish Base Section -->
+                            <div style="
+                                background: rgba(34, 197, 94, 0.1);
+                                border: 1px solid rgba(34, 197, 94, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                            ">
+                                <div style="color: #22c55e; font-size: 18px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🏗️ Establish Your Cosmic Base
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 16px; text-align: center;">
+                                    Establish your base at your current location. You can only have one base at a time.
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                    <div style="text-align: center;">
+                                        <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 4px;">Cost</div>
+                                        <div style="color: #f59e0b; font-size: 16px; font-weight: 600;">1,000 Steps</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 4px;">Limit</div>
+                                        <div style="color: #22c55e; font-size: 16px; font-weight: 600;">1 Base Max</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Establish Base Button -->
+                                <button onclick="window.establishBaseAtCurrentLocation()" style="
+                                    background: linear-gradient(135deg, #22c55e, #16a34a);
+                                    color: white;
+                                    border: none;
+                                    padding: 20px 24px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-size: 18px;
+                                    font-weight: 600;
+                                    width: 100%;
+                                    min-height: 56px;
+                                    touch-action: manipulation;
+                                    -webkit-tap-highlight-color: transparent;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(34, 197, 94, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(34, 197, 94, 0.3)'">
+                                    🏗️ Establish Base
+                                </button>
+                            </div>
+                            
+                            <!-- Cosmic Shop Preview -->
+                            <div style="
+                                background: rgba(168, 85, 247, 0.1);
+                                border: 1px solid rgba(168, 85, 247, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                            ">
+                                <div style="color: #a855f7; font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🛒 Cosmic Shop (Coming Soon)
+                                </div>
+                                <div style="color: rgba(255,255,255,0.6); font-size: 14px; text-align: center; font-style: italic;">
+                                    "The ancient merchants of the void await your patronage. 
+                                    Once your base is established, cosmic wares and forbidden knowledge 
+                                    shall be revealed to those worthy..."
+                                </div>
+                            </div>
                         </div>
-                        <div style="space-y: 16px;">
+                    `;
+                } else {
+                    // Has base - show management interface
+                    return `
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="color: #f59e0b; margin: 0; font-size: 20px; font-weight: 600;">🏠 Base Management</h3>
+                                <span style="color: rgba(255,255,255,0.6); font-size: 14px;">Level 1</span>
+                            </div>
+                            
+                            <!-- Lovecraftian Cosmic Narrative -->
+                            <div style="
+                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+                                border: 1px solid rgba(139, 92, 246, 0.3);
+                                padding: 20px;
+                                border-radius: 12px;
+                                margin-bottom: 20px;
+                                font-family: 'Cinzel', serif;
+                            ">
+                                <div style="color: #8b5cf6; font-size: 16px; font-weight: 600; margin-bottom: 12px; text-align: center;">
+                                    🌌 Your Cosmic Nexus
+                                </div>
+                                <div style="color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.6; text-align: center; font-style: italic;">
+                                    "The cosmic energies flow through your established nexus, pulsing with the rhythm of the universe itself. 
+                                    Your base stands as a beacon in the void, channeling the ancient powers that course through 
+                                    the very fabric of reality..."
+                                </div>
+                            </div>
+                            
+                            <!-- Base Status -->
                             <div style="
                                 background: rgba(245, 158, 11, 0.1);
                                 border: 1px solid rgba(245, 158, 11, 0.3);
                                 padding: 20px;
                                 border-radius: 12px;
-                                margin-bottom: 16px;
+                                margin-bottom: 20px;
                             ">
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                                     <div>
@@ -550,25 +695,197 @@ class ThreeJSUILayer extends BaseLayer {
                                     <div style="background: #f59e0b; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
                                 </div>
                             </div>
-                            <button style="
-                                background: linear-gradient(135deg, #f59e0b, #fbbf24);
-                                color: white;
-                                border: none;
-                                padding: 16px 24px;
+                            
+                            <!-- Base Management Buttons -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                <button style="
+                                    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+                                    color: white;
+                                    border: none;
+                                    padding: 16px 20px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                                    ⬆️ Upgrade Base
+                                </button>
+                                
+                                <button onclick="window.relocateBase()" style="
+                                    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+                                    color: white;
+                                    border: none;
+                                    padding: 16px 20px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    min-height: 48px;
+                                    touch-action: manipulation;
+                                    -webkit-tap-highlight-color: transparent;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
+                                    📍 Relocate Base
+                                </button>
+                            </div>
+                            
+                            <!-- Player Activity Controls -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                <button onclick="window.togglePlayerTrails()" style="
+                                    background: linear-gradient(135deg, #10b981, #059669);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+                                    🛤️ Toggle Trails
+                                </button>
+                                
+                                <button onclick="window.showOtherBases()" style="
+                                    background: linear-gradient(135deg, #6366f1, #4f46e5);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(99, 102, 241, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.3)'">
+                                    🏗️ Other Bases
+                                </button>
+                            </div>
+                            
+                            <!-- Debug Tools -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                                <button onclick="window.exportDeviceLogs()" style="
+                                    background: linear-gradient(135deg, #f59e0b, #d97706);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                                    📱 Export Logs
+                                </button>
+                                
+                                <button onclick="window.clearAllBaseData()" style="
+                                    background: linear-gradient(135deg, #ef4444, #dc2626);
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 16px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    transition: all 0.2s ease;
+                                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+                                " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)'"
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
+                                    🧹 Clear Data
+                                </button>
+                            </div>
+                            
+                            <!-- Cosmic Shop -->
+                            <div style="
+                                background: rgba(168, 85, 247, 0.1);
+                                border: 1px solid rgba(168, 85, 247, 0.3);
+                                padding: 20px;
                                 border-radius: 12px;
-                                cursor: pointer;
-                                font-size: 16px;
-                                font-weight: 600;
-                                width: 100%;
-                                transition: all 0.2s ease;
-                                box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-                            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(245, 158, 11, 0.4)'"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
-                                Upgrade Base
-                            </button>
+                                margin-bottom: 20px;
+                            ">
+                                <div style="color: #a855f7; font-size: 18px; font-weight: 600; margin-bottom: 16px; text-align: center;">
+                                    🛒 Cosmic Shop
+                                </div>
+                                
+                                <!-- Shop Items -->
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                                    <button onclick="window.purchaseShopItem('energy-core')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">⚡</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Energy Core</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">500 Steps</div>
+                                    </button>
+                                    
+                                    <button onclick="window.purchaseShopItem('shield-generator')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">🛡️</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Shield Generator</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">750 Steps</div>
+                                    </button>
+                                    
+                                    <button onclick="window.purchaseShopItem('crystal-matrix')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">🔮</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Crystal Matrix</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">1000 Steps</div>
+                                    </button>
+                                    
+                                    <button onclick="window.purchaseShopItem('void-portal')" style="
+                                        background: rgba(0,0,0,0.2);
+                                        border: 1px solid rgba(168, 85, 247, 0.3);
+                                        padding: 12px;
+                                        border-radius: 8px;
+                                        text-align: center;
+                                        cursor: pointer;
+                                        transition: all 0.2s ease;
+                                    " onmouseover="this.style.borderColor='rgba(168, 85, 247, 0.6)'; this.style.backgroundColor='rgba(0,0,0,0.3)'"
+                                       onmouseout="this.style.borderColor='rgba(168, 85, 247, 0.3)'; this.style.backgroundColor='rgba(0,0,0,0.2)'">
+                                        <div style="color: #a855f7; font-size: 24px; margin-bottom: 8px;">🌌</div>
+                                        <div style="color: white; font-size: 14px; font-weight: 600; margin-bottom: 4px;">Void Portal</div>
+                                        <div style="color: #f59e0b; font-size: 12px;">1500 Steps</div>
+                                    </button>
+                                </div>
+                                
+                                <div style="color: rgba(255,255,255,0.6); font-size: 12px; text-align: center; font-style: italic;">
+                                    "The cosmic merchants whisper of greater treasures yet to be discovered..."
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             case 'settings':
                 return `
                     <div style="margin-bottom: 24px;">
@@ -661,7 +978,7 @@ class ThreeJSUILayer extends BaseLayer {
                                 <small style="color: rgba(255,255,255,0.6);">Receive quest updates and achievements</small>
                             </div>
                             
-                            <button style="
+                            <button id="settings-action-button" style="
                                 background: linear-gradient(135deg, #8b5cf6, #a78bfa);
                                 color: white;
                                 border: none;
@@ -674,8 +991,9 @@ class ThreeJSUILayer extends BaseLayer {
                                 transition: all 0.2s ease;
                                 box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
                             " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"
-                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
-                                Save Settings
+                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'"
+                               onclick="window.eldritchApp?.layerManager?.getLayer?.('threejs-ui')?.handleSettingsAction?.()">
+                                ${this.playerCreated ? 'Save Settings' : 'Create Player And Enter Sanctuary'}
                             </button>
                         </div>
                     </div>
@@ -1108,6 +1426,134 @@ class ThreeJSUILayer extends BaseLayer {
         console.log('🎮 Player creation panel created');
     }
     
+    handlePlayerCreationComplete() {
+        console.log('🎮 Player creation completed - closing settings tab');
+        
+        // Mark player as created
+        this.playerCreated = true;
+        
+        // Close the settings tab by switching to it again (toggle behavior)
+        if (this.enhancedUI && this.enhancedUI.switchTab) {
+            this.enhancedUI.switchTab('settings'); // This will toggle it off since it's already active
+        }
+        
+        // Also emit an event to start the game
+        if (this.eventBus) {
+            this.eventBus.emit('game:start');
+        }
+    }
+
+    handleSettingsAction() {
+        if (this.playerCreated) {
+            console.log('🎮 Saving settings - closing settings tab');
+            // Save settings logic here if needed
+        } else {
+            console.log('🎮 Creating player - closing settings tab');
+            // Mark player as created
+            this.playerCreated = true;
+            
+            // Emit game start event
+            if (this.eventBus) {
+                this.eventBus.emit('game:start');
+            }
+        }
+        
+        // Close the settings tab by switching to it again (toggle behavior)
+        console.log('🎮 Attempting to close settings tab...');
+        console.log('🎮 enhancedUI available:', !!this.enhancedUI);
+        console.log('🎮 switchTab method available:', !!(this.enhancedUI && this.enhancedUI.switchTab));
+        
+        if (this.enhancedUI && this.enhancedUI.switchTab) {
+            console.log('🎮 Calling switchTab("settings") to close tab');
+            this.enhancedUI.switchTab('settings'); // This will toggle it off since it's already active
+        } else {
+            console.warn('🎮 Enhanced UI or switchTab method not available, using basic 2D UI method');
+            // Use the basic 2D UI method to close the tab
+            this.switchTab('settings'); // This will toggle it off since it's already active
+        }
+    }
+
+    // Method to refresh settings content when tab is opened
+    refreshSettingsContent() {
+        if (this.enhancedUI && this.enhancedUI.updateTabContent) {
+            this.enhancedUI.updateTabContent('settings', this.getTabContent('settings'));
+        }
+    }
+
+    // Fallback method to hide all tabs
+    hideAllTabs() {
+        console.log('🎮 Hiding all tabs as fallback');
+        
+        // Try multiple approaches to hide the settings tab
+        let hidden = false;
+        
+        // Method 1: Try enhanced UI if available
+        if (this.enhancedUI && this.enhancedUI.hideAllPanels) {
+            console.log('🎮 Using enhanced UI hideAllPanels');
+            this.enhancedUI.hideAllPanels();
+            this.enhancedUI.activeTab = null;
+            hidden = true;
+        }
+        
+        // Method 2: Try to find and hide the settings tab directly
+        if (!hidden) {
+            console.log('🎮 Trying to hide settings tab directly');
+            
+            // Look for settings tab content
+            const settingsTab = document.querySelector('[data-tab="settings"]');
+            const settingsContent = document.querySelector('.settings-tab-content');
+            const tabContent = document.querySelector('.tab-content');
+            const magneticTabs = document.querySelector('.magnetic-tabs');
+            
+            if (settingsTab) {
+                console.log('🎮 Found settings tab, hiding it');
+                settingsTab.style.display = 'none';
+                settingsTab.classList.remove('active');
+                hidden = true;
+            }
+            
+            if (settingsContent) {
+                console.log('🎮 Found settings content, hiding it');
+                settingsContent.style.display = 'none';
+                hidden = true;
+            }
+            
+            if (tabContent) {
+                console.log('🎮 Found tab content, hiding it');
+                tabContent.style.display = 'none';
+                hidden = true;
+            }
+            
+            if (magneticTabs) {
+                console.log('🎮 Found magnetic tabs, hiding them');
+                magneticTabs.style.display = 'none';
+                hidden = true;
+            }
+        }
+        
+        // Method 3: Try to hide any visible panels
+        if (!hidden) {
+            console.log('🎮 Trying to hide any visible panels');
+            const panels = document.querySelectorAll('.panel, .tab-panel, .ui-panel');
+            panels.forEach(panel => {
+                if (panel.style.display !== 'none') {
+                    console.log('🎮 Hiding panel:', panel.className);
+                    panel.style.display = 'none';
+                    hidden = true;
+                }
+            });
+        }
+        
+        // Method 4: Reset active tab state
+        this.activeTab = null;
+        
+        if (hidden) {
+            console.log('🎮 Successfully hid tabs using fallback method');
+        } else {
+            console.warn('🎮 Could not hide tabs - no suitable elements found');
+        }
+    }
+    
     createPlayerCreationForm(panel, data) {
         // Check if we're using enhanced UI or basic systems
         if (this.enhancedUI) {
@@ -1349,6 +1795,58 @@ class ThreeJSUILayer extends BaseLayer {
         this.isInitialized = false;
         
         console.log('🧹 ThreeJS UI Layer disposed');
+    }
+    
+    // Refresh the current tab content
+    refreshCurrentTab() {
+        console.log('🔄 Refreshing current tab content...');
+        if (this.enhancedUI && this.enhancedUI.currentTab) {
+            const currentTab = this.enhancedUI.currentTab;
+            const newContent = this.getTabContent(currentTab);
+            
+            // Find the content container and update it
+            const contentContainer = document.querySelector('.tab-content');
+            if (contentContainer) {
+                contentContainer.innerHTML = newContent;
+                console.log(`🔄 Refreshed ${currentTab} tab content`);
+            } else {
+                console.warn('⚠️ Content container not found, trying alternative selectors');
+                // Try alternative selectors
+                const altContainer = document.querySelector('[class*="content"]') || 
+                                   document.querySelector('[class*="panel"]') ||
+                                   document.querySelector('[class*="tab"]');
+                if (altContainer) {
+                    altContainer.innerHTML = newContent;
+                    console.log('🔄 Refreshed using alternative selector');
+                }
+            }
+        }
+    }
+    
+    // Force refresh base management tab
+    forceRefreshBaseTab() {
+        console.log('🔄 Force refreshing base management tab...');
+        const newContent = this.getTabContent('base');
+        
+        // Try multiple selectors to find the content area
+        const selectors = [
+            '.tab-content',
+            '[class*="content"]',
+            '[class*="panel"]',
+            '[class*="tab"]',
+            'div[style*="margin-bottom"]'
+        ];
+        
+        for (const selector of selectors) {
+            const container = document.querySelector(selector);
+            if (container) {
+                container.innerHTML = newContent;
+                console.log(`🔄 Refreshed using selector: ${selector}`);
+                return;
+            }
+        }
+        
+        console.warn('⚠️ Could not find content container to refresh');
     }
 }
 

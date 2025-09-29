@@ -1934,7 +1934,6 @@ html, body {
     #header {
         background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 40, 0.95));
     }
-}
     
     .header-top h1 {
         font-size: 1rem;
@@ -2480,14 +2479,163 @@ html, body {
     filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8)) drop-shadow(0 0 20px rgba(0, 255, 0, 0.4));
 }
 
-/* Base marker specific styling */
+/* 
+ * BRDC: Base marker specific styling - COMMENTED OUT FOR LIGHTWEIGHT VERSION
+ * 
+ * These CSS rules were causing positioning conflicts with Leaflet markers.
+ * The `position: relative !important` rule was overriding Leaflet's absolute
+ * positioning system, causing base markers to appear "way off" from their
+ * intended coordinates.
+ * 
+ * Solution: Use lightweight markers with inline styles and unique class names
+ * to avoid CSS conflicts while maintaining visual consistency.
+ * 
+ * Resolves: #bug-base-marker-visibility
+ * Implements: #feature-marker-system
+ * 
+ * Original complex styling (commented out):
+ */
+/*
 .base-marker {
-    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 20px rgba(255, 0, 0, 0.4));
+    filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
+    z-index: 2000 !important;
+    background: #8b5cf6 !important;
+    border-radius: 50% !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    border: 3px solid #ffffff !important;
+    animation: basePulse 2s ease-in-out infinite !important;
 }
+
+@keyframes basePulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+*/
 
 /* Base popup styling */
 .base-popup {
     min-width: 200px;
+}
+
+/* Map Object Manager styles */
+.map-object-marker {
+    z-index: 1000;
+    animation: objectPulse 2s infinite;
+}
+
+.player-marker {
+    z-index: 1000;
+}
+
+.quest-marker {
+    z-index: 1500;
+}
+
+.npc-marker {
+    z-index: 1600;
+}
+
+.encounter-marker {
+    z-index: 1700;
+}
+
+.location-marker {
+    z-index: 1400;
+}
+
+.legendary-marker {
+    z-index: 2500;
+}
+
+.debug-marker {
+    z-index: 1000;
+}
+
+/* Object pulse animation - 2D only */
+@keyframes objectPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Debug panel map object controls */
+.map-object-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.object-type-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.object-type-selector label {
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.debug-select {
+    background: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.object-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.object-management {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.object-info {
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+.object-info div {
+    color: #ffffff;
+    font-size: 12px;
+    margin: 2px 0;
+}
+
+.quick-objects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.quick-objects .debug-btn {
+    min-width: 60px;
+    font-size: 12px;
 }
 
 .popup-header {
@@ -2643,20 +2791,22 @@ html, body {
     }
 }
 
-/* Base marker click handling */
+/* Base marker click handling - COMMENTED OUT FOR LIGHTWEIGHT VERSION */
+/*
 .base-marker {
-    z-index: 1000 !important;
+    z-index: 2000 !important;
     pointer-events: auto !important;
 }
 
 .base-marker.multilayered {
-    z-index: 1000 !important;
+    z-index: 2000 !important;
     pointer-events: auto !important;
 }
 
 .base-marker.multilayered > div {
     pointer-events: auto !important;
 }
+*/
 
 .multilayered {
     background: transparent !important;
@@ -7305,10 +7455,153 @@ input[type="range"]::-moz-range-thumb {
     }
 }
 
+@keyframes playerFlash {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+    }
+    50% {
+        transform: scale(1.3);
+        box-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00, 0 0 120px #00ff00;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+    }
+}
+
 .pvp-encounter {
     background: linear-gradient(135deg, #2c1810, #4a2c1a);
     border: 3px solid #ff6b35;
     box-shadow: 0 0 30px rgba(255, 107, 53, 0.8);
+}
+
+/* SVG Base Graphics Styles */
+.svg-base-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.svg-base-marker {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+}
+
+/* Trail animations */
+@keyframes trailPulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.7; }
+}
+
+/* Other player base styling */
+.other-player-base {
+    opacity: 0.8;
+    filter: grayscale(0.3);
+}
+
+.svg-base-marker svg {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+}
+
+.svg-base-marker:hover svg {
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+    transform: scale(1.05);
+}
+
+.territory-circle {
+    animation: territory-pulse 2s ease-in-out infinite;
+}
+
+@keyframes territory-pulse {
+    0%, 100% {
+        r: 120;
+        opacity: 0.6;
+    }
+    50% {
+        r: 144;
+        opacity: 0.8;
+    }
+}
+
+.flag-container {
+    animation: flag-wave 3s ease-in-out infinite;
+}
+
+@keyframes flag-wave {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(0, 2px);
+    }
+}
+
+.addon-glow {
+    animation: addon-glow 1s ease-in-out infinite;
+}
+
+@keyframes addon-glow {
+    0%, 100% {
+        opacity: 0;
+        r: 16;
+    }
+    50% {
+        opacity: 0.6;
+        r: 20;
+    }
+}
+
+.particle-effect {
+    animation: particle-life 2s ease-out forwards;
+}
+
+@keyframes particle-life {
+    0% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) translate(20px, 20px);
+    }
+}
+
+/* Base Management Modal Styles */
+#base-info-modal {
+    z-index: 10000;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#base-info-modal h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+#base-info-modal p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+#base-info-modal button {
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+#base-info-modal button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#base-info-modal button:active {
+    transform: translateY(0);
 }
 
 .pvp-header {

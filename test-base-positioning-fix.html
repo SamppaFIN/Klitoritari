@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Base Marker Positioning Fix</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+            border: 2px solid #333;
+        }
+        .test-controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* Fixed base-marker CSS (without position: relative) */
+        .base-marker {
+            filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 20px rgba(139, 92, 246, 0.4));
+            z-index: 2000 !important;
+            /* Removed position: relative !important; - this was breaking Leaflet positioning */
+            background: #8b5cf6 !important;
+            border-radius: 50% !important;
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            border: 3px solid #ffffff !important;
+            animation: basePulse 2s ease-in-out infinite !important;
+        }
+
+        @keyframes basePulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Base Marker Positioning Fix</h1>
+    
+    <div class="test-controls">
+        <h3>Test Controls:</h3>
+        <button onclick="testPOIMarker()">Create POI Marker</button>
+        <button onclick="testBaseMarker()">Create Base Marker (Fixed CSS)</button>
+        <button onclick="testBothMarkers()">Create Both Markers at Same Location</button>
+        <button onclick="clearMap()">Clear Map</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="map"></div>
+    
+    <div class="log" id="log"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([60.1699, 24.9384], 10); // Helsinki
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Logging function
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Test POI marker
+        function testPOIMarker() {
+            log('📍 Creating POI marker...');
+            
+            const position = {
+                lat: 60.1699,
+                lng: 24.9384
+            };
+            
+            const poiIcon = L.divIcon({
+                className: 'poi-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #ff6b35; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">❓</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([position.lat, position.lng], { 
+                icon: poiIcon,
+                zIndexOffset: 700
+            }).addTo(map);
+
+            marker.bindPopup(`POI Marker<br>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+            log('✅ POI marker created at: ' + position.lat + ', ' + position.lng);
+        }
+
+        // Test base marker with fixed CSS
+        function testBaseMarker() {
+            log('🏗️ Creating base marker with FIXED CSS...');
+            
+            const position = {
+                lat: 60.1699 + 0.01,
+                lng: 24.9384 + 0.01
+            };
+            
+            const baseIcon = L.divIcon({
+                className: 'base-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #8b5cf6; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">🏗️</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([position.lat, position.lng], { 
+                icon: baseIcon,
+                zIndexOffset: 600
+            }).addTo(map);
+
+            marker.bindPopup(`Base Marker (Fixed CSS)<br>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+            log('✅ Base marker created at: ' + position.lat + ', ' + position.lng);
+        }
+
+        // Test both markers at same location
+        function testBothMarkers() {
+            log('🎯 Creating both markers at SAME location...');
+            
+            const position = {
+                lat: 60.1699,
+                lng: 24.9384
+            };
+            
+            // POI marker
+            const poiIcon = L.divIcon({
+                className: 'poi-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #ff6b35; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">❓</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const poiMarker = L.marker([position.lat, position.lng], { 
+                icon: poiIcon,
+                zIndexOffset: 700
+            }).addTo(map);
+
+            poiMarker.bindPopup(`POI Marker<br>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+
+            // Base marker
+            const baseIcon = L.divIcon({
+                className: 'base-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #8b5cf6; 
+                        border: 3px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    ">🏗️</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const baseMarker = L.marker([position.lat, position.lng], { 
+                icon: baseIcon,
+                zIndexOffset: 600
+            }).addTo(map);
+
+            baseMarker.bindPopup(`Base Marker<br>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+            
+            log('✅ Both markers created at SAME location: ' + position.lat + ', ' + position.lng);
+            log('📍 POI marker should be on top (z-index 700)');
+            log('🏗️ Base marker should be below (z-index 600)');
+        }
+
+        function clearMap() {
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+            log('🗑️ Map cleared');
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Initial log
+        log('🚀 Test page loaded. Click buttons to test marker positioning.');
+        log('📍 POI: Orange circle (no CSS)');
+        log('🏗️ Base: Purple circle with FIXED CSS (no position: relative)');
+        log('🎯 Both: Test both markers at same location to verify positioning');
+    </script>
+</body>
+</html>

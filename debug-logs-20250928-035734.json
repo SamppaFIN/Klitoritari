@@ -1,0 +1,256 @@
+﻿{
+    "timestamp":  "2025-09-28T00:56:28.964Z",
+    "totalLogs":  110,
+    "logs":  [
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.182Z",
+                     "message":  "🚶‍♂️ StepCurrencySystem made globally available",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.192Z",
+                     "message":  "🌌 STEP 3 ✓: Core systems initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.192Z",
+                     "message":  "🌌 STEP 4: Initializing canvas...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.210Z",
+                     "message":  "🌌 STEP 4 ✓: Canvas initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.210Z",
+                     "message":  "🌌 STEP 5: Initializing layer manager...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.214Z",
+                     "message":  "🌌 BackgroundLayer: Initializing cosmic background...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.215Z",
+                     "message":  "🌌 BackgroundLayer: Cosmic background initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.878Z",
+                     "message":  "📍 STEP 5.14.1: GeolocationLayer: Initializing...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.878Z",
+                     "message":  "📍 STEP 5.14.2 ✓: Geolocation supported",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.878Z",
+                     "message":  "📍 STEP 5.14.3: Setting up event listeners...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.882Z",
+                     "message":  "📍 GeolocationLayer: Setting up event listeners...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.882Z",
+                     "message":  "📍 GeolocationLayer: EventBus available, registering listeners...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.882Z",
+                     "message":  "📍 GeolocationLayer: Event listeners registered",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.883Z",
+                     "message":  "📍 GeolocationLayer: Test event emitted",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.883Z",
+                     "message":  "📍 STEP 5.14.4 ✓: Event listeners set up",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.883Z",
+                     "message":  "📍 STEP 5.14.5: Checking permission status...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.884Z",
+                     "message":  "📍 STEP 5.14.6 ✓: Permission status checked",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.884Z",
+                     "message":  "📍 STEP 5.14.7 ✓: GeolocationLayer: Initialized",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.885Z",
+                     "message":  "🎮 ThreeJS UI Layer: Initialized",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.886Z",
+                     "message":  "🎮 ThreeJS UI Layer: DISABLED - Using 2D UI instead",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.890Z",
+                     "message":  "🎮 ThreeJS UI Layer: Skipped (2D UI active)",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.894Z",
+                     "message":  "🌌 STEP 5 ✓: Layer manager initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.894Z",
+                     "message":  "🌌 STEP 6: Initializing mobile optimization...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.900Z",
+                     "message":  "🌌 STEP 6 ✓: Mobile optimization initialized",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.900Z",
+                     "message":  "🌌 STEP 7: Starting application...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.913Z",
+                     "message":  "🌌 STEP 8 ✓: Eldritch Sanctuary App: Initialized successfully in 826ms",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.914Z",
+                     "message":  "🌌 New architecture initialization complete",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:27.914Z",
+                     "message":  "🌌 Initializing Eldritch Sanctuary with loading system...",
+                     "type":  "system"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.018Z",
+                     "message":  "🚶‍♂️ Accelerometer permission granted",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.019Z",
+                     "message":  "🚶‍♂️ Setting up advanced step detection",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.181Z",
+                     "message":  "🚶‍♂️ Accelerometer permission granted",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.182Z",
+                     "message":  "🚶‍♂️ Setting up advanced step detection",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.183Z",
+                     "message":  "📍 GeolocationLayer: Starting location tracking...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.275Z",
+                     "message":  "📍 GeolocationLayer: Position updated: [object Object]",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.344Z",
+                     "message":  "🚶‍♂️ Adjusted step sensitivity for unknown: threshold=2.5, interval=1000ms",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.345Z",
+                     "message":  "🚶‍♂️ Adjusted step sensitivity for unknown: threshold=2.5, interval=1000ms",
+                     "type":  "general"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.952Z",
+                     "message":  "📍 GeolocationLayer: Testing direct event emission...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.952Z",
+                     "message":  "📍 STEP GPS.REQUEST: GeolocationLayer: GPS request received!",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.952Z",
+                     "message":  "📍 STEP GPS.REQUEST: EventBus available: true",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.953Z",
+                     "message":  "📍 STEP GPS.REQUEST: GeolocationLayer state: [object Object]",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.957Z",
+                     "message":  "📍 STEP GPS.PERMISSION: Requesting location permission...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.958Z",
+                     "message":  "📍 STEP GPS.SUCCESS: Permission granted, position received",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.959Z",
+                     "message":  "📍 GeolocationLayer: Permission granted",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.960Z",
+                     "message":  "📍 STEP GPS.1: Showing geolocation success...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.961Z",
+                     "message":  "📍 STEP GPS.3: Enabling game buttons...",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.962Z",
+                     "message":  "📍 STEP GPS.4 ✓: Continue adventure button enabled",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.962Z",
+                     "message":  "🎮 Enabling canvas interactions...",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.963Z",
+                     "message":  "🎮 Canvas interactions enabled",
+                     "type":  "map"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.963Z",
+                     "message":  "📍 STEP GPS.6 ✓: GPS enabled event emitted",
+                     "type":  "location"
+                 },
+                 {
+                     "timestamp":  "2025-09-28T00:56:28.964Z",
+                     "message":  "📍 STEP GPS.2 ✓: Geolocation success UI updated",
+                     "type":  "location"
+                 }
+             ]
+}

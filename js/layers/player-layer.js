@@ -76,6 +76,10 @@ class PlayerLayer extends BaseLayer {
     }
 
     doRender(deltaTime) {
+        // DISABLED: Player layer causing positioning issues with map
+        // The map layer should be the primary visual element
+        return;
+        
         if (!this.ctx) return;
         
         // Update animation

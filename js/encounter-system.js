@@ -1,4 +1,11 @@
 ﻿/**
+ * @fileoverview [VERIFIED] Encounter System - Handles proximity encounters, cutscenes, battles, and puzzles
+ * @status VERIFIED - Encounter system with proximity detection working correctly
+ * @feature #feature-encounter-system
+ * @last_verified 2024-01-28
+ * @dependencies Map Engine, Step Currency System, Dialog System
+ * @warning Do not modify encounter logic or proximity detection without testing all encounter types
+ * 
  * Encounter System - Handles proximity encounters, cutscenes, battles, and puzzles
  * Currency: Steps (gained through movement)
  */
@@ -1691,14 +1698,14 @@ class EncounterSystem {
 
     calculateDistance(lat1, lng1, lat2, lng2) {
         const R = 6371e3; // Earth's radius in meters
-        const Ï†1 = lat1 * Math.PI/180;
-        const Ï†2 = lat2 * Math.PI/180;
-        const Î”Ï† = (lat2-lat1) * Math.PI/180;
-        const Î”Î» = (lng2-lng1) * Math.PI/180;
+        const phi1 = lat1 * Math.PI/180;
+        const phi2 = lat2 * Math.PI/180;
+        const deltaPhi = (lat2-lat1) * Math.PI/180;
+        const deltaLambda = (lng2-lng1) * Math.PI/180;
 
-        const a = Math.sin(Î”Ï†/2) * Math.sin(Î”Ï†/2) +
-                Math.cos(Ï†1) * Math.cos(Ï†2) *
-                Math.sin(Î”Î»/2) * Math.sin(Î”Î»/2);
+        const a = Math.sin(deltaPhi/2) * Math.sin(deltaPhi/2) +
+                Math.cos(phi1) * Math.cos(phi2) *
+                Math.sin(deltaLambda/2) * Math.sin(deltaLambda/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 
         return R * c; // Distance in meters

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Persistence Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.connected {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.disconnected {
+            background: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Server Persistence Test</h1>
+    
+    <div class="test-section">
+        <h2>Connection Status</h2>
+        <div id="connectionStatus" class="status disconnected">Disconnected</div>
+        <button onclick="connect()">Connect to Server</button>
+        <button onclick="disconnect()">Disconnect</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Game State Tests</h2>
+        <button onclick="requestGameState()">Request Game State</button>
+        <button onclick="createTestMarker()">Create Test Marker</button>
+        <button onclick="establishTestBase()">Establish Test Base</button>
+        <button onclick="updatePlayerSteps()">Update Steps (1000)</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <div id="testLog" class="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <script>
+        let ws = null;
+        let playerId = 'test_player_' + Math.random().toString(36).substr(2, 9);
+        
+        function log(message) {
+            const logDiv = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').textContent = '';
+        }
+        
+        function updateConnectionStatus(connected) {
+            const statusDiv = document.getElementById('connectionStatus');
+            if (connected) {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'status connected';
+            } else {
+                statusDiv.textContent = 'Disconnected';
+                statusDiv.className = 'status disconnected';
+            }
+        }
+        
+        function connect() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                log('⚠️ Already connected');
+                return;
+            }
+            
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = 'localhost';
+            const port = '3000';
+            const wsUrl = `${protocol}//${host}:${port}/ws`;
+            
+            log(`🔌 Connecting to: ${wsUrl}`);
+            log(`👤 Player ID: ${playerId}`);
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = function() {
+                log('✅ Connected to server');
+                updateConnectionStatus(true);
+                
+                // Send player join message
+                ws.send(JSON.stringify({
+                    type: 'playerJoin',
+                    payload: {
+                        playerId: playerId,
+                        playerData: {
+                            profile: { name: 'Test Player' },
+                            position: { lat: 61.472768, lng: 23.724032 }
+                        }
+                    }
+                }));
+            };
+            
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    log(`📨 Received: ${message.type}`);
+                    
+                    switch (message.type) {
+                        case 'game_state_sync':
+                            log(`🎮 Game State: Steps=${message.payload.gameState.totalSteps}, Markers=${message.payload.gameState.markers.length}`);
+                            break;
+                        case 'marker_created':
+                            log(`✅ Marker created: ${message.payload.markerId}`);
+                            break;
+                        case 'base_established':
+                            log(`🏗️ Base established at: ${JSON.stringify(message.payload.position)}`);
+                            break;
+                        case 'steps_synced':
+                            log(`🚶‍♂️ Steps synced: ${message.payload.totalSteps}`);
+                            break;
+                        default:
+                            log(`📋 ${message.type}: ${JSON.stringify(message.payload)}`);
+                    }
+                } catch (error) {
+                    log(`❌ Error parsing message: ${error.message}`);
+                }
+            };
+            
+            ws.onclose = function() {
+                log('❌ Disconnected from server');
+                updateConnectionStatus(false);
+            };
+            
+            ws.onerror = function(error) {
+                log(`❌ WebSocket error: ${error}`);
+            };
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+                updateConnectionStatus(false);
+                log('🔌 Disconnected');
+            }
+        }
+        
+        function requestGameState() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ Not connected to server');
+                return;
+            }
+            
+            log('🎮 Requesting game state...');
+            ws.send(JSON.stringify({
+                type: 'request_game_state'
+            }));
+        }
+        
+        function createTestMarker() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ Not connected to server');
+                return;
+            }
+            
+            const markerData = {
+                type: 'flag',
+                position: {
+                    lat: 61.472768 + (Math.random() - 0.5) * 0.01,
+                    lng: 23.724032 + (Math.random() - 0.5) * 0.01
+                },
+                data: {
+                    size: 1,
+                    rotation: 0,
+                    symbol: '🇫🇮',
+                    name: 'Test Flag'
+                }
+            };
+            
+            log('📍 Creating test marker...');
+            ws.send(JSON.stringify({
+                type: 'marker_create',
+                payload: markerData
+            }));
+        }
+        
+        function establishTestBase() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ Not connected to server');
+                return;
+            }
+            
+            const position = {
+                lat: 61.472768 + (Math.random() - 0.5) * 0.01,
+                lng: 23.724032 + (Math.random() - 0.5) * 0.01
+            };
+            
+            log('🏗️ Establishing test base...');
+            ws.send(JSON.stringify({
+                type: 'base_establish',
+                payload: { position: position }
+            }));
+        }
+        
+        function updatePlayerSteps() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                log('❌ Not connected to server');
+                return;
+            }
+            
+            const steps = 1000 + Math.floor(Math.random() * 5000);
+            log(`🚶‍♂️ Updating steps to: ${steps}`);
+            ws.send(JSON.stringify({
+                type: 'sync_steps',
+                payload: {
+                    totalSteps: steps,
+                    sessionSteps: 100,
+                    timestamp: Date.now()
+                }
+            }));
+        }
+        
+        // Auto-connect on page load
+        window.addEventListener('load', function() {
+            log('🚀 Test page loaded');
+            log('💡 Click "Connect to Server" to start testing');
+        });
+    </script>
+</body>
+</html>

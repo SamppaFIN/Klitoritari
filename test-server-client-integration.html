@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Server-Client Integration</title>
+</head>
+<body>
+    <h1>Test Server-Client Integration</h1>
+    <button onclick="testStepMilestones()">Test Step Milestones</button>
+    <button onclick="testWebSocketConnection()">Test WebSocket Connection</button>
+    <div id="output"></div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += '<div>' + new Date().toISOString() + ': ' + message + '</div>';
+            console.log(message);
+        }
+
+        function testWebSocketConnection() {
+            log('Testing WebSocket connection...');
+            
+            const ws = new WebSocket('ws://localhost:3000/ws');
+            
+            ws.onopen = function() {
+                log('✅ WebSocket connected successfully');
+                
+                // Test sending a milestone message
+                const milestoneMessage = {
+                    type: 'step_milestone',
+                    payload: {
+                        milestoneType: 'area',
+                        sessionSteps: 1000,
+                        totalSteps: 1000,
+                        timestamp: Date.now(),
+                        playerId: 'test_player_123'
+                    }
+                };
+                
+                log('Sending milestone message: ' + JSON.stringify(milestoneMessage));
+                ws.send(JSON.stringify(milestoneMessage));
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                log('📨 Received from server: ' + JSON.stringify(data));
+                
+                if (data.type === 'base_establishment_available') {
+                    log('🎉 SUCCESS: Base establishment available message received!');
+                }
+            };
+            
+            ws.onerror = function(error) {
+                log('❌ WebSocket error: ' + error);
+            };
+            
+            ws.onclose = function() {
+                log('🔌 WebSocket closed');
+            };
+        }
+
+        function testStepMilestones() {
+            log('Testing step milestones...');
+            
+            // Simulate the step currency system milestone emission
+            const eventData = {
+                type: 'area',
+                sessionSteps: 1000,
+                totalSteps: 1000,
+                timestamp: Date.now(),
+                thresholds: { flag: 50, celebration: 100, quest: 500, area: 1000 }
+            };
+            
+            log('Simulating milestone event: ' + JSON.stringify(eventData));
+            
+            // Test WebSocket connection and send milestone
+            testWebSocketConnection();
+        }
+    </script>
+</body>
+</html>

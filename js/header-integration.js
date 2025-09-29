@@ -594,10 +594,11 @@ class HeaderIntegration {
         
         // Add event listeners
         setTimeout(() => {
-            document.getElementById('debug-add-steps')?.addEventListener('click', () => {
-                this.addSteps(100);
-                this.updateDebugDisplay();
-            });
+            // Step addition now handled by unified debug panel to prevent conflicts
+            // document.getElementById('debug-add-steps')?.addEventListener('click', () => {
+            //     this.addSteps(100);
+            //     this.updateDebugDisplay();
+            // });
             
             document.getElementById('debug-reset-steps')?.addEventListener('click', () => {
                 this.setStepCount(0);
