@@ -421,10 +421,17 @@ class GeolocationManager {
             this.isFirstLocation = false;
             this.initializeMapAndQuests(newPosition);
             
-            // Mobile-specific: Ensure map centers on player after a delay
+            // Mobile-specific: Ensure map centers on player immediately and with retries
+            this.ensureMapCenteredOnPlayer(newPosition);
+            
+            // Additional centering attempts for mobile reliability
             setTimeout(() => {
                 this.ensureMapCenteredOnPlayer(newPosition);
-            }, 500);
+            }, 1000);
+            
+            setTimeout(() => {
+                this.ensureMapCenteredOnPlayer(newPosition);
+            }, 3000);
         }
         
         if (this.onPositionUpdate) {
@@ -898,12 +905,20 @@ class GeolocationManager {
                 distance: distance.toFixed(2) + 'm'
             });
             
-            // If map is not centered on player (more than 100m away), center it
-            if (distance > 100) {
-                console.log('📍 Recentering map on player - distance too far');
-                map.setView([position.lat, position.lng], 18);
+            // Mobile-specific: Always center on player for first location or if far away
+            const shouldCenter = this.isFirstLocation || distance > 50; // Reduced threshold for mobile
+            
+            if (shouldCenter) {
+                console.log('📍 Recentering map on player - mobile centering');
                 
-                // Double-check after centering
+                // Use smooth pan for better mobile experience
+                map.setView([position.lat, position.lng], 18, {
+                    animate: true,
+                    duration: 1.0,
+                    easeLinearity: 0.25
+                });
+                
+                // Double-check after centering with longer delay for mobile
                 setTimeout(() => {
                     const newCenter = map.getCenter();
                     const newDistance = this.calculateDistance(
@@ -915,12 +930,29 @@ class GeolocationManager {
                         distance: newDistance.toFixed(2) + 'm',
                         success: newDistance < 100
                     });
-                }, 200);
+                    
+                    // If still not centered, try again with force
+                    if (newDistance > 100) {
+                        console.log('📍 Map still not centered, forcing center...');
+                        map.setView([position.lat, position.lng], 18, {
+                            animate: false
+                        });
+                    }
+                }, 500);
             } else {
                 console.log('📍 Map is already centered on player');
             }
         } else {
             console.warn('📍 Map engine or map not available for centering');
+            
+            // Try alternative centering methods
+            if (window.mapEngine) {
+                console.log('📍 Trying alternative centering methods...');
+                // Force map engine to update player position
+                if (typeof window.mapEngine.updatePlayerPosition === 'function') {
+                    window.mapEngine.updatePlayerPosition(position);
+                }
+            }
         }
     }
 

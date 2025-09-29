@@ -184,6 +184,13 @@ class ThreeJSUILayer extends BaseLayer {
             this.switchTab(tabData.id);
         });
         
+        // Add touch handler for mobile devices
+        tab.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.createRippleEffect(e, tab);
+            this.switchTab(tabData.id);
+        });
+        
         return tab;
     }
     
@@ -602,12 +609,15 @@ class ThreeJSUILayer extends BaseLayer {
                                     background: linear-gradient(135deg, #22c55e, #16a34a);
                                     color: white;
                                     border: none;
-                                    padding: 16px 24px;
+                                    padding: 20px 24px;
                                     border-radius: 12px;
                                     cursor: pointer;
-                                    font-size: 16px;
+                                    font-size: 18px;
                                     font-weight: 600;
                                     width: 100%;
+                                    min-height: 56px;
+                                    touch-action: manipulation;
+                                    -webkit-tap-highlight-color: transparent;
                                     transition: all 0.2s ease;
                                     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
                                 " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(34, 197, 94, 0.4)'"
@@ -711,8 +721,11 @@ class ThreeJSUILayer extends BaseLayer {
                                     padding: 16px 20px;
                                     border-radius: 12px;
                                     cursor: pointer;
-                                    font-size: 14px;
+                                    font-size: 16px;
                                     font-weight: 600;
+                                    min-height: 48px;
+                                    touch-action: manipulation;
+                                    -webkit-tap-highlight-color: transparent;
                                     transition: all 0.2s ease;
                                     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
                                 " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(139, 92, 246, 0.4)'"

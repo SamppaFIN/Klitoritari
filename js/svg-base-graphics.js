@@ -86,10 +86,12 @@ class SVGBaseGraphics {
         
         // Get current zoom level for initial scaling
         let currentZoom = 13; // Default zoom level
-        if (map) {
+        if (map && typeof map.getZoom === 'function') {
             currentZoom = map.getZoom();
-        } else if (window.map) {
+        } else if (window.map && typeof window.map.getZoom === 'function') {
             currentZoom = window.map.getZoom();
+        } else if (window.mapLayer && window.mapLayer.map && typeof window.mapLayer.map.getZoom === 'function') {
+            currentZoom = window.mapLayer.map.getZoom();
         }
         
         console.log(`🎨 Creating base marker at zoom level: ${currentZoom}`);

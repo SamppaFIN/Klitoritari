@@ -230,18 +230,33 @@ class WelcomeScreen {
     continueAdventure() {
         console.log('🔄 Continuing existing adventure!');
         
-        // Mark welcome as seen
-        localStorage.setItem('eldritch_welcome_seen', 'true');
-        this.hasSeenWelcome = true;
-        
-        // Hide welcome screen immediately and start game
-        console.log('🌟 Hiding welcome screen and initializing game...');
-        this.hideWelcomeScreen();
-        this.initializeGame(false); // false = don't reset
-        
-        // Start NPC simulation after welcome screen is dismissed
-        if (window.eldritchApp) {
-            window.eldritchApp.startNPCSimulation();
+        try {
+            // Mark welcome as seen
+            localStorage.setItem('eldritch_welcome_seen', 'true');
+            this.hasSeenWelcome = true;
+            
+            // Hide welcome screen immediately and start game
+            console.log('🌟 Hiding welcome screen and initializing game...');
+            this.hideWelcomeScreen();
+            
+            // Add delay to ensure welcome screen is hidden before initializing game
+            setTimeout(() => {
+                console.log('🌟 Initializing game after welcome screen is hidden...');
+                this.initializeGame(false); // false = don't reset
+                
+                // Start NPC simulation after welcome screen is dismissed
+                if (window.eldritchApp) {
+                    console.log('🌟 Starting NPC simulation...');
+                    window.eldritchApp.startNPCSimulation();
+                } else {
+                    console.warn('⚠️ Main app not available for NPC simulation');
+                }
+            }, 300);
+            
+        } catch (error) {
+            console.error('❌ Error in continueAdventure:', error);
+            // Fallback: try to hide welcome screen and show game
+            this.hideWelcomeScreen();
         }
     }
 
@@ -1221,22 +1236,69 @@ class WelcomeScreen {
     initializeGame(resetEverything = false) {
         console.log('🎮 Initializing game systems...', resetEverything ? '(with reset)' : '(continuing)');
         
-        // Initialize the main app
-        if (window.eldritchApp) {
-            console.log('🌌 Main app found, calling initializeGame...');
-            window.eldritchApp.initializeGame();
-        } else {
-            console.error('🌌 Main app not found!');
-            console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
+        try {
+            // Initialize the main app
+            if (window.eldritchApp) {
+                console.log('🌌 Main app found, calling initializeGame...');
+                
+                // Check if the method exists before calling it
+                if (typeof window.eldritchApp.initializeGame === 'function') {
+                    window.eldritchApp.initializeGame();
+                    console.log('🌌 Main app initializeGame called successfully');
+                } else {
+                    console.warn('⚠️ Main app initializeGame method not available');
+                }
+            } else {
+                console.error('🌌 Main app not found!');
+                console.log('🌌 Available window objects:', Object.keys(window).filter(key => key.includes('App') || key.includes('app')));
+                
+                // Try to initialize systems manually
+                this.initializeGameSystemsManually();
+            }
+            
+            // Show distortion animation for fresh adventures
+            if (resetEverything) {
+                // Small delay to ensure systems are initialized
+                setTimeout(() => {
+                    this.showGameTips();
+                }, 1000);
+            }
+            
+        } catch (error) {
+            console.error('❌ Error in initializeGame:', error);
+            // Fallback initialization
+            this.initializeGameSystemsManually();
+        }
+    }
+    
+    initializeGameSystemsManually() {
+        console.log('🔧 Initializing game systems manually...');
+        
+        // Initialize step currency system if available
+        if (window.stepCurrencySystem) {
+            console.log('🚶‍♂️ Initializing step currency system...');
+            if (typeof window.stepCurrencySystem.init === 'function') {
+                window.stepCurrencySystem.init();
+            }
         }
         
-        // Show distortion animation for fresh adventures
-        if (resetEverything) {
-            // Small delay to ensure systems are initialized
-            setTimeout(() => {
-                this.showGameTips();
-            }, 1000);
+        // Initialize map engine if available
+        if (window.mapEngine) {
+            console.log('🗺️ Initializing map engine...');
+            if (typeof window.mapEngine.init === 'function') {
+                window.mapEngine.init();
+            }
         }
+        
+        // Initialize geolocation if available
+        if (window.geolocationManager) {
+            console.log('📍 Initializing geolocation manager...');
+            if (typeof window.geolocationManager.init === 'function') {
+                window.geolocationManager.init();
+            }
+        }
+        
+        console.log('🔧 Manual game systems initialization completed');
     }
 
     showGameTips() {

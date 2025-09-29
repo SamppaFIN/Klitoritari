@@ -28,6 +28,9 @@ class SimpleBaseInit {
             }
             
             console.log('🏗️ Simple Base Init: Complete');
+            
+            // Note: Icon errors in console are likely server configuration issues
+            // The icons exist in the icons/ directory and manifest.json is correct
         } catch (error) {
             console.error('🏗️ Simple Base Init failed:', error);
         }
@@ -106,20 +109,50 @@ class SimpleBaseInit {
                 throw new Error('Map initialization timeout');
             }
             
-            // Try to get map from different sources
-            if (window.mapEngine && window.mapEngine.map) {
+            // Try to get map from different sources (new architecture)
+            if (window.mapLayer && window.mapLayer.map && window.mapLayer.mapReady && typeof window.mapLayer.map.addLayer === 'function') {
+                this.map = window.mapLayer.map;
+                console.log('🏗️ Map found via mapLayer (ready)');
+                break;
+            } else if (window.mapEngine && window.mapEngine.map && typeof window.mapEngine.map.addLayer === 'function') {
                 this.map = window.mapEngine.map;
                 console.log('🏗️ Map found via mapEngine');
                 break;
-            } else if (window.map) {
+            } else if (window.map && typeof window.map.addLayer === 'function') {
                 this.map = window.map;
                 console.log('🏗️ Map found via global window.map');
                 break;
             }
             
+            // Debug: Log what we're checking
+            if (Date.now() - startTime > 1000) { // Only log after 1 second to avoid spam
+                console.log('🏗️ Checking map sources:');
+                console.log('🏗️   window.mapLayer:', !!window.mapLayer);
+                console.log('🏗️   window.mapLayer.map:', !!window.mapLayer?.map);
+                console.log('🏗️   window.mapLayer.mapReady:', window.mapLayer?.mapReady);
+                console.log('🏗️   window.mapEngine:', !!window.mapEngine);
+                console.log('🏗️   window.mapEngine.map:', !!window.mapEngine?.map);
+                console.log('🏗️   window.map:', !!window.map);
+            }
+            
             // Wait 100ms before trying again
             await new Promise(resolve => setTimeout(resolve, 100));
         }
+        
+        // Debug: Log what we found
+        this.debugMapObject();
+    }
+    
+    /**
+     * Debug method to log map object details
+     */
+    debugMapObject() {
+        console.log('🏗️ Map object debug info:');
+        console.log('🏗️ Map type:', typeof this.map);
+        console.log('🏗️ Map constructor:', this.map?.constructor?.name);
+        console.log('🏗️ Has addLayer:', typeof this.map?.addLayer);
+        console.log('🏗️ Has getZoom:', typeof this.map?.getZoom);
+        console.log('🏗️ Map object:', this.map);
     }
 
     // Create base marker on map
@@ -203,16 +236,28 @@ class SimpleBaseInit {
         };
         
         // Create animated base marker using SVG graphics system
-        this.baseMarker = window.svgBaseGraphics.createAnimatedBaseMarker(
-            { lat: lat, lng: lng },
-            baseConfig,
-            'finnish', // Force Finnish flag
-            this.map, // Pass the map instance for zoom detection
-            'own' // This is always the player's own base
-        );
+        try {
+            this.baseMarker = window.svgBaseGraphics.createAnimatedBaseMarker(
+                { lat: lat, lng: lng },
+                baseConfig,
+                'finnish', // Force Finnish flag
+                this.map, // Pass the map instance for zoom detection
+                'own' // This is always the player's own base
+            );
+        } catch (error) {
+            console.error('🏗️ Error creating SVG base marker:', error);
+            // Fallback to simple marker if SVG creation fails
+            this.createFallbackBaseMarker(lat, lng);
+            return;
+        }
         
-        // Add to map
-        this.baseMarker.addTo(this.map);
+        // Add to map (with validation)
+        if (this.map && typeof this.map.addLayer === 'function') {
+            this.baseMarker.addTo(this.map);
+        } else {
+            console.error('🏗️ Invalid map object - cannot add marker');
+            throw new Error('Invalid map object');
+        }
         
         // Create enhanced popup with base information
         this.baseMarker.bindPopup(`
@@ -246,6 +291,47 @@ class SimpleBaseInit {
         
         // Center map on base with smooth animation
         this.map.setView([lat, lng], 18, { animate: true, duration: 1.0 });
+    }
+    
+    /**
+     * Create fallback base marker if SVG creation fails
+     * @param {number} lat - Latitude coordinate
+     * @param {number} lng - Longitude coordinate
+     */
+    createFallbackBaseMarker(lat, lng) {
+        console.log('🏗️ Creating fallback base marker');
+        
+        try {
+            // Create a simple Leaflet marker as fallback
+            this.baseMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'fallback-base-marker',
+                    html: '<div style="background: #8b5cf6; width: 40px; height: 40px; border-radius: 50%; border: 3px solid #fff; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">🏗️</div>',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                })
+            });
+            
+            // Add to map (with validation)
+            if (this.map && typeof this.map.addLayer === 'function') {
+                this.baseMarker.addTo(this.map);
+            } else {
+                console.error('🏗️ Invalid map object in fallback - cannot add marker');
+                return;
+            }
+            
+            // Create simple popup
+            this.baseMarker.bindPopup(`
+                <div style="text-align: center; padding: 10px;">
+                    <h3 style="margin: 0 0 10px 0; color: #8b5cf6;">🏗️ My Base</h3>
+                    <p style="margin: 0; color: #666;">Base established successfully!</p>
+                </div>
+            `);
+            
+            console.log('🏗️ Fallback base marker created');
+        } catch (error) {
+            console.error('🏗️ Error creating fallback base marker:', error);
+        }
     }
 
     // Create simple base marker (fallback)

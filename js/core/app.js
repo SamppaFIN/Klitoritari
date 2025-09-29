@@ -117,6 +117,30 @@ class EldritchSanctuaryApp {
             console.log('🔧 Creating GameState...');
             this.gameState = new GameState();
             console.log('🔧 GameState created');
+            
+            // Initialize mobile encounter system
+            if (window.MobileEncounterSystem) {
+                console.log('📱 Creating Mobile Encounter System...');
+                window.mobileEncounterSystem = new MobileEncounterSystem();
+                window.mobileEncounterSystem.init();
+                console.log('📱 Mobile encounter system initialized');
+            }
+            
+            // Initialize mobile debug system
+            if (window.MobileDebugSystem) {
+                console.log('🔧 Creating Mobile Debug System...');
+                window.mobileDebugSystem = new MobileDebugSystem();
+                window.mobileDebugSystem.init();
+                console.log('🔧 Mobile debug system initialized');
+            }
+            
+            // Initialize mobile testing suite
+            if (window.MobileTestingSuite) {
+                console.log('🧪 Creating Mobile Testing Suite...');
+                window.mobileTestingSuite = new MobileTestingSuite();
+                window.mobileTestingSuite.init();
+                console.log('🧪 Mobile testing suite initialized');
+            }
         } catch (error) {
             console.error('🔧 Error in initCoreSystems setup:', error);
             throw error;

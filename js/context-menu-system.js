@@ -26,15 +26,16 @@ class ContextMenuSystem {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid #4a9eff;
             border-radius: 10px;
-            padding: 10px 0;
-            min-width: 200px;
+            padding: 0;
+            min-width: 220px;
             box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
             z-index: 10000;
             display: none;
             font-family: 'Arial', sans-serif;
             backdrop-filter: blur(10px);
-            overflow: visible;
+            overflow: hidden;
             max-height: 80vh;
+            box-sizing: border-box;
         `;
 
         // Create menu items
@@ -105,24 +106,28 @@ class ContextMenuSystem {
             const menuItem = document.createElement('div');
             menuItem.className = 'context-menu-item';
             menuItem.style.cssText = `
-                padding: 8px 16px;
+                padding: 12px 16px;
                 color: #ffffff;
                 cursor: pointer;
                 transition: all 0.2s ease;
                 border-bottom: 1px solid rgba(74, 158, 255, 0.2);
                 display: flex;
                 flex-direction: column;
-                gap: 2px;
-                min-height: 40px;
+                gap: 4px;
+                min-height: 48px;
                 position: relative;
                 z-index: 1;
                 align-items: flex-start;
                 justify-content: center;
+                box-sizing: border-box;
+                width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
             `;
             
             menuItem.innerHTML = `
-                <div style="font-weight: bold; font-size: 13px;">${item.text}</div>
-                <div style="font-size: 11px; color: #a0a0a0;">${item.description}</div>
+                <div style="font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.text}</div>
+                <div style="font-size: 11px; color: #a0a0a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.description}</div>
             `;
 
             menuItem.addEventListener('click', (e) => {
