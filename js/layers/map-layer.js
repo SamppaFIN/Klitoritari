@@ -48,6 +48,11 @@ class MapLayer extends BaseLayer {
             console.log('🗺️ MapLayer: Leaflet Layer Manager initialized');
         }
         
+        // Initialize Sacred Geometry Background Layer
+        if (this.mapReady) {
+            this.initializeSacredGeometryLayer();
+        }
+        
         // Initialize player marker after map is ready
         if (this.mapReady) {
             this.initializePlayerMarker();
@@ -199,6 +204,61 @@ class MapLayer extends BaseLayer {
 
         } catch (error) {
             console.error('🗺️ MapLayer: Failed to initialize map:', error);
+        }
+    }
+    
+    /**
+     * Initialize Sacred Geometry Background Layer
+     * @status [IN_DEVELOPMENT] - Sacred geometry integration
+     * @feature #feature-sacred-geometry-background
+     * @last_tested 2025-01-28
+     */
+    initializeSacredGeometryLayer() {
+        console.log('🌌 MapLayer: Initializing Sacred Geometry Background Layer...');
+        
+        try {
+            // Check if Sacred Geometry Layer is available
+            if (typeof L.SacredGeometryLayer === 'undefined') {
+                console.warn('🌌 Sacred Geometry Layer not available, skipping initialization');
+                return;
+            }
+            
+            // Create sacred geometry layer with cosmic settings
+            this.sacredGeometryLayer = L.sacredGeometryLayer({
+                opacity: 0.25, // Subtle sacred geometry
+                visible: true,
+                colorScheme: 'cosmic',
+                patterns: {
+                    flowerOfLife: true,
+                    metatronsCube: true,
+                    sriYantra: true,
+                    goldenSpiral: true,
+                    treeOfLife: true,
+                    vesicaPiscis: true
+                },
+                effects: {
+                    particles: true,
+                    aurora: true,
+                    cosmicGradient: true,
+                    sacredSigils: true
+                },
+                performance: {
+                    adaptiveQuality: true,
+                    maxParticles: 30, // Reduced for performance
+                    batteryOptimized: true
+                }
+            });
+            
+            // Add sacred geometry layer to map
+            this.sacredGeometryLayer.addTo(this.map);
+            
+            // Make globally available for debugging
+            window.sacredGeometryLayer = this.sacredGeometryLayer;
+            
+            console.log('🌌 MapLayer: Sacred Geometry Background Layer initialized successfully');
+            
+        } catch (error) {
+            console.error('🌌 MapLayer: Failed to initialize Sacred Geometry Background Layer:', error);
         }
     }
 

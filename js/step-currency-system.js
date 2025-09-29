@@ -1033,8 +1033,8 @@ class StepCurrencySystem {
             timestamp: Date.now()
         });
         
-        // Debug: Log first few events to see if data is coming through
-        if (this.accelerationData.length <= 5) {
+        // Debug: Log first few events to see if data is coming through (only in development)
+        if (this.accelerationData.length <= 5 && window.location.hostname === 'localhost') {
             console.log(`🚶‍♂️ Device motion event ${this.accelerationData.length}:`, {
                 x: acceleration.x,
                 y: acceleration.y,
@@ -1075,8 +1075,8 @@ class StepCurrencySystem {
             const previous = recent[3].magnitude;
             const before = recent[2].magnitude;
             
-            // Debug: Log step detection attempts
-            if (this.accelerationData.length % 20 === 0) { // Log every 20th attempt to avoid spam
+            // Debug: Log step detection attempts (only in development)
+            if (this.accelerationData.length % 20 === 0 && window.location.hostname === 'localhost') {
                 console.log('🚶‍♂️ Step detection check:', {
                     current: current.toFixed(2),
                     previous: previous.toFixed(2),
