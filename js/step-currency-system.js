@@ -137,6 +137,42 @@ class StepCurrencySystem {
         console.log('🚶‍♂️ Step 9: Running initial milestone check...');
         this.checkMilestones();
         console.log('🚶‍♂️ ===== STEP CURRENCY SYSTEM INITIALIZATION COMPLETE =====');
+        
+        // Add debug functions to window for testing
+        window.debugStepCounter = {
+            addTestStep: () => {
+                console.log('🚶‍♂️ Adding test step...');
+                this.addStep();
+            },
+            getStatus: () => {
+                return {
+                    stepDetectionActive: this.stepDetectionActive,
+                    accelerationDataLength: this.accelerationData.length,
+                    stepThreshold: this.stepThreshold,
+                    minStepInterval: this.minStepInterval,
+                    totalSteps: this.totalSteps,
+                    sessionSteps: this.sessionSteps,
+                    mobileStepData: this.mobileStepData,
+                    stepValidation: this.stepValidation
+                };
+            },
+            testDeviceMotion: () => {
+                console.log('🚶‍♂️ Testing device motion...');
+                if (this.accelerationData.length > 0) {
+                    console.log('🚶‍♂️ Device motion data available:', this.accelerationData.slice(-3));
+                } else {
+                    console.log('🚶‍♂️ No device motion data received');
+                }
+            },
+            resetThresholds: () => {
+                console.log('🚶‍♂️ Resetting thresholds for testing...');
+                this.stepThreshold = 1.0;
+                this.minStepInterval = 200;
+                console.log('🚶‍♂️ New thresholds:', { stepThreshold: this.stepThreshold, minStepInterval: this.minStepInterval });
+            }
+        };
+        
+        console.log('🚶‍♂️ Debug functions available: window.debugStepCounter');
     }
     
     requestInitialStepsFromServer() {
@@ -487,10 +523,24 @@ class StepCurrencySystem {
     }
     
     setupDeviceMotion() {
+        console.log('🚶‍♂️ Setting up device motion detection...');
+        console.log('🚶‍♂️ Protocol:', window.location.protocol);
+        console.log('🚶‍♂️ User Agent:', navigator.userAgent);
+        
+        // Check if we're on HTTPS (required for device motion on mobile)
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            console.warn('🚶‍♂️ Device motion requires HTTPS on mobile devices. Using fallback mode.');
+            this.enableFallbackMode();
+            return;
+        }
+        
         // Request permission for device motion
         if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            console.log('🚶‍♂️ Requesting device motion permission...');
             DeviceMotionEvent.requestPermission().then(response => {
+                console.log('🚶‍♂️ Device motion permission response:', response);
                 if (response === 'granted') {
+                    console.log('🚶‍♂️ Device motion permission granted!');
                     this.enableDeviceMotion();
                 } else {
                     console.log('🚶‍♂️ Device motion permission denied, using fallback');
@@ -501,6 +551,7 @@ class StepCurrencySystem {
                 this.enableFallbackMode();
             });
         } else {
+            console.log('🚶‍♂️ Direct device motion access (older browsers)');
             // Direct access (older browsers)
             this.enableDeviceMotion();
         }
@@ -700,14 +751,21 @@ class StepCurrencySystem {
             // Reduce data collection frequency to save battery
             this.accelerationData = this.accelerationData.filter((_, index) => index % 2 === 0);
             
-            // Adjust thresholds for mobile with better accuracy
-            this.stepThreshold = Math.max(1.5, this.stepThreshold * 0.8);
-            this.minStepInterval = Math.max(500, this.minStepInterval * 0.8);
+            // More sensitive thresholds for mobile devices
+            this.stepThreshold = Math.max(1.2, this.stepThreshold * 0.6); // More sensitive
+            this.minStepInterval = Math.max(300, this.minStepInterval * 0.6); // Faster detection
+            
+            console.log('🚶‍♂️ Mobile thresholds set:', {
+                stepThreshold: this.stepThreshold,
+                minStepInterval: this.minStepInterval
+            });
             
             // Enable enhanced mobile features
             this.enableBackgroundStepCounting();
             this.enableMobileStepValidation();
             this.enableBatteryOptimization();
+        } else {
+            console.log('🚶‍♂️ Desktop device detected, using standard thresholds');
         }
     }
     
@@ -848,10 +906,24 @@ class StepCurrencySystem {
     
     enableDeviceMotion() {
         console.log('🚶‍♂️ Enabling device motion detection');
+        console.log('🚶‍♂️ Adding devicemotion event listener...');
+        
         window.addEventListener('devicemotion', (event) => {
             this.handleDeviceMotion(event);
         });
+        
         this.stepDetectionActive = true;
+        console.log('🚶‍♂️ Step detection active:', this.stepDetectionActive);
+        
+        // Test if device motion events are actually firing
+        setTimeout(() => {
+            console.log('🚶‍♂️ Device motion test - checking if events are firing...');
+            if (this.accelerationData.length === 0) {
+                console.warn('🚶‍♂️ No device motion events received after 2 seconds - may need fallback');
+            } else {
+                console.log('🚶‍♂️ Device motion events are firing correctly!');
+            }
+        }, 2000);
         
         // Also enable gyroscope-based detection when GPS is tracking
         this.enableGyroscopeDetection();
@@ -935,23 +1007,41 @@ class StepCurrencySystem {
     }
     
     handleDeviceMotion(event) {
-        if (!this.stepDetectionActive) return;
+        if (!this.stepDetectionActive) {
+            console.log('🚶‍♂️ Step detection not active, skipping device motion');
+            return;
+        }
         
         const acceleration = event.accelerationIncludingGravity;
-        if (!acceleration) return;
+        if (!acceleration) {
+            console.log('🚶‍♂️ No acceleration data in device motion event');
+            return;
+        }
         
         // Store acceleration data with individual components
+        const magnitude = Math.sqrt(
+            acceleration.x * acceleration.x +
+            acceleration.y * acceleration.y +
+            acceleration.z * acceleration.z
+        );
+        
         this.accelerationData.push({
             x: acceleration.x,
             y: acceleration.y,
             z: acceleration.z,
-            magnitude: Math.sqrt(
-                acceleration.x * acceleration.x +
-                acceleration.y * acceleration.y +
-                acceleration.z * acceleration.z
-            ),
+            magnitude: magnitude,
             timestamp: Date.now()
         });
+        
+        // Debug: Log first few events to see if data is coming through
+        if (this.accelerationData.length <= 5) {
+            console.log(`🚶‍♂️ Device motion event ${this.accelerationData.length}:`, {
+                x: acceleration.x,
+                y: acceleration.y,
+                z: acceleration.z,
+                magnitude: magnitude.toFixed(2)
+            });
+        }
         
         // Keep only last 50 readings
         if (this.accelerationData.length > 50) {
@@ -962,7 +1052,7 @@ class StepCurrencySystem {
         this.adjustStepSensitivity();
         
         // Detect step pattern
-        this.detectStep(this.accelerationData[this.accelerationData.length - 1].magnitude);
+        this.detectStep(magnitude);
     }
     
     detectStep(magnitude) {
@@ -985,15 +1075,34 @@ class StepCurrencySystem {
             const previous = recent[3].magnitude;
             const before = recent[2].magnitude;
             
-            // More strict step detection: current must be significantly higher than previous readings
+            // Debug: Log step detection attempts
+            if (this.accelerationData.length % 20 === 0) { // Log every 20th attempt to avoid spam
+                console.log('🚶‍♂️ Step detection check:', {
+                    current: current.toFixed(2),
+                    previous: previous.toFixed(2),
+                    before: before.toFixed(2),
+                    threshold: this.stepThreshold.toFixed(2),
+                    magnitude: magnitude.toFixed(2)
+                });
+            }
+            
+            // More lenient step detection for mobile: current must be higher than previous readings
             if (current > previous && current > before && current > this.stepThreshold) {
                 // Additional check: ensure it's a real peak, not just noise
                 const isPeak = current > recent[1].magnitude && current > recent[0].magnitude;
                 if (isPeak) {
+                    console.log('🚶‍♂️ Potential step detected!', {
+                        magnitude: current.toFixed(2),
+                        threshold: this.stepThreshold.toFixed(2)
+                    });
+                    
                     // Mobile validation before adding step
                     if (this.validateStepForMobile(current, recent)) {
+                        console.log('🚶‍♂️ Step validated and added!');
                         this.addStep();
                         this.lastStepTime = now;
+                    } else {
+                        console.log('🚶‍♂️ Step validation failed');
                     }
                 }
             }
