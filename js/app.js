@@ -1205,7 +1205,7 @@ class LegacyEldritchSanctuaryApp {
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
                         console.log('📍 Location permission denied');
-                        this.showLocationError('Location permission denied. Please allow location access in your browser settings and try again.');
+                        this.showLocationError('Location permission denied. Please allow location access in your browser settings.');
                         break;
                     case error.POSITION_UNAVAILABLE:
                         console.log('📍 Location unavailable');
@@ -2940,6 +2940,9 @@ class LegacyEldritchSanctuaryApp {
             // Also make it globally available for debug panel and other systems
             window.stepCurrencySystem = this.systems.stepCurrency;
             console.log('🚶‍♂️ StepCurrencySystem made globally available');
+            
+            // Default step engine: GPS distance
+            try { if (typeof window.setStepEngineMode === 'function') { window.setStepEngineMode('gps_distance'); } } catch (_) {}
         } else {
             console.log('🚶‍♂️ StepCurrencySystem already exists, using existing instance');
             this.systems.stepCurrency = window.stepCurrencySystem;
