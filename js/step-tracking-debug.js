@@ -234,6 +234,15 @@ class StepTrackingDebug {
         this.updateDisplay();
         this.showModeNotification(mode);
     }
+
+// Expose a global helper
+if (typeof window !== 'undefined') {
+  window.setStepEngineMode = (mode) => {
+    if (window.stepTrackingDebug) {
+      window.stepTrackingDebug.setMode(mode);
+    }
+  };
+}
     
     applyModeToStepSystem(mode) {
         const stepSystem = window.stepCurrencySystem;

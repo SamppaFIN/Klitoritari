@@ -366,6 +366,25 @@ class SacredSettings {
                         </div>
                     </div>
                 </div>
+                
+                <!-- Step Engine Settings -->
+                <div class="settings-section">
+                    <h3 style="margin: 0 0 15px 0; color: #d1d5db; font-size: 18px;">
+                        👣 Step Engine
+                    </h3>
+                    <div style="display: grid; gap: 12px;">
+                        <div class="setting-item">
+                            <label style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <span>Source</span>
+                                <select id="step-engine-source" style="padding:6px; background:#374151; color:#e5e7eb; border:1px solid #4b5563; border-radius:6px;">
+                                    <option value="gps_distance">GPS Distance</option>
+                                    <option value="device">Device Motion</option>
+                                    <option value="simulation">Simulation</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
@@ -612,6 +631,14 @@ class SacredSettings {
             this.updateSetting('performance', 'webglHUD', e.target.checked);
             this.applySettings();
         });
+
+        // Step engine
+        const stepEngineSource = document.getElementById('step-engine-source');
+        if (stepEngineSource) {
+            stepEngineSource.addEventListener('change', (e) => {
+                try { window.setStepEngineMode?.(e.target.value); } catch (_) {}
+            });
+        }
     }
     
     updateSetting(category, key, value) {
@@ -820,6 +847,10 @@ class SacredSettings {
         if (perfWebglOther) perfWebglOther.value = this.settings.performance.webglOtherPlayersThreshold;
         if (perfWebglTotal) perfWebglTotal.value = this.settings.performance.webglTotalMarkersThreshold;
         if (perfWebglHUD) perfWebglHUD.checked = this.settings.performance.webglHUD;
+
+        // Sync step engine UI
+        const stepEngineSource = document.getElementById('step-engine-source');
+        if (stepEngineSource) stepEngineSource.value = 'gps_distance';
     }
     
     toggleSettingsPanel() {
