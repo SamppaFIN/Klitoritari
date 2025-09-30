@@ -1119,6 +1119,11 @@ class WebSocketClient {
         }
         
         try {
+            // Check if this is the player's own base FIRST
+            const currentPlayerId = this.getCurrentPlayerId();
+            const markerPlayerId = marker.data?.playerId || marker.data?.ownerId;
+            const isOwnBase = marker.data?.isOwnBase || (markerPlayerId && markerPlayerId === currentPlayerId);
+            
             // Use SVG graphics system for base marker restoration
             const baseConfig = {
                 size: 120,
@@ -1151,11 +1156,6 @@ class WebSocketClient {
             // Add simple stats popup
             const name = marker.data?.name || 'My Cosmic Base';
             const buttonId = `manage-base-btn-${Date.now()}`;
-            
-            // Check if this is the player's own base
-            const currentPlayerId = this.getCurrentPlayerId();
-            const markerPlayerId = marker.data?.playerId || marker.data?.ownerId;
-            const isOwnBase = marker.data?.isOwnBase || (markerPlayerId && markerPlayerId === currentPlayerId);
             
             console.log('🔍 Base ownership check:', {
                 currentPlayerId,
