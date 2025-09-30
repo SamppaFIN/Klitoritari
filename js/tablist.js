@@ -754,9 +754,12 @@ class Tablist {
         if (!container) return;
         
         // Get current settings
-        const playerName = localStorage.getItem('playerName') || 'Cosmic Explorer';
-        const pathColor = localStorage.getItem('pathColor') || '#00ff88';
+        const playerName = localStorage.getItem('playerName') || localStorage.getItem('eldritch_player_name') || 'Cosmic Explorer';
+        const pathColor = localStorage.getItem('pathColor') || localStorage.getItem('eldritch_player_color') || '#00ff88';
         const playerSymbol = localStorage.getItem('playerSymbol') || '🌟';
+        const baseFlag = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+        const pathSymbol = localStorage.getItem('eldritch_player_path_symbol') || 'sun';
+        const playerIcon = localStorage.getItem('eldritch_player_icon') || 'person';
         
         container.innerHTML = `
             <div class="settings-content">
@@ -764,6 +767,13 @@ class Tablist {
                 
                 <div class="setting-group">
                     <h4>👤 Profile</h4>
+                    <div class="setting-item">
+                        <div class="profile-summary">
+                            <div class="profile-row"><span>Name:</span><span id="profile-name">${playerName}</span></div>
+                            <div class="profile-row"><span>Level:</span><span id="profile-level">${window.encounterSystem?.playerStats?.level || 1}</span></div>
+                            <div class="profile-row"><span>Total Steps:</span><span id="profile-steps">${window.stepCurrencySystem?.totalSteps || 0}</span></div>
+                        </div>
+                    </div>
                     <div class="setting-item">
                         <label>Player Name</label>
                         <input type="text" id="settings-player-name" value="${playerName}" maxlength="24">
@@ -786,6 +796,44 @@ class Tablist {
                             <input type="color" id="settings-path-color" value="${pathColor}">
                             <button onclick="window.tablist.savePathColor()">Apply</button>
                         </div>
+                    </div>
+                    <div class="setting-item">
+                        <label>Base Flag</label>
+                        <select id="settings-base-flag" onchange="window.tablist.saveBaseFlag()">
+                            <option value="finnish" ${baseFlag==='finnish'?'selected':''}>🇫🇮 Finnish</option>
+                            <option value="swedish" ${baseFlag==='swedish'?'selected':''}>🇸🇪 Swedish</option>
+                            <option value="norwegian" ${baseFlag==='norwegian'?'selected':''}>🇳🇴 Norwegian</option>
+                            <option value="flower_of_life" ${baseFlag==='flower_of_life'?'selected':''}>✳️ Flower of Life</option>
+                            <option value="sacred_triangle" ${baseFlag==='sacred_triangle'?'selected':''}>🔺 Sacred Triangle</option>
+                            <option value="hexagon" ${baseFlag==='hexagon'?'selected':''}>⬣ Hexagon</option>
+                            <option value="cosmic_spiral" ${baseFlag==='cosmic_spiral'?'selected':''}>🌀 Cosmic Spiral</option>
+                            <option value="star" ${baseFlag==='star'?'selected':''}>⭐ Star</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Path Marker</label>
+                        <select id="settings-path-symbol" onchange="window.tablist.savePathSymbol()">
+                            <option value="sun" ${pathSymbol==='sun'?'selected':''}>☀️ Sun</option>
+                            <option value="star" ${pathSymbol==='star'?'selected':''}>⭐ Star</option>
+                            <option value="sparkle" ${pathSymbol==='sparkle'?'selected':''}>✨ Sparkle</option>
+                            <option value="crescent" ${pathSymbol==='crescent'?'selected':''}>🌙 Crescent</option>
+                            <option value="diamond" ${pathSymbol==='diamond'?'selected':''}>💎 Diamond</option>
+                            <option value="aurora" ${pathSymbol==='aurora'?'selected':''}>🌌 Aurora</option>
+                            <option value="lightning" ${pathSymbol==='lightning'?'selected':''}>⚡ Lightning</option>
+                            <option value="flame" ${pathSymbol==='flame'?'selected':''}>🔥 Flame</option>
+                            <option value="snowflake" ${pathSymbol==='snowflake'?'selected':''}>❄️ Snowflake</option>
+                            <option value="wave" ${pathSymbol==='wave'?'selected':''}>🌊 Wave</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Player Marker</label>
+                        <select id="settings-player-icon" onchange="window.tablist.savePlayerIcon()">
+                            <option value="person" ${playerIcon==='person'?'selected':''}>👤 Person</option>
+                            <option value="comet" ${playerIcon==='comet'?'selected':''}>☄️ Comet</option>
+                            <option value="sparkle" ${playerIcon==='sparkle'?'selected':''}>✨ Sparkle</option>
+                            <option value="dragon" ${playerIcon==='dragon'?'selected':''}>🐉 Dragon</option>
+                            <option value="beacon" ${playerIcon==='beacon'?'selected':''}>📡 Beacon</option>
+                        </select>
                     </div>
                     <div class="setting-item">
                         <label>UI Theme</label>
@@ -871,12 +919,16 @@ class Tablist {
         const newColor = colorInput.value;
         
         localStorage.setItem('pathColor', newColor);
+        localStorage.setItem('eldritch_player_color', newColor);
         this.showSettingsNotification('Path color saved!', 'success');
         console.log('✅ Path color saved:', newColor);
         
         // Apply color to path system if available
         if (window.pathPaintingSystem && window.pathPaintingSystem.setColor) {
             window.pathPaintingSystem.setColor(newColor);
+        }
+        if (window.mapLayer && window.mapLayer.pathMarkers) {
+            // Optionally refresh future markers color usage if implemented
         }
     }
     
@@ -904,6 +956,39 @@ class Tablist {
         localStorage.setItem('uiTheme', theme);
         this.showSettingsNotification(`Theme changed to ${theme}`, 'success');
         console.log('✅ Theme changed to:', theme);
+    }
+
+    saveBaseFlag() {
+        const select = document.getElementById('settings-base-flag');
+        const value = select?.value || 'finnish';
+        localStorage.setItem('eldritch_player_base_logo', value);
+        this.showSettingsNotification('Base flag updated', 'success');
+        // Refresh existing base marker if present
+        try { window.mapLayer?.addBaseMarker(window.mapLayer?.getCurrentPlayerPosition?.()); } catch (_) {}
+    }
+
+    savePathSymbol() {
+        const select = document.getElementById('settings-path-symbol');
+        const value = select?.value || 'sun';
+        localStorage.setItem('eldritch_player_path_symbol', value);
+        localStorage.setItem('eldritch_player_symbol', value);
+        this.showSettingsNotification('Path marker symbol updated', 'success');
+    }
+
+    savePlayerIcon() {
+        const select = document.getElementById('settings-player-icon');
+        const value = select?.value || 'person';
+        localStorage.setItem('eldritch_player_icon', value);
+        this.showSettingsNotification('Player marker updated', 'success');
+        // Rebuild player marker HTML live if available
+        try {
+            const marker = window.mapLayer?.markers?.get?.('player');
+            if (marker && window.mapLayer?.createPlayerMarkerHTML) {
+                const html = window.mapLayer.createPlayerMarkerHTML();
+                const icon = L.divIcon({ className: 'player-marker', html, iconSize: [40,40], iconAnchor: [20,20] });
+                marker.setIcon(icon);
+            }
+        } catch (_) {}
     }
     
     changeGPSAccuracy() {

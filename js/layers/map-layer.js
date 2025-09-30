@@ -707,12 +707,23 @@ class MapLayer extends BaseLayer {
     }
 
     createPlayerMarkerHTML() {
+        const iconChoice = (localStorage.getItem('eldritch_player_icon') || 'person');
+        const colorChoice = localStorage.getItem('eldritch_player_color') || '#00ff00';
+        const emoji = (() => {
+            switch (iconChoice) {
+                case 'comet': return '☄️';
+                case 'sparkle': return '✨';
+                case 'dragon': return '🐉';
+                case 'beacon': return '📡';
+                default: return '👤';
+            }
+        })();
         return `
             <div style="position: relative; width: 40px; height: 40px;">
-                <div style="position: absolute; top: -10px; left: -10px; width: 60px; height: 60px; background: radial-gradient(circle, #00ff0040 0%, transparent 70%); border-radius: 50%; animation: playerPulse 2s infinite;"></div>
-                <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, #00ff0060 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
-                <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: #00ff00; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;"></div>
-                <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(0,0,0,0.9); font-weight: bold;">👤</div>
+                <div style="position: absolute; top: -10px; left: -10px; width: 60px; height: 60px; background: radial-gradient(circle, ${colorChoice}40 0%, transparent 70%); border-radius: 50%; animation: playerPulse 2s infinite;"></div>
+                <div style="position: absolute; top: -5px; left: -5px; width: 50px; height: 50px; background: radial-gradient(circle, ${colorChoice}60 0%, transparent 70%); border-radius: 50%; animation: playerGlow 2s infinite;"></div>
+                <div style="position: absolute; top: 2px; left: 2px; width: 36px; height: 36px; background: ${colorChoice}; border: 3px solid #ffffff; border-radius: 50%; opacity: 0.9; box-shadow: 0 0 20px ${colorChoice}, 0 0 40px ${colorChoice};"></div>
+                <div style="position: absolute; top: 8px; left: 8px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #ffffff; text-shadow: 0 0 8px rgba(0,0,0,0.9); font-weight: bold;">${emoji}</div>
             </div>
         `;
     }
@@ -855,6 +866,21 @@ class MapLayer extends BaseLayer {
     }
 
     addPathMarker(position) {
+        const symbolChoice = (localStorage.getItem('eldritch_player_path_symbol') || 'sun');
+        const symbolEmoji = (() => {
+            switch (symbolChoice) {
+                case 'star': return '⭐';
+                case 'sparkle': return '✨';
+                case 'crescent': return '🌙';
+                case 'diamond': return '💎';
+                case 'aurora': return '🌌';
+                case 'lightning': return '⚡';
+                case 'flame': return '🔥';
+                case 'snowflake': return '❄️';
+                case 'wave': return '🌊';
+                default: return '☀️';
+            }
+        })();
         const pathIcon = L.divIcon({
             className: 'path-marker',
             html: `
@@ -870,7 +896,7 @@ class MapLayer extends BaseLayer {
                     font-size: 16px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
                 ">
-                    🇫🇮
+                    ${symbolEmoji}
                 </div>
             `,
             iconSize: [30, 30],
@@ -897,7 +923,7 @@ class MapLayer extends BaseLayer {
         // Add popup
         marker.bindPopup(`
             <b>Path Marker</b><br>
-            <small>Finnish Flag</small><br>
+            <small>${symbolChoice}</small><br>
             <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
         `);
         
@@ -912,7 +938,7 @@ class MapLayer extends BaseLayer {
                 type: 'path',
                 position: { lat: position.lat, lng: position.lng },
                 data: {
-                    symbol: '🇫🇮',
+                    symbol: symbolChoice,
                     markerId: `path_${Date.now()}`
                 }
             });
@@ -938,6 +964,21 @@ class MapLayer extends BaseLayer {
             this.markers.delete('base');
         }
 
+        // Resolve selected base flag/symbol
+        const baseChoice = (localStorage.getItem('eldritch_player_base_logo') || 'finnish');
+        const baseEmoji = (() => {
+            switch (baseChoice) {
+                case 'swedish': return '🇸🇪';
+                case 'norwegian': return '🇳🇴';
+                case 'flower_of_life': return '✳️';
+                case 'sacred_triangle': return '🔺';
+                case 'hexagon': return '⬣';
+                case 'cosmic_spiral': return '🌀';
+                case 'star': return '⭐';
+                default: return '🇫🇮';
+            }
+        })();
+
         // Create base marker icon using EXACT same approach as path markers
         const baseIcon = L.divIcon({
             className: 'base-marker',
@@ -955,7 +996,7 @@ class MapLayer extends BaseLayer {
                     color: white;
                     text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
                     box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-                ">🏗️</div>
+                ">${baseEmoji}</div>
             `,
             iconSize: [30, 30],
             iconAnchor: [15, 15]
@@ -982,7 +1023,7 @@ class MapLayer extends BaseLayer {
         // Add popup (same as path markers)
         marker.bindPopup(`
             <b>Base Marker</b><br>
-            <small>🏗️ Base</small><br>
+            <small>${baseChoice}</small><br>
             <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
         `);
         
@@ -996,7 +1037,7 @@ class MapLayer extends BaseLayer {
                 type: 'base',
                 position: { lat: position.lat, lng: position.lng },
                 data: {
-                    symbol: '🏗️',
+                    symbol: baseChoice,
                     markerId: `base_${Date.now()}`
                 }
             });
