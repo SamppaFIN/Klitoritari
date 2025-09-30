@@ -164,6 +164,25 @@ class MobileLogEmailSystem {
             this.showEmailError(error);
         }
     }
+
+    /**
+     * Send a custom text report via email (used by Mobile Testing Suite)
+     * @param {string} subject - Email subject
+     * @param {string} text - Plain text body
+     */
+    async sendTextReport(subject, text) {
+        try {
+            const deviceInfo = this.getDeviceInfo();
+            this.emailData.device_info = deviceInfo;
+            this.emailData.logs_content = text;
+            this.emailData.timestamp = new Date().toISOString();
+            if (subject) this.emailData.subject = subject;
+            await this.tryEmailMethods();
+        } catch (error) {
+            console.error('📧 Error sending text report:', error);
+            this.showEmailError(error);
+        }
+    }
     
     /**
      * Get device information

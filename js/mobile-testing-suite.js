@@ -359,6 +359,7 @@ class MobileTestingSuite {
                     <button class="test-btn" id="test-systems">Systems</button>
                     <button class="test-btn" id="test-clear">Clear</button>
                     <button class="test-btn" id="test-export">Export</button>
+                    <button class="test-btn" id="test-email">Email Report</button>
                 </div>
             </div>
             
@@ -475,6 +476,19 @@ class MobileTestingSuite {
                 this.exportTestResults();
             });
         }
+
+        // Email tests
+        const emailBtn = document.getElementById('test-email');
+        if (emailBtn) {
+            emailBtn.addEventListener('click', async () => {
+                try {
+                    const report = this.generateTextReport();
+                    await window.mobileLogEmailSystem?.sendTextReport?.('Mobile Test Report', report);
+                } catch (e) {
+                    console.warn('🧪 Failed to email report:', e);
+                }
+            });
+        }
     }
     
     /**
@@ -494,6 +508,27 @@ class MobileTestingSuite {
             
             console.log(`🧪 Test panel ${isVisible ? 'hidden' : 'shown'}`);
         }
+    }
+
+    /**
+     * Generate a plain-text report from current results
+     */
+    generateTextReport() {
+        const lines = [];
+        lines.push(`ELDRITCH SANCTUARY - MOBILE TEST REPORT`);
+        lines.push(new Date().toISOString());
+        lines.push('');
+        const addSection = (title, obj) => {
+            lines.push(`=== ${title} ===`);
+            Object.entries(obj || {}).forEach(([k,v]) => lines.push(`${k}: ${typeof v==='object'?JSON.stringify(v):v}`));
+            lines.push('');
+        };
+        addSection('Performance', this.testResults.performance);
+        addSection('Mobile', this.testResults.mobile);
+        addSection('Systems', this.testResults.systems);
+        addSection('Errors', { errors: (this.testResults.errors||[]).join('\n') });
+        lines.push(`Overall: ${this.testResults.overall}`);
+        return lines.join('\n');
     }
     
     /**
