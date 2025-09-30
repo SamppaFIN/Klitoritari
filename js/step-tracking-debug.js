@@ -26,7 +26,7 @@ class StepTrackingDebug {
         };
         
         // Current mode
-        this.currentMode = this.modes.SIMULATION; // Start with simulation for testing
+        this.currentMode = this.modes.GPS_DISTANCE; // Start with GPS distance for real tracking
         this.isDebugMode = true;
         
         // Simulation settings
@@ -71,7 +71,7 @@ class StepTrackingDebug {
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #e5e7eb;
-            display: none;
+            display: block;
         `;
         
         // Create panel content
@@ -234,15 +234,6 @@ class StepTrackingDebug {
         this.updateDisplay();
         this.showModeNotification(mode);
     }
-
-// Expose a global helper
-if (typeof window !== 'undefined') {
-  window.setStepEngineMode = (mode) => {
-    if (window.stepTrackingDebug) {
-      window.stepTrackingDebug.setMode(mode);
-    }
-  };
-}
     
     applyModeToStepSystem(mode) {
         const stepSystem = window.stepCurrencySystem;
@@ -511,6 +502,66 @@ if (typeof window !== 'undefined') {
             this.debugPanel.style.display = 'none';
         }
     }
+}
+
+// Expose a global helper
+if (typeof window !== 'undefined') {
+  window.setStepEngineMode = async (mode) => {
+    try {
+      if (window.stepTrackingDebug && typeof window.stepTrackingDebug.setMode === 'function') {
+        window.stepTrackingDebug.setMode(mode);
+      } else {
+        // Fallback: apply directly to systems
+        const sys = window.stepCurrencySystem;
+        if (!sys) {
+          console.warn('StepCurrencySystem not available');
+        } else {
+          switch (mode) {
+            case 'simulation': {
+              sys.autoStepDetectionEnabled = false;
+              sys.stepDetectionActive = false;
+              if (sys.enhancedTracking && typeof sys.enhancedTracking.stopTracking === 'function') {
+                sys.enhancedTracking.stopTracking();
+              }
+              break;
+            }
+            case 'device': {
+              sys.autoStepDetectionEnabled = true;
+              try { if (typeof sys.startStepDetection === 'function') sys.startStepDetection(); } catch(_) {}
+              if (sys.enhancedTracking) {
+                try {
+                  if (typeof sys.enhancedTracking.initializePedometer === 'function') {
+                    sys.enhancedTracking.initializePedometer();
+                    if (typeof sys.enhancedTracking.startTracking === 'function') sys.enhancedTracking.startTracking();
+                  }
+                } catch(_) {}
+              }
+              break;
+            }
+            case 'gps_distance': {
+              try {
+                if (!sys.enhancedTracking && typeof EnhancedStepTracking !== 'undefined') {
+                  sys.enhancedTracking = new EnhancedStepTracking();
+                }
+                if (sys.enhancedTracking) {
+                  if (typeof sys.enhancedTracking.initializeGPSDistance === 'function') {
+                    sys.enhancedTracking.initializeGPSDistance();
+                  }
+                  if (typeof sys.enhancedTracking.startTracking === 'function') sys.enhancedTracking.startTracking();
+                }
+              } catch (e) { console.warn('GPS distance init failed', e); }
+              sys.autoStepDetectionEnabled = false;
+              sys.stepDetectionActive = false;
+              break;
+            }
+          }
+        }
+      }
+      try { if (window.notificationCenter && typeof window.notificationCenter.showBanner === 'function') window.notificationCenter.showBanner(`Step engine: ${mode}`, 'info'); } catch (_) {}
+    } catch (err) {
+      console.error('Failed to set step engine mode:', err);
+    }
+  };
 }
 
 // Initialize when DOM is ready

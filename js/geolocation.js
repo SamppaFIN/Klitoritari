@@ -37,7 +37,7 @@ class GeolocationManager {
         this.createDeviceLocationDisplay();
         this.startPeriodicUpdates();
         this.setupBackgroundTracking();
-        console.log('📍 Geolocation manager initialized');
+        // console.log('📍 Geolocation manager initialized');
     }
 
     setupBackgroundTracking() {
@@ -47,7 +47,7 @@ class GeolocationManager {
         // Set up visibility change handler to resume tracking when app becomes visible
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && this.isTracking) {
-                console.log('📍 App became visible, resuming location tracking');
+                // console.log('📍 App became visible, resuming location tracking');
                 this.startTracking();
             }
         });
@@ -55,7 +55,7 @@ class GeolocationManager {
         // Set up page focus handler
         window.addEventListener('focus', () => {
             if (this.isTracking) {
-                console.log('📍 Page focused, resuming location tracking');
+                // console.log('📍 Page focused, resuming location tracking');
                 this.startTracking();
             }
         });
@@ -74,13 +74,15 @@ class GeolocationManager {
 
     async requestHighAccuracyLocation() {
         return new Promise((resolve) => {
-            if (!navigator.geolocation) {
-                console.warn('📍 Geolocation not supported');
-                resolve(false);
-                return;
+        if (!navigator.geolocation) {
+            if (window.notificationCenter) {
+                window.notificationCenter.showBanner('GPS not supported on this device', 'warning');
             }
+            resolve(false);
+            return;
+        }
 
-            console.log('📍 Requesting high accuracy location for background tracking...');
+            // console.log('📍 Requesting high accuracy location for background tracking...');
             
             const options = {
                 enableHighAccuracy: true,
@@ -90,13 +92,15 @@ class GeolocationManager {
 
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    console.log('📍 High accuracy location granted');
+                    // console.log('📍 High accuracy location granted');
                     this.currentPosition = position;
                     this.lastValidPosition = position;
                     resolve(true);
                 },
                 (error) => {
-                    console.warn('📍 High accuracy location denied:', error.message);
+                    if (window.notificationCenter) {
+                        window.notificationCenter.showBanner(`GPS access denied: ${error.message}`, 'warning');
+                    }
                     resolve(false);
                 },
                 options
@@ -119,7 +123,7 @@ class GeolocationManager {
     createDeviceLocationDisplay() {
         // Check if display already exists
         if (document.getElementById('device-location-display')) {
-            console.log('📍 Device location display already exists, skipping creation');
+            // console.log('📍 Device location display already exists, skipping creation');
             this.deviceLocationDisplay = document.getElementById('device-location-display');
             return;
         }
@@ -156,7 +160,7 @@ class GeolocationManager {
         }
 
         this.deviceLocationDisplay = locationDisplay;
-        console.log('📍 Device location display created');
+        // console.log('📍 Device location display created');
     }
     
     // Start periodic updates to maintain display values
@@ -227,6 +231,36 @@ class GeolocationManager {
                 timestamp: Date.now()
             });
             return;
+        }
+
+        // First, try to get current position immediately
+        if (navigator.geolocation) {
+            this.updateDeviceLocationDisplay('Getting location...', '--');
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    this.handlePositionUpdate(position);
+                    this.updateDeviceLocationDisplay(
+                        `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
+                        `${Math.round(position.coords.accuracy)}m`
+                    );
+                    if (window.notificationCenter) {
+                        window.notificationCenter.showBanner('Location acquired successfully', 'success');
+                    }
+                },
+                (error) => {
+                    console.error('📍 Failed to get current position:', error);
+                    if (window.notificationCenter) {
+                        window.notificationCenter.showBanner(`Location failed: ${error.message}`, 'warning');
+                    }
+                    // Fall back to cached position or default
+                    this.useFallbackPosition();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 30000
+                }
+            );
         }
 
         if (!this.checkGeolocationSupport()) {
@@ -774,6 +808,22 @@ class GeolocationManager {
             };
             console.log('📍 Updated fallback position to last known position:', `lat: ${this.fixedPosition.lat}, lng: ${this.fixedPosition.lng}`);
         }
+    }
+
+    // Use fallback position when GPS fails
+    useFallbackPosition() {
+        this.updateDeviceLocationDisplay(
+            `${this.fixedPosition.lat.toFixed(6)}, ${this.fixedPosition.lng.toFixed(6)}`,
+            'Fallback'
+        );
+        this.handlePositionUpdate({
+            coords: {
+                latitude: this.fixedPosition.lat,
+                longitude: this.fixedPosition.lng,
+                accuracy: 1000
+            },
+            timestamp: Date.now()
+        });
     }
 
     // Toggle device GPS on/off

@@ -14,7 +14,7 @@ class MultiplayerPanel {
   _init() {
     const panel = document.createElement('div');
     panel.id = 'multiplayer-panel';
-    panel.style.cssText = 'position:fixed; bottom:14px; left:14px; z-index:10020; background:rgba(17,24,39,0.92); border:1px solid #374151; color:#e5e7eb; border-radius:10px; padding:10px 12px; width:260px; font-family:Segoe UI, sans-serif; box-shadow:0 16px 40px rgba(0,0,0,0.35)';
+    panel.style.cssText = 'position:fixed; bottom:120px; left:14px; z-index:10020; background:rgba(17,24,39,0.92); border:1px solid #374151; color:#e5e7eb; border-radius:10px; padding:10px 12px; width:260px; font-family:Segoe UI, sans-serif; box-shadow:0 16px 40px rgba(0,0,0,0.35)';
     panel.innerHTML = `
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
         <div style="font-weight:700;">👥 Multiplayer</div>
