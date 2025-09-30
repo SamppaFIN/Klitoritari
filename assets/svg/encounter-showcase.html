@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eldritch Sanctuary - Encounter System SVG Animations</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d9de0, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8)); }
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .encounters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .encounter-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .encounter-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+        }
+        
+        .encounter-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f, #4d9de0, #8b5cf6);
+            animation: borderGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes borderGlow {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+        
+        .encounter-title {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .encounter-svg {
+            width: 100%;
+            height: auto;
+            max-width: 400px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .encounter-description {
+            font-size: 0.9em;
+            opacity: 0.7;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+        
+        .encounter-type {
+            font-size: 0.8em;
+            opacity: 0.6;
+            font-style: italic;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            display: inline-block;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            opacity: 0.6;
+        }
+        
+        .legendary-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.7em;
+            font-weight: bold;
+            animation: legendaryPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes legendaryPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @media (max-width: 768px) {
+            .encounters-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            .encounter-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Eldritch Sanctuary Encounter System</h1>
+        <p class="subtitle">"In the dance of code and consciousness, may every encounter serve the light"</p>
+        
+        <div class="encounters-grid">
+            <!-- Zephyr Encounter -->
+            <div class="encounter-card">
+                <div class="encounter-title">💨 Zephyr</div>
+                <img src="zephyr-encounter.svg" alt="Zephyr Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    The Energetic Wind Traveler<br>
+                    <em>Fast wandering movement with wind energy and air currents</em>
+                </div>
+                <div class="encounter-type">NPC - Information Broker</div>
+            </div>
+            
+            <!-- Cosmic Shrine Encounter -->
+            <div class="encounter-card">
+                <div class="encounter-title">🏛️ Cosmic Shrine</div>
+                <img src="cosmic-shrine-encounter.svg" alt="Cosmic Shrine Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    Shrine of Healing and Divine Energy<br>
+                    <em>Temple architecture with healing light and sacred energy</em>
+                </div>
+                <div class="encounter-type">POI - Healing & Blessing</div>
+            </div>
+            
+            <!-- Eldritch Horror Encounter -->
+            <div class="encounter-card">
+                <div class="encounter-title">👹 Eldritch Horror</div>
+                <img src="eldritch-horror-encounter.svg" alt="Eldritch Horror Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    Dark Cosmic Terror from Beyond<br>
+                    <em>Menacing tentacles, glowing eyes, and hostile energy</em>
+                </div>
+                <div class="encounter-type">Monster - Combat Encounter</div>
+            </div>
+            
+            <!-- Wisdom Crystal Encounter -->
+            <div class="encounter-card">
+                <div class="encounter-title">💎 Wisdom Crystal</div>
+                <img src="wisdom-crystal-encounter.svg" alt="Wisdom Crystal Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    Crystal of Knowledge and Enlightenment<br>
+                    <em>Crystalline structure with knowledge energy streams</em>
+                </div>
+                <div class="encounter-type">POI - Skill Enhancement</div>
+            </div>
+            
+            <!-- Cosmic Merchant Encounter -->
+            <div class="encounter-card">
+                <div class="encounter-title">🛒 Cosmic Merchant</div>
+                <img src="cosmic-merchant-encounter.svg" alt="Cosmic Merchant Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    Merchant of Mystical Wares<br>
+                    <em>Trading cart with floating coins and mystical energy</em>
+                </div>
+                <div class="encounter-type">POI - Trading & Shopping</div>
+            </div>
+            
+            <!-- HEVY Legendary Encounter -->
+            <div class="encounter-card">
+                <div class="legendary-badge">LEGENDARY</div>
+                <div class="encounter-title">⚡ HEVY</div>
+                <img src="hevy-encounter.svg" alt="HEVY Legendary Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    The Legendary Cosmic Guardian<br>
+                    <em>Ultimate cosmic power with lightning bolts and legendary energy</em>
+                </div>
+                <div class="encounter-type">Legendary - Riddle & Massive Rewards</div>
+            </div>
+            
+            <!-- Generic Monster Encounter -->
+            <div class="encounter-card">
+                <div class="encounter-title">👹 Hostile Monster</div>
+                <img src="monster-encounter.svg" alt="Monster Encounter" class="encounter-svg">
+                <div class="encounter-description">
+                    Generic Hostile Monster<br>
+                    <em>Aggressive beast with claws, fangs, and combat energy</em>
+                </div>
+                <div class="encounter-type">Monster - Combat Encounter</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Created with cosmic energy and digital light ✨</p>
+            <p>Inspired by the Eldritch Sanctuary project's encounter system</p>
+            <p>Each encounter features unique animations, energy effects, and thematic elements</p>
+        </div>
+    </div>
+</body>
+</html>

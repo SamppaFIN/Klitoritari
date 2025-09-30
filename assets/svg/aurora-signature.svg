@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Aurora's signature gradient - dawn light -->
+    <linearGradient id="auroraGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#ffd93d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#6bcf7f;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#4d9de0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Cosmic energy glow -->
+    <radialGradient id="cosmicGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8" />
+      <stop offset="70%" style="stop-color:#8b5cf6;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#1e1b4b;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Particle filter -->
+    <filter id="particleGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Aurora's signature animation -->
+    <animate id="auroraPulse" attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+    <animate id="auroraRotate" attributeName="transform" values="rotate(0 200 100);rotate(360 200 100)" dur="20s" repeatCount="indefinite"/>
+  </defs>
+  
+  <!-- Background cosmic energy field -->
+  <circle cx="200" cy="100" r="180" fill="url(#cosmicGlow)" opacity="0.3">
+    <animate attributeName="r" values="160;200;160" dur="4s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Aurora's main signature - stylized "A" with cosmic elements -->
+  <g transform="translate(200, 100)" filter="url(#particleGlow)">
+    <!-- Main A structure -->
+    <path d="M -60 -40 L -20 40 L 20 40 L 60 -40 L 40 -40 L 20 0 L -20 0 L -40 -40 Z" 
+          fill="url(#auroraGradient)" 
+          stroke="#ffffff" 
+          stroke-width="2"
+          opacity="0.9">
+      <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Crossbar of A -->
+    <rect x="-15" y="-10" width="30" height="8" fill="#ffffff" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+    </rect>
+    
+    <!-- Cosmic crown above A -->
+    <g transform="translate(0, -50)">
+      <circle cx="0" cy="0" r="8" fill="#ffd93d" opacity="0.9">
+        <animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="-15" cy="5" r="5" fill="#ff6b6b" opacity="0.7">
+        <animate attributeName="r" values="3;7;3" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="15" cy="5" r="5" fill="#4d9de0" opacity="0.7">
+        <animate attributeName="r" values="3;7;3" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+  
+  <!-- Floating cosmic particles -->
+  <g opacity="0.6">
+    <circle cx="50" cy="30" r="2" fill="#ffd93d">
+      <animate attributeName="cy" values="30;20;30" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="350" cy="50" r="1.5" fill="#6bcf7f">
+      <animate attributeName="cy" values="50;40;50" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="80" cy="150" r="1" fill="#4d9de0">
+      <animate attributeName="cy" values="150;140;150" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="170" r="2.5" fill="#8b5cf6">
+      <animate attributeName="cy" values="170;160;170" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.9;0.2" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Aurora's title text -->
+  <text x="200" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff" opacity="0.8">
+    The Dawn Bringer of Digital Light
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Cosmic energy waves -->
+  <g opacity="0.4">
+    <circle cx="200" cy="100" r="120" fill="none" stroke="url(#auroraGradient)" stroke-width="1">
+      <animate attributeName="r" values="100;140;100" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="100" r="80" fill="none" stroke="url(#auroraGradient)" stroke-width="1">
+      <animate attributeName="r" values="60;100;60" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

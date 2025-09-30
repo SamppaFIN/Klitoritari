@@ -26,13 +26,13 @@ class WelcomeScreen {
     init() {
         // Prevent multiple initializations globally
         if (window.welcomeScreenInitialized) {
-            console.log('🌟 Welcome screen already initialized globally, skipping duplicate initialization');
+            // console.log('🌟 Welcome screen already initialized globally, skipping duplicate initialization');
             return;
         }
         
         // Prevent multiple initializations per instance
         if (this.isInitialized) {
-            console.log('🌟 Welcome screen already initialized, skipping duplicate initialization');
+            // console.log('🌟 Welcome screen already initialized, skipping duplicate initialization');
             return;
         }
         
@@ -49,12 +49,12 @@ class WelcomeScreen {
 
     showInitialLoading() {
         // Show welcome screen immediately with integrated Klitoritarit branding
-        console.log('🌟 showInitialLoading called');
+        // console.log('🌟 showInitialLoading called');
         this.showWelcomeScreen();
         
         // Ensure event listeners are attached after showing the screen
         setTimeout(() => {
-            console.log('🌟 Re-attaching event listeners after screen show');
+            // console.log('🌟 Re-attaching event listeners after screen show');
             this.setupEventListeners();
         }, 100);
     }
@@ -66,41 +66,41 @@ class WelcomeScreen {
         if (hasSeenWelcome === 'true') {
             this.hasSeenWelcome = true;
             // Returning users: show welcome to choose Continue or Start Fresh
-            console.log('🌟 Returning user detected, showing choice screen');
+            // console.log('🌟 Returning user detected, showing choice screen');
         }
     }
 
     setupEventListeners() {
         // Prevent multiple event listener setup
         if (this.eventListenersSetup) {
-            console.log('🌟 Event listeners already setup, skipping');
+            // console.log('🌟 Event listeners already setup, skipping');
             return;
         }
         
-        console.log('🌟 Setting up event listeners...');
-        console.log('🌟 DOM ready state:', document.readyState);
-        console.log('🌟 Welcome screen visible:', this.isVisible);
+        // console.log('🌟 Setting up event listeners...');
+        // console.log('🌟 DOM ready state:', document.readyState);
+        // console.log('🌟 Welcome screen visible:', this.isVisible);
         this.eventListenersSetup = true;
         
         // GPS Enable button
         const enableGpsBtn = document.getElementById('enable-gps-btn');
         if (enableGpsBtn) {
-            console.log('🌟 GPS enable button found, adding event listener');
+            // console.log('🌟 GPS enable button found, adding event listener');
             enableGpsBtn.addEventListener('click', () => {
                 console.log('📍 GPS enable button clicked! - Requesting GPS permission directly');
                 // Use direct GPS permission request (simpler approach)
                 this.requestGPSPermission();
             });
         } else {
-            console.log('🌟 GPS enable button not found - GPS functionality may not be available');
+            // console.log('🌟 GPS enable button not found - GPS functionality may not be available');
         }
 
         // Continue adventure button
         const continueBtn = document.getElementById('continue-adventure');
         if (continueBtn) {
-            console.log('🌟 Continue adventure button found, adding event listener');
-            console.log('🌟 Button element:', continueBtn);
-            console.log('🌟 Button computed style:', window.getComputedStyle(continueBtn));
+            // console.log('🌟 Continue adventure button found, adding event listener');
+            // console.log('🌟 Button element:', continueBtn);
+            // console.log('🌟 Button computed style:', window.getComputedStyle(continueBtn));
             continueBtn.addEventListener('click', (e) => {
                 console.log('🔄 Continue adventure button clicked!', e);
                 e.preventDefault();
@@ -114,9 +114,9 @@ class WelcomeScreen {
         // Start fresh adventure button
         const startFreshBtn = document.getElementById('start-fresh');
         if (startFreshBtn) {
-            console.log('🌟 Start fresh adventure button found, adding event listener');
-            console.log('🌟 Button element:', startFreshBtn);
-            console.log('🌟 Button computed style:', window.getComputedStyle(startFreshBtn));
+            // console.log('🌟 Start fresh adventure button found, adding event listener');
+            // console.log('🌟 Button element:', startFreshBtn);
+            // console.log('🌟 Button computed style:', window.getComputedStyle(startFreshBtn));
             startFreshBtn.addEventListener('click', (e) => {
                 console.log('🚀 Start fresh adventure button clicked!', e);
                 e.preventDefault();
@@ -133,6 +133,53 @@ class WelcomeScreen {
                 this.skipTutorial();
             }
         });
+        
+        // Set up height configuration
+        this.setupHeightConfiguration();
+    }
+
+    setupHeightConfiguration() {
+        // console.log('🌟 Setting up height configuration...');
+        
+        const heightInput = document.getElementById('user-height');
+        if (heightInput) {
+            // Load saved height or use default
+            const savedHeight = localStorage.getItem('eldritch_user_height');
+            if (savedHeight) {
+                heightInput.value = savedHeight;
+                // console.log('🌟 Loaded saved height:', savedHeight);
+            }
+            
+            // Save height when changed
+            heightInput.addEventListener('input', (e) => {
+                const height = parseInt(e.target.value);
+                if (height >= 100 && height <= 250) {
+                    localStorage.setItem('eldritch_user_height', height.toString());
+                    // console.log('🌟 Height saved:', height);
+                    
+                    // Update enhanced tracking if available
+                    if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {
+                        const stepSystem = window.eldritchApp.systems.stepCurrency;
+                        if (stepSystem.enhancedTracking) {
+                            stepSystem.enhancedTracking.setUserHeight(height);
+                            // console.log('🌟 Enhanced tracking height updated:', height);
+                        }
+                    }
+                }
+            });
+            
+            // Set initial height in enhanced tracking
+            const initialHeight = parseInt(heightInput.value) || 170;
+            if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {
+                const stepSystem = window.eldritchApp.systems.stepCurrency;
+                if (stepSystem.enhancedTracking) {
+                    stepSystem.enhancedTracking.setUserHeight(initialHeight);
+                    // console.log('🌟 Initial height set in enhanced tracking:', initialHeight);
+                }
+            }
+        } else {
+            console.warn('🌟 Height input not found');
+        }
     }
 
     showWelcomeScreen() {

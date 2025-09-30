@@ -7,13 +7,35 @@ class DebugLogger {
     constructor() {
         this.logs = [];
         this.maxLogs = 1000; // Keep last 1000 logs
-        this.isEnabled = true;
+        this.isEnabled = false; // Start disabled to avoid performance issues
+        this.isCapturing = false; // Only capture when explicitly requested
         
-        // Override console.log to capture logs
+        // Store original console.log
         this.originalConsoleLog = console.log;
-        this.setupConsoleCapture();
         
-        console.log('🔍 Debug Logger initialized');
+        console.log('🔍 Debug Logger initialized (minimal mode)');
+    }
+    
+    /**
+     * Start capturing logs (only when export is requested)
+     */
+    startCapturing() {
+        if (this.isCapturing) return;
+        
+        this.isCapturing = true;
+        this.isEnabled = true;
+        this.setupConsoleCapture();
+        console.log('🔍 Debug Logger: Started capturing logs');
+    }
+    
+    /**
+     * Stop capturing logs
+     */
+    stopCapturing() {
+        this.isCapturing = false;
+        this.isEnabled = false;
+        this.restoreConsole();
+        console.log('🔍 Debug Logger: Stopped capturing logs');
     }
     
     setupConsoleCapture() {
@@ -22,18 +44,26 @@ class DebugLogger {
             // Call original console.log
             self.originalConsoleLog.apply(console, args);
             
-            // Capture logs that start with specific prefixes
-            const message = args.join(' ');
-            if (message.includes('🏗️') || message.includes('🎮') || message.includes('📍') || 
-                message.includes('🌌') || message.includes('🎭') || message.includes('👤') ||
-                message.includes('🚶‍♂️') || message.includes('🎯') || message.includes('🧪')) {
-                self.addLog(message);
+            // Only capture logs if we're actively capturing
+            if (self.isCapturing && self.isEnabled) {
+                const message = args.join(' ');
+                if (message.includes('🏗️') || message.includes('🎮') || message.includes('📍') || 
+                    message.includes('🌌') || message.includes('🎭') || message.includes('👤') ||
+                    message.includes('🚶‍♂️') || message.includes('🎯') || message.includes('🧪')) {
+                    self.addLog(message);
+                }
             }
         };
     }
     
+    restoreConsole() {
+        if (console.log !== this.originalConsoleLog) {
+            console.log = this.originalConsoleLog;
+        }
+    }
+    
     addLog(message) {
-        if (!this.isEnabled) return;
+        if (!this.isEnabled || !this.isCapturing) return;
         
         const timestamp = new Date().toISOString();
         const logEntry = {
@@ -49,8 +79,10 @@ class DebugLogger {
             this.logs = this.logs.slice(-this.maxLogs);
         }
         
-        // Write to file periodically
-        this.writeToFile();
+        // Only write to file every 50 logs to reduce performance impact
+        if (this.logs.length % 50 === 0) {
+            this.writeToFile();
+        }
     }
     
     getLogType(message) {
@@ -64,8 +96,8 @@ class DebugLogger {
     }
     
     writeToFile() {
-        // Only write every 10 logs to avoid too many file writes
-        if (this.logs.length % 10 === 0) {
+        // Only write every 50 logs to avoid too many file writes
+        if (this.logs.length % 50 === 0) {
             this.saveLogsToFile();
         }
     }
@@ -75,7 +107,7 @@ class DebugLogger {
             const logData = {
                 timestamp: new Date().toISOString(),
                 totalLogs: this.logs.length,
-                logs: this.logs.slice(-50) // Last 50 logs
+                logs: this.logs.slice(-100) // Last 100 logs
             };
             
             // Create a downloadable file
@@ -85,8 +117,10 @@ class DebugLogger {
             // Store in localStorage as backup
             localStorage.setItem('debug_logs', dataStr);
             
-            // Also try to send to server for AI access
-            this.sendLogsToServer(logData);
+            // Only send logs to server in development
+            if (window.location.hostname === 'localhost') {
+                this.sendLogsToServer(logData);
+            }
             
             console.log('🔍 Debug logs saved to localStorage');
         } catch (error) {
@@ -112,6 +146,59 @@ class DebugLogger {
             // Silently fail - server might not have the endpoint yet
             console.log('🔍 Could not send logs to server (this is normal)');
         }
+    }
+    
+    /**
+     * Perform full system check and export logs
+     */
+    async performSystemCheck() {
+        console.log('🔍 Starting full system check...');
+        
+        // Start capturing logs
+        this.startCapturing();
+        
+        // Wait a moment to capture some logs
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Perform system check
+        const systemCheck = {
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`,
+            viewportSize: `${window.innerWidth}x${window.innerHeight}`,
+            memory: performance.memory ? {
+                used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + ' MB',
+                total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024) + ' MB',
+                limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024) + ' MB'
+            } : 'Not available',
+            timing: {
+                loadTime: Math.round(performance.timing.loadEventEnd - performance.timing.navigationStart) + ' ms',
+                domReady: Math.round(performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart) + ' ms'
+            },
+            gameState: {
+                stepCount: window.stepCurrencySystem?.totalSteps || 0,
+                health: window.headerIntegration?.getHealth() || 0,
+                sanity: window.headerIntegration?.getSanity() || 0,
+                playerName: window.headerIntegration?.getPlayerName() || 'Unknown'
+            },
+            enhancedTracking: window.enhancedTracking ? {
+                isActive: window.enhancedTracking.isActive,
+                method: window.enhancedTracking.currentMethod,
+                stepCount: window.enhancedTracking.stepCount
+            } : 'Not available'
+        };
+        
+        // Add system check to logs
+        this.addLog(`🔍 System Check: ${JSON.stringify(systemCheck, null, 2)}`);
+        
+        // Export logs
+        this.exportLogs();
+        
+        // Stop capturing after export
+        this.stopCapturing();
+        
+        console.log('🔍 System check completed and logs exported');
+        return systemCheck;
     }
     
     getLogs() {
@@ -145,7 +232,7 @@ window.getDebugLogs = () => window.debugLogger.getLogs();
 window.getBaseLogs = () => window.debugLogger.getLogsByType('base');
 window.getMapLogs = () => window.debugLogger.getLogsByType('map');
 window.getPlayerLogs = () => window.debugLogger.getLogsByType('player');
-window.exportDebugLogs = () => window.debugLogger.exportLogs();
+window.exportDebugLogs = () => window.debugLogger.performSystemCheck();
 window.clearDebugLogs = () => window.debugLogger.clearLogs();
 
-console.log('🔍 Debug Logger ready! Use getDebugLogs(), getBaseLogs(), etc. to access logs');
+console.log('🔍 Debug Logger ready! Use exportDebugLogs() to perform system check and export logs');

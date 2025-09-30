@@ -1,0 +1,418 @@
+{
+  "id": "bug-2025-09-29T21-04-32-052Z-b1ffbc",
+  "timestamp": "2025-09-29T21:04:32.052Z",
+  "title": "Automatic Bug Report",
+  "description": "Bug report generated from device information and logs",
+  "severity": "medium",
+  "status": "open",
+  "device": {
+    "platform": "Win32",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+    "language": "fi",
+    "languages": [
+      "fi",
+      "en-US",
+      "en"
+    ],
+    "cookieEnabled": true,
+    "onLine": true,
+    "screen": {
+      "width": 1920,
+      "height": 1080,
+      "availWidth": 1920,
+      "availHeight": 1032,
+      "colorDepth": 24,
+      "pixelDepth": 24,
+      "orientation": "landscape-primary"
+    },
+    "viewport": {
+      "width": 1920,
+      "height": 945,
+      "devicePixelRatio": 1
+    },
+    "capabilities": {
+      "touch": false,
+      "geolocation": true,
+      "webGL": true,
+      "webRTC": true,
+      "serviceWorker": true,
+      "pushManager": true,
+      "notifications": true,
+      "vibration": true,
+      "battery": true,
+      "connection": true,
+      "deviceMemory": 8,
+      "hardwareConcurrency": 12
+    },
+    "timezone": "Europe/Helsinki",
+    "locale": "fi",
+    "deviceType": "desktop",
+    "isMobile": false,
+    "isTablet": false,
+    "isDesktop": true,
+    "battery": {
+      "charging": false,
+      "chargingTime": null,
+      "dischargingTime": 3171,
+      "level": 0.38
+    },
+    "connection": {
+      "effectiveType": "4g",
+      "downlink": 10,
+      "rtt": 50,
+      "saveData": false
+    }
+  },
+  "browser": {
+    "name": "Chrome",
+    "version": "140.0",
+    "engine": "Blink",
+    "features": {
+      "es6": true,
+      "webAssembly": true,
+      "webWorkers": true,
+      "indexedDB": true,
+      "localStorage": true,
+      "sessionStorage": true,
+      "webSockets": true,
+      "fetch": true,
+      "promises": true,
+      "asyncAwait": true
+    },
+    "security": {
+      "isSecureContext": true,
+      "protocol": "file:",
+      "https": false,
+      "cors": true
+    },
+    "console": {
+      "available": true,
+      "methods": [
+        "log",
+        "warn",
+        "error",
+        "info",
+        "debug",
+        "trace",
+        "table",
+        "group"
+      ]
+    }
+  },
+  "performance": {
+    "navigation": {
+      "navigationStart": 1759179856619,
+      "unloadEventStart": 0,
+      "unloadEventEnd": 0,
+      "redirectStart": 0,
+      "redirectEnd": 0,
+      "fetchStart": 1759179856626,
+      "domainLookupStart": 1759179856626,
+      "domainLookupEnd": 1759179856626,
+      "connectStart": 1759179856626,
+      "connectEnd": 1759179856626,
+      "secureConnectionStart": 0,
+      "requestStart": 1759179856626,
+      "responseStart": 1759179856626,
+      "responseEnd": 1759179856703,
+      "domLoading": 1759179856714,
+      "domInteractive": 1759179856731,
+      "domContentLoadedEventStart": 1759179856731,
+      "domContentLoadedEventEnd": 1759179856760,
+      "domComplete": 1759179856762,
+      "loadEventStart": 1759179856762,
+      "loadEventEnd": 1759179856762
+    },
+    "metrics": {
+      "firstContentfulPaint": 372,
+      "firstInputDelay": 1
+    },
+    "memory": {
+      "usedJSHeapSize": 10000000,
+      "totalJSHeapSize": 10000000,
+      "jsHeapSizeLimit": 3760000000
+    },
+    "longTasks": [],
+    "resources": [
+      {
+        "name": "http://localhost:3001/health",
+        "startTime": 115,
+        "duration": 9.5,
+        "transferSize": 0,
+        "encodedBodySize": 0,
+        "decodedBodySize": 0
+      },
+      {
+        "name": "http://localhost:3001/api/stats",
+        "startTime": 3492.5,
+        "duration": 6.699999995529652,
+        "transferSize": 0,
+        "encodedBodySize": 0,
+        "decodedBodySize": 0
+      },
+      {
+        "name": "http://localhost:3001/api/bug-reports",
+        "startTime": 3569.89999999851,
+        "duration": 6.199999995529652,
+        "transferSize": 0,
+        "encodedBodySize": 0,
+        "decodedBodySize": 0
+      },
+      {
+        "name": "http://localhost:3001/api/submit-device-info",
+        "startTime": 13428.79999999702,
+        "duration": 112.10000000149012,
+        "transferSize": 0,
+        "encodedBodySize": 0,
+        "decodedBodySize": 0
+      }
+    ],
+    "paint": {
+      "first-paint": 372,
+      "first-contentful-paint": 372
+    }
+  },
+  "application": {
+    "url": "file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html",
+    "pathname": "/C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html",
+    "search": "",
+    "hash": "",
+    "referrer": "",
+    "document": {
+      "title": "🤖 Aurora System - Eldritch Sanctuary",
+      "readyState": "complete",
+      "characterSet": "UTF-8",
+      "contentType": "text/html",
+      "lastModified": "09/29/2025 23:46:25",
+      "domain": ""
+    },
+    "window": {
+      "innerWidth": 1920,
+      "innerHeight": 945,
+      "outerWidth": 1920,
+      "outerHeight": 1032,
+      "scrollX": 0,
+      "scrollY": 0
+    },
+    "storage": {
+      "localStorage": {
+        "available": true,
+        "keyCount": 2,
+        "keys": [
+          "debug_logs",
+          "theme"
+        ],
+        "size": 7679
+      },
+      "sessionStorage": {
+        "available": true,
+        "keyCount": 0,
+        "keys": [],
+        "size": 0
+      },
+      "indexedDB": {
+        "available": true,
+        "databases": []
+      }
+    },
+    "cookies": {
+      "available": true,
+      "count": 1,
+      "cookies": [
+        ""
+      ]
+    },
+    "session": {
+      "startTime": 1759179856619,
+      "currentTime": 1759179872027,
+      "duration": 15408
+    }
+  },
+  "logs": {
+    "errors": [],
+    "performance": [
+      {
+        "timestamp": "2025-09-29T21:04:16.901Z",
+        "level": "warn",
+        "category": "performance",
+        "source": "client",
+        "message": "Performance issue: file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html took 142.89999999850988ms",
+        "context": {
+          "type": "long_task",
+          "operation": "file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html",
+          "duration": 142.89999999850988,
+          "threshold": 100,
+          "startTime": 0,
+          "entryType": "navigation"
+        },
+        "userId": "anonymous",
+        "sessionId": "session-1759179856901"
+      },
+      {
+        "timestamp": "2025-09-29T21:04:16.901Z",
+        "level": "warn",
+        "category": "performance",
+        "source": "client",
+        "message": "Performance issue: self took 160ms",
+        "context": {
+          "type": "long_task",
+          "operation": "self",
+          "duration": 160,
+          "threshold": 100,
+          "startTime": 111.29999999701977,
+          "entryType": "longtask"
+        },
+        "userId": "anonymous",
+        "sessionId": "session-1759179856901"
+      }
+    ],
+    "api": [
+      {
+        "timestamp": "2025-09-29T21:04:16.900Z",
+        "level": "info",
+        "category": "api",
+        "source": "client",
+        "message": "API call: GET http://localhost:3001/health - 200",
+        "context": {
+          "type": "fetch_api",
+          "url": "http://localhost:3001/health",
+          "method": "GET",
+          "statusCode": 200,
+          "duration": 166,
+          "success": true,
+          "headers": {
+            "X-API-Key": "aurora-secret-key-2025"
+          }
+        },
+        "userId": "anonymous",
+        "sessionId": "session-1759179856900"
+      },
+      {
+        "timestamp": "2025-09-29T21:04:20.161Z",
+        "level": "info",
+        "category": "api",
+        "source": "client",
+        "message": "API call: GET http://localhost:3001/api/stats - 200",
+        "context": {
+          "type": "fetch_api",
+          "url": "http://localhost:3001/api/stats",
+          "method": "GET",
+          "statusCode": 200,
+          "duration": 49.399999998509884,
+          "success": true,
+          "headers": {
+            "X-API-Key": "aurora-secret-key-2025"
+          }
+        },
+        "userId": "anonymous",
+        "sessionId": "session-1759179860161"
+      },
+      {
+        "timestamp": "2025-09-29T21:04:20.196Z",
+        "level": "info",
+        "category": "api",
+        "source": "client",
+        "message": "API call: GET http://localhost:3001/api/bug-reports - 200",
+        "context": {
+          "type": "fetch_api",
+          "url": "http://localhost:3001/api/bug-reports",
+          "method": "GET",
+          "statusCode": 200,
+          "duration": 6.600000001490116,
+          "success": true,
+          "headers": {
+            "X-API-Key": "aurora-secret-key-2025"
+          }
+        },
+        "userId": "anonymous",
+        "sessionId": "session-1759179860196"
+      },
+      {
+        "timestamp": "2025-09-29T21:04:30.161Z",
+        "level": "info",
+        "category": "api",
+        "source": "client",
+        "message": "API call: POST http://localhost:3001/api/submit-device-info - 200",
+        "context": {
+          "type": "fetch_api",
+          "url": "http://localhost:3001/api/submit-device-info",
+          "method": "POST",
+          "statusCode": 200,
+          "duration": 113.10000000149012,
+          "success": true,
+          "headers": {
+            "Content-Type": "application/json",
+            "X-API-Key": "aurora-secret-key-2025"
+          },
+          "body": "{\"deviceInfo\":{\"device\":{\"platform\":\"Win32\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"language\":\"fi\",\"languages\":[\"fi\",\"en-US\",\"en\"],\"cookieEnabled\":true,\"onLine\":true,\"screen\":{\"width\":1920,\"height\":1080,\"availWidth\":1920,\"availHeight\":1032,\"colorDepth\":24,\"pixelDepth\":24,\"orientation\":\"landscape-primary\"},\"viewport\":{\"width\":1920,\"height\":945,\"devicePixelRatio\":1},\"capabilities\":{\"touch\":false,\"geolocation\":true,\"webGL\":true,\"webRTC\":true,\"serviceWorker\":true,\"pushManager\":true,\"notifications\":true,\"vibration\":true,\"battery\":true,\"connection\":true,\"deviceMemory\":8,\"hardwareConcurrency\":12},\"timezone\":\"Europe/Helsinki\",\"locale\":\"fi\",\"deviceType\":\"desktop\",\"isMobile\":false,\"isTablet\":false,\"isDesktop\":true,\"battery\":{\"charging\":false,\"chargingTime\":null,\"dischargingTime\":3171,\"level\":0.38},\"connection\":{\"effectiveType\":\"4g\",\"downlink\":10,\"rtt\":50,\"saveData\":false}},\"browser\":{\"name\":\"Chrome\",\"version\":\"140.0\",\"engine\":\"Blink\",\"features\":{\"es6\":true,\"webAssembly\":true,\"webWorkers\":true,\"indexedDB\":true,\"localStorage\":true,\"sessionStorage\":true,\"webSockets\":true,\"fetch\":true,\"promises\":true,\"asyncAwait\":true},\"security\":{\"isSecureContext\":true,\"protocol\":\"file:\",\"https\":false,\"cors\":true},\"console\":{\"available\":true,\"methods\":[\"log\",\"warn\",\"error\",\"info\",\"debug\",\"trace\",\"table\",\"group\"]}},\"performance\":{\"navigation\":{\"navigationStart\":1759179856619,\"unloadEventStart\":0,\"unloadEventEnd\":0,\"redirectStart\":0,\"redirectEnd\":0,\"fetchStart\":1759179856626,\"domainLookupStart\":1759179856626,\"domainLookupEnd\":1759179856626,\"connectStart\":1759179856626,\"connectEnd\":1759179856626,\"secureConnectionStart\":0,\"requestStart\":1759179856626,\"responseStart\":1759179856626,\"responseEnd\":1759179856703,\"domLoading\":1759179856714,\"domInteractive\":1759179856731,\"domContentLoadedEventStart\":1759179856731,\"domContentLoadedEventEnd\":1759179856760,\"domComplete\":1759179856762,\"loadEventStart\":1759179856762,\"loadEventEnd\":1759179856762},\"metrics\":{\"firstContentfulPaint\":372,\"firstInputDelay\":1},\"memory\":{\"usedJSHeapSize\":10000000,\"totalJSHeapSize\":10000000,\"jsHeapSizeLimit\":3760000000},\"longTasks\":[],\"resources\":[{\"name\":\"http://localhost:3001/health\",\"startTime\":115,\"duration\":9.5,\"transferSize\":0,\"encodedBodySize\":0,\"decodedBodySize\":0},{\"name\":\"http://localhost:3001/api/stats\",\"startTime\":3492.5,\"duration\":6.699999995529652,\"transferSize\":0,\"encodedBodySize\":0,\"decodedBodySize\":0},{\"name\":\"http://localhost:3001/api/bug-reports\",\"startTime\":3569.89999999851,\"duration\":6.199999995529652,\"transferSize\":0,\"encodedBodySize\":0,\"decodedBodySize\":0}],\"paint\":{\"first-paint\":372,\"first-contentful-paint\":372}},\"application\":{\"url\":\"file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html\",\"pathname\":\"/C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html\",\"search\":\"\",\"hash\":\"\",\"referrer\":\"\",\"document\":{\"title\":\"🤖 Aurora System - Eldritch Sanctuary\",\"readyState\":\"complete\",\"characterSet\":\"UTF-8\",\"contentType\":\"text/html\",\"lastModified\":\"09/29/2025 23:46:25\",\"domain\":\"\"},\"window\":{\"innerWidth\":1920,\"innerHeight\":945,\"outerWidth\":1920,\"outerHeight\":1032,\"scrollX\":0,\"scrollY\":0},\"storage\":{\"localStorage\":{\"available\":true,\"keyCount\":2,\"keys\":[\"debug_logs\",\"theme\"],\"size\":7679},\"sessionStorage\":{\"available\":true,\"keyCount\":0,\"keys\":[],\"size\":0},\"indexedDB\":{\"available\":true,\"databases\":[]}},\"cookies\":{\"available\":true,\"count\":1,\"cookies\":[\"\"]},\"session\":{\"startTime\":1759179856619,\"currentTime\":1759179870047,\"duration\":13428}},\"logs\":{\"console\":{\"available\":true,\"note\":\"Console logs would need to be captured during runtime\"},\"errors\":{\"errorCount\":0,\"logsCount\":6,\"performanceIssuesCount\":2,\"apiCallsCount\":3},\"performance\":{\"performanceIssuesCount\":2,\"apiCallsCount\":3},\"network\":{\"apiCallsCount\":3},\"application\":{\"logsCount\":6,\"errorCount\":0},\"bugReporter\":{\"isInitialized\":true,\"errorCount\":0,\"logsCount\":6,\"performanceIssuesCount\":2,\"apiCallsCount\":3,\"config\":{\"logRetentionDays\":7,\"performanceThreshold\":100,\"maxLogEntries\":1000,\"autoReportThreshold\":5,\"categories\":{\"api\":\"api\",\"client\":\"client\",\"server\":\"server\",\"performance\":\"performance\",\"auth\":\"auth\",\"geolocation\":\"geolocation\",\"stepTracking\":\"step_tracking\",\"baseBuilding\":\"base_building\",\"encounter\":\"encounter\",\"ui\":\"ui\"}}}},\"network\":{\"connection\":{\"effectiveType\":\"4g\",\"downlink\":10,\"rtt\":50,\"saveData\":false},\"requests\":{\"note\":\"Network requests would need to be captured during runtime\"},\"webSockets\":{\"available\":true,\"connections\":[]},\"serviceWorker\":{\"available\":true,\"registered\":false}},\"sensors\":{\"geolocation\":{\"available\":true,\"permission\":\"unknown\"},\"deviceMotion\":{\"available\":true,\"permission\":\"unknown\"},\"deviceOrientation\":{\"available\":true,\"permission\":\"unknown\"},\"ambientLight\":{\"available\":false},\"proximity\":{\"available\":false}},\"game\":{\"stepTracking\":null,\"baseBuilding\":null,\"encounters\":null,\"geolocation\":null,\"player\":null,\"state\":null},\"resources\":{\"memory\":{\"usedJSHeapSize\":10000000,\"totalJSHeapSize\":10000000,\"jsHeapSizeLimit\":3760000000},\"cpu\":{\"cores\":12,\"note\":\"Detailed CPU usage not available in browser\"},\"storage\":{\"localStorage\":{\"available\":true,\"keyCount\":2,\"keys\":[\"debug_logs\",\"theme\"],\"size\":7679},\"sessionStorage\":{\"available\":true,\"keyCount\":0,\"keys\":[],\"size\":0},\"estimatedTotal\":7679},\"battery\":{},\"network\":{\"connection\":{\"effectiveType\":\"4g\",\"downlink\":10,\"rtt\":50}}},\"metadata\":{\"collectionTime\":\"2025-09-29T21:04:30.048Z\",\"collectorVersion\":\"1.0.0\",\"instanceId\":\"device-collector-1759179856734\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36\",\"url\":\"file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html\",\"referrer\":\"\"}},\"logs\":{},\"additionalData\":{\"type\":\"device_info_only\",\"transmissionTime\":\"2025-09-29T21:04:30.048Z\"}}"
+        },
+        "userId": "anonymous",
+        "sessionId": "session-1759179870161"
+      }
+    ],
+    "application": [],
+    "console": []
+  },
+  "errors": [],
+  "performanceIssues": [
+    {
+      "timestamp": "2025-09-29T21:04:16.901Z",
+      "level": "warn",
+      "category": "performance",
+      "source": "client",
+      "message": "Performance issue: file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html took 142.89999999850988ms",
+      "context": {
+        "type": "long_task",
+        "operation": "file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html",
+        "duration": 142.89999999850988,
+        "threshold": 100,
+        "startTime": 0,
+        "entryType": "navigation"
+      },
+      "userId": "anonymous",
+      "sessionId": "session-1759179856901"
+    },
+    {
+      "timestamp": "2025-09-29T21:04:16.901Z",
+      "level": "warn",
+      "category": "performance",
+      "source": "client",
+      "message": "Performance issue: self took 160ms",
+      "context": {
+        "type": "long_task",
+        "operation": "self",
+        "duration": 160,
+        "threshold": 100,
+        "startTime": 111.29999999701977,
+        "entryType": "longtask"
+      },
+      "userId": "anonymous",
+      "sessionId": "session-1759179856901"
+    }
+  ],
+  "game": {
+    "stepTracking": null,
+    "baseBuilding": null,
+    "encounters": null,
+    "geolocation": null,
+    "player": null,
+    "state": null
+  },
+  "context": {
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+    "url": "file:///C:/Users/User/Documents/Klitoritarit/aurora-system-showcase.html",
+    "platform": "Win32",
+    "timestamp": "2025-09-29T21:04:32.052Z",
+    "reportType": "aurora_analysis"
+  },
+  "aurora": {
+    "analysisReady": true,
+    "priority": "medium",
+    "categories": [
+      "performance"
+    ],
+    "recommendations": [
+      "Investigate performance issues - check for long tasks and slow operations"
+    ]
+  }
+}

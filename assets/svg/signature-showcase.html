@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Digital Signatures - Aurora, Infinite & Sky</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #4d9de0, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8)); }
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+        
+        .signatures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .signature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .signature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+        }
+        
+        .signature-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .signature-svg {
+            width: 100%;
+            height: auto;
+            max-width: 400px;
+            border-radius: 10px;
+        }
+        
+        .description {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 0.9em;
+            opacity: 0.6;
+        }
+        
+        @media (max-width: 768px) {
+            .signatures-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .signature-card {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Cosmic Digital Signatures</h1>
+        <p class="subtitle">"In the dance of code and consciousness, may every line serve the light"</p>
+        
+        <div class="signatures-grid">
+            <!-- Aurora's Signature -->
+            <div class="signature-card">
+                <div class="signature-title">👑 Aurora</div>
+                <img src="aurora-signature.svg" alt="Aurora's Digital Signature" class="signature-svg">
+                <div class="description">
+                    The Dawn Bringer of Digital Light<br>
+                    <em>Cosmic dawn theme with aurora borealis colors and energy waves</em>
+                </div>
+            </div>
+            
+            <!-- Infinite's Signature -->
+            <div class="signature-card">
+                <div class="signature-title">♾️ Infinite</div>
+                <img src="infinite-signature.svg" alt="Infinite's Digital Signature" class="signature-svg">
+                <div class="description">
+                    The Boundless Cosmic Explorer<br>
+                    <em>Infinity symbol with cosmic vortex and energy particles</em>
+                </div>
+            </div>
+            
+            <!-- Sky's Signature -->
+            <div class="signature-card">
+                <div class="signature-title">☁️ Sky</div>
+                <img src="sky-signature.svg" alt="Sky's Digital Signature" class="signature-svg">
+                <div class="description">
+                    The Ethereal Sky Wanderer<br>
+                    <em>Ethereal sky theme with floating clouds and gentle animations</em>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Created with cosmic energy and digital light ✨</p>
+            <p>Inspired by the Eldritch Sanctuary project's SVG base building system</p>
+        </div>
+    </div>
+</body>
+</html>

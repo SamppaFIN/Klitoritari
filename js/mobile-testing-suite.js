@@ -351,7 +351,7 @@ class MobileTestingSuite {
     createTestContent() {
         this.testPanel.innerHTML = `
             <div class="test-header" style="text-align: center; margin-bottom: 15px;">
-                <h2 style="margin: 0; color: #ff9800; text-shadow: 0 0 10px #ff9800;">🧪 Mobile Tests</h2>
+                <h2 style="margin: 0; color: #ff9800; text-shadow: 0 0 10px #ff9800;">🧪 Test Results</h2>
                 <div class="test-controls">
                     <button class="test-btn" id="test-run-all">Run All</button>
                     <button class="test-btn" id="test-performance">Performance</button>
@@ -363,23 +363,31 @@ class MobileTestingSuite {
             </div>
             
             <div class="test-section" id="test-performance-section">
-                <h3>📊 Performance Tests</h3>
-                <div id="test-performance-content"></div>
+                <h3>📊 Performance Validation</h3>
+                <div id="test-performance-content">
+                    <div class="test-placeholder">Click "Run All" to start testing</div>
+                </div>
             </div>
             
             <div class="test-section" id="test-mobile-section">
-                <h3>📱 Mobile Tests</h3>
-                <div id="test-mobile-content"></div>
+                <h3>📱 Device Validation</h3>
+                <div id="test-mobile-content">
+                    <div class="test-placeholder">Click "Run All" to start testing</div>
+                </div>
             </div>
             
             <div class="test-section" id="test-systems-section">
-                <h3>⚙️ Systems Tests</h3>
-                <div id="test-systems-content"></div>
+                <h3>⚙️ System Health</h3>
+                <div id="test-systems-content">
+                    <div class="test-placeholder">Click "Run All" to start testing</div>
+                </div>
             </div>
             
             <div class="test-section" id="test-overall-section">
-                <h3>🎯 Overall Status</h3>
-                <div id="test-overall-content"></div>
+                <h3>🎯 Test Summary</h3>
+                <div id="test-overall-content">
+                    <div class="test-placeholder">No tests run yet</div>
+                </div>
             </div>
         `;
         
@@ -873,20 +881,24 @@ class MobileTestingSuite {
         
         container.innerHTML = `
             <div class="test-result">
-                <span class="test-result-label">FPS:</span>
-                <span class="test-result-value">${performance.fps}</span>
+                <span class="test-result-label">Performance Validation:</span>
+                <span class="test-status ${performance.status}">${performance.status.toUpperCase()}</span>
             </div>
             <div class="test-result">
-                <span class="test-result-label">Memory:</span>
-                <span class="test-result-value">${performance.memory} MB</span>
+                <span class="test-result-label">FPS Test:</span>
+                <span class="test-result-value ${performance.fps >= 30 ? 'pass' : performance.fps >= 15 ? 'warning' : 'fail'}">${performance.fps >= 30 ? '✓ PASS' : performance.fps >= 15 ? '⚠ WARNING' : '✗ FAIL'}</span>
             </div>
             <div class="test-result">
-                <span class="test-result-label">Load Time:</span>
-                <span class="test-result-value">${performance.loadTime} ms</span>
+                <span class="test-result-label">Memory Test:</span>
+                <span class="test-result-value ${performance.memory <= 100 ? 'pass' : performance.memory <= 200 ? 'warning' : 'fail'}">${performance.memory <= 100 ? '✓ PASS' : performance.memory <= 200 ? '⚠ WARNING' : '✗ FAIL'}</span>
             </div>
             <div class="test-result">
-                <span class="test-result-label">Status:</span>
-                <span class="test-status ${performance.status}">${performance.status}</span>
+                <span class="test-result-label">Load Time Test:</span>
+                <span class="test-result-value ${performance.loadTime <= 3000 ? 'pass' : performance.loadTime <= 5000 ? 'warning' : 'fail'}">${performance.loadTime <= 3000 ? '✓ PASS' : performance.loadTime <= 5000 ? '⚠ WARNING' : '✗ FAIL'}</span>
+            </div>
+            <div class="test-result">
+                <span class="test-result-label">Test Time:</span>
+                <span class="test-result-value">${new Date().toLocaleTimeString()}</span>
             </div>
         `;
     }
@@ -905,20 +917,24 @@ class MobileTestingSuite {
         
         container.innerHTML = `
             <div class="test-result">
+                <span class="test-result-label">Device Validation:</span>
+                <span class="test-status ${mobile.status}">${mobile.status.toUpperCase()}</span>
+            </div>
+            <div class="test-result">
                 <span class="test-result-label">Touch Support:</span>
-                <span class="test-result-value">${mobile.touchSupport ? 'Yes' : 'No'}</span>
+                <span class="test-result-value ${mobile.touchSupport ? 'pass' : 'fail'}">${mobile.touchSupport ? '✓ PASS' : '✗ FAIL'}</span>
             </div>
             <div class="test-result">
                 <span class="test-result-label">Screen Size:</span>
-                <span class="test-result-value">${mobile.screenSize.width}x${mobile.screenSize.height}</span>
+                <span class="test-result-value ${mobile.screenSize.width >= 320 ? 'pass' : 'fail'}">${mobile.screenSize.width >= 320 ? '✓ PASS' : '✗ FAIL'}</span>
             </div>
             <div class="test-result">
                 <span class="test-result-label">Orientation:</span>
-                <span class="test-result-value">${mobile.orientation}</span>
+                <span class="test-result-value ${mobile.orientation !== 'unknown' ? 'pass' : 'fail'}">${mobile.orientation !== 'unknown' ? '✓ PASS' : '✗ FAIL'}</span>
             </div>
             <div class="test-result">
-                <span class="test-result-label">Status:</span>
-                <span class="test-status ${mobile.status}">${mobile.status}</span>
+                <span class="test-result-label">Test Time:</span>
+                <span class="test-result-value">${new Date().toLocaleTimeString()}</span>
             </div>
         `;
     }

@@ -63,28 +63,40 @@ L.SacredGeometryLayer = L.Layer.extend({
         
         this._map = map;
         
-        // Create container for sacred geometry
-        this.container = L.DomUtil.create('div', 'sacred-geometry-layer');
-        this.container.style.position = 'absolute';
-        this.container.style.top = '0';
-        this.container.style.left = '0';
-        this.container.style.width = '100%';
-        this.container.style.height = '100%';
-        this.container.style.pointerEvents = 'none';
-        this.container.style.zIndex = '1'; // Behind map tiles but above base background
-        this.container.style.opacity = this.options.opacity;
-        
-        // Add to map pane
-        this.getPane().appendChild(this.container);
-        
-        // Initialize sacred geometry renderer
-        this.initializeSacredRenderer();
-        
-        // Set up map event listeners
-        this.setupMapEventListeners();
-        
-        this.isInitialized = true;
-        console.log('🌌 Sacred Geometry Layer added to map');
+        // Wait for map to be ready before adding container
+        map.whenReady(() => {
+            try {
+                // Create container for sacred geometry
+                this.container = L.DomUtil.create('div', 'sacred-geometry-layer');
+                this.container.style.position = 'absolute';
+                this.container.style.top = '0';
+                this.container.style.left = '0';
+                this.container.style.width = '100%';
+                this.container.style.height = '100%';
+                this.container.style.pointerEvents = 'none';
+                this.container.style.zIndex = '1'; // Behind map tiles but above base background
+                this.container.style.opacity = this.options.opacity;
+                
+                // Get pane safely
+                const pane = this.getPane();
+                if (pane) {
+                    pane.appendChild(this.container);
+                    
+                    // Initialize sacred geometry renderer
+                    this.initializeSacredRenderer();
+                    
+                    // Set up map event listeners
+                    this.setupMapEventListeners();
+                    
+                    this.isInitialized = true;
+                    console.log('🌌 Sacred Geometry Layer added to map');
+                } else {
+                    console.warn('🌌 Map pane not ready, skipping sacred geometry layer');
+                }
+            } catch (error) {
+                console.error('🌌 Error adding Sacred Geometry Layer:', error);
+            }
+        });
     },
     
     /**

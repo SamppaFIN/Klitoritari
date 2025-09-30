@@ -38,6 +38,10 @@ class StepCurrencySystem {
         // Debug flag to disable automatic step detection
         this.autoStepDetectionEnabled = false;
         
+        // Enhanced step tracking system
+        this.enhancedTracking = null;
+        this.useEnhancedTracking = true;
+        
         // Step milestones for rewards
         this.milestones = {
             flag: 50,      // Create flag every 50 steps
@@ -90,6 +94,38 @@ class StepCurrencySystem {
         console.log('🏗️ Base building layer connected to step currency system');
     }
     
+    initializeEnhancedTracking() {
+        console.log('🚶‍♂️ Initializing enhanced step tracking system...');
+        
+        // Check if EnhancedStepTracking class is available
+        if (typeof EnhancedStepTracking !== 'undefined') {
+            try {
+                this.enhancedTracking = new EnhancedStepTracking();
+                console.log('🚶‍♂️ Enhanced step tracking system initialized successfully');
+                
+                // Set up event listeners for step updates
+                this.enhancedTracking.on('stepDetected', (data) => {
+                    console.log('🚶‍♂️ Enhanced tracking detected step:', data);
+                    this.addStep('enhanced-tracking');
+                });
+                
+                this.enhancedTracking.on('trackingStatusChanged', (status) => {
+                    console.log('🚶‍♂️ Enhanced tracking status changed:', status);
+                });
+                
+                // Initialize the enhanced tracking
+                this.enhancedTracking.init();
+                
+            } catch (error) {
+                console.warn('🚶‍♂️ Failed to initialize enhanced tracking:', error);
+                this.useEnhancedTracking = false;
+            }
+        } else {
+            console.warn('🚶‍♂️ EnhancedStepTracking class not available, using fallback methods');
+            this.useEnhancedTracking = false;
+        }
+    }
+    
     init() {
         console.log('🚶‍♂️ ===== STEP CURRENCY SYSTEM INITIALIZATION =====');
         console.log('🚶‍♂️ Instance ID:', this.instanceId || 'no-id');
@@ -108,29 +144,32 @@ class StepCurrencySystem {
             console.log(`🚶‍♂️ Force set totalSteps to: ${this.totalSteps}`);
         }
         
-        console.log('🚶‍♂️ Step 2: Setting up device motion...');
+        console.log('🚶‍♂️ Step 2: Initializing enhanced step tracking...');
+        this.initializeEnhancedTracking();
+        
+        console.log('🚶‍♂️ Step 3: Setting up device motion...');
         this.setupDeviceMotion();
         
-        console.log('🚶‍♂️ Step 3: Setting up Google Fit...');
+        console.log('🚶‍♂️ Step 4: Setting up Google Fit...');
         this.setupGoogleFit();
         
-        console.log('🚶‍♂️ Step 4: Creating step counter...');
+        console.log('🚶‍♂️ Step 5: Creating step counter...');
         this.createStepCounter();
         
-        console.log('🚶‍♂️ Step 5: Starting step detection...');
+        console.log('🚶‍♂️ Step 6: Starting step detection...');
         this.startStepDetection();
         
-        console.log('🚶‍♂️ Step 6: Optimizing for mobile...');
+        console.log('🚶‍♂️ Step 7: Optimizing for mobile...');
         this.optimizeForMobile();
         
         // Update step counter display (with delay to ensure HTML is ready)
-        console.log('🚶‍♂️ Step 7: Updating step counter display...');
+        console.log('🚶‍♂️ Step 8: Updating step counter display...');
         setTimeout(() => {
             this.updateStepCounter();
         }, 100);
         
         // Sync steps to server for validation
-        console.log('🚶‍♂️ Step 8: Syncing steps to server...');
+        console.log('🚶‍♂️ Step 9: Syncing steps to server...');
         this.syncStepsToServer();
         
         // Check milestones for existing steps (in case user already has enough steps)
@@ -526,6 +565,12 @@ class StepCurrencySystem {
         console.log('🚶‍♂️ Setting up device motion detection...');
         console.log('🚶‍♂️ Protocol:', window.location.protocol);
         console.log('🚶‍♂️ User Agent:', navigator.userAgent);
+        
+        // If enhanced tracking is available and working, skip traditional setup
+        if (this.useEnhancedTracking && this.enhancedTracking) {
+            console.log('🚶‍♂️ Using enhanced step tracking system, skipping traditional device motion setup');
+            return;
+        }
         
         // Check if we're on HTTPS (required for device motion on mobile)
         if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
@@ -2682,16 +2727,39 @@ class StepCurrencySystem {
         this.stepDetectionActive = true;
         console.log('🚶‍♂️ Step detection started');
         
-        // Disable automatic step detection - only manual steps allowed
-        this.autoStepDetectionEnabled = false;
-        console.log('🧪 Automatic step detection disabled - only manual steps allowed');
-        
-        // Do not enable fallback mode - we want manual control only
+        // Start enhanced tracking if available
+        if (this.useEnhancedTracking && this.enhancedTracking) {
+            console.log('🚶‍♂️ Starting enhanced step tracking...');
+            this.enhancedTracking.startTracking();
+        } else {
+            // Disable automatic step detection - only manual steps allowed
+            this.autoStepDetectionEnabled = false;
+            console.log('🧪 Automatic step detection disabled - only manual steps allowed');
+        }
     }
     
     stopStepDetection() {
         this.stepDetectionActive = false;
         console.log('🚶‍♂️ Step detection stopped');
+        
+        // Stop enhanced tracking if available
+        if (this.useEnhancedTracking && this.enhancedTracking) {
+            console.log('🚶‍♂️ Stopping enhanced step tracking...');
+            this.enhancedTracking.stopTracking();
+        }
+    }
+    
+    getEnhancedTrackingStatus() {
+        if (this.useEnhancedTracking && this.enhancedTracking) {
+            return this.enhancedTracking.getTrackingStatus();
+        }
+        return {
+            enabled: false,
+            methods: [],
+            activeMethods: [],
+            totalSteps: 0,
+            lastUpdate: null
+        };
     }
     
     setStepDetectionMode(gpsTracking) {

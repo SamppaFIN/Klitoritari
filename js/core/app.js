@@ -141,6 +141,14 @@ class EldritchSanctuaryApp {
                 window.mobileTestingSuite.init();
                 console.log('🧪 Mobile testing suite initialized');
             }
+            
+            // Initialize mobile log email system
+            if (window.MobileLogEmailSystem) {
+                console.log('📧 Creating Mobile Log Email System...');
+                window.mobileLogEmailSystem = new MobileLogEmailSystem();
+                window.mobileLogEmailSystem.init();
+                console.log('📧 Mobile log email system initialized');
+            }
         } catch (error) {
             console.error('🔧 Error in initCoreSystems setup:', error);
             throw error;

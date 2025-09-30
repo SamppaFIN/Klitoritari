@@ -8600,6 +8600,90 @@ input[type="range"]::-moz-range-thumb {
     font-size: 1.2rem;
 }
 
+/* Height Configuration Section */
+.height-config-section {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.height-config-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.height-icon {
+    font-size: 2rem;
+    color: #ffd700;
+}
+
+.height-text {
+    flex: 1;
+}
+
+.height-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.height-subtitle {
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.height-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.height-input-group:focus-within {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.height-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    width: 80px;
+    text-align: center;
+    outline: none;
+}
+
+.height-input::placeholder {
+    color: #999;
+}
+
+.height-unit {
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.height-info {
+    text-align: center;
+}
+
+.height-info small {
+    color: #999;
+    font-size: 0.8rem;
+}
+
 /* Action Buttons - Using original welcome button styles */
 .action-buttons {
     display: flex;

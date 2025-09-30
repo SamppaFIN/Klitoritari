@@ -1080,6 +1080,7 @@ class EldritchSanctuaryServer {
         // Set base in player's game state
         this.setPlayerBase(playerId, { position });
         
+        
         // Create base marker with icon data
         const baseMarker = this.addMarkerToPlayer(playerId, {
             type: 'base',

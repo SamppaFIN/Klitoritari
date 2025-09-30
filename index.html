@@ -1209,6 +1209,24 @@ Check console for full localStorage contents.`);
                         </button>
                     </div>
                     
+                    <!-- Height Configuration Section -->
+                    <div class="height-config-section">
+                        <div class="height-config-header">
+                            <div class="height-icon">📏</div>
+                            <div class="height-text">
+                                <div class="height-title">Step Tracking Accuracy</div>
+                                <div class="height-subtitle">Set your height for more accurate step counting</div>
+                            </div>
+                        </div>
+                        <div class="height-input-group">
+                            <input type="number" id="user-height" class="height-input" placeholder="170" min="100" max="250" value="170">
+                            <span class="height-unit">cm</span>
+                        </div>
+                        <div class="height-info">
+                            <small>This helps calculate your step length for more accurate distance tracking</small>
+                        </div>
+                    </div>
+                    
                     <!-- Action Buttons -->
                     <div class="action-buttons">
                         <button id="continue-adventure" class="continue-btn">
@@ -1482,6 +1500,9 @@ Check console for full localStorage contents.`);
     <!-- Loading System -->
     <script src="js/ui/loading-system.js?v=2"></script>
     
+    <!-- Enhanced Step Tracking System -->
+    <script src="js/enhanced-step-tracking.js"></script>
+    
     <!-- Step Currency System -->
     <script src="js/step-currency-system.js"></script>
     
@@ -1496,6 +1517,7 @@ Check console for full localStorage contents.`);
     
     <!-- Mobile Testing Suite -->
     <script src="js/mobile-testing-suite.js"></script>
+    <script src="js/mobile-log-email-system.js"></script>
     <script src="js/sacred-geometry-renderer.js"></script>
     <script src="js/sacred-geometry-leaflet-layer.js"></script>
     

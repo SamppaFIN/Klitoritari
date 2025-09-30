@@ -762,9 +762,54 @@ class HeaderIntegration {
     }
     
     /**
-     * Export debug logs
+     * Export debug logs - now uses the enhanced debug logger system
      */
-    exportDebugLogs() {
+    async exportDebugLogs() {
+        try {
+            // Use the enhanced debug logger's system check
+            if (window.debugLogger && window.debugLogger.performSystemCheck) {
+                console.log('🔍 Starting enhanced debug log export...');
+                const systemCheck = await window.debugLogger.performSystemCheck();
+                
+                // Create a comprehensive debug report
+                const debugReport = {
+                    timestamp: new Date().toISOString(),
+                    systemCheck: systemCheck,
+                    gameState: {
+                        stepCount: this.stepCount,
+                        health: this.health,
+                        sanity: this.sanity,
+                        playerName: this.playerName
+                    },
+                    debugLogs: window.debugLogger.getLogs(),
+                    localStorage: this.getLocalStorageData(),
+                    sessionStorage: this.getSessionStorageData()
+                };
+                
+                // Export as JSON file
+                const blob = new Blob([JSON.stringify(debugReport, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `eldritch-debug-report-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('Enhanced debug report exported!', 'success');
+            } else {
+                // Fallback to simple export
+                this.exportSimpleLogs();
+            }
+        } catch (error) {
+            console.error('Error exporting debug logs:', error);
+            this.showNotification('Error exporting logs', 'error');
+        }
+    }
+    
+    /**
+     * Fallback simple export
+     */
+    exportSimpleLogs() {
         const logs = {
             timestamp: new Date().toISOString(),
             stepCount: this.stepCount,
@@ -785,6 +830,42 @@ class HeaderIntegration {
         URL.revokeObjectURL(url);
         
         this.showNotification('Debug logs exported!', 'success');
+    }
+    
+    /**
+     * Get localStorage data for debugging
+     */
+    getLocalStorageData() {
+        const data = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key) {
+                try {
+                    data[key] = JSON.parse(localStorage.getItem(key));
+                } catch {
+                    data[key] = localStorage.getItem(key);
+                }
+            }
+        }
+        return data;
+    }
+    
+    /**
+     * Get sessionStorage data for debugging
+     */
+    getSessionStorageData() {
+        const data = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key) {
+                try {
+                    data[key] = JSON.parse(sessionStorage.getItem(key));
+                } catch {
+                    data[key] = sessionStorage.getItem(key);
+                }
+            }
+        }
+        return data;
     }
     
     /**

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Infinite's signature gradient - cosmic infinity -->
+    <linearGradient id="infiniteGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#ec4899;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Infinity symbol gradient -->
+    <linearGradient id="infinityGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Cosmic vortex effect -->
+    <radialGradient id="cosmicVortex" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="30%" style="stop-color:#8b5cf6;stop-opacity:0.6" />
+      <stop offset="70%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#1e1b4b;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Energy pulse filter -->
+    <filter id="energyPulse" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Infinite loop animation -->
+    <animateTransform id="infiniteRotate" attributeName="transform" type="rotate" values="0 200 100;360 200 100" dur="8s" repeatCount="indefinite"/>
+    <animate id="infinitePulse" attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+  </defs>
+  
+  <!-- Background cosmic vortex -->
+  <circle cx="200" cy="100" r="160" fill="url(#cosmicVortex)" opacity="0.4">
+    <animate attributeName="r" values="140;180;140" dur="5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Main infinity symbol -->
+  <g transform="translate(200, 100)" filter="url(#energyPulse)">
+    <!-- Infinity symbol path -->
+    <path d="M -60 0 C -60 -30, -30 -50, 0 -50 C 30 -50, 60 -30, 60 0 C 60 30, 30 50, 0 50 C -30 50, -60 30, -60 0 Z M 0 -50 C 0 -30, 0 -10, 0 10 C 0 30, 0 50, 0 50" 
+          fill="none" 
+          stroke="url(#infinityGradient)" 
+          stroke-width="8"
+          stroke-linecap="round"
+          opacity="0.9">
+      <animate attributeName="stroke-dasharray" values="0,400;200,200;400,0" dur="3s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Inner infinity loop -->
+    <path d="M -40 0 C -40 -20, -20 -30, 0 -30 C 20 -30, 40 -20, 40 0 C 40 20, 20 30, 0 30 C -20 30, -40 20, -40 0 Z" 
+          fill="none" 
+          stroke="#ffffff" 
+          stroke-width="3"
+          opacity="0.6">
+      <animateTransform attributeName="transform" type="rotate" values="0;360" dur="6s" repeatCount="indefinite"/>
+    </path>
+    
+    <!-- Central cosmic core -->
+    <circle cx="0" cy="0" r="12" fill="url(#infiniteGradient)" opacity="0.8">
+      <animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Orbiting energy particles -->
+    <g opacity="0.7">
+      <circle cx="50" cy="0" r="3" fill="#3b82f6">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="-50" cy="0" r="3" fill="#ec4899">
+        <animateTransform attributeName="transform" type="rotate" values="360;0" dur="4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="0" cy="40" r="2" fill="#f59e0b">
+        <animateTransform attributeName="transform" type="rotate" values="0;360" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="0" cy="-40" r="2" fill="#8b5cf6">
+        <animateTransform attributeName="transform" type="rotate" values="360;0" dur="3s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+  </g>
+  
+  <!-- Floating cosmic energy orbs -->
+  <g opacity="0.5">
+    <circle cx="80" cy="40" r="4" fill="#3b82f6">
+      <animate attributeName="cy" values="40;30;40" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="60" r="3" fill="#ec4899">
+      <animate attributeName="cy" values="60;50;60" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.7;0.2" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="140" r="2" fill="#f59e0b">
+      <animate attributeName="cy" values="140;130;140" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="300" cy="160" r="3.5" fill="#8b5cf6">
+      <animate attributeName="cy" values="160;150;160" dur="3.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Infinite's title text -->
+  <text x="200" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#ffffff" opacity="0.8">
+    The Boundless Cosmic Explorer
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.5s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Cosmic energy rings -->
+  <g opacity="0.3">
+    <circle cx="200" cy="100" r="100" fill="none" stroke="url(#infiniteGradient)" stroke-width="2">
+      <animate attributeName="r" values="80;120;80" dur="6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="100" r="60" fill="none" stroke="url(#infiniteGradient)" stroke-width="1">
+      <animate attributeName="r" values="40;80;40" dur="4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="4s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Spiral energy trails -->
+  <g opacity="0.4">
+    <path d="M 200 100 L 220 80 L 240 100 L 220 120 Z" fill="none" stroke="#8b5cf6" stroke-width="1">
+      <animateTransform attributeName="transform" type="rotate" values="0 200 100;360 200 100" dur="10s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 200 100 L 180 80 L 160 100 L 180 120 Z" fill="none" stroke="#ec4899" stroke-width="1">
+      <animateTransform attributeName="transform" type="rotate" values="360 200 100;0 200 100" dur="10s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

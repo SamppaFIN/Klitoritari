@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="200" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Monster gradient - hostile energy -->
+    <linearGradient id="monsterGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B0000;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#DC143C;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF4500;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#B22222;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2F4F4F;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Hostile energy gradient -->
+    <radialGradient id="hostileEnergy" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:0.8" />
+      <stop offset="30%" style="stop-color:#8B0000;stop-opacity:0.6" />
+      <stop offset="70%" style="stop-color:#2F4F4F;stop-opacity:0.4" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:0.2" />
+    </radialGradient>
+    
+    <!-- Combat energy gradient -->
+    <linearGradient id="combatEnergy" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:0.9" />
+      <stop offset="50%" style="stop-color:#8B0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF4500;stop-opacity:0.9" />
+    </linearGradient>
+    
+    <!-- Monster filter for aggressive effects -->
+    <filter id="monsterFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Monster animations -->
+    <animate id="monsterPulse" attributeName="opacity" values="0.7;1;0.7" dur="1.5s" repeatCount="indefinite"/>
+    <animate id="monsterShake" attributeName="transform" values="translateX(0px);translateX(3px);translateX(-3px);translateX(0px)" dur="0.8s" repeatCount="indefinite"/>
+  </defs>
+  
+  <!-- Background hostile energy field -->
+  <circle cx="200" cy="100" r="160" fill="url(#hostileEnergy)" opacity="0.5">
+    <animate attributeName="r" values="140;180;140" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Monster main form -->
+  <g transform="translate(200, 100)" filter="url(#monsterFilter)">
+    <!-- Main body - aggressive beast shape -->
+    <ellipse cx="0" cy="0" rx="30" ry="45" fill="url(#monsterGradient)" opacity="0.9">
+      <animateTransform attributeName="transform" type="scale" values="1;1.08;1" dur="2s" repeatCount="indefinite"/>
+    </ellipse>
+    
+    <!-- Monster head -->
+    <ellipse cx="0" cy="-25" rx="20" ry="15" fill="url(#monsterGradient)" opacity="0.8">
+      <animate attributeName="ry" values="12;18;12" dur="1.8s" repeatCount="indefinite"/>
+    </ellipse>
+    
+    <!-- Aggressive eyes -->
+    <g opacity="0.9">
+      <ellipse cx="-8" cy="-30" rx="4" ry="6" fill="#FF0000">
+        <animate attributeName="ry" values="4;8;4" dur="1.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.2s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="8" cy="-30" rx="4" ry="6" fill="#FF0000">
+        <animate attributeName="ry" values="4;8;4" dur="1.3s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.3s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- Eye pupils -->
+      <circle cx="-8" cy="-30" r="2" fill="#000000">
+        <animate attributeName="r" values="1;3;1" dur="1s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="8" cy="-30" r="2" fill="#000000">
+        <animate attributeName="r" values="1;3;1" dur="1.1s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    
+    <!-- Fangs/teeth -->
+    <g opacity="0.8">
+      <polygon points="-5,-20 -3,-15 -7,-15" fill="#FFFFFF">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="5,-20 7,-15 3,-15" fill="#FFFFFF">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="-2,-18 -1,-13 -3,-13" fill="#FFFFFF">
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.6s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="2,-18 3,-13 1,-13" fill="#FFFFFF">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1.7s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    
+    <!-- Claws/arms -->
+    <g opacity="0.7">
+      <ellipse cx="-25" cy="-10" rx="8" ry="15" fill="url(#monsterGradient)">
+        <animate attributeName="ry" values="12;18;12" dur="1.8s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="25" cy="-10" rx="8" ry="15" fill="url(#monsterGradient)">
+        <animate attributeName="ry" values="12;18;12" dur="1.9s" repeatCount="indefinite"/>
+      </ellipse>
+      <!-- Claw tips -->
+      <polygon points="-30,-15 -25,-10 -30,-5" fill="#2F4F4F">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1.3s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="30,-15 25,-10 30,-5" fill="#2F4F4F">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    
+    <!-- Hostile energy aura -->
+    <g opacity="0.6">
+      <circle cx="0" cy="0" r="40" fill="none" stroke="url(#combatEnergy)" stroke-width="3">
+        <animate attributeName="r" values="35;45;35" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="0" cy="0" r="25" fill="none" stroke="url(#hostileEnergy)" stroke-width="2">
+        <animate attributeName="r" values="20;30;20" dur="1.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.5s" repeatCount="indefinite"/>
+      </circle>
+    </g>
+    
+    <!-- Aggressive spikes -->
+    <g opacity="0.8">
+      <polygon points="0,-50 5,-45 0,-40" fill="url(#combatEnergy)">
+        <animate attributeName="opacity" values="0.6;1;0.6" dur="1s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="-15,-40 -10,-35 -15,-30" fill="url(#combatEnergy)">
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.1s" repeatCount="indefinite"/>
+      </polygon>
+      <polygon points="15,-40 10,-35 15,-30" fill="url(#combatEnergy)">
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.2s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+  </g>
+  
+  <!-- Floating hostile particles -->
+  <g opacity="0.6">
+    <circle cx="60" cy="40" r="3" fill="url(#hostileEnergy)">
+      <animate attributeName="cy" values="40;30;40" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="340" cy="60" r="2.5" fill="url(#combatEnergy)">
+      <animate attributeName="cy" values="60;50;60" dur="2.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="80" cy="140" r="3.5" fill="url(#monsterGradient)">
+      <animate attributeName="cy" values="140;130;140" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="320" cy="160" r="2" fill="url(#hostileEnergy)">
+      <animate attributeName="cy" values="160;150;160" dur="2.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2.8s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Monster title text -->
+  <text x="200" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#8B0000" opacity="0.8">
+    👹 Hostile Monster Encounter
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="1.5s" repeatCount="indefinite"/>
+  </text>
+  
+  <!-- Combat energy waves -->
+  <g opacity="0.4">
+    <circle cx="200" cy="100" r="100" fill="none" stroke="url(#combatEnergy)" stroke-width="2">
+      <animate attributeName="r" values="80;120;80" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="100" r="60" fill="none" stroke="url(#hostileEnergy)" stroke-width="1">
+      <animate attributeName="r" values="40;80;40" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Aggressive energy spikes -->
+  <g opacity="0.5">
+    <path d="M 200 20 L 205 10 L 210 20" fill="url(#combatEnergy)">
+      <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 200 180 L 195 190 L 190 180" fill="url(#combatEnergy)">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.1s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 20 100 L 10 95 L 20 90" fill="url(#hostileEnergy)">
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 380 100 L 390 105 L 380 110" fill="url(#hostileEnergy)">
+      <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.3s" repeatCount="indefinite"/>
+    </path>
+  </g>
+  
+  <!-- Combat warning symbols -->
+  <g opacity="0.6">
+    <polygon points="50,30 60,20 70,30 60,40" fill="url(#combatEnergy)">
+      <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.5s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="350,50 360,40 370,50 360,60" fill="url(#hostileEnergy)">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="80,150 90,140 100,150 90,160" fill="url(#monsterGradient)">
+      <animate attributeName="opacity" values="0.2;0.8;0.2" dur="1.7s" repeatCount="indefinite"/>
+    </polygon>
+    <polygon points="320,170 330,160 340,170 330,180" fill="url(#combatEnergy)">
+      <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.8s" repeatCount="indefinite"/>
+    </polygon>
+  </g>
+</svg>

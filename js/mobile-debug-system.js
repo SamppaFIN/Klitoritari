@@ -96,6 +96,13 @@ class MobileDebugSystem {
             this.startAutoRefresh();
         }
         
+        // Show debug panel by default and start refreshing
+        if (this.debugPanel) {
+            this.debugPanel.style.display = 'block';
+            this.isDebugMode = true;
+            this.refreshDebugData();
+        }
+        
         this.isInitialized = true;
         console.log('🔧 Mobile debug system initialization complete');
     }
@@ -159,6 +166,9 @@ class MobileDebugSystem {
         
         // Create debug content
         this.createDebugContent();
+        
+        // Add export logs button
+        this.addExportButton();
         
         // Add to document
         document.body.appendChild(this.debugPanel);
@@ -395,6 +405,121 @@ class MobileDebugSystem {
     }
     
     /**
+     * Add export logs button to debug panel
+     * @status [IN_DEVELOPMENT] - Export button addition
+     * @feature #feature-mobile-debug-system
+     * @last_tested 2025-01-28
+     */
+    addExportButton() {
+        const exportButton = document.createElement('button');
+        exportButton.id = 'mobile-debug-export';
+        exportButton.innerHTML = '📤 Send Logs';
+        exportButton.style.cssText = `
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        `;
+        
+        exportButton.addEventListener('click', () => {
+            this.exportDebugLogs();
+        });
+        
+        this.debugPanel.appendChild(exportButton);
+        console.log('🔧 Export button added to mobile debug panel');
+    }
+    
+    /**
+     * Export debug logs
+     * @status [IN_DEVELOPMENT] - Debug log export
+     * @feature #feature-mobile-debug-system
+     * @last_tested 2025-01-28
+     */
+    exportDebugLogs() {
+        try {
+            // Use the enhanced debug logger's system check
+            if (window.debugLogger && window.debugLogger.performSystemCheck) {
+                console.log('🔧 Starting mobile debug log export...');
+                window.debugLogger.performSystemCheck().then(() => {
+                    this.showNotification('Debug logs exported successfully!', 'success');
+                });
+            } else {
+                // Fallback to simple export
+                this.exportSimpleLogs();
+            }
+        } catch (error) {
+            console.error('Error exporting debug logs:', error);
+            this.showNotification('Error exporting logs', 'error');
+        }
+    }
+    
+    /**
+     * Fallback simple export
+     * @status [IN_DEVELOPMENT] - Simple export fallback
+     * @feature #feature-mobile-debug-system
+     * @last_tested 2025-01-28
+     */
+    exportSimpleLogs() {
+        const debugData = {
+            timestamp: new Date().toISOString(),
+            mobileDebug: this.metrics,
+            userAgent: navigator.userAgent,
+            screenResolution: `${screen.width}x${screen.height}`,
+            viewportSize: `${window.innerWidth}x${window.innerHeight}`
+        };
+        
+        const blob = new Blob([JSON.stringify(debugData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mobile-debug-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.showNotification('Mobile debug data exported!', 'success');
+    }
+    
+    /**
+     * Show notification
+     * @status [IN_DEVELOPMENT] - Notification display
+     * @feature #feature-mobile-debug-system
+     * @last_tested 2025-01-28
+     */
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#2196F3'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 10002;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
+
+    /**
      * Create debug toggle button
      * @status [IN_DEVELOPMENT] - Debug toggle creation
      * @feature #feature-mobile-debug-system
@@ -506,7 +631,16 @@ class MobileDebugSystem {
                 this.performanceMonitor.fpsHistory.shift();
             }
             
-            this.metrics.performance.fps = Math.round(fps);
+            // Calculate average FPS from history
+            if (this.performanceMonitor.fpsHistory.length > 0) {
+                const avgFps = this.performanceMonitor.fpsHistory.reduce((a, b) => a + b, 0) / this.performanceMonitor.fpsHistory.length;
+                this.metrics.performance.fps = Math.round(avgFps);
+            } else {
+                this.metrics.performance.fps = Math.round(fps);
+            }
+        } else {
+            // Initialize with a reasonable default
+            this.metrics.performance.fps = 60;
         }
         this.performanceMonitor.lastFrameTime = now;
         
@@ -860,7 +994,8 @@ class MobileDebugSystem {
      */
     startAutoRefresh() {
         setInterval(() => {
-            if (this.isDebugMode) {
+            // Always refresh if debug panel exists and is visible
+            if (this.debugPanel && this.debugPanel.style.display !== 'none') {
                 this.refreshDebugData();
             }
         }, this.debugSettings.refreshInterval);
