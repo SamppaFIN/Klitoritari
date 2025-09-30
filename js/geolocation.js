@@ -28,6 +28,7 @@ class GeolocationManager {
         this.targetQuestLocation = null;
         this.locationUpdatesPaused = false;
         this.isFirstLocation = true; // Track first successful location
+        this.shownLowAccuracyNotice = false;
     }
 
     init() {
@@ -515,47 +516,44 @@ class GeolocationManager {
 
     updateAccuracyDisplay() {
         const accuracyDisplay = document.getElementById('accuracy-display-header');
-        const locateStatus = document.getElementById('locate-status');
-        
         if (!this.currentPosition) {
             if (accuracyDisplay) accuracyDisplay.textContent = 'Accuracy: --';
-            if (locateStatus) {
-                locateStatus.textContent = 'GPS Ready';
-                locateStatus.className = 'btn-status disconnected';
-            }
             return;
         }
-
         const accuracy = this.currentPosition.accuracy;
         let displayText = 'Accuracy: --';
-        let statusText = 'GPS Ready';
-        let statusClass = 'btn-status disconnected';
-
-        if (accuracy !== null) {
+        if (accuracy === null || accuracy === undefined) {
+            displayText = 'Accuracy: unknown';
+        } else {
             if (accuracy <= 10) {
                 displayText = `Accuracy: ${Math.round(accuracy)}m`;
-                statusText = '<10m';
-                statusClass = 'btn-status green';
             } else if (accuracy <= 1100) {
                 displayText = `Accuracy: ${Math.round(accuracy)}m`;
-                statusText = '<1100m';
-                statusClass = 'btn-status yellow';
             } else {
                 displayText = `Accuracy: ${Math.round(accuracy)}m`;
-                statusText = 'Poor';
-                statusClass = 'btn-status red';
             }
+            // Low-accuracy banner
+            try {
+                if (accuracy > this.accuracyThreshold) {
+                    if (!this.shownLowAccuracyNotice && window.notificationCenter) {
+                        window.notificationCenter.showBanner('Location accuracy low — using current best fix', 'warning');
+                        this.shownLowAccuracyNotice = true;
+                    }
+                } else {
+                    // Reset so we can notify again later if accuracy degrades
+                    this.shownLowAccuracyNotice = false;
+                }
+            } catch (_) {}
         }
-
         if (accuracyDisplay) {
             accuracyDisplay.textContent = displayText;
+            // Color hint
+            if (accuracy !== null && accuracy !== undefined) {
+                const good = accuracy <= this.accuracyThreshold;
+                accuracyDisplay.style.color = good ? '#10b981' : '#f59e0b';
+            }
         }
-        
-        if (locateStatus) {
-            locateStatus.textContent = statusText;
-            locateStatus.className = statusClass;
-        }
-
+        // Emit accuracy change event
         if (this.onAccuracyChange) {
             this.onAccuracyChange(accuracy);
         }

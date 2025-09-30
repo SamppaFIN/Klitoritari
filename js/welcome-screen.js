@@ -317,18 +317,28 @@ class WelcomeScreen {
             
             // Check if player has an active player ID
             const hasActivePlayerId = window.websocketClient && window.websocketClient.hasActivePlayerId();
+            // Check for a stored profile object
+            let hasProfile = false;
+            try {
+                const profRaw = localStorage.getItem('eldritch_profile');
+                if (profRaw) {
+                    const prof = JSON.parse(profRaw);
+                    hasProfile = !!(prof && (prof.name || prof.id));
+                }
+            } catch (_) {}
             
             console.log('🌟 Continue Adventure button check:', {
                 websocketClient: !!window.websocketClient,
                 hasActivePlayerId: hasActivePlayerId,
+                hasProfile: hasProfile,
                 playerId: localStorage.getItem('playerId'),
                 eldritch_player_id: localStorage.getItem('eldritch_player_id')
             });
             
-            if (!hasActivePlayerId) {
+            if (!hasActivePlayerId || !hasProfile) {
                 // Disable continue adventure button if no player ID exists
                 btn.disabled = true;
-                btn.textContent = 'No Adventure to Continue';
+                btn.textContent = 'Start New Adventure';
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
                 console.log('🌟 Continue Adventure button disabled - no active player ID');
@@ -342,9 +352,9 @@ class WelcomeScreen {
             
             let name = 'Wanderer';
             try {
-                const raw = localStorage.getItem((window.sessionPersistence?.key && window.sessionPersistence.key('profile')) || '');
-                if (raw) {
-                    const prof = JSON.parse(raw);
+                const profRaw = localStorage.getItem('eldritch_profile');
+                if (profRaw) {
+                    const prof = JSON.parse(profRaw);
                     if (prof?.name) name = prof.name;
                 }
             } catch (_) {}
