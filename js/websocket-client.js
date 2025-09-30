@@ -366,8 +366,9 @@ class WebSocketClient {
                 investigation: null,
                 lastSeen: Date.now()
             });
+            try { if (window.notificationCenter) window.notificationCenter.notifyPlayerJoined(payload.name); } catch (_) {}
             
-            console.log(`ðŸ‘¤ Player joined: ${payload.name || payload.playerId}`);
+            console.log(`👤 Player joined: ${payload.name || payload.playerId}`);
 
             // UI/list rendering handled by MultiplayerManager; do not mutate DOM here
         }
@@ -529,6 +530,7 @@ class WebSocketClient {
             if (payload.baseMarker && payload.position) {
                 console.log('🏗️ Creating other player base marker...');
                 this.createOtherPlayerBaseMarker(payload.baseMarker, payload.position, payload.playerId);
+                try { if (window.notificationCenter) window.notificationCenter.notifyPlayerBaseCreated(payload.playerName || payload.playerId); } catch (_) {}
             } else {
                 console.warn('⚠️ Other player base establishment payload missing data');
                 console.warn('⚠️ Payload structure:', JSON.stringify(payload, null, 2));

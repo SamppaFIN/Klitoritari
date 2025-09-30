@@ -33,7 +33,8 @@ class SacredSettings {
                 shareAnalytics: 'basic', // 'off', 'basic', 'advanced'
                 shareMood: false,
                 shareAura: true,
-                chatAutoOpen: true
+                chatAutoOpen: true,
+                notifyPlayerEvents: true
             },
             accessibility: {
                 reducedMotion: false,
@@ -57,6 +58,9 @@ class SacredSettings {
                 markerLimit: 500,
                 autoQuality: true,
                 batterySaver: false
+            },
+            notifications: {
+                notifyPlayerEvents: true
             }
         };
         
@@ -314,6 +318,21 @@ class SacredSettings {
                         </div>
                     </div>
                 </div>
+                
+                <!-- Notification Settings -->
+                <div class="settings-section">
+                    <h3 style="margin: 0 0 15px 0; color: #d1d5db; font-size: 18px;">
+                        🔔 Notifications
+                    </h3>
+                    <div style="display: grid; gap: 12px;">
+                        <div class="setting-item">
+                            <label style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>Player Event Alerts (join/base)</span>
+                                <input type="checkbox" id="notify-player-events" style="transform: scale(1.2);">
+                            </label>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: center;">
@@ -445,6 +464,7 @@ class SacredSettings {
         const shareBases = document.getElementById('share-bases');
         const analyticsLevel = document.getElementById('analytics-level');
         const chatAutoOpen = document.getElementById('chat-auto-open');
+        const notifyPlayerEvents = document.getElementById('notify-player-events');
         
         if (shareLocation) {
             shareLocation.addEventListener('change', (e) => {
@@ -473,6 +493,12 @@ class SacredSettings {
         if (chatAutoOpen) {
             chatAutoOpen.addEventListener('change', (e) => {
                 this.updateSetting('privacy', 'chatAutoOpen', e.target.checked);
+            });
+        }
+        
+        if (notifyPlayerEvents) {
+            notifyPlayerEvents.addEventListener('change', (e) => {
+                this.updateSetting('privacy', 'notifyPlayerEvents', e.target.checked);
             });
         }
         
@@ -555,6 +581,9 @@ class SacredSettings {
         
         // Apply cosmic settings
         this.applyCosmicSettings();
+
+        // Apply notification settings
+        this.applyNotificationSettings();
         
         // Update UI
         this.updateSettingsUI();
@@ -583,7 +612,7 @@ class SacredSettings {
     }
     
     applyPrivacySettings() {
-        const { shareLocation, shareSteps, shareBases, shareAnalytics, chatAutoOpen } = this.settings.privacy;
+        const { shareLocation, shareSteps, shareBases, shareAnalytics, chatAutoOpen, notifyPlayerEvents } = this.settings.privacy;
         
         // Apply privacy settings to systems
         if (window.stepCurrencySystem) {
@@ -602,6 +631,10 @@ class SacredSettings {
         
         if (window.playerChatSystem) {
             window.playerChatSystem.enabled = this.settings.privacy.chatAutoOpen;
+        }
+
+        if (window.notificationCenter) {
+            window.notificationCenter.playerEventsEnabled = this.settings.privacy.notifyPlayerEvents;
         }
     }
     
@@ -639,6 +672,13 @@ class SacredSettings {
         document.body.setAttribute('data-cosmic-weather', cosmicWeather);
         document.body.setAttribute('data-aether-lens', aetherLens);
     }
+
+    applyNotificationSettings() {
+        const { notifyPlayerEvents } = this.settings.notifications;
+        if (window.playerEventSystem) {
+            window.playerEventSystem.enabled = notifyPlayerEvents;
+        }
+    }
     
     updateSettingsUI() {
         // Update immersion settings
@@ -658,12 +698,14 @@ class SacredSettings {
         const shareBases = document.getElementById('share-bases');
         const analyticsLevel = document.getElementById('analytics-level');
         const chatAutoOpen = document.getElementById('chat-auto-open');
+        const notifyPlayerEvents = document.getElementById('notify-player-events');
         
         if (shareLocation) shareLocation.checked = this.settings.privacy.shareLocation;
         if (shareSteps) shareSteps.checked = this.settings.privacy.shareSteps;
         if (shareBases) shareBases.checked = this.settings.privacy.shareBases;
         if (analyticsLevel) analyticsLevel.value = this.settings.privacy.shareAnalytics;
         if (chatAutoOpen) chatAutoOpen.checked = this.settings.privacy.chatAutoOpen;
+        if (notifyPlayerEvents) notifyPlayerEvents.checked = this.settings.privacy.notifyPlayerEvents;
         
         // Update accessibility settings
         const reducedMotion = document.getElementById('reduced-motion');
@@ -684,6 +726,10 @@ class SacredSettings {
         if (lunarCalendar) lunarCalendar.checked = this.settings.cosmic.lunarCalendar;
         if (cosmicWeather) cosmicWeather.checked = this.settings.cosmic.cosmicWeather;
         if (aetherLens) aetherLens.value = this.settings.cosmic.aetherLens;
+
+        // Update notification settings
+        const notifyPlayerEvents = document.getElementById('notify-player-events');
+        if (notifyPlayerEvents) notifyPlayerEvents.checked = this.settings.privacy.notifyPlayerEvents;
     }
     
     toggleSettingsPanel() {
