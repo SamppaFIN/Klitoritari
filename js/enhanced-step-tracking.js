@@ -30,11 +30,12 @@ class EnhancedStepTracking {
         
         // Current active method
         this.activeMethod = null;
+        // Prefer GPS distance by default, then fallbacks
         this.methodPriority = [
+            this.trackingMethods.GPS_DISTANCE,
             this.trackingMethods.PEDOMETER,
             this.trackingMethods.GOOGLE_FIT,
             this.trackingMethods.GYROSCOPE,
-            this.trackingMethods.GPS_DISTANCE,
             this.trackingMethods.FALLBACK
         ];
         
