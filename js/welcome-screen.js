@@ -1138,8 +1138,31 @@ class WelcomeScreen {
             // Clear any existing player base so fresh start has no base
             try {
                 localStorage.removeItem('eldritch-player-base');
+                localStorage.removeItem('playerBase');
+                localStorage.removeItem('base_bases');
             } catch (e) {
                 console.warn('Failed to clear player base storage:', e);
+            }
+
+            // Clear any in-memory base system state and markers
+            try {
+                if (typeof window.clearAllBaseData === 'function') {
+                    window.clearAllBaseData();
+                }
+                if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.base) {
+                    const baseSystem = window.eldritchApp.systems.base;
+                    if (baseSystem.playerBase) {
+                        // Use API to delete without notifications
+                        baseSystem.playerBase = null;
+                        baseSystem.updateBaseUI && baseSystem.updateBaseUI();
+                    }
+                }
+                if (window.mapEngine && typeof window.mapEngine.updateBaseMarker === 'function') {
+                    // Remove any lingering base marker by updating with null
+                    try { window.mapEngine.updateBaseMarker(null); } catch (_) {}
+                }
+            } catch (e) {
+                console.warn('Failed to clear in-memory base state:', e);
             }
 
             // Reset step currency system
