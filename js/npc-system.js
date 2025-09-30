@@ -1134,9 +1134,46 @@ class NPCSystem {
             this.chatModal.remove();
         }
     }
+
+    // Quick helper: spawn Aurora near player and start chat
+    startAuroraEncounterNearPlayer(offsetMeters = 10) {
+        try {
+            if (!window.eldritchApp || !window.eldritchApp.systems || !window.eldritchApp.systems.geolocation) {
+                console.warn('🧑‍🚀 No geolocation available for Aurora encounter');
+                return false;
+            }
+            const playerPos = window.eldritchApp.systems.geolocation.getCurrentPosition();
+            if (!playerPos) {
+                console.warn('🧑‍🚀 Player position not available');
+                return false;
+            }
+            // small offset north-east ~offsetMeters
+            const latOffset = (offsetMeters / 111320); // meters per degree lat
+            const lngOffset = (offsetMeters / (40075000 * Math.cos(playerPos.lat * Math.PI/180) / 360));
+            const aurora = this.createAuroraNPC({
+                lat: playerPos.lat + latOffset,
+                lng: playerPos.lng + lngOffset
+            });
+            if (aurora) {
+                this.startChat(aurora.id);
+                return true;
+            }
+        } catch (e) {
+            console.error('Failed to start Aurora encounter near player:', e);
+        }
+        return false;
+    }
 }
 
-// Make NPC system globally available
-window.NPCSystem = NPCSystem;
+// Expose global shortcut for testing
+if (typeof window !== 'undefined') {
+    window.encounterAurora = () => {
+        if (!window.npcSystem) {
+            console.warn('NPC system not ready');
+            return false;
+        }
+        return window.npcSystem.startAuroraEncounterNearPlayer(10);
+    };
+}
 
 
