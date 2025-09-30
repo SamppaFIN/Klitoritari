@@ -504,17 +504,35 @@ class WebSocketClient {
         console.log('🏗️ Payload details:', {
             hasBaseMarker: !!payload.baseMarker,
             hasPosition: !!payload.position,
+            hasPlayerId: !!payload.playerId,
             position: payload.position,
-            baseMarker: payload.baseMarker
+            baseMarker: payload.baseMarker,
+            playerId: payload.playerId
         });
         
-        // Create base marker on client side using MapObjectManager
-        if (payload.baseMarker && payload.position) {
-            console.log('🏗️ Creating base marker from server response...');
-            this.createBaseMarkerFromServer(payload.baseMarker, payload.position);
+        // Check if this is our own base or another player's base
+        const isOwnBase = !payload.playerId || payload.playerId === this.playerId;
+        
+        if (isOwnBase) {
+            console.log('🏗️ This is our own base establishment confirmation');
+            // Handle own base establishment (existing logic)
+            if (payload.baseMarker && payload.position) {
+                console.log('🏗️ Creating base marker from server response...');
+                this.createBaseMarkerFromServer(payload.baseMarker, payload.position);
+            } else {
+                console.warn('⚠️ Base establishment payload missing baseMarker or position data');
+                console.warn('⚠️ Payload structure:', JSON.stringify(payload, null, 2));
+            }
         } else {
-            console.warn('⚠️ Base establishment payload missing baseMarker or position data');
-            console.warn('⚠️ Payload structure:', JSON.stringify(payload, null, 2));
+            console.log('🏗️ Another player created a base - showing on our map');
+            // Handle other player's base establishment
+            if (payload.baseMarker && payload.position) {
+                console.log('🏗️ Creating other player base marker...');
+                this.createOtherPlayerBaseMarker(payload.baseMarker, payload.position, payload.playerId);
+            } else {
+                console.warn('⚠️ Other player base establishment payload missing data');
+                console.warn('⚠️ Payload structure:', JSON.stringify(payload, null, 2));
+            }
         }
     }
     
@@ -579,6 +597,121 @@ class WebSocketClient {
         } catch (error) {
             console.error('❌ Failed to restore base marker from server:', error);
         }
+    }
+    
+    /**
+     * Create other player's base marker from server broadcast
+     * @param {Object} baseMarker - Base marker data from server
+     * @param {Object} position - Position data
+     * @param {String} playerId - Player ID who created the base
+     */
+    createOtherPlayerBaseMarker(baseMarker, position, playerId) {
+        console.log('🏗️ Creating other player base marker:', { baseMarker, position, playerId });
+        
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('⚠️ MapLayer not available for other player base marker');
+            return;
+        }
+        
+        try {
+            // Create a different visual style for other players' bases
+            const otherPlayerBaseIcon = L.divIcon({
+                className: 'other-player-base-marker',
+                html: `
+                    <div style="
+                        width: 25px; 
+                        height: 25px; 
+                        background: #10b981; 
+                        border: 2px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 14px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+                        animation: pulse 2s infinite;
+                    ">${baseMarker.data?.symbol || '🏗️'}</div>
+                `,
+                iconSize: [25, 25],
+                iconAnchor: [12, 12]
+            });
+
+            const marker = L.marker([position.lat, position.lng], { 
+                icon: otherPlayerBaseIcon,
+                zIndexOffset: 500 // Lower z-index than own base
+            }).addTo(window.mapLayer.map);
+
+            // Add popup for other player's base
+            const name = baseMarker.data?.name || 'Other Player Base';
+            const symbol = baseMarker.data?.symbol || '🏗️';
+            
+            marker.bindPopup(`
+                <b>Other Player's Base</b><br>
+                <small>${symbol} ${name}</small><br>
+                <small>Player: ${playerId}</small><br>
+                <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
+            `);
+
+            console.log('🏗️ Other player base marker created successfully');
+            
+            // Show notification about new base
+            this.showNewBaseNotification(playerId, position);
+            
+            return marker;
+        } catch (error) {
+            console.error('❌ Failed to create other player base marker:', error);
+        }
+    }
+    
+    /**
+     * Show notification when another player creates a base
+     * @param {String} playerId - Player ID who created the base
+     * @param {Object} position - Base position
+     */
+    showNewBaseNotification(playerId, position) {
+        console.log('🔔 Showing new base notification for player:', playerId);
+        
+        // Create a simple notification
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            max-width: 300px;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        notification.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 4px;">🏗️ New Base Created!</div>
+            <div style="font-size: 12px; opacity: 0.9;">
+                Another player has established a base nearby!<br>
+                <small>Location: ${position.lat.toFixed(4)}, ${position.lng.toFixed(4)}</small>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 5000);
     }
     
     /**
