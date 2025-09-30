@@ -11,6 +11,7 @@ class HeaderIntegration {
         this.health = 100;
         this.sanity = 100;
         this.playerName = 'Wanderer';
+        this.playerLevel = 1;
         
         console.log('🎮 Header Integration: Initializing...');
     }
@@ -22,10 +23,14 @@ class HeaderIntegration {
         }
         
         this.setupEventListeners();
+        this.hydrateFromStorageAndSystems();
+        this.ensureProfileBadges();
         this.updateStepCounter();
         this.updateHealthSanity();
         this.updatePlayerName();
+        this.updatePlayerLevel();
         this.setupDebugToggle();
+        this.startAutoSync();
         
         this.isInitialized = true;
         console.log('✅ Header Integration: Initialized successfully');
@@ -153,6 +158,22 @@ class HeaderIntegration {
         if (playerNameElement) {
             playerNameElement.textContent = this.playerName;
             playerNameElement.title = `Player: ${this.playerName}`;
+        }
+        // Legacy header name, if present
+        const legacyName = document.querySelector('.header-center #player-name');
+        if (legacyName) {
+            legacyName.textContent = this.playerName;
+        }
+    }
+
+    /**
+     * Update player level badge
+     */
+    updatePlayerLevel() {
+        const levelBadge = document.getElementById('player-level');
+        if (levelBadge) {
+            levelBadge.textContent = `Lv ${this.playerLevel}`;
+            levelBadge.title = `Level ${this.playerLevel}`;
         }
     }
     
@@ -524,6 +545,11 @@ class HeaderIntegration {
         this.playerName = name || 'Wanderer';
         this.updatePlayerName();
     }
+
+    setPlayerLevel(level) {
+        this.playerLevel = Math.max(1, Math.floor(level || 1));
+        this.updatePlayerLevel();
+    }
     
     // Get current values
     getStepCount() { return this.stepCount; }
@@ -759,6 +785,90 @@ class HeaderIntegration {
         if (stepDisplay) {
             stepDisplay.textContent = this.stepCount;
         }
+    }
+
+    /**
+     * Create small badges for level and total steps in header if missing
+     */
+    ensureProfileBadges() {
+        // #game-header area
+        const playerInfo = document.getElementById('player-info');
+        if (playerInfo && !document.getElementById('player-level')) {
+            const levelSpan = document.createElement('span');
+            levelSpan.id = 'player-level';
+            levelSpan.style.cssText = 'font-size:12px; background:#374151; color:#e5e7eb; padding:2px 6px; border-radius:6px;';
+            levelSpan.textContent = `Lv ${this.playerLevel}`;
+            playerInfo.appendChild(levelSpan);
+        }
+        // Steps badge near steps-section
+        const stepsSection = document.getElementById('steps-section');
+        if (stepsSection && !document.getElementById('player-steps-badge')) {
+            const stepsBadge = document.createElement('span');
+            stepsBadge.id = 'player-steps-badge';
+            stepsBadge.style.cssText = 'font-size:12px; color:#9ca3af; margin-left:6px;';
+            stepsBadge.textContent = `${this.stepCount} total`;
+            stepsSection.appendChild(stepsBadge);
+        }
+        // Legacy header already shows step-count-legacy-1
+    }
+
+    /**
+     * Load name/level/steps from systems and storage
+     */
+    hydrateFromStorageAndSystems() {
+        try {
+            // Name
+            const profRaw = localStorage.getItem('eldritch_profile');
+            if (profRaw) {
+                const prof = JSON.parse(profRaw);
+                if (prof?.name) this.playerName = prof.name;
+            } else {
+                const fallbackName = localStorage.getItem('eldritch_player_name');
+                if (fallbackName) this.playerName = fallbackName;
+            }
+        } catch (_) {}
+        // Level
+        try {
+            const level = window.encounterSystem?.playerStats?.level;
+            if (level) this.playerLevel = level;
+        } catch (_) {}
+        // Steps
+        try {
+            const steps = window.stepCurrencySystem?.totalSteps;
+            if (Number.isFinite(steps)) this.stepCount = steps;
+        } catch (_) {}
+    }
+
+    /**
+     * Periodically sync displayed values from systems
+     */
+    startAutoSync() {
+        if (this._syncTimer) return;
+        this._syncTimer = setInterval(() => {
+            // Steps
+            const steps = window.stepCurrencySystem?.totalSteps;
+            if (Number.isFinite(steps) && steps !== this.stepCount) {
+                this.setStepCount(steps);
+                const badge = document.getElementById('player-steps-badge');
+                if (badge) badge.textContent = `${this.stepCount} total`;
+            }
+            // Level
+            const lvl = window.encounterSystem?.playerStats?.level;
+            if (Number.isFinite(lvl) && lvl !== this.playerLevel) {
+                this.setPlayerLevel(lvl);
+            }
+            // Name (in case changed)
+            const name = (function() {
+                try {
+                    const pr = localStorage.getItem('eldritch_profile');
+                    if (pr) return (JSON.parse(pr)?.name);
+                    return localStorage.getItem('eldritch_player_name');
+                } catch(_) { return null; }
+            })();
+            if (name && name !== this.playerName) {
+                this.setPlayerName(name);
+            }
+        }, 1000);
     }
     
     /**

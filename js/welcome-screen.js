@@ -358,13 +358,19 @@ class WelcomeScreen {
                     if (prof?.name) name = prof.name;
                 }
             } catch (_) {}
+            // Level and steps for label context
+            let level = 1;
+            try { level = window.encounterSystem?.playerStats?.level || 1; } catch (_) {}
+            let steps = 0;
+            try { steps = window.stepCurrencySystem?.totalSteps || 0; } catch (_) {}
             // Load morals
             let morals = this.getMoralSummary();
             // Nickname
             let nick = '';
             try { nick = window.eldritchApp?.systems?.moralChoice?.getNickname?.() || ''; } catch (_) {}
             const nickText = nick ? `, ${nick}` : '';
-            btn.textContent = morals ? `Continue as ${name}${nickText} ${morals}` : `Continue as ${name}${nickText}`;
+            const meta = `Lv ${level} · ${steps} steps`;
+            btn.textContent = morals ? `Continue as ${name}${nickText} (${meta}) ${morals}` : `Continue as ${name}${nickText} (${meta})`;
         } catch (_) {}
     }
 
