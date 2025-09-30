@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-011
+  title: "R11 Implementation Plan \u2014 Movement-Driven Gameplay & Map Interaction"
+  owner: "\U0001F4BB Codex"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\R11-Implementation-Plan.md
+  tags:
+  - brdc
+  - implementation
+  - development
+  related: []
+  dependencies: []
+  consciousness_level: low
+  healing_impact: Brings consciousness-serving features to life
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # R11 Implementation Plan — Movement-Driven Gameplay & Map Interaction
 
 Date: 2025-09-22  

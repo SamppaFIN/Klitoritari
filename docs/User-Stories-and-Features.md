@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-700
+  title: Eldritch Sanctuary - User Stories & Features
+  owner: "\U0001F338 Aurora"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\User-Stories-and-Features.md
+  tags:
+  - brdc
+  - consciousness
+  - healing
+  related: []
+  dependencies: []
+  consciousness_level: high
+  healing_impact: Directly serves spatial wisdom and community healing
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Eldritch Sanctuary - User Stories & Features
 
 ## 🎮 **Game Vision**

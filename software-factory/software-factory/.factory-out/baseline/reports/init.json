@@ -1,0 +1,18 @@
+{
+  "phase": "init",
+  "timestamp": "2025-09-30T12:17:51Z",
+  "gaps": {
+    "tests": false,
+    "coverage": false,
+    "ci": false,
+    "docker": false,
+    "security": false,
+    "perf_budget": false,
+    "a11y": false,
+    "openrouter": false,
+    "db_rls": true
+  },
+  "created": [
+    "docs\\tickets\\AASF-BUG-database-rls-missing.md"
+  ]
+}

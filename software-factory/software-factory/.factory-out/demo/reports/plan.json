@@ -1,0 +1,19 @@
+{
+  "phase": "plan",
+  "timestamp": "2025-09-30T10:35:48Z",
+  "project": "demo",
+  "docs": "Codex/*.md docs/*.md",
+  "tickets": "docs/tickets",
+  "plan": [
+    {
+      "id": "plan-01",
+      "task": "scan codex/docs",
+      "status": "pending"
+    },
+    {
+      "id": "plan-02",
+      "task": "extract tickets",
+      "status": "pending"
+    }
+  ]
+}

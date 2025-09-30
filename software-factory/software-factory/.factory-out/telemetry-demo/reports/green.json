@@ -1,0 +1,8 @@
+{
+  "phase": "green",
+  "timestamp": "2025-09-30T14:16:16Z",
+  "files_modified": 13,
+  "guardrails": {
+    "diff_max_lines": 500
+  }
+}

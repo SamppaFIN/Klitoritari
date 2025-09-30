@@ -1,0 +1,17 @@
+{
+  "name": "autonomous-factory",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "factory:plan": "python scripts/factory.py plan",
+    "factory:red": "python scripts/factory.py red",
+    "factory:green": "python scripts/factory.py green",
+    "factory:verify": "python scripts/factory.py verify",
+    "factory:docs": "python scripts/factory.py docs",
+    "factory:build": "python scripts/factory.py build",
+    "dev:watch": "bash scripts/dev.sh --watch || powershell -ExecutionPolicy Bypass -File scripts/dev.ps1 -Watch",
+    "build": "bash build.sh || powershell -ExecutionPolicy Bypass -File build.ps1"
+  }
+}
+
+

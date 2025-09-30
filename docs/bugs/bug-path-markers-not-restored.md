@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-400
+  title: 'Bug Report: Path Markers Not Restored from Server Game State'
+  owner: "\U0001F4DA Lexicon"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\bugs\bug-path-markers-not-restored.md
+  tags:
+  - brdc
+  - documentation
+  - knowledge
+  related: []
+  dependencies: []
+  consciousness_level: medium
+  healing_impact: Preserves and shares wisdom for collective growth
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Bug Report: Path Markers Not Restored from Server Game State
 
 **Bug ID:** `bug-path-markers-not-restored`  

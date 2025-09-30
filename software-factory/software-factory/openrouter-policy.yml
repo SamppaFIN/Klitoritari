@@ -1,0 +1,17 @@
+policy_version: 1
+budgets:
+  max_cost_usd_per_day: 1.00
+  max_latency_ms_p95: 40000
+tiers:
+  - name: free_first
+    models: [openai/gpt-4o-mini, google/gemini-flash-1.5, anthropic/claude-3-haiku]
+    use_for: [plan, docs]
+    fallback: tier_medium
+  - name: tier_medium
+    models: [qwen/qwen-2.5-72b-instruct, mistralai/mixtral-8x7b-instruct]
+    use_for: [red, green]
+    fallback: tier_heavy
+  - name: tier_heavy
+    models: [anthropic/claude-3.5-sonnet, openai/gpt-4o, google/gemini-1.5-pro]
+    use_for: [security, performance]
+

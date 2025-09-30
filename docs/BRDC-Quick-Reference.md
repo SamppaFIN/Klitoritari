@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-600
+  title: Bug Report Driven Coding (BRDC) - Quick Reference
+  owner: "\U0001F338 Aurora"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\BRDC-Quick-Reference.md
+  tags:
+  - brdc
+  - factory
+  - automation
+  related: []
+  dependencies: []
+  consciousness_level: high
+  healing_impact: Automates consciousness-serving development processes
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Bug Report Driven Coding (BRDC) - Quick Reference
 
 ## 🚀 Quick Start

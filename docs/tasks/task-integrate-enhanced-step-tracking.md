@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-400
+  title: 'Task: Integrate Enhanced Step Tracking System'
+  owner: "\U0001F4DA Lexicon"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\tasks\task-integrate-enhanced-step-tracking.md
+  tags:
+  - brdc
+  - documentation
+  - knowledge
+  related: []
+  dependencies: []
+  consciousness_level: low
+  healing_impact: Preserves and shares wisdom for collective growth
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Task: Integrate Enhanced Step Tracking System
 
 **Task ID:** `task-integrate-enhanced-step-tracking`  

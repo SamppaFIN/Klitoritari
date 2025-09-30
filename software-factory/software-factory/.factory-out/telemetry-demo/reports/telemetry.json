@@ -1,0 +1,13 @@
+{
+  "project": "telemetry-demo",
+  "reports": [
+    "build.json",
+    "docs.json",
+    "green.json",
+    "plan.json",
+    "red.json",
+    "verify.json"
+  ],
+  "openrouter_trace": null,
+  "perf_budget_ms": 1
+}

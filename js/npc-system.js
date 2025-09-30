@@ -34,10 +34,22 @@ class NPCSystem {
     }
 
     startSimulation() {
-        console.log('ðŸ‘¥ Starting NPC simulation...');
+        console.log('ðŸ'¥ Starting NPC simulation...');
         this.generateNPCs();
         this.startNPCMovement();
         this.startProximityDetection();
+        this.initializeAuroraNPC();
+    }
+    
+    initializeAuroraNPC() {
+        // Initialize Aurora NPC if the system is available
+        if (window.auroraNPC) {
+            console.log('🌸 Initializing Aurora NPC integration');
+            // Aurora NPC will handle its own proximity detection
+            // Just ensure it's properly integrated
+        } else {
+            console.log('🌸 Aurora NPC system not available, skipping integration');
+        }
     }
 
     generateNPCs() {

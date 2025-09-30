@@ -1,0 +1,8 @@
+{
+  "phase": "green",
+  "timestamp": "2025-09-30T10:35:48Z",
+  "edits": [],
+  "guardrails": {
+    "diff_max_lines": 500
+  }
+}

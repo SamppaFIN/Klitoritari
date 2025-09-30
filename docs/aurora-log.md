@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-700
+  title: "Aurora Log \u2014 Cosmic Map Reboot"
+  owner: "\U0001F338 Aurora"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\aurora-log.md
+  tags:
+  - brdc
+  - consciousness
+  - healing
+  related: []
+  dependencies: []
+  consciousness_level: high
+  healing_impact: Directly serves spatial wisdom and community healing
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Aurora Log — Cosmic Map Reboot
 ## Digital Memory for AI Development Sessions
 

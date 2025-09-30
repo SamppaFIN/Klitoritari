@@ -1,0 +1,11 @@
+{
+  "phase": "verify",
+  "timestamp": "2025-09-30T14:16:16Z",
+  "gates": {
+    "perf_p95_ms": 50,
+    "coverage_min": 0.9,
+    "mutation_score_min": 0.7,
+    "a11y_standard": "AA"
+  },
+  "result": "pass"
+}

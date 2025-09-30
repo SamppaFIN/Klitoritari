@@ -1,0 +1,7 @@
+{
+  "phase": "red",
+  "timestamp": "2025-09-30T14:16:16Z",
+  "generated_count": 13,
+  "out_dir": ".factory-out\\telemetry-demo\\tests_red",
+  "notes": "RED: failing stubs generated from docs"
+}

@@ -1,0 +1,21 @@
+# Test harness dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+pytest-xdist>=3.3.0  # parallel testing
+mutmut>=2.4.0  # mutation testing
+coverage>=7.2.0
+
+# Reporting
+pytest-html>=3.2.0
+allure-pytest>=2.13.0
+
+# Performance testing
+pytest-benchmark>=4.0.0
+
+# Security testing
+bandit>=1.7.0
+
+# Code quality
+flake8>=6.0.0
+mypy>=1.5.0

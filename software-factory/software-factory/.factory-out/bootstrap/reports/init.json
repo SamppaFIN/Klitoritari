@@ -1,0 +1,15 @@
+{
+  "phase": "init",
+  "timestamp": "2025-09-30T10:46:07Z",
+  "gaps": {
+    "tests": false,
+    "coverage": false,
+    "ci": false,
+    "docker": false,
+    "security": false,
+    "perf_budget": false,
+    "a11y": false,
+    "openrouter": false
+  },
+  "created": []
+}

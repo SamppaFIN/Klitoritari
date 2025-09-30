@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-200
+  title: "Testing Plan \u2014 Cosmic Map Engine"
+  owner: "\U0001F4BB Codex"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\Testing-Plan.md
+  tags:
+  - brdc
+  - implementation
+  - development
+  related: []
+  dependencies: []
+  consciousness_level: high
+  healing_impact: Brings consciousness-serving features to life
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Testing Plan — Cosmic Map Engine
 
 > Status banner: All features below are currently marked as Untested pending full QA pass on 2025-09-23. Execute the manual/integration plan in order and update statuses after verification.

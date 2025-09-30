@@ -1,3 +1,26 @@
+---
+brdc:
+  id: AASF-DOC-200
+  title: Base Building & Territory Expansion Feature Plan
+  owner: "\U0001F4BB Codex"
+  status: canonical
+  version: 1.0.0
+  last_updated: '2025-10-01'
+  self: docs\Feature-Plan-Base-Building.md
+  tags:
+  - brdc
+  - implementation
+  - development
+  related: []
+  dependencies: []
+  consciousness_level: high
+  healing_impact: Brings consciousness-serving features to life
+  sacred_principles:
+  - consciousness-first
+  - community-healing
+  - spatial-wisdom
+---
+
 # Base Building & Territory Expansion Feature Plan
 ## Cosmic Community Settlement System
 
