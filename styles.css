@@ -12760,3 +12760,26 @@ input[type="range"]::-moz-range-thumb {
 .other-player-base-marker {
     animation: otherPlayerBasePulse 2s infinite;
 }
+
+/* Step Tracking Debug Notifications */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}

@@ -2914,6 +2914,16 @@ window.forceResetSteps = () => {
     }
 };
 
+// Public method to add steps (for debug system)
+addSteps(amount) {
+    console.log(`🚶‍♂️ Adding ${amount} steps via debug system`);
+    this.addTestSteps(amount);
+    this.updateStepCounter();
+    this.checkMilestones();
+    this.saveSteps();
+    console.log(`🚶‍♂️ Steps added. Current total: ${this.totalSteps}`);
+}
+
 // Debug function to add steps and test
 window.addStepsAndTest = (amount = 100) => {
     console.log(`🧪 Adding ${amount} steps and testing...`);
