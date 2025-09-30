@@ -862,6 +862,34 @@ class EldritchSanctuaryServer {
         }
         return gameState;
     }
+    
+    /**
+     * Get all base markers from all players for multiplayer visibility
+     * @returns {Array} Array of all base markers
+     */
+    getAllPlayersBaseMarkers() {
+        const allBaseMarkers = [];
+        
+        // Iterate through all players' game states
+        for (const [playerId, gameState] of this.gameStateDB.players) {
+            if (gameState && gameState.markers) {
+                // Get base markers from this player
+                const baseMarkers = gameState.markers.filter(marker => 
+                    marker.type === 'base' && marker.position
+                );
+                
+                // Add player ID to each marker for ownership tracking
+                baseMarkers.forEach(marker => {
+                    marker.playerId = playerId;
+                });
+                
+                allBaseMarkers.push(...baseMarkers);
+            }
+        }
+        
+        console.log(`🏗️ Retrieved ${allBaseMarkers.length} base markers from ${this.gameStateDB.players.size} players`);
+        return allBaseMarkers;
+    }
 
     // WebSocket Message Handlers for Game State Synchronization
     
@@ -876,6 +904,23 @@ class EldritchSanctuaryServer {
         // Get complete game state (will initialize if not exists)
         const gameState = this.getCompleteGameState(playerId);
         
+        // Get all players' base markers for multiplayer visibility
+        const allBaseMarkers = this.getAllPlayersBaseMarkers();
+        console.log(`🏗️ Found ${allBaseMarkers.length} base markers from all players`);
+        
+        // Add other players' base markers to the game state
+        if (allBaseMarkers.length > 0) {
+            // Filter out the player's own base markers to avoid duplicates
+            const otherPlayersBases = allBaseMarkers.filter(marker => 
+                marker.playerId !== playerId && marker.type === 'base'
+            );
+            
+            console.log(`🏗️ Adding ${otherPlayersBases.length} other players' base markers to game state`);
+            
+            // Add other players' bases to the markers array
+            gameState.markers = gameState.markers.concat(otherPlayersBases);
+        }
+        
         console.log(`🎮 Sending game state to player ${playerId}:`, {
             markers: gameState.markers.length,
             base: gameState.base ? 'exists' : 'none',
@@ -887,7 +932,8 @@ class EldritchSanctuaryServer {
             console.log(`🎮 Player ${playerId} has ${gameState.markers.length} markers:`, gameState.markers.map(m => ({
                 id: m.id,
                 type: m.type,
-                position: m.position
+                position: m.position,
+                playerId: m.playerId
             })));
         } else {
             console.log(`🎮 Player ${playerId} has NO markers in game state`);
