@@ -893,7 +893,7 @@ class ThreeJSUILayer extends BaseLayer {
                         <div style="space-y: 20px;">
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Player Name</label>
-                                <input type="text" value="Cosmic Explorer" style="
+                                <input id="settings-player-name-3d" type="text" value="${localStorage.getItem('eldritch_player_name') || 'Cosmic Explorer'}" style="
                                     width: 100%;
                                     padding: 16px;
                                     border-radius: 12px;
@@ -909,7 +909,7 @@ class ThreeJSUILayer extends BaseLayer {
                             <div style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Path Color</label>
                                 <div style="display: flex; gap: 12px; align-items: center;">
-                                    <input type="color" value="#3b82f6" style="
+                                    <input id="settings-path-color-3d" type="color" value="${localStorage.getItem('eldritch_player_color') || '#3b82f6'}" style="
                                         width: 60px;
                                         height: 60px;
                                         border-radius: 12px;
@@ -919,6 +919,41 @@ class ThreeJSUILayer extends BaseLayer {
                                     <div style="flex: 1; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; color: rgba(255,255,255,0.8);">
                                         Choose your path color for the map
                                     </div>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 20px;">
+                                <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Base Flag</label>
+                                <select id="settings-base-flag-3d" style="width:100%; padding:12px; border-radius:12px; background: rgba(255,255,255,0.05); color:white; border:2px solid rgba(255,255,255,0.1);">
+                                    ${(() => { const v = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+                                        const opts = [
+                                            ['finnish','🇫🇮 Finnish'], ['swedish','🇸🇪 Swedish'], ['norwegian','🇳🇴 Norwegian'],
+                                            ['flower_of_life','✳️ Flower of Life'], ['sacred_triangle','🔺 Sacred Triangle'], ['hexagon','⬣ Hexagon'],
+                                            ['cosmic_spiral','🌀 Cosmic Spiral'], ['star','⭐ Star']
+                                        ];
+                                        return opts.map(([id,label])=>`<option value="${id}" ${v===id?'selected':''}>${label}</option>`).join('');
+                                    })()}
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 20px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Path Marker</label>
+                                    <select id="settings-path-symbol-3d" style="width:100%; padding:12px; border-radius:12px; background: rgba(255,255,255,0.05); color:white; border:2px solid rgba(255,255,255,0.1);">
+                                        ${(() => { const v = localStorage.getItem('eldritch_player_path_symbol') || 'sun';
+                                            const opts = [['sun','☀️ Sun'],['star','⭐ Star'],['sparkle','✨ Sparkle'],['crescent','🌙 Crescent'],['diamond','💎 Diamond'],['aurora','🌌 Aurora'],['lightning','⚡ Lightning'],['flame','🔥 Flame'],['snowflake','❄️ Snowflake'],['wave','🌊 Wave']];
+                                            return opts.map(([id,label])=>`<option value="${id}" ${v===id?'selected':''}>${label}</option>`).join('');
+                                        })()}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 8px; color: white; font-weight: 500; font-size: 16px;">Player Marker</label>
+                                    <select id="settings-player-icon-3d" style="width:100%; padding:12px; border-radius:12px; background: rgba(255,255,255,0.05); color:white; border:2px solid rgba(255,255,255,0.1);">
+                                        ${(() => { const v = localStorage.getItem('eldritch_player_icon') || 'person';
+                                            const opts = [['person','👤 Person'],['comet','☄️ Comet'],['sparkle','✨ Sparkle'],['dragon','🐉 Dragon'],['beacon','📡 Beacon']];
+                                            return opts.map(([id,label])=>`<option value="${id}" ${v===id?'selected':''}>${label}</option>`).join('');
+                                        })()}
+                                    </select>
                                 </div>
                             </div>
                             
@@ -1444,10 +1479,35 @@ class ThreeJSUILayer extends BaseLayer {
     }
 
     handleSettingsAction() {
-        if (this.playerCreated) {
-            console.log('🎮 Saving settings - closing settings tab');
-            // Save settings logic here if needed
-        } else {
+        // Persist settings from 3D controls if present
+        try {
+            const nameEl = document.getElementById('settings-player-name-3d');
+            const colorEl = document.getElementById('settings-path-color-3d');
+            const baseEl = document.getElementById('settings-base-flag-3d');
+            const pathEl = document.getElementById('settings-path-symbol-3d');
+            const iconEl = document.getElementById('settings-player-icon-3d');
+            if (nameEl) localStorage.setItem('eldritch_player_name', nameEl.value.trim() || 'Cosmic Explorer');
+            if (colorEl) localStorage.setItem('eldritch_player_color', colorEl.value);
+            if (baseEl) localStorage.setItem('eldritch_player_base_logo', baseEl.value);
+            if (pathEl) { localStorage.setItem('eldritch_player_path_symbol', pathEl.value); localStorage.setItem('eldritch_player_symbol', pathEl.value); }
+            if (iconEl) localStorage.setItem('eldritch_player_icon', iconEl.value);
+            // Live-apply map updates
+            try {
+                const pos = window.mapLayer?.getCurrentPlayerPosition?.();
+                if (pos) {
+                    window.mapLayer.addBaseMarker(pos);
+                    window.mapLayer.addPathMarker(pos);
+                }
+                const playerMarker = window.mapLayer?.markers?.get?.('player');
+                if (playerMarker && window.mapLayer?.createPlayerMarkerHTML) {
+                    const html = window.mapLayer.createPlayerMarkerHTML();
+                    const icon = L.divIcon({ className: 'player-marker', html, iconSize: [40,40], iconAnchor: [20,20] });
+                    playerMarker.setIcon(icon);
+                }
+            } catch (_) {}
+        } catch (_) {}
+
+        if (!this.playerCreated) {
             console.log('🎮 Creating player - closing settings tab');
             // Mark player as created
             this.playerCreated = true;
