@@ -57,7 +57,11 @@ class SacredSettings {
                 particleLimit: 1000,
                 markerLimit: 500,
                 autoQuality: true,
-                batterySaver: false
+                batterySaver: false,
+                webglAutoLayering: true,
+                webglOtherPlayersThreshold: 5,
+                webglTotalMarkersThreshold: 50,
+                webglHUD: true
             },
             notifications: {
                 notifyPlayerEvents: true
@@ -319,6 +323,35 @@ class SacredSettings {
                     </div>
                 </div>
                 
+                <!-- Performance Settings additions -->
+                <div class="settings-section">
+                    <h3 style="margin: 0 0 15px 0; color: #d1d5db; font-size: 18px;">
+                        🚀 Rendering
+                    </h3>
+                    <div style="display: grid; gap: 12px;">
+                        <div class="setting-item">
+                            <label style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <span>WebGL Auto-Layering</span>
+                                <input type="checkbox" id="perf-webgl-auto" style="transform: scale(1.2);">
+                            </label>
+                        </div>
+                        <div class="setting-item" style="display:grid; grid-template-columns: 1fr 120px; align-items:center; gap:10px;">
+                            <label for="perf-webgl-other">Other Players ≥</label>
+                            <input type="number" id="perf-webgl-other" min="1" max="200" style="padding:6px; background:#374151; color:#e5e7eb; border:1px solid #4b5563; border-radius:6px;">
+                        </div>
+                        <div class="setting-item" style="display:grid; grid-template-columns: 1fr 120px; align-items:center; gap:10px;">
+                            <label for="perf-webgl-total">Total Markers ≥</label>
+                            <input type="number" id="perf-webgl-total" min="10" max="1000" style="padding:6px; background:#374151; color:#e5e7eb; border:1px solid #4b5563; border-radius:6px;">
+                        </div>
+                        <div class="setting-item">
+                            <label style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <span>WebGL HUD Indicator</span>
+                                <input type="checkbox" id="perf-webgl-hud" style="transform: scale(1.2);">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Notification Settings -->
                 <div class="settings-section">
                     <h3 style="margin: 0 0 15px 0; color: #d1d5db; font-size: 18px;">
@@ -554,6 +587,31 @@ class SacredSettings {
                 this.updateSetting('cosmic', 'aetherLens', e.target.value);
             });
         }
+
+        // Performance controls
+        const perfWebglAuto = document.getElementById('perf-webgl-auto');
+        const perfWebglOther = document.getElementById('perf-webgl-other');
+        const perfWebglTotal = document.getElementById('perf-webgl-total');
+        const perfWebglHUD = document.getElementById('perf-webgl-hud');
+        
+        if (perfWebglAuto) perfWebglAuto.addEventListener('change', (e) => {
+            this.updateSetting('performance', 'webglAutoLayering', e.target.checked);
+            this.applySettings();
+        });
+        if (perfWebglOther) perfWebglOther.addEventListener('change', (e) => {
+            const v = Math.max(1, parseInt(e.target.value||'5'));
+            this.updateSetting('performance', 'webglOtherPlayersThreshold', v);
+            this.applySettings();
+        });
+        if (perfWebglTotal) perfWebglTotal.addEventListener('change', (e) => {
+            const v = Math.max(10, parseInt(e.target.value||'50'));
+            this.updateSetting('performance', 'webglTotalMarkersThreshold', v);
+            this.applySettings();
+        });
+        if (perfWebglHUD) perfWebglHUD.addEventListener('change', (e) => {
+            this.updateSetting('performance', 'webglHUD', e.target.checked);
+            this.applySettings();
+        });
     }
     
     updateSetting(category, key, value) {
@@ -584,6 +642,27 @@ class SacredSettings {
 
         // Apply notification settings
         this.applyNotificationSettings();
+
+        // Apply performance settings to WebGL integration if present
+        try {
+            const wgi = window.eldritchApp?.systems?.webglMapIntegration;
+            if (wgi) {
+                // thresholds
+                if (!wgi.thresholds) wgi.thresholds = {};
+                wgi.thresholds.otherPlayers = this.settings.performance.webglOtherPlayersThreshold;
+                wgi.thresholds.totalMarkers = this.settings.performance.webglTotalMarkersThreshold;
+                // auto-layering: if disabled, force disable
+                if (!this.settings.performance.webglAutoLayering && wgi.isEnabled) {
+                    wgi.disableWebGLRendering();
+                }
+                if (typeof wgi.setHUDEnabled === 'function') {
+                    wgi.setHUDEnabled(this.settings.performance.webglHUD);
+                }
+                if (typeof wgi.evaluateAutoLayering === 'function' && this.settings.performance.webglAutoLayering) {
+                    wgi.evaluateAutoLayering();
+                }
+            }
+        } catch (_) {}
         
         // Update UI
         this.updateSettingsUI();
@@ -730,6 +809,17 @@ class SacredSettings {
         // Update notification settings
         const notifyPlayerEvents = document.getElementById('notify-player-events');
         if (notifyPlayerEvents) notifyPlayerEvents.checked = this.settings.privacy.notifyPlayerEvents;
+
+        // Sync performance UI
+        const perfWebglAuto = document.getElementById('perf-webgl-auto');
+        const perfWebglOther = document.getElementById('perf-webgl-other');
+        const perfWebglTotal = document.getElementById('perf-webgl-total');
+        const perfWebglHUD = document.getElementById('perf-webgl-hud');
+        
+        if (perfWebglAuto) perfWebglAuto.checked = this.settings.performance.webglAutoLayering;
+        if (perfWebglOther) perfWebglOther.value = this.settings.performance.webglOtherPlayersThreshold;
+        if (perfWebglTotal) perfWebglTotal.value = this.settings.performance.webglTotalMarkersThreshold;
+        if (perfWebglHUD) perfWebglHUD.checked = this.settings.performance.webglHUD;
     }
     
     toggleSettingsPanel() {

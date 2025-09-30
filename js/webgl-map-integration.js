@@ -49,6 +49,29 @@ class WebGLMapIntegration {
         console.log('Œ WebGL integration ready (WebGL rendering disabled until map is ready)');
     }
     
+    setHUDEnabled(enabled) {
+        this.hudEnabled = enabled;
+        if (!enabled && this.hudEl) { try { this.hudEl.remove(); } catch(_){} this.hudEl = null; }
+        if (enabled && !this.hudEl) this._ensureHUD();
+    }
+    
+    _ensureHUD() {
+        if (this.hudEl) return;
+        const el = document.createElement('div');
+        el.id = 'webgl-hud-indicator';
+        el.style.cssText = 'position:fixed; bottom:14px; right:14px; z-index:10030; background:#0b1220; border:1px solid #1f2937; color:#e5e7eb; border-radius:8px; padding:6px 10px; font-size:12px; box-shadow:0 12px 36px rgba(0,0,0,0.35)';
+        el.textContent = 'WebGL: OFF';
+        document.body.appendChild(el);
+        this.hudEl = el;
+        this._updateHUD();
+    }
+    
+    _updateHUD() {
+        if (!this.hudEl) return;
+        this.hudEl.textContent = `WebGL: ${this.isEnabled ? 'ON' : 'OFF'}`;
+        this.hudEl.style.borderColor = this.isEnabled ? '#10b981' : '#374151';
+    }
+    
     setupAutoLayering() {
         // thresholds
         this.thresholds = {
@@ -77,11 +100,14 @@ class WebGLMapIntegration {
         if (shouldEnable && !this.isEnabled) {
             console.log('Œ Auto-layering: enabling WebGL (counts)', { otherCount, total });
             this.enableWebGLRendering();
+            if (this.hudEnabled) this._ensureHUD();
+            this._updateHUD();
         } else if (!shouldEnable && this.isEnabled) {
             console.log('Œ Auto-layering: disabling WebGL (counts)', { otherCount, total });
             this.disableWebGLRendering();
             // restart loop when disabled
             this.startRenderLoop();
+            this._updateHUD();
         }
     }
     
@@ -467,6 +493,7 @@ class WebGLMapIntegration {
             originalUpdateOtherPlayer(player);
             this.updateOtherPlayer(player);
             this.evaluateAutoLayering();
+            this._updateHUD();
         };
         
         const originalAddInvestigationMarker = this.mapEngine.addInvestigationMarker.bind(this.mapEngine);
@@ -474,6 +501,7 @@ class WebGLMapIntegration {
             originalAddInvestigationMarker(investigation);
             this.addInvestigationMarker(investigation);
             this.evaluateAutoLayering();
+            this._updateHUD();
         };
     }
     
