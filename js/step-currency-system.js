@@ -261,6 +261,16 @@ class StepCurrencySystem {
         // Update the display
         this.updateStepCounter();
         
+        // Visual feedback
+        try {
+            if (window.auraPulseSystem) {
+                window.auraPulseSystem.pulse({ color: '#8b5cf6', size: 120, duration: 400 });
+            }
+            if (window.particleSystem) {
+                window.particleSystem.triggerBurst(window.innerWidth * 0.5, window.innerHeight * 0.85, { hue: 260, count: 12 });
+            }
+        } catch (_) {}
+        
         console.log(`🚶‍♂️ Set steps from server - Total: ${this.totalSteps}, Session: ${this.sessionSteps}`);
     }
 
@@ -1298,6 +1308,16 @@ class StepCurrencySystem {
         // Sync to server for validation
         this.syncStepsToServer();
         
+        // Visual feedback per step
+        try {
+            if (window.auraPulseSystem) {
+                window.auraPulseSystem.pulse({ color: '#3b82f6', size: 90, duration: 300 });
+            }
+            if (window.particleSystem && this.sessionSteps % 10 === 0) {
+                window.particleSystem.triggerBurst(window.innerWidth * 0.5, window.innerHeight * 0.9, { hue: 220, count: 8 });
+            }
+        } catch (_) {}
+        
         // Debug: Check if we're at a 50-step milestone
         if (this.totalSteps % 50 === 0) {
             console.log(`🎯 50-step milestone reached! Total steps: ${this.totalSteps}`);
@@ -1359,6 +1379,16 @@ class StepCurrencySystem {
         
         // Sync to server for validation
         this.syncStepsToServer();
+        
+        // Visual feedback per step
+        try {
+            if (window.auraPulseSystem) {
+                window.auraPulseSystem.pulse({ color: '#3b82f6', size: 90, duration: 300 });
+            }
+            if (window.particleSystem && this.sessionSteps % 10 === 0) {
+                window.particleSystem.triggerBurst(window.innerWidth * 0.5, window.innerHeight * 0.9, { hue: 220, count: 8 });
+            }
+        } catch (_) {}
         
         // Debug: Check if we're at a 50-step milestone
         if (this.totalSteps % 50 === 0) {
@@ -2251,6 +2281,18 @@ class StepCurrencySystem {
             this.createBaseMarkerOnMap(basePosition);
             
             console.log('🏗️ Simple base established successfully!', baseData);
+            try {
+                if (window.auraPulseSystem) {
+                    window.auraPulseSystem.pulse({ color: '#10b981', size: 200, duration: 800 });
+                }
+                if (window.particleSystem) {
+                    window.particleSystem.triggerBurst(window.innerWidth * 0.5, window.innerHeight * 0.5, { hue: 140, count: 36 });
+                }
+            } catch (_) {}
+            
+            // Broadcast to server
+            this.syncStepsToServer();
+            
             return true;
             } else {
             console.warn('⚠️ Could not get position for base establishment');
@@ -2914,15 +2956,6 @@ window.forceResetSteps = () => {
     }
 };
 
-// Public method to add steps (for debug system)
-addSteps(amount) {
-    console.log(`🚶‍♂️ Adding ${amount} steps via debug system`);
-    this.addTestSteps(amount);
-    this.updateStepCounter();
-    this.checkMilestones();
-    this.saveSteps();
-    console.log(`🚶‍♂️ Steps added. Current total: ${this.totalSteps}`);
-}
 
 // Debug function to add steps and test
 window.addStepsAndTest = (amount = 100) => {
@@ -3028,3 +3061,17 @@ window.testCreateMarker = () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = StepCurrencySystem;
 }
+
+// Public helper to add steps (for debug system)
+window.addSteps = (amount = 100) => {
+    console.log(`🚶‍♂️ Adding ${amount} steps via debug helper`);
+    if (window.stepCurrencySystem) {
+        window.stepCurrencySystem.addTestSteps(amount);
+        window.stepCurrencySystem.updateStepCounter();
+        window.stepCurrencySystem.checkMilestones();
+        window.stepCurrencySystem.saveSteps();
+        console.log(`🚶‍♂️ Steps added. Current total: ${window.stepCurrencySystem.totalSteps}`);
+    } else {
+        console.warn('Step currency system not available');
+    }
+};
