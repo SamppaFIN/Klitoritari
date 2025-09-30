@@ -73,6 +73,32 @@ class NPCSystem {
         this.createAuroraNPC();
         this.createZephyrNPC();
         
+        // Register proximity with universal manager
+        try {
+            if (window.proximityManager) {
+                this.npcs.forEach(npc => {
+                    const id = `npc:${npc.id}`;
+                    const getPos = () => ({ lat: npc.lat, lng: npc.lng });
+                    // Use chatDistance radius
+                    if (!window.proximityManager.targets.has(id)) {
+                        window.proximityManager.addTarget(id, getPos, this.chatDistance);
+                        window.proximityManager.on(id, 'enter', () => {
+                            if (!npc.encountered) {
+                                npc.encountered = true;
+                                this.startChat(npc.id);
+                            }
+                        });
+                    }
+                });
+            } else {
+                // Fallback to legacy polling
+                this.startProximityDetection();
+            }
+        } catch (e) {
+            console.warn('NPC proximity registration failed, using fallback:', e);
+            this.startProximityDetection();
+        }
+        
         console.log('ðŸ‘¥ Generated', this.npcs.length, 'NPCs');
         
         // Return early to prevent old NPC generation code from running
