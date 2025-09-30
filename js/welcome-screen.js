@@ -516,6 +516,7 @@ class WelcomeScreen {
         const savedBaseLogo = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
         const savedAreaSymbol = localStorage.getItem('eldritch_player_area_symbol') || 'finnish';
         const savedPathSymbol = localStorage.getItem('eldritch_player_path_symbol') || 'finnish';
+        const savedPlayerIcon = localStorage.getItem('eldritch_player_icon') || 'person';
         
         // Initialize base logo options
         const baseLogoGrid = document.getElementById('base-logo-options');
@@ -536,6 +537,29 @@ class WelcomeScreen {
         if (pathSymbolGrid) {
             this.populatePathSymbolOptions(pathSymbolGrid);
             this.selectSymbolOption(pathSymbolGrid, savedPathSymbol, 'sun');
+        }
+        
+        // Ensure Player Icon options section exists; create if missing
+        let playerIconGrid = document.getElementById('player-icon-options');
+        if (!playerIconGrid) {
+            try {
+                const modal = document.getElementById('user-settings-modal');
+                if (modal) {
+                    const content = modal.querySelector('.settings-content') || modal.querySelector('.modal-content') || modal;
+                    const section = document.createElement('div');
+                    section.className = 'setting-group';
+                    section.innerHTML = `
+                        <h4>👤 Player Marker</h4>
+                        <div id="player-icon-options" class="symbol-grid"></div>
+                    `;
+                    content.appendChild(section);
+                    playerIconGrid = section.querySelector('#player-icon-options');
+                }
+            } catch (_) {}
+        }
+        if (playerIconGrid) {
+            this.populatePlayerIconOptions(playerIconGrid);
+            this.selectSymbolOption(playerIconGrid, savedPlayerIcon, 'person');
         }
     }
 
@@ -631,6 +655,22 @@ class WelcomeScreen {
         grid.innerHTML = symbols.map(opt => `
             <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}">
                 ${opt.svg}
+                <span>${opt.label}</span>
+            </div>
+        `).join('');
+    }
+    
+    populatePlayerIconOptions(grid) {
+        const icons = [
+            { id: 'person', label: 'Person', emoji: '👤' },
+            { id: 'comet', label: 'Comet', emoji: '☄️' },
+            { id: 'sparkle', label: 'Sparkle', emoji: '✨' },
+            { id: 'dragon', label: 'Dragon', emoji: '🐉' },
+            { id: 'beacon', label: 'Beacon', emoji: '📡' }
+        ];
+        grid.innerHTML = icons.map(opt => `
+            <div class="symbol-option" data-symbol="${opt.id}" title="${opt.label}" style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:20px;">${opt.emoji}</span>
                 <span>${opt.label}</span>
             </div>
         `).join('');
@@ -868,6 +908,18 @@ class WelcomeScreen {
                 }
             });
         }
+        
+        // Player icon selection
+        const playerIconGrid = document.getElementById('player-icon-options');
+        if (playerIconGrid) {
+            playerIconGrid.addEventListener('click', (e) => {
+                const option = e.target.closest('.symbol-option');
+                if (option) {
+                    playerIconGrid.querySelectorAll('.symbol-option').forEach(opt => opt.classList.remove('selected'));
+                    option.classList.add('selected');
+                }
+            });
+        }
     }
 
     updateColorFromSliders() {
@@ -902,6 +954,7 @@ class WelcomeScreen {
         const baseLogoGrid = document.getElementById('base-logo-options');
         const areaSymbolGrid = document.getElementById('area-symbol-options');
         const pathSymbolGrid = document.getElementById('path-symbol-options');
+        const playerIconGrid = document.getElementById('player-icon-options');
         
         const name = (nameInput?.value || '').trim() || 'Cosmic Wanderer';
         const color = colorInput?.value || '#00ff88';
@@ -911,6 +964,8 @@ class WelcomeScreen {
         const areaSymbol = selectedAreaSymbol?.dataset.symbol || 'finnish';
         const selectedPathSymbol = pathSymbolGrid?.querySelector('.symbol-option.selected');
         const pathSymbol = selectedPathSymbol?.dataset.symbol || 'sun';
+        const selectedPlayerIcon = playerIconGrid?.querySelector('.symbol-option.selected');
+        const playerIcon = selectedPlayerIcon?.dataset.symbol || 'person';
         
         console.log('🎭 Selected symbols:', { baseLogo, areaSymbol, pathSymbol });
         
@@ -921,6 +976,7 @@ class WelcomeScreen {
         localStorage.setItem('eldritch_player_area_symbol', areaSymbol);
         localStorage.setItem('eldritch_player_symbol', pathSymbol); // Keep for backward compatibility
         localStorage.setItem('eldritch_player_path_symbol', pathSymbol);
+        localStorage.setItem('eldritch_player_icon', playerIcon);
         
         // Update multiplayer profile if available
         if (window.multiplayerManager) {
