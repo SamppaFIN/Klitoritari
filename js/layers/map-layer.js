@@ -25,7 +25,7 @@ class MapLayer extends BaseLayer {
         this.overlays = new Map();
         this.mapReady = false;
         this.mapContainer = null;
-        this.initialPosition = { lat: 61.472768, lng: 23.724032 }; // Default position
+        this.initialPosition = { lat: 61.472768, lng: 23.724032 }; // Fallback position
         this.initialZoom = 18;
     }
 
@@ -165,9 +165,19 @@ class MapLayer extends BaseLayer {
         }
 
         try {
+            // Try to use last known device position immediately
+            let startPos = this.initialPosition;
+            try {
+                const cached = localStorage.getItem('eldritch_last_gps');
+                if (cached) {
+                    const p = JSON.parse(cached);
+                    if (Number.isFinite(p.lat) && Number.isFinite(p.lng)) startPos = { lat: p.lat, lng: p.lng };
+                }
+            } catch (_) {}
+
             // Initialize Leaflet map
             this.map = L.map(this.mapContainer, {
-                center: [this.initialPosition.lat, this.initialPosition.lng],
+                center: [startPos.lat, startPos.lng],
                 zoom: this.initialZoom,
                 zoomControl: true,
                 attributionControl: true,

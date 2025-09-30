@@ -117,7 +117,7 @@ class MobileTestingSuite {
                 border: 2px solid #ff9800;
                 border-radius: 10px;
                 padding: 15px;
-                z-index: 10000;
+                z-index: 20001;
                 font-family: 'Courier New', monospace;
                 font-size: 12px;
                 color: #ff9800;
@@ -139,7 +139,7 @@ class MobileTestingSuite {
                 color: white;
                 font-size: 20px;
                 cursor: pointer;
-                z-index: 10001;
+                z-index: 20002;
                 box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
                 transition: all 0.3s ease;
                 touch-action: manipulation;
@@ -383,6 +383,15 @@ class MobileTestingSuite {
                     <div class="test-placeholder">Click "Run All" to start testing</div>
                 </div>
             </div>
+
+            <div class="test-section" id="test-steps-section">
+                <h3>🚶 Step Engine</h3>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button class="test-btn" data-stepmode="simulation">Simulation</button>
+                    <button class="test-btn" data-stepmode="device">Device Motion</button>
+                    <button class="test-btn" data-stepmode="gps">GPS Distance</button>
+                </div>
+            </div>
             
             <div class="test-section" id="test-overall-section">
                 <h3>🎯 Test Summary</h3>
@@ -489,6 +498,24 @@ class MobileTestingSuite {
                 }
             });
         }
+
+        // Step engine buttons
+        const stepButtons = document.querySelectorAll('[data-stepmode]');
+        stepButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.getAttribute('data-stepmode');
+                try {
+                    if (window.setStepEngineMode) {
+                        window.setStepEngineMode(mode);
+                    } else if (window.stepCurrencySystem?.setEngineMode) {
+                        window.stepCurrencySystem.setEngineMode(mode);
+                    }
+                    this.addInlineStatus(`Step engine set to ${mode}`);
+                } catch (e) {
+                    console.warn('🚶 Failed to change step mode:', e);
+                }
+            });
+        });
     }
     
     /**
@@ -529,6 +556,16 @@ class MobileTestingSuite {
         addSection('Errors', { errors: (this.testResults.errors||[]).join('\n') });
         lines.push(`Overall: ${this.testResults.overall}`);
         return lines.join('\n');
+    }
+
+    addInlineStatus(text) {
+        const overall = document.getElementById('test-overall-content');
+        if (overall) {
+            const div = document.createElement('div');
+            div.className = 'test-result';
+            div.innerHTML = `<span class="test-result-label">Status</span><span class="test-result-value">${text}</span>`;
+            overall.prepend(div);
+        }
     }
     
     /**
