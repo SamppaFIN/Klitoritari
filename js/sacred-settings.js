@@ -32,7 +32,8 @@ class SacredSettings {
                 shareBases: true,
                 shareAnalytics: 'basic', // 'off', 'basic', 'advanced'
                 shareMood: false,
-                shareAura: true
+                shareAura: true,
+                chatAutoOpen: true
             },
             accessibility: {
                 reducedMotion: false,
@@ -236,6 +237,12 @@ class SacredSettings {
                                 </select>
                             </label>
                         </div>
+                        <div class="setting-item">
+                            <label style="display: flex; align-items: center; justify-content: space-between;">
+                                <span>Auto-open Proximity Chat</span>
+                                <input type="checkbox" id="chat-auto-open" style="transform: scale(1.2);">
+                            </label>
+                        </div>
                     </div>
                 </div>
                 
@@ -437,6 +444,7 @@ class SacredSettings {
         const shareSteps = document.getElementById('share-steps');
         const shareBases = document.getElementById('share-bases');
         const analyticsLevel = document.getElementById('analytics-level');
+        const chatAutoOpen = document.getElementById('chat-auto-open');
         
         if (shareLocation) {
             shareLocation.addEventListener('change', (e) => {
@@ -459,6 +467,12 @@ class SacredSettings {
         if (analyticsLevel) {
             analyticsLevel.addEventListener('change', (e) => {
                 this.updateSetting('privacy', 'shareAnalytics', e.target.value);
+            });
+        }
+        
+        if (chatAutoOpen) {
+            chatAutoOpen.addEventListener('change', (e) => {
+                this.updateSetting('privacy', 'chatAutoOpen', e.target.checked);
             });
         }
         
@@ -569,7 +583,7 @@ class SacredSettings {
     }
     
     applyPrivacySettings() {
-        const { shareLocation, shareSteps, shareBases, shareAnalytics } = this.settings.privacy;
+        const { shareLocation, shareSteps, shareBases, shareAnalytics, chatAutoOpen } = this.settings.privacy;
         
         // Apply privacy settings to systems
         if (window.stepCurrencySystem) {
@@ -584,6 +598,10 @@ class SacredSettings {
                 shareLocation: shareLocation,
                 shareBases: shareBases
             });
+        }
+        
+        if (window.playerChatSystem) {
+            window.playerChatSystem.enabled = this.settings.privacy.chatAutoOpen;
         }
     }
     
@@ -639,11 +657,13 @@ class SacredSettings {
         const shareSteps = document.getElementById('share-steps');
         const shareBases = document.getElementById('share-bases');
         const analyticsLevel = document.getElementById('analytics-level');
+        const chatAutoOpen = document.getElementById('chat-auto-open');
         
         if (shareLocation) shareLocation.checked = this.settings.privacy.shareLocation;
         if (shareSteps) shareSteps.checked = this.settings.privacy.shareSteps;
         if (shareBases) shareBases.checked = this.settings.privacy.shareBases;
         if (analyticsLevel) analyticsLevel.value = this.settings.privacy.shareAnalytics;
+        if (chatAutoOpen) chatAutoOpen.checked = this.settings.privacy.chatAutoOpen;
         
         // Update accessibility settings
         const reducedMotion = document.getElementById('reduced-motion');
