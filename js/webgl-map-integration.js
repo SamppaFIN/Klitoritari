@@ -43,7 +43,46 @@ class WebGLMapIntegration {
         // Start render loop
         this.startRenderLoop();
         
+        // Auto-layering check
+        this.setupAutoLayering();
+        
         console.log('Œ WebGL integration ready (WebGL rendering disabled until map is ready)');
+    }
+    
+    setupAutoLayering() {
+        // thresholds
+        this.thresholds = {
+            otherPlayers: 5,
+            totalMarkers: 50
+        };
+        // periodic re-evaluation
+        if (this.autoInterval) cancelAnimationFrame(this.autoInterval);
+        const tick = () => {
+            try { this.evaluateAutoLayering(); } catch (_) {}
+            this.autoInterval = setTimeout(tick, 1500);
+        };
+        tick();
+    }
+    
+    evaluateAutoLayering() {
+        if (!this.mapEngine) return;
+        const otherCount = this.mapEngine.otherPlayerMarkers?.size || 0;
+        const invCount = this.mapEngine.investigationMarkers?.size || 0;
+        const questCount = this.mapEngine.testQuestMarkers?.size || 0;
+        const baseCount = this.mapEngine.playerBaseMarker ? 1 : 0;
+        const npcCount = (window.eldritchApp?.systems?.npc?.npcMarkers?.length) || 0;
+        const total = otherCount + invCount + questCount + baseCount + npcCount;
+        
+        const shouldEnable = otherCount >= this.thresholds.otherPlayers || total >= this.thresholds.totalMarkers;
+        if (shouldEnable && !this.isEnabled) {
+            console.log('Œ Auto-layering: enabling WebGL (counts)', { otherCount, total });
+            this.enableWebGLRendering();
+        } else if (!shouldEnable && this.isEnabled) {
+            console.log('Œ Auto-layering: disabling WebGL (counts)', { otherCount, total });
+            this.disableWebGLRendering();
+            // restart loop when disabled
+            this.startRenderLoop();
+        }
     }
     
     enableWebGLRendering() {
@@ -420,18 +459,21 @@ class WebGLMapIntegration {
         this.mapEngine.updatePlayerPosition = (position) => {
             originalUpdatePlayerPosition(position);
             this.updatePlayerPosition(position);
+            // position update alone doesn't change counts, skip evaluate to reduce churn
         };
         
         const originalUpdateOtherPlayer = this.mapEngine.updateOtherPlayer.bind(this.mapEngine);
         this.mapEngine.updateOtherPlayer = (player) => {
             originalUpdateOtherPlayer(player);
             this.updateOtherPlayer(player);
+            this.evaluateAutoLayering();
         };
         
         const originalAddInvestigationMarker = this.mapEngine.addInvestigationMarker.bind(this.mapEngine);
         this.mapEngine.addInvestigationMarker = (investigation) => {
             originalAddInvestigationMarker(investigation);
             this.addInvestigationMarker(investigation);
+            this.evaluateAutoLayering();
         };
     }
     
