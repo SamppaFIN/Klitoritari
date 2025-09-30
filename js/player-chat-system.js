@@ -18,14 +18,21 @@ class PlayerChatSystem {
 
   _init() {
     this._ensureModal();
-    // Hook into websocket player updates
+    // Register proximity targets for other players when they appear
     const attach = () => {
       if (!window.websocketClient) return;
-      const prev = window.websocketClient.onPlayerUpdate;
+      const prevJoin = window.websocketClient.onPlayerUpdate;
       window.websocketClient.onPlayerUpdate = (player) => {
-        try { if (prev) prev(player); } catch (_) {}
-        this._handleOtherPlayerUpdate(player);
+        try { if (prevJoin) prevJoin(player); } catch (_) {}
+        this._registerOrUpdateProximity(player);
       };
+      // Also register existing snapshot if available
+      try {
+        if (typeof window.websocketClient.getOtherPlayers === 'function') {
+          const others = window.websocketClient.getOtherPlayers();
+          others.forEach(p => this._registerOrUpdateProximity(p));
+        }
+      } catch (_) {}
     };
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', attach);
@@ -78,6 +85,32 @@ class PlayerChatSystem {
   }
 
   _escape(s) { return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+  _registerOrUpdateProximity(player) {
+    if (!player || !player.playerId || !player.position) return;
+    const id = `player:${player.playerId}`;
+    const getPos = () => player.position;
+    if (window.proximityManager) {
+      if (!window.proximityManager.targets.has(id)) {
+        window.proximityManager.addTarget(id, getPos, this.distanceThresholdM);
+        window.proximityManager.on(id, 'enter', () => this._maybeOpen(player));
+      } else {
+        // already tracked; nothing to do (update uses closure)
+      }
+    } else {
+      // Fallback: direct check
+      this._handleOtherPlayerUpdate(player);
+    }
+  }
+
+  _maybeOpen(player) {
+    if (!this.enabled) return;
+    const now = Date.now();
+    const last = this.lastOpenedByPlayer.get(player.playerId) || 0;
+    if (now - last < this.cooldownMs) return;
+    this.lastOpenedByPlayer.set(player.playerId, now);
+    this.open(player);
+  }
 
   _handleOtherPlayerUpdate(player) {
     if (!this.enabled || !player || !player.position) return;
