@@ -177,3 +177,6 @@ js/geolocation-init.js
 js/unified-gps-consciousness.js
 js/gps-consciousness-integration-patch.js
 js/tests/unified-gps-consciousness-tests.js
+
+# Cursor IDE files
+.cursor/
