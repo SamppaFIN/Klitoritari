@@ -180,3 +180,6 @@ js/tests/unified-gps-consciousness-tests.js
 
 # Cursor IDE files
 .cursor/
+
+# Software factory (development tools)
+software-factory/

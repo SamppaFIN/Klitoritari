@@ -1,2 +1,0 @@
-# Make scripts a package
-
