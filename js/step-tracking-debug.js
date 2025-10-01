@@ -71,7 +71,7 @@ class StepTrackingDebug {
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #e5e7eb;
-            display: block;
+            display: none;
         `;
         
         // Create panel content
@@ -485,6 +485,12 @@ class StepTrackingDebug {
     
     toggleDebugPanel() {
         if (this.debugPanel) {
+            // Don't show debug panel during welcome screen
+            if (this.isWelcomeScreenActive()) {
+                console.log('🔧 Step tracking debug panel: Welcome screen active, keeping hidden');
+                return;
+            }
+            
             const isVisible = this.debugPanel.style.display !== 'none';
             this.debugPanel.style.display = isVisible ? 'none' : 'block';
             console.log('🔧 Step tracking debug panel:', isVisible ? 'hidden' : 'shown');
@@ -501,6 +507,27 @@ class StepTrackingDebug {
         if (this.debugPanel) {
             this.debugPanel.style.display = 'none';
         }
+    }
+    
+    /**
+     * Check if welcome screen is currently active or game hasn't started yet
+     * @returns {boolean} True if welcome screen is active or game hasn't started
+     */
+    isWelcomeScreenActive() {
+        // Check if welcome screen element is visible
+        const welcomeScreen = document.getElementById('welcome-screen');
+        if (welcomeScreen) {
+            const style = window.getComputedStyle(welcomeScreen);
+            const isVisible = style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+            if (isVisible) return true;
+        }
+        
+        // Also check if notifications are disabled (game not started yet)
+        if (window.notificationCenter && !window.notificationCenter.gameStarted) {
+            return true; // Treat as welcome screen active
+        }
+        
+        return false;
     }
 }
 

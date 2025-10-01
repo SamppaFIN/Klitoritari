@@ -833,9 +833,7 @@ class SacredSettings {
         if (cosmicWeather) cosmicWeather.checked = this.settings.cosmic.cosmicWeather;
         if (aetherLens) aetherLens.value = this.settings.cosmic.aetherLens;
 
-        // Update notification settings
-        const notifyPlayerEvents = document.getElementById('notify-player-events');
-        if (notifyPlayerEvents) notifyPlayerEvents.checked = this.settings.privacy.notifyPlayerEvents;
+        // Update notification settings (already handled above)
 
         // Sync performance UI
         const perfWebglAuto = document.getElementById('perf-webgl-auto');

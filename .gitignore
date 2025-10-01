@@ -153,3 +153,27 @@ typings/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Project documentation (exclude all docs except README.md files)
+docs/
+Codex-v1/
+Sanctum/
+software-factory/software-factory/docs/
+software-factory/software-factory/Codex/
+bugreports/
+archive/
+
+# Debug and test files
+debug-logs*.json
+gps-test.html
+test-*.html
+test-*.js
+test-*.ps1
+
+# Legacy GPS files (archived)
+js/geolocation.js
+js/geolocation-fixes.js
+js/geolocation-init.js
+js/unified-gps-consciousness.js
+js/gps-consciousness-integration-patch.js
+js/tests/unified-gps-consciousness-tests.js

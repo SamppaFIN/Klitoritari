@@ -300,6 +300,46 @@ html, body {
     text-overflow: ellipsis;
 }
 
+.gps-location {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.gps-location:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.gps-icon {
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.gps-status {
+    font-size: 8px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.gps-location.gps-acquired .gps-status {
+    color: #4ade80;
+}
+
+.gps-location.gps-error .gps-status {
+    color: #f87171;
+}
+
 .base-flag {
     display: flex;
     align-items: center;
@@ -7981,7 +8021,7 @@ input[type="range"]::-moz-range-thumb {
     background-size: 400% 400%;
     animation: cosmicBackground 20s ease infinite;
     z-index: 10000;
-    display: flex;
+    display: none; /* Hidden by default - lazy loading gate will show it if needed */
     align-items: flex-start;
     justify-content: center;
     overflow-y: auto;
@@ -8600,89 +8640,7 @@ input[type="range"]::-moz-range-thumb {
     font-size: 1.2rem;
 }
 
-/* Height Configuration Section */
-.height-config-section {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    padding: 20px;
-    margin: 20px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.height-config-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.height-icon {
-    font-size: 2rem;
-    color: #ffd700;
-}
-
-.height-text {
-    flex: 1;
-}
-
-.height-title {
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 5px;
-}
-
-.height-subtitle {
-    font-size: 0.9rem;
-    color: #ccc;
-}
-
-.height-input-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    padding: 10px 15px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
-}
-
-.height-input-group:focus-within {
-    border-color: #ffd700;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-}
-
-.height-input {
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: 1.1rem;
-    font-weight: bold;
-    width: 80px;
-    text-align: center;
-    outline: none;
-}
-
-.height-input::placeholder {
-    color: #999;
-}
-
-.height-unit {
-    color: #ccc;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-.height-info {
-    text-align: center;
-}
-
-.height-info small {
-    color: #999;
-    font-size: 0.8rem;
-}
+/* Height Configuration Section - Removed (Not Needed) */
 
 /* Action Buttons - Using original welcome button styles */
 .action-buttons {
@@ -12784,52 +12742,50 @@ input[type="range"]::-moz-range-thumb {
     }
 }
 
- 
- / *   S a c r e d   S e t t i n g s   A n i m a t i o n s   * / 
- @ k e y f r a m e s   s l i d e I n D o w n   { 
-         f r o m   { 
-                 t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( - 1 0 0 % ) ; 
-                 o p a c i t y :   0 ; 
-         } 
-         t o   { 
-                 t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( 0 ) ; 
-                 o p a c i t y :   1 ; 
-         } 
- } 
- 
- @ k e y f r a m e s   s l i d e O u t U p   { 
-         f r o m   { 
-                 t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( 0 ) ; 
-                 o p a c i t y :   1 ; 
-         } 
-         t o   { 
-                 t r a n s f o r m :   t r a n s l a t e X ( - 5 0 % )   t r a n s l a t e Y ( - 1 0 0 % ) ; 
-                 o p a c i t y :   0 ; 
-         } 
- } 
- 
- / *   S a c r e d   S e t t i n g s   S t y l e s   * / 
- . r e d u c e d - m o t i o n   *   { 
-         a n i m a t i o n - d u r a t i o n :   0 . 0 1 m s   ! i m p o r t a n t ; 
-         a n i m a t i o n - i t e r a t i o n - c o u n t :   1   ! i m p o r t a n t ; 
-         t r a n s i t i o n - d u r a t i o n :   0 . 0 1 m s   ! i m p o r t a n t ; 
- } 
- 
- . h i g h - c o n t r a s t   { 
-         - - t e x t - p r i m a r y :   # f f f f f f ; 
-         - - t e x t - s e c o n d a r y :   # 0 0 0 0 0 0 ; 
-         - - b g - p r i m a r y :   # 0 0 0 0 0 0 ; 
-         - - b g - s e c o n d a r y :   # f f f f f f ; 
-         - - b o r d e r - c o l o r :   # f f f f f f ; 
- } 
- 
- . l a r g e - t e x t   { 
-         f o n t - s i z e :   1 . 2 e m ; 
- } 
- 
- . l a r g e - t e x t   h 1   {   f o n t - s i z e :   2 . 4 e m ;   } 
- . l a r g e - t e x t   h 2   {   f o n t - s i z e :   2 . 0 e m ;   } 
- . l a r g e - t e x t   h 3   {   f o n t - s i z e :   1 . 8 e m ;   } 
- . l a r g e - t e x t   p   {   f o n t - s i z e :   1 . 2 e m ;   } 
- . l a r g e - t e x t   b u t t o n   {   f o n t - s i z e :   1 . 2 e m ;   }  
- 
+/* Sacred Settings Animations */
+@keyframes slideInDown {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutUp {
+    from {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+}
+
+/* Sacred Settings Styles */
+.reduced-motion * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+.high-contrast {
+    --text-primary: #ffffff;
+    --text-secondary: #000000;
+    --bg-primary: #000000;
+    --bg-secondary: #ffffff;
+    --border-color: #ffffff;
+}
+
+.large-text {
+    font-size: 1.2em;
+}
+
+.large-text h1 { font-size: 2.4em; }
+.large-text h2 { font-size: 2.0em; }
+.large-text h3 { font-size: 1.8em; }
+.large-text p { font-size: 1.2em; }
+.large-text button { font-size: 1.2em; }

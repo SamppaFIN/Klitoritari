@@ -87,9 +87,44 @@ class MultiplayerPanel {
 
   _selfPos() {
     try {
+      // Try new GPS Core system first
+      if (window.gpsCore && typeof window.gpsCore.getCurrentPosition === 'function') {
+        const pos = window.gpsCore.getCurrentPosition();
+        if (pos && pos.lat != null && pos.lng != null) {
+          console.log('🎮 Multiplayer: Using GPS Core position:', pos);
+          return pos;
+        }
+      }
+      
+      // Try global player position
+      if (window.playerPosition && window.playerPosition.lat != null && window.playerPosition.lng != null) {
+        console.log('🎮 Multiplayer: Using global player position:', window.playerPosition);
+        return window.playerPosition;
+      }
+      
+      // Try localStorage position
+      const storedPos = localStorage.getItem('eldritch_player_position');
+      if (storedPos) {
+        try {
+          const pos = JSON.parse(storedPos);
+          if (pos && pos.lat != null && pos.lng != null) {
+            console.log('🎮 Multiplayer: Using stored position:', pos);
+            return pos;
+          }
+        } catch (e) {
+          console.warn('🎮 Multiplayer: Error parsing stored position:', e);
+        }
+      }
+      
+      // [BRDC DEPRECATED] Fallback to legacy geolocationManager
       const p = window.geolocationManager?.getCurrentPositionSafe?.();
-      if (p && p.lat != null && p.lng != null) return p;
-    } catch (_) {}
+      if (p && p.lat != null && p.lng != null) {
+        console.warn('🎮 [DEPRECATED] Multiplayer using legacy geolocationManager - migrate to gpsCore');
+        return p;
+      }
+    } catch (e) {
+      console.error('🎮 Multiplayer: Error getting self position:', e);
+    }
     return null;
   }
 }

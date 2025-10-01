@@ -4,7 +4,8 @@
 
 class NotificationCenter {
   constructor() {
-    this.playerEventsEnabled = true;
+    this.playerEventsEnabled = false; // Disabled by default during startup
+    this.gameStarted = false; // Track if game has fully started
     this.container = null;
     this._init();
   }
@@ -45,15 +46,29 @@ class NotificationCenter {
   }
 
   notifyPlayerJoined(name) {
-    if (!this.playerEventsEnabled) return;
+    if (!this.playerEventsEnabled || !this.gameStarted) return;
     this.showBanner(`${name || 'Explorer'} entered the realm`, 'info');
     this.chime(1100, 0.12, 'triangle');
   }
 
   notifyPlayerBaseCreated(name) {
-    if (!this.playerEventsEnabled) return;
+    if (!this.playerEventsEnabled || !this.gameStarted) return;
     this.showBanner(`${name || 'Explorer'} established a base`, 'success');
     this.chime(880, 0.14, 'sine');
+  }
+
+  // Method to enable notifications after game has fully started
+  enableNotifications() {
+    console.log('🔔 Enabling notifications - game has started');
+    this.playerEventsEnabled = true;
+    this.gameStarted = true;
+  }
+
+  // Method to disable notifications during startup
+  disableNotifications() {
+    console.log('🔔 Disabling notifications during startup');
+    this.playerEventsEnabled = false;
+    this.gameStarted = false;
   }
 
   _bg(type) {

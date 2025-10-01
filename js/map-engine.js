@@ -721,7 +721,11 @@ class MapEngine {
         const activeInvestigation = window.investigationSystem.getActiveInvestigation();
         if (!activeInvestigation) return;
 
+        // [BRDC DEPRECATED] Legacy geolocationManager - use gpsCore instead
         const playerPosition = window.geolocationManager?.getCurrentPositionData();
+        if (window.geolocationManager) {
+            console.warn('🗺️ [DEPRECATED] Using legacy geolocationManager.getCurrentPositionData() - migrate to gpsCore');
+        }
         if (!playerPosition) return;
 
         window.investigationSystem.updateInvestigationProgress(playerPosition);
@@ -1712,7 +1716,7 @@ class MapEngine {
         if (!playerPos) {
             console.warn('🎮 No current player position available, using fallback');
             // Use fallback position if no GPS position available
-            const fallback = { lat: 61.472768, lng: 23.724032 }; // User's known location
+            const fallback = this.generateRandomWorldLocation(); // Random world location
             
             // Simulate movement from fallback to target
             this.simulatePlayerMovement(fallback, { lat, lng });
@@ -1836,7 +1840,9 @@ class MapEngine {
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             return window.eldritchApp.systems.geolocation.getCurrentPosition();
         }
+        // [BRDC DEPRECATED] Legacy geolocationManager - use gpsCore instead
         if (window.geolocationManager) {
+            console.warn('🗺️ [DEPRECATED] Using legacy geolocationManager.getCurrentPosition() - migrate to gpsCore');
             return window.geolocationManager.getCurrentPosition();
         }
         if (this.playerMarker) {
@@ -2634,6 +2640,19 @@ class MapEngine {
     }
     
 
+    /**
+     * Generate a random world location for testing purposes
+     * @returns {Object} Random coordinates with lat/lng
+     */
+    generateRandomWorldLocation() {
+        // Generate random coordinates within reasonable world bounds
+        const lat = (Math.random() - 0.5) * 180; // -90 to 90 degrees
+        const lng = (Math.random() - 0.5) * 360; // -180 to 180 degrees
+        
+        console.log(`🌍 Generated random world location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        return { lat: lat, lng: lng };
+    }
+
     getPlayerPosition() {
         if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
             const geolocation = window.eldritchApp.systems.geolocation;
@@ -2657,18 +2676,12 @@ class MapEngine {
                 };
             }
             
-            // If no valid position at all, use fallback
-            console.log('📍 No valid position available, using fallback position');
-            return {
-                lat: 61.472768, // User's known location
-                lng: 23.724032
-            };
+            // If no valid position at all, use random world location
+            console.log('📍 No valid position available, using random world location');
+            return this.generateRandomWorldLocation();
         } else {
-            console.log('📍 No geolocation system available, using fallback position');
-            return {
-                lat: 61.472768, // User's known location
-                lng: 23.724032
-            };
+            console.log('📍 No geolocation system available, using random world location');
+            return this.generateRandomWorldLocation();
         }
     }
     

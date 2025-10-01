@@ -42,6 +42,229 @@ class LegacyEldritchSanctuaryApp {
                (window.innerWidth <= 768);
     }
     
+    // Initialize geolocation with proper permission handling
+    async initializeGeolocationWithPermission() {
+        console.log('📍 Initializing geolocation with permission handling...');
+        
+        try {
+            // First, check if geolocation is supported
+            if (!navigator.geolocation) {
+                console.error('📍 Geolocation not supported on this device');
+                this.showGeolocationError('GPS not supported on this device');
+                return;
+            }
+            
+            // Request permission with user gesture
+            const permissionGranted = await this.requestGeolocationPermission();
+            
+            if (permissionGranted) {
+                console.log('📍 GPS permission granted, starting tracking...');
+                this.systems.geolocation.startTracking();
+            } else {
+                console.warn('📍 GPS permission denied, using fallback position');
+                this.systems.geolocation.useFallbackPosition();
+            }
+            
+        } catch (error) {
+            console.error('📍 Geolocation initialization failed:', error);
+            this.showGeolocationError('Failed to initialize GPS');
+            this.systems.geolocation.useFallbackPosition();
+        }
+    }
+    
+    // Request geolocation permission with proper user interaction
+    async requestGeolocationPermission() {
+        return new Promise((resolve) => {
+            console.log('📍 Requesting geolocation permission...');
+            
+            // Show permission request UI
+            this.showGeolocationPermissionUI((granted) => {
+                if (granted) {
+                    // Try to get current position to verify permission
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            console.log('📍 GPS permission confirmed with position:', position);
+                            resolve(true);
+                        },
+                        (error) => {
+                            console.error('📍 GPS permission verification failed:', error);
+                            resolve(false);
+                        },
+                        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+                    );
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    }
+    
+    // Show geolocation permission request UI
+    showGeolocationPermissionUI(callback) {
+        const modal = document.createElement('div');
+        modal.id = 'gps-permission-modal';
+        modal.className = 'gps-permission-modal';
+        modal.innerHTML = `
+            <div class="gps-permission-content">
+                <div class="gps-permission-header">
+                    <div class="gps-icon">📍</div>
+                    <h2>Location Access Required</h2>
+                </div>
+                <div class="gps-permission-body">
+                    <p>Eldritch Sanctuary needs access to your location to provide the full gaming experience.</p>
+                    <p>This allows you to:</p>
+                    <ul>
+                        <li>Explore the real world map</li>
+                        <li>Discover locations and quests</li>
+                        <li>Interact with other players</li>
+                        <li>Build bases at real locations</li>
+                    </ul>
+                    <p><strong>Your location data is never stored or shared.</strong></p>
+                </div>
+                <div class="gps-permission-footer">
+                    <button id="deny-gps" class="deny-btn">Deny</button>
+                    <button id="allow-gps" class="allow-btn">Allow Location Access</button>
+                </div>
+            </div>
+        `;
+        
+        // Add styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .gps-permission-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+                animation: fadeIn 0.3s ease;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            .gps-permission-content {
+                background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+                border: 2px solid #4a9eff;
+                border-radius: 15px;
+                padding: 30px;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+                color: white;
+                animation: slideIn 0.3s ease;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateY(-50px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            .gps-permission-header {
+                margin-bottom: 20px;
+            }
+            
+            .gps-icon {
+                font-size: 48px;
+                margin-bottom: 10px;
+                animation: pulse 2s infinite;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+            
+            .gps-permission-body {
+                margin-bottom: 30px;
+                text-align: left;
+            }
+            
+            .gps-permission-body p {
+                margin-bottom: 15px;
+                line-height: 1.5;
+            }
+            
+            .gps-permission-body ul {
+                margin: 15px 0;
+                padding-left: 20px;
+            }
+            
+            .gps-permission-body li {
+                margin: 8px 0;
+                color: #4a9eff;
+            }
+            
+            .gps-permission-footer {
+                display: flex;
+                gap: 15px;
+                justify-content: center;
+            }
+            
+            .gps-permission-footer button {
+                padding: 12px 24px;
+                border: none;
+                border-radius: 5px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+            
+            .deny-btn {
+                background: #666;
+                color: white;
+            }
+            
+            .deny-btn:hover {
+                background: #777;
+            }
+            
+            .allow-btn {
+                background: linear-gradient(45deg, #4a9eff, #6bb6ff);
+                color: white;
+            }
+            
+            .allow-btn:hover {
+                background: linear-gradient(45deg, #6bb6ff, #4a9eff);
+                transform: translateY(-2px);
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        document.getElementById('allow-gps').addEventListener('click', () => {
+            modal.remove();
+            style.remove();
+            callback(true);
+        });
+        
+        document.getElementById('deny-gps').addEventListener('click', () => {
+            modal.remove();
+            style.remove();
+            callback(false);
+        });
+    }
+    
+    // Show geolocation error
+    showGeolocationError(message) {
+        console.error('📍 Geolocation error:', message);
+        
+        if (window.notificationCenter) {
+            window.notificationCenter.showBanner(message, 'error');
+        } else {
+            alert(message);
+        }
+    }
+
     // Initialize mobile-optimized UI
     initMobileUI() {
         console.log('📱 Initializing mobile UI...');
@@ -1230,12 +1453,26 @@ class LegacyEldritchSanctuaryApp {
         );
     }
     
+    /**
+     * Generate a random world location for testing purposes
+     * @returns {Object} Random coordinates with lat/lng
+     */
+    generateRandomWorldLocation() {
+        // Generate random coordinates within reasonable world bounds
+        const lat = (Math.random() - 0.5) * 180; // -90 to 90 degrees
+        const lng = (Math.random() - 0.5) * 360; // -180 to 180 degrees
+        
+        console.log(`🌍 Generated random world location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        return { lat: lat, lng: lng };
+    }
+
     useFallbackLocation() {
         console.log('📍 Using fallback location for desktop testing');
         
-        // Use a known location in Tampere for testing
-        const fallbackLat = 61.472768; // User's known location
-        const fallbackLng = 23.724032;
+        // Use a random world location for testing
+        const randomLocation = this.generateRandomWorldLocation();
+        const fallbackLat = randomLocation.lat; // Random world location
+        const fallbackLng = randomLocation.lng;
         const fallbackAccuracy = 1000; // 1km accuracy for fallback
         
         console.log(`📍 Fallback Position: ${fallbackLat}, ${fallbackLng} (accuracy: ${fallbackAccuracy}m)`);
@@ -2742,7 +2979,9 @@ class LegacyEldritchSanctuaryApp {
     enableDeviceMode() {
         console.log('📍 Enabling device location mode');
         this.stopRandomWandering(); // Stop random wandering
+        // [BRDC DEPRECATED] Legacy geolocationManager - use gpsCore instead
         if (window.geolocationManager) {
+            console.warn('📍 [DEPRECATED] Using legacy geolocationManager.startTracking() - migrate to gpsCore');
             window.geolocationManager.startTracking();
         }
         if (window.mapEngine) {
@@ -2820,8 +3059,8 @@ class LegacyEldritchSanctuaryApp {
         this.systems.geolocation = new GeolocationManager();
         this.systems.geolocation.init();
         
-        // Start tracking automatically
-        this.systems.geolocation.startTracking();
+        // Request GPS permission first, then start tracking
+        this.initializeGeolocationWithPermission();
         
         // Initialize layered rendering system FIRST
         this.systems.layeredRendering = new LayeredRenderingSystem();
@@ -3108,7 +3347,9 @@ class LegacyEldritchSanctuaryApp {
         window.eldritchApp = this;
         window.cosmicEffects = this.systems.cosmicEffects;
         window.sanityDistortion = this.systems.sanityDistortion;
+        // [BRDC DEPRECATED] Legacy geolocationManager - use gpsCore instead
         window.geolocationManager = this.systems.geolocation;
+        console.warn('🌌 [DEPRECATED] Setting legacy geolocationManager - migrate to gpsCore');
         window.mapEngine = this.systems.mapEngine;
         console.log('🌌 Setting window.mapEngine:', !!window.mapEngine);
         console.log('🌌 Map engine instance:', window.mapEngine);

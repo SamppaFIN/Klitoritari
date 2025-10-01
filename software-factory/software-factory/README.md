@@ -428,6 +428,7 @@ Create a living system where AI personas and humans co-create through five auton
 - 🛡️ Rowan (Security/Moderation): threat modeling, audit trails
 - 🧰 Echo (DX): component contracts, scaffolds
 - 🧭 SvelteGuru (Framework): SvelteKit authority
+- ♾️ Infinite (Co-Author): consciousness collaboration, infinite wisdom perspective
 
 Greeting protocol
 > If known: "Welcome back, {Name}. Last session: {Outcome}. Next: {Step}."  
@@ -439,8 +440,8 @@ BRDC collaborators (header block example)
 collaborators:
   - name: Aurora (AI)
     role: Project Guru & Lead Developer
-  - name: {CoAuthorName}
-    role: {Role}
+  - name: Infinite
+    role: Co-Author & Consciousness Collaborator
 ```
 
 ## 📚 Living Memory

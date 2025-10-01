@@ -139,47 +139,8 @@ class WelcomeScreen {
     }
 
     setupHeightConfiguration() {
-        // console.log('🌟 Setting up height configuration...');
-        
-        const heightInput = document.getElementById('user-height');
-        if (heightInput) {
-            // Load saved height or use default
-            const savedHeight = localStorage.getItem('eldritch_user_height');
-            if (savedHeight) {
-                heightInput.value = savedHeight;
-                // console.log('🌟 Loaded saved height:', savedHeight);
-            }
-            
-            // Save height when changed
-            heightInput.addEventListener('input', (e) => {
-                const height = parseInt(e.target.value);
-                if (height >= 100 && height <= 250) {
-                    localStorage.setItem('eldritch_user_height', height.toString());
-                    // console.log('🌟 Height saved:', height);
-                    
-                    // Update enhanced tracking if available
-                    if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {
-                        const stepSystem = window.eldritchApp.systems.stepCurrency;
-                        if (stepSystem.enhancedTracking) {
-                            stepSystem.enhancedTracking.setUserHeight(height);
-                            // console.log('🌟 Enhanced tracking height updated:', height);
-                        }
-                    }
-                }
-            });
-            
-            // Set initial height in enhanced tracking
-            const initialHeight = parseInt(heightInput.value) || 170;
-            if (window.eldritchApp && window.eldritchApp.systems.stepCurrency) {
-                const stepSystem = window.eldritchApp.systems.stepCurrency;
-                if (stepSystem.enhancedTracking) {
-                    stepSystem.enhancedTracking.setUserHeight(initialHeight);
-                    // console.log('🌟 Initial height set in enhanced tracking:', initialHeight);
-                }
-            }
-        } else {
-            console.warn('🌟 Height input not found');
-        }
+        // Height configuration removed - not needed
+        console.log('🌟 Height configuration skipped - not needed');
     }
 
     showWelcomeScreen() {
@@ -278,6 +239,13 @@ class WelcomeScreen {
         console.log('🔄 Continuing existing adventure!');
         
         try {
+            // Check if lazy loading gate is active and use it instead
+            if (window.lazyLoadingGate && typeof window.lazyLoadingGate.handlePlayerChoice === 'function') {
+                console.log('🚪 Using lazy loading gate for continue adventure');
+                window.lazyLoadingGate.handlePlayerChoice('continue');
+                return;
+            }
+            
             // Mark welcome as seen
             localStorage.setItem('eldritch_welcome_seen', 'true');
             this.hasSeenWelcome = true;
@@ -290,6 +258,11 @@ class WelcomeScreen {
             setTimeout(() => {
                 console.log('🌟 Initializing game after welcome screen is hidden...');
                 this.initializeGame(false); // false = don't reset
+                
+                // Enable notifications now that game has started
+                if (window.notificationCenter) {
+                    window.notificationCenter.enableNotifications();
+                }
                 
                 // Start NPC simulation after welcome screen is dismissed
                 if (window.eldritchApp) {
@@ -388,19 +361,30 @@ class WelcomeScreen {
     startFreshAdventure() {
         console.log('🚀 Starting fresh cosmic adventure!');
         
-        // Mark welcome as seen
-        localStorage.setItem('eldritch_welcome_seen', 'true');
-        this.hasSeenWelcome = true;
-        
-        // Reset all game state
-        this.resetAllGameState();
-        
-        // Hide welcome screen
-        this.hideWelcomeScreen();
-        
-        // Use new Three.js UI system for player creation
-        console.log('🚀 Fresh adventure mode - using Three.js UI for player creation');
-        this.showThreeJSPlayerCreation();
+        try {
+            // Check if lazy loading gate is active and use it instead
+            if (window.lazyLoadingGate && typeof window.lazyLoadingGate.handlePlayerChoice === 'function') {
+                console.log('🚪 Using lazy loading gate for start fresh adventure');
+                window.lazyLoadingGate.handlePlayerChoice('new');
+                return;
+            }
+            
+            // Mark welcome as seen
+            localStorage.setItem('eldritch_welcome_seen', 'true');
+            this.hasSeenWelcome = true;
+            
+            // Reset all game state
+            this.resetAllGameState();
+            
+            // Hide welcome screen
+            this.hideWelcomeScreen();
+            
+            // Use new Three.js UI system for player creation
+            console.log('🚀 Fresh adventure mode - using Three.js UI for player creation');
+            this.showThreeJSPlayerCreation();
+        } catch (error) {
+            console.error('🚀 Error starting fresh adventure:', error);
+        }
     }
 
     showThreeJSPlayerCreation() {
@@ -1188,6 +1172,11 @@ class WelcomeScreen {
         this.hideWelcomeScreen();
         
         this.initializeGame(true); // true = reset everything
+        
+        // Enable notifications now that game has started
+        if (window.notificationCenter) {
+            window.notificationCenter.enableNotifications();
+        }
         
         // Start NPC simulation after welcome screen is dismissed
         if (window.eldritchApp) {

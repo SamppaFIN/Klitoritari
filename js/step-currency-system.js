@@ -1766,6 +1766,12 @@ class StepCurrencySystem {
         console.log('🌍 1000 steps reached - new area unlocked!');
         console.log('🏗️ Base establishment now available!');
         
+        // Don't show notifications during welcome screen
+        if (this.isWelcomeScreenActive()) {
+            console.log('🏗️ Welcome screen active, deferring base establishment notification');
+            return;
+        }
+        
         // Play sound effect
         if (window.soundManager) window.soundManager.playTerrifyingBling();
         
@@ -1890,6 +1896,12 @@ class StepCurrencySystem {
                 console.log('🏗️ Welcome screen element found and visible:', element.id || element.className);
                 return true;
             }
+        }
+        
+        // Also check if notifications are disabled (game not started yet)
+        if (window.notificationCenter && !window.notificationCenter.gameStarted) {
+            console.log('🏗️ Notifications disabled - game not started yet');
+            return true; // Treat as welcome screen active
         }
         
         console.log('🏗️ No welcome screen elements found or visible');
@@ -2290,6 +2302,9 @@ class StepCurrencySystem {
                 }
             } catch (_) {}
             
+            // Update UI panels after base establishment
+            this.updateUIAfterBaseEstablishment();
+            
             // Broadcast to server
             this.syncStepsToServer();
             
@@ -2298,6 +2313,35 @@ class StepCurrencySystem {
             console.warn('⚠️ Could not get position for base establishment');
             return false;
         }
+    }
+    
+    updateUIAfterBaseEstablishment() {
+        console.log('🔄 Updating UI after base establishment...');
+        
+        // Update tablist if available
+        if (window.tablist && window.tablist.updateBaseInfo) {
+            console.log('🔄 Updating tablist base info...');
+            window.tablist.updateBaseInfo();
+        }
+        
+        // Update ThreeJS UI if available
+        if (window.threejsUI && window.threejsUI.updateBaseInfo) {
+            console.log('🔄 Updating ThreeJS UI base info...');
+            window.threejsUI.updateBaseInfo();
+        }
+        
+        // Update UI panels if available
+        if (window.UIPanels && window.UIPanels.updateBaseInfo) {
+            console.log('🔄 Updating UI panels base info...');
+            window.UIPanels.updateBaseInfo();
+        }
+        
+        // Trigger custom event for other systems to listen
+        document.dispatchEvent(new CustomEvent('baseEstablished', {
+            detail: { baseData: JSON.parse(localStorage.getItem('playerBase') || '{}') }
+        }));
+        
+        console.log('🔄 UI update completed after base establishment');
     }
     
     createBaseMarkerOnMap(position) {
@@ -2897,6 +2941,19 @@ window.testMilestoneChecking = () => {
     }
 };
 
+/**
+ * Generate a random world location for testing purposes
+ * @returns {Object} Random coordinates with lat/lng
+ */
+function generateRandomWorldLocation() {
+    // Generate random coordinates within reasonable world bounds
+    const lat = (Math.random() - 0.5) * 180; // -90 to 90 degrees
+    const lng = (Math.random() - 0.5) * 360; // -180 to 180 degrees
+    
+    console.log(`🌍 Generated random world location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+    return { lat: lat, lng: lng };
+}
+
 // Debug function to test base marker creation
 window.testBaseMarker = () => {
     console.log('🧪 Testing base marker creation...');
@@ -2907,7 +2964,7 @@ window.testBaseMarker = () => {
         testPosition = window.mapLayer.getCurrentPlayerPosition();
         console.log('🧪 Using player position for base marker:', testPosition);
     } else {
-        testPosition = { lat: 61.472768, lng: 23.724032 }; // Default position
+        testPosition = generateRandomWorldLocation(); // Random world location
         console.log('🧪 Using default position for base marker:', testPosition);
     }
     

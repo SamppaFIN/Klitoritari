@@ -34,7 +34,7 @@ class NPCSystem {
     }
 
     startSimulation() {
-        console.log('ðŸ'¥ Starting NPC simulation...');
+        console.log('🔥 Starting NPC simulation...');
         this.generateNPCs();
         this.startNPCMovement();
         this.startProximityDetection();

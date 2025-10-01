@@ -55,6 +55,21 @@ class HeaderIntegration {
             });
         }
         
+        // GPS location click handler
+        const gpsLocation = document.querySelector('.gps-location');
+        if (gpsLocation) {
+            gpsLocation.addEventListener('click', () => {
+                this.requestGPSLocation();
+            });
+            
+            gpsLocation.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.requestGPSLocation();
+                }
+            });
+        }
+        
         // Base flag click handler
         const baseFlag = document.querySelector('.base-flag');
         if (baseFlag) {
@@ -426,12 +441,403 @@ class HeaderIntegration {
     }
     
     /**
+     * Request GPS location
+     */
+    requestGPSLocation() {
+        console.log('📍 Requesting GPS location...');
+        
+        // Update GPS status to loading
+        this.updateGPSStatus('loading', 'Loading...');
+        
+        // Check if we have permission first
+        if (navigator.permissions) {
+            navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+                if (result.state === 'denied') {
+                    console.log('📍 GPS permission denied, showing permission request...');
+                    this.showGPSPermissionRequest();
+                    return;
+                }
+                this.attemptGPSLocation();
+            }).catch(() => {
+                // Fallback if permissions API not available
+                this.attemptGPSLocation();
+            });
+        } else {
+            this.attemptGPSLocation();
+        }
+    }
+    
+    attemptGPSLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    console.log('📍 GPS location acquired:', position);
+                    this.updateGPSStatus('acquired', 'GPS');
+                    
+                    // Update player position if geolocation manager is available
+                    if (window.geolocationManager) {
+                        window.geolocationManager.handlePositionUpdate({
+                            coords: {
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude,
+                                accuracy: position.coords.accuracy
+                            },
+                            timestamp: position.timestamp
+                        });
+                    }
+                    
+                    // Show success notification
+                    this.showNotification('GPS location acquired!', 'success');
+                },
+                (error) => {
+                    console.error('📍 GPS error:', error);
+                    this.updateGPSStatus('error', 'Error');
+                    
+                    // Show error notification
+                    let errorMessage = 'GPS access denied';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'GPS permission denied - please allow location access';
+                            this.showGPSPermissionRequest();
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'GPS position unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'GPS request timeout';
+                            break;
+                    }
+                    this.showNotification(errorMessage, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                }
+            );
+        } else {
+            console.error('📍 Geolocation not supported');
+            this.updateGPSStatus('error', 'N/A');
+            this.showNotification('GPS not supported on this device', 'error');
+        }
+    }
+    
+    showGPSPermissionRequest() {
+        // Show a simplified permission request
+        const modal = document.createElement('div');
+        modal.className = 'gps-permission-request';
+        modal.innerHTML = `
+            <div class="gps-permission-request-content">
+                <div class="gps-icon">📍</div>
+                <h3>Location Access Required</h3>
+                <p>Please allow location access in your browser settings to use GPS features.</p>
+                <button onclick="this.closest('.gps-permission-request').remove()">OK</button>
+            </div>
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            .gps-permission-request {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            }
+            
+            .gps-permission-request-content {
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border: 2px solid #4a9eff;
+                border-radius: 10px;
+                padding: 20px;
+                text-align: center;
+                color: white;
+                max-width: 300px;
+            }
+            
+            .gps-icon {
+                font-size: 32px;
+                margin-bottom: 10px;
+            }
+            
+            .gps-permission-request-content button {
+                background: #4a9eff;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-top: 15px;
+            }
+        `;
+        
+        document.head.appendChild(style);
+        document.body.appendChild(modal);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.remove();
+                style.remove();
+            }
+        }, 5000);
+    }
+    
+    /**
+     * Update GPS status display
+     */
+    updateGPSStatus(status, text) {
+        const gpsLocation = document.querySelector('.gps-location');
+        const gpsStatus = document.querySelector('.gps-status');
+        
+        if (gpsLocation && gpsStatus) {
+            // Remove existing status classes
+            gpsLocation.classList.remove('gps-acquired', 'gps-error');
+            
+            // Add new status class
+            if (status === 'acquired') {
+                gpsLocation.classList.add('gps-acquired');
+            } else if (status === 'error') {
+                gpsLocation.classList.add('gps-error');
+            }
+            
+            // Update status text
+            gpsStatus.textContent = text;
+        }
+    }
+    
+    /**
      * Show base flag selection modal
      */
     showBaseFlagSelection() {
-        // For now, just show a notification
-        // Later this can be expanded to show a flag selection modal
-        this.showNotification('Base Flag Selection - Coming Soon!', 'info');
+        console.log('🏳️ Showing base flag selection...');
+        
+        // Create flag selection modal
+        const modal = document.createElement('div');
+        modal.className = 'flag-selection-modal';
+        modal.innerHTML = `
+            <div class="flag-selection-content">
+                <div class="flag-selection-header">
+                    <h3>🏳️ Choose Base Flag</h3>
+                    <button class="close-flag-modal" onclick="this.closest('.flag-selection-modal').remove()">×</button>
+                </div>
+                <div class="flag-options">
+                    <div class="flag-option" data-flag="finnish" onclick="window.headerIntegration.selectFlag('finnish')">
+                        <img src="assets/svg/flag_finland.svg" alt="Finnish Flag" class="flag-preview">
+                        <span>🇫🇮 Finland</span>
+                    </div>
+                    <div class="flag-option" data-flag="swedish" onclick="window.headerIntegration.selectFlag('swedish')">
+                        <span class="flag-emoji">🇸🇪</span>
+                        <span>Sweden</span>
+                    </div>
+                    <div class="flag-option" data-flag="norwegian" onclick="window.headerIntegration.selectFlag('norwegian')">
+                        <span class="flag-emoji">🇳🇴</span>
+                        <span>Norway</span>
+                    </div>
+                    <div class="flag-option" data-flag="flower_of_life" onclick="window.headerIntegration.selectFlag('flower_of_life')">
+                        <span class="flag-emoji">✳️</span>
+                        <span>Flower of Life</span>
+                    </div>
+                    <div class="flag-option" data-flag="star" onclick="window.headerIntegration.selectFlag('star')">
+                        <span class="flag-emoji">⭐</span>
+                        <span>Star</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .flag-selection-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                backdrop-filter: blur(10px);
+            }
+            
+            .flag-selection-content {
+                background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(40, 20, 60, 0.95));
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 16px;
+                padding: 24px;
+                max-width: 400px;
+                width: 90%;
+                backdrop-filter: blur(20px);
+            }
+            
+            .flag-selection-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            
+            .flag-selection-header h3 {
+                color: #00ffff;
+                margin: 0;
+                text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+            
+            .close-flag-modal {
+                background: none;
+                border: none;
+                color: #fff;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: all 0.3s ease;
+            }
+            
+            .close-flag-modal:hover {
+                background: rgba(255, 255, 255, 0.1);
+                transform: scale(1.1);
+            }
+            
+            .flag-options {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 12px;
+            }
+            
+            .flag-option {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 16px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                text-align: center;
+            }
+            
+            .flag-option:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(0, 255, 255, 0.5);
+                transform: translateY(-2px);
+            }
+            
+            .flag-preview {
+                width: 32px;
+                height: 24px;
+                margin-bottom: 8px;
+                border-radius: 4px;
+            }
+            
+            .flag-emoji {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+            
+            .flag-option span:last-child {
+                color: #fff;
+                font-size: 12px;
+                font-weight: bold;
+            }
+        `;
+        
+        document.head.appendChild(style);
+        document.body.appendChild(modal);
+        
+        // Remove style when modal is closed
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+                style.remove();
+            }
+        });
+    }
+    
+    /**
+     * Select a flag
+     */
+    selectFlag(flagType) {
+        console.log('🏳️ Selecting flag:', flagType);
+        
+        // Store flag selection
+        localStorage.setItem('eldritch_player_base_logo', flagType);
+        
+        // Update flag display
+        this.updateFlagDisplay(flagType);
+        
+        // Close modal
+        const modal = document.querySelector('.flag-selection-modal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        // Show success notification
+        this.showNotification(`Flag changed to ${flagType}!`, 'success');
+        
+        // Update map markers if available
+        if (window.mapLayer && window.mapLayer.updateBaseMarkerFlag) {
+            window.mapLayer.updateBaseMarkerFlag(flagType);
+        }
+    }
+    
+    /**
+     * Update flag display
+     */
+    updateFlagDisplay(flagType) {
+        const baseFlag = document.querySelector('.base-flag');
+        if (!baseFlag) return;
+        
+        const flagIcon = baseFlag.querySelector('.flag-icon');
+        if (flagIcon) {
+            // Update flag based on type
+            switch(flagType) {
+                case 'finnish':
+                    flagIcon.src = 'assets/svg/flag_finland.svg';
+                    flagIcon.alt = 'Finnish Flag';
+                    break;
+                case 'swedish':
+                    flagIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjMDA2FAA4Ii8+CjxwYXRoIGQ9Ik0wIDcuNUgyNFYxMC41SDBWNy41WiIgZmlsbD0iI0ZGRkZGRiIvPgo8cGF0aCBkPSJNOC41IDBIMTUuNVYxOEg4LjVWMFoiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+';
+                    flagIcon.alt = 'Swedish Flag';
+                    break;
+                case 'norwegian':
+                    flagIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAyNCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjI0IiBoZWlnaHQ9IjE4IiBmaWxsPSIjRkZGRkZGIi8+CjxyZWN0IHdpZHRoPSIyNCIgaGVpZ2h0PSI0LjUiIGZpbGw9IiNGRkAwMDAiLz4KPHJlY3QgeT0iMTMuNSIgd2lkdGg9IjI0IiBoZWlnaHQ9IjQuNSIgZmlsbD0iI0ZGQDAwMCIvPgo8cmVjdCB4PSI2IiB3aWR0aD0iNCIgaGVpZ2h0PSIxOCIgZmlsbD0iI0ZGQDAwMCIvPgo8cmVjdCB4PSIxNCIgd2lkdGg9IjQiIGhlaWdodD0iMTgiIGZpbGw9IiNGRkAwMDAiLz4KPC9zdmc+';
+                    flagIcon.alt = 'Norwegian Flag';
+                    break;
+                default:
+                    // For emoji flags, replace img with span
+                    const emoji = this.getFlagEmoji(flagType);
+                    baseFlag.innerHTML = `<span class="flag-emoji">${emoji}</span>`;
+                    return;
+            }
+        }
+    }
+    
+    /**
+     * Get flag emoji for a flag type
+     */
+    getFlagEmoji(flagType) {
+        switch(flagType) {
+            case 'swedish': return '🇸🇪';
+            case 'norwegian': return '🇳🇴';
+            case 'flower_of_life': return '✳️';
+            case 'star': return '⭐';
+            default: return '🇫🇮';
+        }
     }
     
     /**

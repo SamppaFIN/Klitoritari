@@ -25,8 +25,67 @@ class MapLayer extends BaseLayer {
         this.overlays = new Map();
         this.mapReady = false;
         this.mapContainer = null;
-        this.initialPosition = { lat: 61.472768, lng: 23.724032 }; // Fallback position
+        // Try to get GPS position first, fallback to random if not available
+        this.initialPosition = this.getInitialPosition();
         this.initialZoom = 18;
+    }
+
+    /**
+     * Get initial position - try GPS first, fallback to random
+     * @returns {Object} Coordinates with lat/lng
+     */
+    getInitialPosition() {
+        // Try to get GPS position from lazy loading gate
+        if (window.playerPosition && window.playerPosition.lat && window.playerPosition.lng) {
+            console.log(`🗺️ MapLayer: Using GPS position from lazy loading gate: ${window.playerPosition.lat}, ${window.playerPosition.lng}`);
+            return {
+                lat: window.playerPosition.lat,
+                lng: window.playerPosition.lng,
+                accuracy: window.playerPosition.accuracy
+            };
+        }
+        
+        // Try to get GPS position from GPS Core
+        if (window.gpsCore && typeof window.gpsCore.getCurrentPosition === 'function') {
+            const gpsPosition = window.gpsCore.getCurrentPosition();
+            if (gpsPosition && gpsPosition.lat && gpsPosition.lng) {
+                console.log(`🗺️ MapLayer: Using GPS position from GPS Core: ${gpsPosition.lat}, ${gpsPosition.lng}`);
+                return gpsPosition;
+            }
+        }
+        
+        // Try to get position from localStorage
+        const storedPosition = localStorage.getItem('eldritch_player_position');
+        if (storedPosition) {
+            try {
+                const position = JSON.parse(storedPosition);
+                if (position.lat && position.lng) {
+                    console.log(`🗺️ MapLayer: Using stored GPS position: ${position.lat}, ${position.lng}`);
+                    return position;
+                }
+            } catch (error) {
+                console.warn('🗺️ MapLayer: Error parsing stored position:', error);
+            }
+        }
+        
+        // Fallback to random world location
+        console.log('🗺️ MapLayer: No GPS position available, using random world location');
+        const randomPosition = this.generateRandomWorldLocation();
+        randomPosition.isRandom = true; // Mark as random for identification
+        return randomPosition;
+    }
+
+    /**
+     * Generate a random world location for testing purposes
+     * @returns {Object} Random coordinates with lat/lng
+     */
+    generateRandomWorldLocation() {
+        // Generate random coordinates within reasonable world bounds
+        const lat = (Math.random() - 0.5) * 180; // -90 to 90 degrees
+        const lng = (Math.random() - 0.5) * 360; // -180 to 180 degrees
+        
+        console.log(`🌍 Generated random world location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+        return { lat: lat, lng: lng };
     }
 
     init() {
@@ -70,7 +129,7 @@ class MapLayer extends BaseLayer {
         window.testBaseMarker = () => {
             if (this.map && this.mapReady) {
                 console.log('🗺️ Testing base marker creation...');
-                const testPosition = { lat: 61.472768, lng: 23.724032 };
+                const testPosition = this.generateRandomWorldLocation();
                 const baseIcon = L.divIcon({
                     className: 'base-marker multilayered',
                     html: `<div style="position: relative; width: 40px; height: 40px;">
@@ -104,7 +163,7 @@ class MapLayer extends BaseLayer {
         // Add function to manually set player location to Nekala
         window.setPlayerLocationNekala = () => {
             if (this.map && this.mapReady) {
-                const nekalaPosition = { lat: 61.472768, lng: 23.724032 };
+                const nekalaPosition = this.generateRandomWorldLocation();
                 console.log('🗺️ Manually setting player location to Nekala:', nekalaPosition);
                 this.updatePlayerMarker(nekalaPosition);
                 this.map.setView(nekalaPosition, 18);
@@ -279,6 +338,11 @@ class MapLayer extends BaseLayer {
         this.map.whenReady(() => {
             console.log('🗺️ MapLayer: Map is ready');
             this.mapReady = true;
+            
+            // Update player marker with GPS position if available
+            setTimeout(() => {
+                this.updatePlayerMarkerWithGPSPosition();
+            }, 100); // Small delay to ensure everything is initialized
         });
 
         // Map move event
@@ -626,13 +690,33 @@ class MapLayer extends BaseLayer {
     initializePlayerMarker() {
         console.log('🗺️ MapLayer: Initializing player marker...');
         
-        // Listen for geolocation position updates
+        // Listen for position updates from lazy loading gate
         if (this.eventBus) {
-            this.eventBus.on('geolocation:position:update', this.handlePositionUpdate.bind(this));
+            this.eventBus.on('player:position:updated', this.handlePositionUpdate.bind(this));
+            this.eventBus.on('geolocation:position:update', this.handlePositionUpdate.bind(this)); // Legacy support
         }
         
         // Create initial player marker at default position
         this.createPlayerMarker(this.initialPosition);
+        
+        // If GPS position is available, update the marker immediately
+        this.updatePlayerMarkerWithGPSPosition();
+    }
+
+    updatePlayerMarkerWithGPSPosition() {
+        // Try to get current GPS position and update marker
+        const gpsPosition = this.getInitialPosition();
+        
+        // Only update if we got a GPS position (not random fallback)
+        if (gpsPosition && gpsPosition.lat && gpsPosition.lng && 
+            !gpsPosition.isRandom && this.map && this.mapReady) {
+            
+            console.log('🗺️ MapLayer: Updating player marker with GPS position:', gpsPosition);
+            this.updatePlayerMarker(gpsPosition);
+        } else if (window.playerPosition && window.playerPosition.lat && window.playerPosition.lng) {
+            console.log('🗺️ MapLayer: Updating player marker with window.playerPosition:', window.playerPosition);
+            this.updatePlayerMarker(window.playerPosition);
+        }
     }
 
     handlePositionUpdate(position) {
@@ -989,27 +1073,27 @@ class MapLayer extends BaseLayer {
             }
         })();
 
-        // Create base marker icon using EXACT same approach as path markers
+        // Create base marker icon - TINY for starters
         const baseIcon = L.divIcon({
             className: 'base-marker',
             html: `
                 <div style="
-                    width: 30px; 
-                    height: 30px; 
+                    width: 16px; 
+                    height: 16px; 
                     background: #8b5cf6; 
-                    border: 3px solid #ffffff; 
+                    border: 2px solid #ffffff; 
                     border-radius: 50%; 
                     display: flex; 
                     align-items: center; 
                     justify-content: center; 
-                    font-size: 16px;
+                    font-size: 10px;
                     color: white;
-                    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                    text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
                 ">${baseEmoji}</div>
             `,
-            iconSize: [30, 30],
-            iconAnchor: [15, 15]
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
         });
 
         // DEBUG: Log base marker details (same as path markers)

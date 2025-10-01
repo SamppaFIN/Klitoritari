@@ -738,8 +738,8 @@ class SimpleBaseInit {
 // Make it globally available as an instance
 window.SimpleBaseInit = new SimpleBaseInit();
 
-// Initialize the instance
-window.SimpleBaseInit.init();
+// Initialize the instance only when explicitly requested (not during startup)
+// window.SimpleBaseInit.init();
 
 // Expose global functions for UI buttons
 window.establishBaseAtCurrentLocation = () => {

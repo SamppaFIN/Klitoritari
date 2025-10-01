@@ -1,4 +1,17 @@
 ﻿/**
+ * Generate a random world location for testing purposes
+ * @returns {Object} Random coordinates with lat/lng
+ */
+function generateRandomWorldLocation() {
+    // Generate random coordinates within reasonable world bounds
+    const lat = (Math.random() - 0.5) * 180; // -90 to 90 degrees
+    const lng = (Math.random() - 0.5) * 360; // -180 to 180 degrees
+    
+    console.log(`🌍 Generated random world location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+    return { lat: lat, lng: lng };
+}
+
+/**
  * GameState - Central state management for the layered architecture
  * Manages all game data in a single, immutable state object
  */
@@ -19,7 +32,7 @@ class GameState {
             
             // Map state
             map: {
-                center: { lat: 61.472768, lng: 23.724032 }, // Default to Tampere
+                center: generateRandomWorldLocation(), // Random world location
                 zoom: 13,
                 activeOverlays: [],
                 viewport: { width: 0, height: 0 }
@@ -247,7 +260,7 @@ class GameState {
             quests: new Map(),
             npcs: new Map(),
             encounters: [],
-            map: { center: { lat: 61.472768, lng: 23.724032 }, zoom: 13, activeOverlays: [], viewport: { width: 0, height: 0 } },
+            map: { center: generateRandomWorldLocation(), zoom: 13, activeOverlays: [], viewport: { width: 0, height: 0 } },
             ui: { activeModal: null, notifications: [], debugMode: false, selectedTab: 'base' },
             system: { isInitialized: false, isPaused: false, lastUpdate: Date.now(), performance: { fps: 0, memoryUsage: 0, renderTime: 0 } }
         };

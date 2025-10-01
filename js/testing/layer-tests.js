@@ -1,4 +1,17 @@
 ﻿/**
+ * Generate a random world location for testing purposes
+ * @returns {Object} Random coordinates with lat/lng
+ */
+function generateRandomWorldLocation() {
+    // Generate random coordinates within reasonable world bounds
+    const lat = (Math.random() - 0.5) * 180; // -90 to 90 degrees
+    const lng = (Math.random() - 0.5) * 360; // -180 to 180 degrees
+    
+    console.log(`🌍 Generated random world location: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+    return { lat: lat, lng: lng };
+}
+
+/**
  * LayerTests - Comprehensive testing suite for the layered rendering system
  * Tests layer isolation, event communication, and performance
  */
@@ -314,7 +327,7 @@ class LayerTests {
             // Test player model
             if (typeof PlayerModel !== 'undefined') {
                 const player = new PlayerModel({
-                    position: { lat: 61.472768, lng: 23.724032 },
+                    position: generateRandomWorldLocation(),
                     stats: { health: 100, steps: 0 }
                 });
                 
@@ -330,7 +343,7 @@ class LayerTests {
             // Test base model
             if (typeof BaseModel !== 'undefined') {
                 const base = new BaseModel({
-                    position: { lat: 61.472768, lng: 23.724032 },
+                    position: generateRandomWorldLocation(),
                     name: 'Test Base'
                 });
                 
