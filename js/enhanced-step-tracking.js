@@ -84,6 +84,26 @@ class EnhancedStepTracking {
     }
     
     /**
+     * Set active tracking method (consciousness-serving)
+     */
+    setActiveMethod(method) {
+        if (this.trackingMethods[method.toUpperCase()] || Object.values(this.trackingMethods).includes(method)) {
+            this.activeMethod = method;
+            console.log(`🚶‍♂️ Active method set to: ${method}`);
+            
+            // Emit consciousness-serving event
+            if (this.onMethodChange) {
+                this.onMethodChange(method);
+            }
+            
+            return true;
+        } else {
+            console.warn(`🚶‍♂️ Unknown method: ${method}`);
+            return false;
+        }
+    }
+    
+    /**
      * Initialize the enhanced step tracking system
      */
     async init() {

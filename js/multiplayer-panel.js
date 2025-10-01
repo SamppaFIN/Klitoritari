@@ -32,8 +32,9 @@ class MultiplayerPanel {
     this._attachClient();
     this._refresh();
 
-    // periodic refresh fallback
-    setInterval(()=> this._refresh(), 3000);
+    // Consciousness-Serving: Enhanced multiplayer position updates
+    this.positionUpdateInterval = setInterval(() => this._updatePlayerPositions(), 10000); // Every 10 seconds
+    this.refreshInterval = setInterval(() => this._refresh(), 3000); // Keep existing refresh
   }
 
   _toggle() {
@@ -68,6 +69,109 @@ class MultiplayerPanel {
       // others
       others.forEach(p => this._appendRow(p));
     } catch (e) { /* noop */ }
+  }
+  
+  /**
+   * Consciousness-Serving: Update player positions every 10 seconds
+   * Promotes community connection and spatial awareness
+   */
+  _updatePlayerPositions() {
+    console.log('👥 Multiplayer: Updating player positions (consciousness-serving)');
+    
+    if (!window.websocketClient) {
+      console.log('👥 Multiplayer: WebSocket client not available');
+      return;
+    }
+    
+    // Get current player position
+    const currentPosition = this._getCurrentPlayerPosition();
+    if (!currentPosition) {
+      console.log('👥 Multiplayer: No current position available');
+      return;
+    }
+    
+    // Send position update to server (consciousness-serving)
+    try {
+      // Use the correct WebSocket method for position updates
+      if (typeof window.websocketClient.sendPositionUpdate === 'function') {
+        window.websocketClient.sendPositionUpdate({
+          ...currentPosition,
+          timestamp: Date.now(),
+          consciousnessLevel: 'community_connection'
+        });
+      } else if (typeof window.websocketClient.send === 'function') {
+        // Fallback to generic send method
+        window.websocketClient.send(JSON.stringify({
+          type: 'position_update',
+          payload: {
+            ...currentPosition,
+            timestamp: Date.now(),
+            consciousnessLevel: 'community_connection'
+          }
+        }));
+      } else {
+        console.log('👥 Multiplayer: No position update method available');
+        return;
+      }
+      
+      console.log('👥 Multiplayer: Position update sent:', currentPosition);
+      
+      // Emit consciousness-serving event
+      if (window.EventBus && typeof window.EventBus.emit === 'function') {
+        window.EventBus.emit('multiplayer:position:updated', {
+          position: currentPosition,
+          timestamp: Date.now(),
+          consciousnessLevel: 'community_connection'
+        });
+      }
+      
+    } catch (error) {
+      console.error('👥 Multiplayer: Error sending position update:', error);
+    }
+  }
+  
+  /**
+   * Get current player position from available sources
+   */
+  _getCurrentPlayerPosition() {
+    // Try multiple sources for player position
+    if (window.playerPosition && window.playerPosition.lat && window.playerPosition.lng) {
+      return {
+        lat: window.playerPosition.lat,
+        lng: window.playerPosition.lng,
+        accuracy: window.playerPosition.accuracy
+      };
+    }
+    
+    if (window.gpsCore && typeof window.gpsCore.getCurrentPosition === 'function') {
+      const gpsPosition = window.gpsCore.getCurrentPosition();
+      if (gpsPosition && gpsPosition.lat && gpsPosition.lng) {
+        return {
+          lat: gpsPosition.lat,
+          lng: gpsPosition.lng,
+          accuracy: gpsPosition.accuracy
+        };
+      }
+    }
+    
+    // Try to get from localStorage
+    try {
+      const saved = localStorage.getItem('eldritch_last_gps');
+      if (saved) {
+        const position = JSON.parse(saved);
+        if (position.lat && position.lng) {
+          return {
+            lat: position.lat,
+            lng: position.lng,
+            accuracy: position.accuracy || 0
+          };
+        }
+      }
+    } catch (error) {
+      console.error('👥 Multiplayer: Error reading saved position:', error);
+    }
+    
+    return null;
   }
 
   _appendRow(p) {

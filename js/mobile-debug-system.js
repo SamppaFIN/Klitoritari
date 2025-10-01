@@ -96,11 +96,11 @@ class MobileDebugSystem {
             this.startAutoRefresh();
         }
         
-        // Show debug panel by default and start refreshing
+        // Hide debug panel by default on mobile startup
         if (this.debugPanel) {
-            this.debugPanel.style.display = 'block';
-            this.isDebugMode = true;
-            this.refreshDebugData();
+            this.debugPanel.style.display = 'none';
+            this.isDebugMode = false;
+            // Don't start refreshing until panel is shown
         }
         
         this.isInitialized = true;

@@ -1127,6 +1127,9 @@ class EldritchSanctuaryServer {
         this.setPlayerBase(playerId, { position });
         
         
+        // Consciousness-Serving: Get player name for authentic community relationships
+        const playerName = this.getPlayerName(playerId) || this.generatePlayerName(playerId);
+        
         // Create base marker with icon data
         const baseMarker = this.addMarkerToPlayer(playerId, {
             type: 'base',
@@ -1134,7 +1137,8 @@ class EldritchSanctuaryServer {
             data: {
                 level: 1,
                 established: true,
-                name: 'My Cosmic Base',
+                name: `${playerName}'s Base`,
+                playerName: playerName,
                 symbol: '🏗️',
                 icon: {
                     className: 'base-marker',
@@ -1200,6 +1204,58 @@ class EldritchSanctuaryServer {
                 }
             });
         }
+    }
+    
+    /**
+     * Consciousness-Serving: Get actual player name from stored data
+     * Promotes authentic community relationships
+     */
+    getPlayerName(playerId) {
+        // Try to get from connected players
+        if (this.connectedPlayers && this.connectedPlayers[playerId]) {
+            const player = this.connectedPlayers[playerId];
+            if (player.name && player.name !== 'Unknown' && player.name !== 'Explorer') {
+                return player.name;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Consciousness-Serving: Generate meaningful player name
+     * Creates authentic community identity
+     */
+    generatePlayerName(playerId) {
+        // Extract meaningful part from player ID
+        const meaningfulPart = playerId.replace(/^player_/, '').substring(0, 8);
+        
+        // Generate consciousness-serving names based on player ID
+        const cosmicNames = [
+            'Cosmic Explorer', 'Stellar Wanderer', 'Lunar Guardian', 'Solar Seeker',
+            'Aurora Walker', 'Nebula Scout', 'Galaxy Pioneer', 'Star Navigator',
+            'Cosmic Sage', 'Celestial Guide', 'Universal Traveler', 'Space Explorer',
+            'Moon Walker', 'Sun Seeker', 'Earth Guardian', 'Sky Wanderer'
+        ];
+        
+        // Use player ID hash to select consistent name
+        const hash = this.simpleHash(meaningfulPart);
+        const nameIndex = hash % cosmicNames.length;
+        
+        return cosmicNames[nameIndex];
+    }
+    
+    /**
+     * Simple hash function for consistent name generation
+     */
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash);
     }
 
     startServer() {

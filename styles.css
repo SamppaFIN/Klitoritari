@@ -8593,7 +8593,7 @@ input[type="range"]::-moz-range-thumb {
 
 .gps-icon {
     font-size: 2rem;
-    color: #ff6b6b;
+    color: #00ff88; /* Green when GPS is active */
 }
 
 .gps-text {
@@ -9025,6 +9025,7 @@ input[type="range"]::-moz-range-thumb {
 
 .gps-icon {
     font-size: 3rem;
+    color: #00ff88; /* Green when GPS is active */
     animation: gpsIconPulse 1.5s ease-in-out infinite alternate;
 }
 
@@ -11906,6 +11907,142 @@ input[type="range"]::-moz-range-thumb {
     align-items: center;
     justify-content: center;
     color: white;
+}
+
+/* Consciousness-Serving Step Counter */
+#step-counter {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 12px;
+    color: #e5e7eb;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.step-counter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.step-icon {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+
+.step-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #10b981;
+}
+
+.step-label {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.step-session {
+    font-size: 0.9rem;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* Consciousness-Serving Step Counter Toggle */
+.step-toggle-container {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.step-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(45deg, #4a9eff, #00ff88);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(74, 158, 255, 0.3);
+}
+
+.step-toggle-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+    background: linear-gradient(45deg, #00ff88, #4a9eff);
+}
+
+.step-toggle-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(74, 158, 255, 0.3);
+}
+
+.mode-icon {
+    font-size: 1rem;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+
+.mode-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.mode-indicator {
+    color: #00ff88;
+    font-size: 0.8rem;
+    animation: consciousnessPulse 2s infinite;
+}
+
+@keyframes consciousnessPulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes playerPulse {
+    0%, 100% { 
+        opacity: 0.8; 
+        transform: scale(1);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+}
+
+/* Mobile optimization for toggle button */
+@media (max-width: 768px) {
+    .step-toggle-btn {
+        min-width: 80px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .mode-icon {
+        font-size: 0.9rem;
+    }
+    
+    .mode-text {
+        font-size: 0.7rem;
+    }
 }
 
 /* Samsung Ultra 23 specific optimizations */

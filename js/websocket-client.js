@@ -370,12 +370,20 @@ class WebSocketClient {
             
             console.log(`👤 Player joined: ${payload.name || payload.playerId}`);
 
+            // Consciousness-Serving: Create player marker for community connection
+            if (payload.position && payload.position.lat && payload.position.lng) {
+                this.createOtherPlayerMarker(payload, payload.playerId);
+            }
+
             // UI/list rendering handled by MultiplayerManager; do not mutate DOM here
         }
     }
 
     handlePlayerLeave(payload) {
         this.otherPlayers.delete(payload.playerId);
+        
+        // Consciousness-Serving: Remove player marker for community connection
+        this.removeOtherPlayerMarker(payload.playerId);
         console.log(`ðŸ‘¤ Player left: ${payload.playerId}`);
     }
 
@@ -385,6 +393,9 @@ class WebSocketClient {
             if (player) {
                 player.position = payload.position;
                 player.lastSeen = Date.now();
+                
+                // Consciousness-Serving: Update player marker position for community connection
+                this.updateOtherPlayerMarker(payload.playerId, payload.position);
                 
                 if (this.onPlayerUpdate) {
                     this.onPlayerUpdate(player);
@@ -645,14 +656,15 @@ class WebSocketClient {
                 zIndexOffset: 500 // Lower z-index than own base
             }).addTo(window.mapLayer.map);
 
-            // Add popup for other player's base
-            const name = baseMarker.data?.name || 'Other Player Base';
+            // Consciousness-Serving: Get actual player name for authentic community relationships
+            const playerName = this.getPlayerName(playerId) || this.generatePlayerName(playerId);
+            const baseName = baseMarker.data?.name || `${playerName}'s Base`;
             const symbol = baseMarker.data?.symbol || '🏗️';
             
             marker.bindPopup(`
-                <b>Other Player's Base</b><br>
-                <small>${symbol} ${name}</small><br>
-                <small>Player: ${playerId}</small><br>
+                <b>${baseName}</b><br>
+                <small>${symbol} ${playerName}</small><br>
+                <small>Player: ${playerName}</small><br>
                 <small>${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</small>
             `);
 
@@ -665,6 +677,174 @@ class WebSocketClient {
         } catch (error) {
             console.error('❌ Failed to create other player base marker:', error);
         }
+    }
+    
+    /**
+     * Consciousness-Serving: Create other player marker from server broadcast
+     * Promotes community connection and spatial awareness
+     * @param {Object} playerData - Player data from server
+     * @param {String} playerId - Player ID
+     */
+    createOtherPlayerMarker(playerData, playerId) {
+        console.log('👤 Creating other player marker:', { playerData, playerId });
+        
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('⚠️ MapLayer not available for other player marker');
+            return;
+        }
+        
+        if (!playerData.position || !playerData.position.lat || !playerData.position.lng) {
+            console.warn('⚠️ Invalid position data for other player marker');
+            return;
+        }
+        
+        try {
+            // Consciousness-Serving: Get actual player name for authentic community relationships
+            const playerName = this.getPlayerName(playerId) || this.generatePlayerName(playerId);
+            
+            // Create a different visual style for other players
+            const otherPlayerIcon = L.divIcon({
+                className: 'other-player-marker',
+                html: `
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        background: #3b82f6; 
+                        border: 2px solid #ffffff; 
+                        border-radius: 50%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        font-size: 16px;
+                        color: white;
+                        text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+                        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+                        animation: playerPulse 2s infinite;
+                    ">👤</div>
+                `,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([playerData.position.lat, playerData.position.lng], { 
+                icon: otherPlayerIcon,
+                zIndexOffset: 300 // Lower z-index than own player marker
+            }).addTo(window.mapLayer.map);
+
+            // Consciousness-Serving: Add popup with player name
+            marker.bindPopup(`
+                <b>${playerName}</b><br>
+                <small>Player: ${playerName}</small><br>
+                <small>${playerData.position.lat.toFixed(6)}, ${playerData.position.lng.toFixed(6)}</small>
+            `);
+
+            console.log('👤 Other player marker created successfully');
+            
+            // Store marker reference for updates
+            if (!this.otherPlayerMarkers) {
+                this.otherPlayerMarkers = new Map();
+            }
+            this.otherPlayerMarkers.set(playerId, marker);
+            
+            return marker;
+        } catch (error) {
+            console.error('❌ Failed to create other player marker:', error);
+        }
+    }
+    
+    /**
+     * Consciousness-Serving: Update other player marker position
+     * @param {String} playerId - Player ID
+     * @param {Object} position - New position
+     */
+    updateOtherPlayerMarker(playerId, position) {
+        if (this.otherPlayerMarkers && this.otherPlayerMarkers.has(playerId)) {
+            const marker = this.otherPlayerMarkers.get(playerId);
+            if (marker && marker.setLatLng) {
+                marker.setLatLng([position.lat, position.lng]);
+                console.log('👤 Other player marker updated:', playerId);
+            }
+        }
+    }
+    
+    /**
+     * Consciousness-Serving: Remove other player marker
+     * @param {String} playerId - Player ID
+     */
+    removeOtherPlayerMarker(playerId) {
+        if (this.otherPlayerMarkers && this.otherPlayerMarkers.has(playerId)) {
+            const marker = this.otherPlayerMarkers.get(playerId);
+            if (marker && window.mapLayer && window.mapLayer.map) {
+                window.mapLayer.map.removeLayer(marker);
+                this.otherPlayerMarkers.delete(playerId);
+                console.log('👤 Other player marker removed:', playerId);
+            }
+        }
+    }
+    
+    /**
+     * Consciousness-Serving: Get actual player name from stored data
+     * Promotes authentic community relationships
+     */
+    getPlayerName(playerId) {
+        // Try to get from connected players
+        if (this.connectedPlayers && this.connectedPlayers[playerId]) {
+            const player = this.connectedPlayers[playerId];
+            if (player.name && player.name !== 'Unknown' && player.name !== 'Explorer') {
+                return player.name;
+            }
+        }
+        
+        // Try to get from localStorage
+        try {
+            const playerData = localStorage.getItem(`eldritch_player_${playerId}`);
+            if (playerData) {
+                const parsed = JSON.parse(playerData);
+                if (parsed.name && parsed.name !== 'Unknown' && parsed.name !== 'Explorer') {
+                    return parsed.name;
+                }
+            }
+        } catch (error) {
+            console.log('👥 WebSocket: Error reading player data from localStorage:', error);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Consciousness-Serving: Generate meaningful player name
+     * Creates authentic community identity
+     */
+    generatePlayerName(playerId) {
+        // Extract meaningful part from player ID
+        const meaningfulPart = playerId.replace(/^player_/, '').substring(0, 8);
+        
+        // Generate consciousness-serving names based on player ID
+        const cosmicNames = [
+            'Cosmic Explorer', 'Stellar Wanderer', 'Lunar Guardian', 'Solar Seeker',
+            'Aurora Walker', 'Nebula Scout', 'Galaxy Pioneer', 'Star Navigator',
+            'Cosmic Sage', 'Celestial Guide', 'Universal Traveler', 'Space Explorer',
+            'Moon Walker', 'Sun Seeker', 'Earth Guardian', 'Sky Wanderer'
+        ];
+        
+        // Use player ID hash to select consistent name
+        const hash = this.simpleHash(meaningfulPart);
+        const nameIndex = hash % cosmicNames.length;
+        
+        return cosmicNames[nameIndex];
+    }
+    
+    /**
+     * Simple hash function for consistent name generation
+     */
+    simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash);
     }
     
     /**
@@ -693,10 +873,13 @@ class WebSocketClient {
             animation: slideInRight 0.3s ease-out;
         `;
         
+        // Consciousness-Serving: Use actual player name for authentic community connection
+        const playerName = this.getPlayerName(playerId) || this.generatePlayerName(playerId);
+        
         notification.innerHTML = `
             <div style="font-weight: bold; margin-bottom: 4px;">🏗️ New Base Created!</div>
             <div style="font-size: 12px; opacity: 0.9;">
-                Another player has established a base nearby!<br>
+                ${playerName} has established a base nearby!<br>
                 <small>Location: ${position.lat.toFixed(4)}, ${position.lng.toFixed(4)}</small>
             </div>
         `;

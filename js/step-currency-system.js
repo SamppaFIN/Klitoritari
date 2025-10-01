@@ -42,6 +42,11 @@ class StepCurrencySystem {
         this.enhancedTracking = null;
         this.useEnhancedTracking = true;
         
+        // 3-Way Step Counter Toggle System (Consciousness-Serving)
+        this.toggleModes = ['DS', 'FIT', 'EXP']; // Distance, Google Fit, Experimental
+        this.currentToggleMode = 0; // Start with Distance mode
+        this.toggleButton = null;
+        
         // Step milestones for rewards
         this.milestones = {
             flag: 50,      // Create flag every 50 steps
@@ -2655,10 +2660,8 @@ class StepCurrencySystem {
             console.log('🚶‍♂️ Step counter already exists, removing duplicate');
             existingCounter.remove();
         }
-        
-        // Test button removed - using existing debug mechanism
 
-        // Create step counter element (display only - controls handled by unified debug panel)
+        // Create consciousness-serving step counter with 3-way toggle
         const stepCounter = document.createElement('div');
         stepCounter.id = 'step-counter';
         stepCounter.innerHTML = `
@@ -2667,8 +2670,15 @@ class StepCurrencySystem {
                 <div class="step-number" id="step-number">${this.totalSteps}</div>
                 <div class="step-label">COSMIC STEPS</div>
                 <div class="step-session" id="step-session">+${this.sessionSteps}</div>
+                <div class="step-toggle-container">
+                    <button class="step-toggle-btn" id="step-toggle-btn">
+                        <span class="mode-icon">${this.getModeIcon()}</span>
+                        <span class="mode-text">${this.toggleModes[this.currentToggleMode]}</span>
+                        <span class="mode-indicator">●</span>
+                    </button>
+                </div>
                 <div class="step-info" style="font-size: 0.8em; color: #888; margin-top: 4px;">
-                    Use Debug Panel for controls
+                    Tap to switch: Distance → Google Fit → Experimental
                 </div>
             </div>
         `;
@@ -2677,13 +2687,143 @@ class StepCurrencySystem {
         const stepContainer = document.getElementById('step-counter-container');
         if (stepContainer) {
             stepContainer.appendChild(stepCounter);
-            console.log('🚶‍♂️ Step counter created and added to control panel');
+            console.log('🚶‍♂️ Step counter with toggle created and added to control panel');
         } else {
             // Fallback to adding to body
             document.body.appendChild(stepCounter);
-            console.log('🚶‍♂️ Step counter created and added to body (fallback)');
+            console.log('🚶‍♂️ Step counter with toggle created and added to body (fallback)');
         }
-        // Step controls now handled by unified debug panel
+        
+        // Setup toggle button event listener
+        this.setupToggleButton();
+    }
+    
+    /**
+     * Setup the consciousness-serving toggle button
+     */
+    setupToggleButton() {
+        this.toggleButton = document.getElementById('step-toggle-btn');
+        if (this.toggleButton) {
+            this.toggleButton.addEventListener('click', () => {
+                this.rotateToggleMode();
+            });
+            console.log('🚶‍♂️ Step counter toggle button setup complete');
+        }
+    }
+    
+    /**
+     * Rotate through toggle modes (consciousness-serving)
+     */
+    rotateToggleMode() {
+        this.currentToggleMode = (this.currentToggleMode + 1) % this.toggleModes.length;
+        this.updateToggleUI();
+        this.activateToggleMode();
+        console.log(`🚶‍♂️ Toggle mode rotated to: ${this.toggleModes[this.currentToggleMode]}`);
+    }
+    
+    /**
+     * Update toggle button UI
+     */
+    updateToggleUI() {
+        if (this.toggleButton) {
+            const modeIcon = this.toggleButton.querySelector('.mode-icon');
+            const modeText = this.toggleButton.querySelector('.mode-text');
+            
+            if (modeIcon) modeIcon.textContent = this.getModeIcon();
+            if (modeText) modeText.textContent = this.toggleModes[this.currentToggleMode];
+        }
+    }
+    
+    /**
+     * Get mode icon for current toggle state
+     */
+    getModeIcon() {
+        const icons = {
+            'DS': '📏', // Distance
+            'FIT': '🏃', // Google Fit
+            'EXP': '🧪'  // Experimental
+        };
+        return icons[this.toggleModes[this.currentToggleMode]] || '📏';
+    }
+    
+    /**
+     * Activate the current toggle mode (consciousness-serving)
+     */
+    activateToggleMode() {
+        const mode = this.toggleModes[this.currentToggleMode];
+        
+        switch(mode) {
+            case 'DS':
+                this.activateDistanceMode();
+                break;
+            case 'FIT':
+                this.activateGoogleFitMode();
+                break;
+            case 'EXP':
+                this.activateExperimentalMode();
+                break;
+        }
+        
+        // Emit consciousness-serving event
+        if (window.EventBus && typeof window.EventBus.emit === 'function') {
+            window.EventBus.emit('step:mode:changed', {
+                mode: mode,
+                timestamp: Date.now(),
+                consciousnessLevel: 'user_choice_empowerment'
+            });
+        }
+    }
+    
+    /**
+     * Activate Distance mode (GPS-based step estimation)
+     */
+    activateDistanceMode() {
+        console.log('🚶‍♂️ Activating Distance mode (GPS-based)');
+        if (this.enhancedTracking) {
+            this.enhancedTracking.setActiveMethod('gps_distance');
+        }
+    }
+    
+    /**
+     * Activate Google Fit mode
+     */
+    activateGoogleFitMode() {
+        console.log('🚶‍♂️ Activating Google Fit mode');
+        if (this.enhancedTracking) {
+            this.enhancedTracking.setActiveMethod('google_fit');
+        }
+    }
+    
+    /**
+     * Activate Experimental mode (Gyroscope-based)
+     */
+    async activateExperimentalMode() {
+        console.log('🚶‍♂️ Activating Experimental mode (Gyroscope-based)');
+        
+        // Request gyroscope permission
+        if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceMotionEvent.requestPermission();
+                if (permission === 'granted') {
+                    console.log('🚶‍♂️ Gyroscope permission granted');
+                    if (this.enhancedTracking) {
+                        this.enhancedTracking.setActiveMethod('gyroscope');
+                    }
+                } else {
+                    console.log('🚶‍♂️ Gyroscope permission denied, falling back to distance mode');
+                    this.currentToggleMode = 0; // Back to DS
+                    this.updateToggleUI();
+                }
+            } catch (error) {
+                console.error('🚶‍♂️ Error requesting gyroscope permission:', error);
+                this.currentToggleMode = 0; // Back to DS
+                this.updateToggleUI();
+            }
+        } else {
+            console.log('🚶‍♂️ Gyroscope not supported, falling back to distance mode');
+            this.currentToggleMode = 0; // Back to DS
+            this.updateToggleUI();
+        }
     }
 
     setupStepControls() {

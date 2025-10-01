@@ -28,6 +28,9 @@ class MapLayer extends BaseLayer {
         // Try to get GPS position first, fallback to random if not available
         this.initialPosition = this.getInitialPosition();
         this.initialZoom = 18;
+        
+        // Consciousness-Serving Player Marker Persistence
+        this.playerMarkerPersistence = new PlayerMarkerPersistence();
     }
 
     /**
@@ -696,8 +699,17 @@ class MapLayer extends BaseLayer {
             this.eventBus.on('geolocation:position:update', this.handlePositionUpdate.bind(this)); // Legacy support
         }
         
-        // Create initial player marker at default position
-        this.createPlayerMarker(this.initialPosition);
+        // Consciousness-Serving: Always create player marker
+        if (this.initialPosition) {
+            this.createPlayerMarker(this.initialPosition);
+        } else {
+            // Try to create marker from saved position
+            const savedMarker = this.playerMarkerPersistence.createPlayerMarker(this.map);
+            if (savedMarker) {
+                this.markers.set('player', savedMarker);
+                console.log('📍 Player marker created from saved position');
+            }
+        }
         
         // If GPS position is available, update the marker immediately
         this.updatePlayerMarkerWithGPSPosition();
@@ -743,6 +755,9 @@ class MapLayer extends BaseLayer {
             return;
         }
 
+        // Consciousness-Serving: Ensure marker persistence
+        this.playerMarkerPersistence.saveMarkerPosition(position);
+
         // Create player marker icon
         const playerIcon = L.divIcon({
             className: 'player-marker',
@@ -762,6 +777,9 @@ class MapLayer extends BaseLayer {
 
         // Store marker
         this.markers.set('player', marker);
+        
+        // Consciousness-Serving: Force marker visibility
+        this.playerMarkerPersistence.ensureMarkerVisible(marker);
         
         console.log('🗺️ MapLayer: Player marker created at:', position);
     }
@@ -1353,5 +1371,104 @@ class MapLayer extends BaseLayer {
     }
 }
 
+/**
+ * Consciousness-Serving Player Marker Persistence System
+ * Ensures player marker always appears and persists across sessions
+ */
+class PlayerMarkerPersistence {
+    constructor() {
+        this.storageKey = 'eldritch_player_marker';
+        this.marker = null;
+        console.log('📍 Player Marker Persistence System initialized');
+    }
+    
+    /**
+     * Save marker position to consciousness-serving storage
+     */
+    saveMarkerPosition(position) {
+        const markerData = {
+            lat: position.lat,
+            lng: position.lng,
+            timestamp: Date.now(),
+            accuracy: position.accuracy || 0,
+            consciousnessLevel: 'spatial_awareness'
+        };
+        
+        localStorage.setItem(this.storageKey, JSON.stringify(markerData));
+        console.log('📍 Player marker position saved:', markerData);
+    }
+    
+    /**
+     * Load marker position from consciousness-serving storage
+     */
+    loadMarkerPosition() {
+        const saved = localStorage.getItem(this.storageKey);
+        if (saved) {
+            try {
+                const markerData = JSON.parse(saved);
+                console.log('📍 Player marker position loaded:', markerData);
+                return markerData;
+            } catch (error) {
+                console.error('📍 Error loading marker position:', error);
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Ensure marker is always visible (consciousness-serving)
+     */
+    ensureMarkerVisible(marker) {
+        if (marker) {
+            // Force marker visibility
+            marker.setOpacity(1);
+            marker.setZIndexOffset(1000);
+            
+            // Ensure marker is always on top (correct Leaflet API)
+            // Leaflet markers don't have bringToFront, but we can use zIndexOffset
+            // The higher zIndexOffset ensures it appears on top
+            
+            console.log('📍 Player marker visibility ensured');
+        }
+    }
+    
+    /**
+     * Create player marker if it doesn't exist
+     */
+    createPlayerMarker(map) {
+        const savedPosition = this.loadMarkerPosition();
+        if (savedPosition && map) {
+            const playerIcon = L.divIcon({
+                className: 'player-marker',
+                html: '<div class="player-marker-icon">📍</div>',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
+            
+            const marker = L.marker([savedPosition.lat, savedPosition.lng], {
+                icon: playerIcon,
+                zIndexOffset: 1000
+            }).addTo(map);
+            
+            marker.bindPopup('<b>Your Location</b><br>Welcome back to the cosmic realm');
+            this.marker = marker;
+            
+            console.log('📍 Player marker created from saved position');
+            return marker;
+        }
+        return null;
+    }
+    
+    /**
+     * Clear saved marker data (for new game)
+     */
+    clear() {
+        localStorage.removeItem(this.storageKey);
+        console.log('📍 Player marker persistence cleared');
+    }
+}
+
 // Make globally available
 window.MapLayer = MapLayer;
+window.PlayerMarkerPersistence = PlayerMarkerPersistence;

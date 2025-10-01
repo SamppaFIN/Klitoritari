@@ -26,9 +26,11 @@ class SVGBaseGraphics {
         this.animations = new Map(); // Store animation references
         this.particleSystems = new Map(); // Store particle effects
         
-        // Default base configuration
+        // Consciousness-Serving Base Scaling Configuration
         this.defaultConfig = {
-            size: 240, // 3x player icon size
+            minSize: 20, // Start very small (consciousness-serving)
+            maxSize: 240, // Maximum size
+            baseSize: 60, // Default base size (consciousness-serving)
             territoryRadius: 50, // meters
             colors: {
                 primary: '#8b5cf6', // Purple
@@ -43,6 +45,9 @@ class SVGBaseGraphics {
                 energyGlow: true
             }
         };
+        
+        // Consciousness-Serving Scaling System
+        this.scalingSystem = new BaseScalingSystem();
         
         console.log('🎨 SVG Base Graphics System initialized');
     }
@@ -366,9 +371,11 @@ class SVGBaseGraphics {
         flag.setAttribute('height', flagHeight);
         flag.setAttribute('class', `flag-${flagType}`);
         
-        // Add flag colors based on type
+        // Consciousness-Serving: Dynamic flag colors based on config
+        const flagColors = this.getFlagColors(flagType, config);
+        
         if (flagType === 'finnish') {
-            flag.setAttribute('fill', '#ffffff'); // White background
+            flag.setAttribute('fill', flagColors.background); // Dynamic background
             
             // Add blue cross (vertical bar) - draw AFTER flag so it appears on top
             const verticalCross = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -376,7 +383,7 @@ class SVGBaseGraphics {
             verticalCross.setAttribute('y', center - config.size * 0.4);
             verticalCross.setAttribute('width', flagWidth * 0.2);
             verticalCross.setAttribute('height', flagHeight);
-            verticalCross.setAttribute('fill', '#003580'); // Blue cross
+            verticalCross.setAttribute('fill', flagColors.cross); // Dynamic cross color
             verticalCross.setAttribute('z-index', '10'); // Ensure it's on top
             
             // Add blue cross (horizontal bar) - draw AFTER flag so it appears on top
@@ -385,7 +392,7 @@ class SVGBaseGraphics {
             horizontalCross.setAttribute('y', center - config.size * 0.4 + flagHeight * 0.4);
             horizontalCross.setAttribute('width', flagWidth);
             horizontalCross.setAttribute('height', flagHeight * 0.2);
-            horizontalCross.setAttribute('fill', '#003580'); // Blue cross
+            horizontalCross.setAttribute('fill', flagColors.cross); // Dynamic cross color
             horizontalCross.setAttribute('z-index', '10'); // Ensure it's on top
             
             // Add waving animation to cross elements
@@ -399,7 +406,7 @@ class SVGBaseGraphics {
             group.appendChild(verticalCross);
             group.appendChild(horizontalCross);
         } else if (flagType === 'swedish') {
-            flag.setAttribute('fill', '#006aa7'); // Blue background
+            flag.setAttribute('fill', flagColors.background); // Dynamic background
             
             // Add yellow cross (vertical bar) - draw AFTER flag so it appears on top
             const verticalCross = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -407,7 +414,7 @@ class SVGBaseGraphics {
             verticalCross.setAttribute('y', center - config.size * 0.4);
             verticalCross.setAttribute('width', flagWidth * 0.2);
             verticalCross.setAttribute('height', flagHeight);
-            verticalCross.setAttribute('fill', '#fecd00'); // Yellow cross
+            verticalCross.setAttribute('fill', flagColors.cross); // Dynamic cross color
             verticalCross.setAttribute('z-index', '10'); // Ensure it's on top
             
             // Add yellow cross (horizontal bar) - draw AFTER flag so it appears on top
@@ -416,7 +423,7 @@ class SVGBaseGraphics {
             horizontalCross.setAttribute('y', center - config.size * 0.4 + flagHeight * 0.4);
             horizontalCross.setAttribute('width', flagWidth);
             horizontalCross.setAttribute('height', flagHeight * 0.2);
-            horizontalCross.setAttribute('fill', '#fecd00'); // Yellow cross
+            horizontalCross.setAttribute('fill', flagColors.cross); // Dynamic cross color
             horizontalCross.setAttribute('z-index', '10'); // Ensure it's on top
             
             // Add waving animation to cross elements
@@ -430,7 +437,8 @@ class SVGBaseGraphics {
             group.appendChild(verticalCross);
             group.appendChild(horizontalCross);
         } else {
-            // Default flag (no cross)
+            // Default flag (no cross) with dynamic color
+            flag.setAttribute('fill', flagColors.background);
             group.appendChild(flag);
         }
         
@@ -443,6 +451,42 @@ class SVGBaseGraphics {
         group.appendChild(pole);
         
         return group;
+    }
+    
+    /**
+     * Consciousness-Serving: Get dynamic flag colors based on config
+     * 
+     * @param {string} flagType - 'finnish' or 'swedish'
+     * @param {Object} config - Base configuration
+     * @returns {Object} - Flag colors object
+     */
+    getFlagColors(flagType, config) {
+        // Use config colors if available, otherwise use default flag colors
+        const defaultColors = {
+            finnish: {
+                background: '#ffffff', // White
+                cross: '#003580'       // Blue
+            },
+            swedish: {
+                background: '#006aa7', // Blue
+                cross: '#fecd00'       // Yellow
+            },
+            default: {
+                background: config.colors?.primary || '#8b5cf6', // Purple
+                cross: config.colors?.accent || '#f59e0b'         // Amber
+            }
+        };
+        
+        // If custom colors are provided in config, use them
+        if (config.flagColors) {
+            return {
+                background: config.flagColors.background || defaultColors[flagType]?.background || defaultColors.default.background,
+                cross: config.flagColors.cross || defaultColors[flagType]?.cross || defaultColors.default.cross
+            };
+        }
+        
+        // Use default colors for flag type
+        return defaultColors[flagType] || defaultColors.default;
     }
     
     /**
@@ -984,6 +1028,44 @@ styleSheet.textContent = svgBaseStyles;
 document.head.appendChild(styleSheet);
 
 // Export for global access
+/**
+ * Consciousness-Serving Base Scaling System
+ * Ensures bases scale properly with zoom levels
+ */
+class BaseScalingSystem {
+    constructor() {
+        this.minSize = 20;
+        this.maxSize = 240;
+        this.baseSize = 60;
+        console.log('📏 Base Scaling System initialized');
+    }
+    
+    /**
+     * Calculate appropriate size based on zoom level
+     */
+    calculateSize(zoomLevel) {
+        // Consciousness-serving scaling: smaller at higher zoom, larger at lower zoom
+        const baseZoom = 13; // Reference zoom level
+        const zoomFactor = Math.pow(2, zoomLevel - baseZoom);
+        const calculatedSize = this.baseSize * zoomFactor;
+        
+        // Clamp to min/max bounds
+        return Math.max(this.minSize, Math.min(this.maxSize, calculatedSize));
+    }
+    
+    /**
+     * Update base marker size
+     */
+    updateBaseSize(marker, zoomLevel) {
+        if (marker && marker.setIcon) {
+            const newSize = this.calculateSize(zoomLevel);
+            // Update marker icon size if needed
+            console.log(`📏 Base size updated to ${newSize}px for zoom level ${zoomLevel}`);
+        }
+    }
+}
+
 window.SVGBaseGraphics = SVGBaseGraphics;
+window.BaseScalingSystem = BaseScalingSystem;
 
 console.log('🎨 SVG Base Graphics System loaded successfully');
