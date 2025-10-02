@@ -32,7 +32,26 @@ class EldritchSanctuaryServer {
             sessions: new Map()           // Session data
         };
         
+        // 🌸 QA MONITORING SYSTEM
+        this.qaMonitoring = {
+            serverLogs: [],
+            performanceMetrics: {
+                startTime: Date.now(),
+                requestCount: 0,
+                websocketConnections: 0,
+                memoryUsage: process.memoryUsage(),
+                uptime: 0
+            },
+            errorLogs: [],
+            activeConnections: new Map(),
+            debugLogs: null,
+            maxLogSize: 1000
+        };
+        
         this.port = process.env.PORT || 3000;
+        
+        // Setup QA monitoring
+        this.setupQAMonitoring();
     }
 
     init() {
@@ -40,10 +59,114 @@ class EldritchSanctuaryServer {
         this.startServer();
         this.setupWebSocket();
     }
+    
+    /**
+     * 🌸 Setup QA Monitoring System
+     */
+    setupQAMonitoring() {
+        console.log('🌸 Setting up QA monitoring system...');
+        
+        // Override console methods to capture server logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = (...args) => {
+            this.addServerLog('log', args.join(' '));
+            originalLog.apply(console, args);
+        };
+        
+        console.error = (...args) => {
+            this.addServerLog('error', args.join(' '));
+            this.addErrorLog(args.join(' '));
+            originalError.apply(console, args);
+        };
+        
+        console.warn = (...args) => {
+            this.addServerLog('warn', args.join(' '));
+            originalWarn.apply(console, args);
+        };
+        
+        // Start performance monitoring
+        this.startPerformanceMonitoring();
+        
+        console.log('🌸 QA monitoring system initialized');
+    }
+    
+    /**
+     * Add server log entry
+     */
+    addServerLog(type, message) {
+        const logEntry = {
+            type: type,
+            message: message,
+            timestamp: new Date().toISOString(),
+            uptime: Date.now() - this.qaMonitoring.performanceMetrics.startTime
+        };
+        
+        this.qaMonitoring.serverLogs.push(logEntry);
+        
+        // Limit log size
+        if (this.qaMonitoring.serverLogs.length > this.qaMonitoring.maxLogSize) {
+            this.qaMonitoring.serverLogs.shift();
+        }
+    }
+    
+    /**
+     * Add error log entry
+     */
+    addErrorLog(message) {
+        const errorEntry = {
+            message: message,
+            timestamp: new Date().toISOString(),
+            stack: new Error().stack,
+            uptime: Date.now() - this.qaMonitoring.performanceMetrics.startTime
+        };
+        
+        this.qaMonitoring.errorLogs.push(errorEntry);
+        
+        // Limit error log size
+        if (this.qaMonitoring.errorLogs.length > 100) {
+            this.qaMonitoring.errorLogs.shift();
+        }
+    }
+    
+    /**
+     * Start performance monitoring
+     */
+    startPerformanceMonitoring() {
+        setInterval(() => {
+            this.updatePerformanceMetrics();
+        }, 5000); // Update every 5 seconds
+    }
+    
+    /**
+     * Update performance metrics
+     */
+    updatePerformanceMetrics() {
+        this.qaMonitoring.performanceMetrics = {
+            startTime: this.qaMonitoring.performanceMetrics.startTime,
+            requestCount: this.qaMonitoring.performanceMetrics.requestCount,
+            websocketConnections: this.wss ? this.wss.clients.size : 0,
+            memoryUsage: process.memoryUsage(),
+            uptime: Date.now() - this.qaMonitoring.performanceMetrics.startTime,
+            cpuUsage: process.cpuUsage(),
+            platform: process.platform,
+            nodeVersion: process.version,
+            pid: process.pid
+        };
+    }
 
     setupExpress() {
         // Enable CORS for all routes
         this.app.use(cors());
+        
+        // QA monitoring middleware
+        this.app.use((req, res, next) => {
+            this.qaMonitoring.performanceMetrics.requestCount++;
+            this.addServerLog('request', `${req.method} ${req.path} from ${req.ip}`);
+            next();
+        });
         
         // Serve static files
         this.app.use(express.static(path.join(__dirname)));
@@ -111,6 +234,138 @@ class EldritchSanctuaryServer {
                 res.json({ message: 'No debug logs available yet' });
             }
         });
+        
+        // 🌸 QA MONITORING API ENDPOINTS
+        
+        // Get server logs
+        this.app.get('/api/qa/server-logs', (req, res) => {
+            const limit = parseInt(req.query.limit) || 100;
+            const type = req.query.type; // log, error, warn
+            
+            let logs = this.qaMonitoring.serverLogs;
+            
+            if (type) {
+                logs = logs.filter(log => log.type === type);
+            }
+            
+            logs = logs.slice(-limit);
+            
+            res.json({
+                logs: logs,
+                totalLogs: this.qaMonitoring.serverLogs.length,
+                filteredBy: type || 'all',
+                limit: limit,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // Get server performance metrics
+        this.app.get('/api/qa/performance', (req, res) => {
+            this.updatePerformanceMetrics();
+            res.json({
+                performance: this.qaMonitoring.performanceMetrics,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // Get server errors
+        this.app.get('/api/qa/errors', (req, res) => {
+            const limit = parseInt(req.query.limit) || 50;
+            const errors = this.qaMonitoring.errorLogs.slice(-limit);
+            
+            res.json({
+                errors: errors,
+                totalErrors: this.qaMonitoring.errorLogs.length,
+                limit: limit,
+                timestamp: new Date().toISOString()
+            });
+        });
+        
+        // Get server status
+        this.app.get('/api/qa/status', (req, res) => {
+            this.updatePerformanceMetrics();
+            
+            const status = {
+                server: {
+                    uptime: this.qaMonitoring.performanceMetrics.uptime,
+                    status: 'running',
+                    port: this.port,
+                    pid: process.pid,
+                    platform: process.platform,
+                    nodeVersion: process.version
+                },
+                connections: {
+                    websocket: this.wss ? this.wss.clients.size : 0,
+                    players: this.players.size,
+                    investigations: this.investigations.size
+                },
+                performance: this.qaMonitoring.performanceMetrics,
+                logs: {
+                    totalLogs: this.qaMonitoring.serverLogs.length,
+                    totalErrors: this.qaMonitoring.errorLogs.length,
+                    debugLogsAvailable: !!this.debugLogs
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            res.json(status);
+        });
+        
+        // Get comprehensive QA report
+        this.app.get('/api/qa/report', (req, res) => {
+            this.updatePerformanceMetrics();
+            
+            const report = {
+                serverInfo: {
+                    uptime: this.qaMonitoring.performanceMetrics.uptime,
+                    status: 'running',
+                    port: this.port,
+                    pid: process.pid,
+                    platform: process.platform,
+                    nodeVersion: process.version,
+                    startTime: new Date(this.qaMonitoring.performanceMetrics.startTime).toISOString()
+                },
+                performance: this.qaMonitoring.performanceMetrics,
+                connections: {
+                    websocket: this.wss ? this.wss.clients.size : 0,
+                    players: this.players.size,
+                    investigations: this.investigations.size,
+                    activeConnections: Array.from(this.qaMonitoring.activeConnections.values())
+                },
+                logs: {
+                    serverLogs: this.qaMonitoring.serverLogs.slice(-50), // Last 50 logs
+                    errorLogs: this.qaMonitoring.errorLogs.slice(-20), // Last 20 errors
+                    debugLogs: this.debugLogs ? {
+                        available: true,
+                        timestamp: this.debugLogs.timestamp,
+                        totalLogs: this.debugLogs.totalLogs
+                    } : { available: false }
+                },
+                gameState: {
+                    players: Array.from(this.players.keys()),
+                    investigations: Array.from(this.investigations.keys()),
+                    markers: this.gameStateDB.markers.size,
+                    quests: this.gameStateDB.quests.size,
+                    achievements: this.gameStateDB.achievements.size,
+                    sessions: this.gameStateDB.sessions.size
+                },
+                timestamp: new Date().toISOString()
+            };
+            
+            res.json(report);
+        });
+        
+        // Clear server logs (for testing)
+        this.app.post('/api/qa/clear-logs', (req, res) => {
+            this.qaMonitoring.serverLogs = [];
+            this.qaMonitoring.errorLogs = [];
+            this.debugLogs = null;
+            
+            res.json({
+                message: 'All logs cleared',
+                timestamp: new Date().toISOString()
+            });
+        });
 
         // API endpoints
         this.app.get('/api/players', (req, res) => {
@@ -142,6 +397,19 @@ class EldritchSanctuaryServer {
             console.log('🌐 New WebSocket connection');
             
             const playerId = this.generatePlayerId();
+            const clientId = `client-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Track connection for QA
+            const clientInfo = {
+                id: clientId,
+                playerId: playerId,
+                ip: req.socket.remoteAddress,
+                userAgent: req.headers['user-agent'],
+                connectedAt: new Date().toISOString(),
+                lastActivity: Date.now()
+            };
+            this.qaMonitoring.activeConnections.set(clientId, clientInfo);
+            
             const player = {
                 id: playerId,
                 name: 'Cosmic Explorer',
@@ -153,6 +421,7 @@ class EldritchSanctuaryServer {
 
             this.players.set(playerId, player);
             ws.playerId = playerId;
+            ws.clientId = clientId;
 
             // Send welcome message and current player count
             this.sendToClient(ws, {
@@ -188,8 +457,14 @@ class EldritchSanctuaryServer {
                 try {
                     const message = JSON.parse(data);
                     this.handleMessage(ws, message);
+                    
+                    // Update last activity for QA
+                    clientInfo.lastActivity = Date.now();
+                    this.qaMonitoring.activeConnections.set(clientId, clientInfo);
+                    
                 } catch (error) {
                     console.error('Invalid message received:', error);
+                    this.addErrorLog(`WebSocket message parse error: ${error.message}`);
                 }
             });
 
@@ -197,11 +472,15 @@ class EldritchSanctuaryServer {
             ws.on('close', () => {
                 console.log(`🌐 Player ${playerId} disconnected`);
                 this.handlePlayerDisconnect(playerId);
+                
+                // Remove from QA tracking
+                this.qaMonitoring.activeConnections.delete(clientId);
             });
 
             // Handle errors
             ws.on('error', (error) => {
                 console.error(`WebSocket error for player ${playerId}:`, error);
+                this.addErrorLog(`WebSocket error for player ${playerId}: ${error.message}`);
             });
         });
     }

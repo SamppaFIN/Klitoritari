@@ -64,6 +64,25 @@ Eldritch Sanctuary is an immersive cosmic exploration platform that combines inf
 - **No `&&` operator** - use separate commands or `;` for chaining
 - **Debug Logs API:** `Invoke-WebRequest -Uri "http://localhost:3000/api/debug-logs" -UseBasicParsing | Select-Object -ExpandProperty Content`
 
+### 🌸 QA Monitoring Commands
+- **Load QA Commands:** `. .\qa-monitoring-commands.ps1`
+- **Quick Status:** `qa-status`
+- **Performance:** `qa-perf`
+- **Server Logs:** `qa-logs`
+- **Server Errors:** `qa-errors`
+- **QA Report:** `qa-report`
+- **Real-time Monitor:** `qa-monitor`
+- **Health Check:** `qa-health`
+- **Export Data:** `qa-export`
+- **Test Endpoints:** `qa-test`
+- **Help:** `Show-QAHelp`
+
+### 🌸 QA Dashboard (Browser)
+- **Open Dashboard:** Press `Ctrl+Shift+Q` in browser
+- **Global Functions:** `openQADashboard()`, `closeQADashboard()`, `toggleQADashboard()`
+- **Get Report:** `getQAReport()`
+- **Export Data:** `exportQAData()`
+
 ### Pre-Commit Workflow
 1. **Add to README and aurora log** the debug log API call URL
 2. **Check demo API** for all errors before committing
