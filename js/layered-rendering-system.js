@@ -102,6 +102,10 @@ class LayeredRenderingSystem {
     }
     
     render() {
+        // 🌸 CONSCIOUSNESS-AWARE GAME LOOP UPDATES
+        // Update player position and step counter every frame
+        this.updatePlayerPositionAndSteps();
+        
         // Render layers in z-index order
         const layerOrder = [
             'background',
@@ -122,6 +126,53 @@ class LayeredRenderingSystem {
                 layer.render();
             }
         });
+    }
+    
+    /**
+     * 🌸 CONSCIOUSNESS-AWARE PLAYER POSITION & STEP UPDATES
+     * Update player position and step counter every frame in the game loop
+     */
+    updatePlayerPositionAndSteps() {
+        try {
+            // Update player position from geolocation if available
+            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                const geo = window.eldritchApp.systems.geolocation;
+                if (geo.currentPosition && geo.deviceGPSEnabled) {
+                    // Update map engine with current position
+                    if (window.mapEngine && typeof window.mapEngine.updatePlayerPosition === 'function') {
+                        window.mapEngine.updatePlayerPosition(geo.currentPosition);
+                    }
+                    
+                    // Update map layer with position
+                    if (window.mapLayer && typeof window.mapLayer.handlePositionUpdate === 'function') {
+                        window.mapLayer.handlePositionUpdate(geo.currentPosition);
+                    }
+                    
+                    // Update encounter system with position
+                    if (window.encounterSystem && typeof window.encounterSystem.updatePlayerPosition === 'function') {
+                        window.encounterSystem.updatePlayerPosition(geo.currentPosition);
+                    }
+                }
+            }
+            
+            // Update step counter display
+            if (window.stepCurrencySystem && typeof window.stepCurrencySystem.updateStepCounter === 'function') {
+                window.stepCurrencySystem.updateStepCounter();
+            }
+            
+            // Update encounter system step counter
+            if (window.encounterSystem && typeof window.encounterSystem.updateStepCounter === 'function') {
+                window.encounterSystem.updateStepCounter();
+            }
+            
+            // Update player stats if available
+            if (window.playerStats && typeof window.playerStats.update === 'function') {
+                window.playerStats.update();
+            }
+            
+        } catch (error) {
+            console.error('🌸 LayeredRenderingSystem: Error updating player position and steps:', error);
+        }
     }
     
     updatePerformanceMetrics(currentTime) {
