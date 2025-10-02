@@ -41,12 +41,32 @@ class PerformanceStressTest {
      * Set up test UI
      */
     setupTestUI() {
+        // Create toggle button first
+        const toggleButton = document.createElement('button');
+        toggleButton.id = 'stress-test-toggle';
+        toggleButton.innerHTML = '🌸 Stress Test';
+        toggleButton.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 11px;
+            z-index: 10003;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        `;
+        
         // Create test control panel
         const testPanel = document.createElement('div');
         testPanel.id = 'performance-stress-test-panel';
         testPanel.style.cssText = `
             position: fixed;
-            top: 10px;
+            top: 80px;
             right: 10px;
             background: rgba(0, 0, 0, 0.8);
             color: white;
@@ -54,8 +74,9 @@ class PerformanceStressTest {
             border-radius: 10px;
             font-family: monospace;
             font-size: 12px;
-            z-index: 10000;
+            z-index: 10002;
             min-width: 300px;
+            display: none;
         `;
         
         testPanel.innerHTML = `
@@ -67,9 +88,16 @@ class PerformanceStressTest {
             <button id="stop-test" style="background: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-left: 10px;" disabled>Stop Test</button>
         `;
         
+        document.body.appendChild(toggleButton);
         document.body.appendChild(testPanel);
         
         // Set up event listeners
+        toggleButton.addEventListener('click', () => {
+            const isVisible = testPanel.style.display !== 'none';
+            testPanel.style.display = isVisible ? 'none' : 'block';
+            toggleButton.innerHTML = isVisible ? '🌸 Stress Test' : '🌸 Hide Test';
+        });
+        
         document.getElementById('start-test').addEventListener('click', () => this.startTest());
         document.getElementById('stop-test').addEventListener('click', () => this.stopTest());
     }
@@ -383,7 +411,7 @@ class PerformanceStressTest {
 // Make globally available
 window.PerformanceStressTest = PerformanceStressTest;
 
-// Auto-initialize if not already done - DISABLED to prevent freezing
-// if (!window.performanceStressTest) {
-//     window.performanceStressTest = new PerformanceStressTest();
-// }
+// Auto-initialize if not already done - RE-ENABLED with proper positioning
+if (!window.performanceStressTest) {
+    window.performanceStressTest = new PerformanceStressTest();
+}
