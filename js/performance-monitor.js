@@ -260,10 +260,8 @@ class ConsciousnessPerformanceMonitor {
             window.viewportCuller.margin = Math.max(25, 100 - (this.stats.objectCount / 50));
         }
         
-        // Emit performance event
-        if (window.eventBus) {
-            window.eventBus.emit('performance:fps:low', data);
-        }
+        // Don't emit the same event we're listening to - this causes infinite loops
+        // The emergency performance manager will handle crisis situations separately
     }
     
     /**
@@ -282,10 +280,8 @@ class ConsciousnessPerformanceMonitor {
             this.activateOptimizations(['objectPooling']);
         }
         
-        // Emit performance event
-        if (window.eventBus) {
-            window.eventBus.emit('performance:memory:high', data);
-        }
+        // Don't emit the same event we're listening to - this causes infinite loops
+        // The emergency performance manager will handle crisis situations separately
     }
     
     /**
@@ -304,10 +300,8 @@ class ConsciousnessPerformanceMonitor {
             window.viewportCuller.margin = Math.max(25, 100 - (data.count / 100));
         }
         
-        // Emit performance event
-        if (window.eventBus) {
-            window.eventBus.emit('performance:objects:high', data);
-        }
+        // Don't emit the same event we're listening to - this causes infinite loops
+        // The emergency performance manager will handle crisis situations separately
     }
     
     /**
