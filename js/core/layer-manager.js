@@ -329,9 +329,28 @@ class LayerManager {
                 }
             }
             
-            // Update step counter display
-            if (window.stepCurrencySystem && typeof window.stepCurrencySystem.updateStepCounter === 'function') {
-                window.stepCurrencySystem.updateStepCounter();
+            // 🌸 PRIORITY 1: PLAYER POSITION MAP REFRESH
+            // Force refresh player position on map every frame
+            this.refreshPlayerPositionOnMap();
+            
+            // 🌸 ENHANCED STEP COUNTER REFRESH MECHANISM
+            // Force refresh step counter display every frame
+            if (window.stepCurrencySystem) {
+                // Call updateStepCounter with force refresh
+                if (typeof window.stepCurrencySystem.updateStepCounter === 'function') {
+                    window.stepCurrencySystem.updateStepCounter();
+                }
+                
+                // Also trigger step counter refresh via global function if available
+                if (typeof window.triggerStepCounterUpdate === 'function') {
+                    window.triggerStepCounterUpdate();
+                }
+                
+                // Force DOM update if step counter element exists
+                const stepCounterElement = document.getElementById('step-counter');
+                if (stepCounterElement && window.stepCurrencySystem.totalSteps !== undefined) {
+                    stepCounterElement.textContent = window.stepCurrencySystem.totalSteps.toLocaleString();
+                }
             }
             
             // Update encounter system step counter
@@ -344,8 +363,151 @@ class LayerManager {
                 window.playerStats.update();
             }
             
+            // 🌸 PERIODIC REFRESH FOR OTHER PLAYERS' BASES (every 10 seconds)
+            this.updatePeriodicRefresh();
+            
         } catch (error) {
             console.error('🌸 LayerManager: Error updating player position and steps:', error);
+        }
+    }
+    
+    /**
+     * 🌸 PRIORITY 1: REFRESH PLAYER POSITION ON MAP
+     * Force refresh player position on map every frame
+     */
+    refreshPlayerPositionOnMap() {
+        try {
+            // Get current player position from multiple sources
+            let currentPosition = null;
+            
+            // Try to get position from geolocation system
+            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
+                const geo = window.eldritchApp.systems.geolocation;
+                if (geo.currentPosition) {
+                    currentPosition = geo.currentPosition;
+                } else if (geo.lastValidPosition) {
+                    currentPosition = geo.lastValidPosition;
+                }
+            }
+            
+            // Try to get position from map engine
+            if (!currentPosition && window.mapEngine && window.mapEngine.playerPosition) {
+                currentPosition = window.mapEngine.playerPosition;
+            }
+            
+            // Try to get position from map layer
+            if (!currentPosition && window.mapLayer && typeof window.mapLayer.getCurrentPlayerPosition === 'function') {
+                currentPosition = window.mapLayer.getCurrentPlayerPosition();
+            }
+            
+            // If we have a position, force refresh the player marker on map
+            if (currentPosition) {
+                // Force update player marker on map layer
+                if (window.mapLayer && typeof window.mapLayer.updatePlayerMarker === 'function') {
+                    window.mapLayer.updatePlayerMarker({
+                        lat: currentPosition.latitude || currentPosition.lat,
+                        lng: currentPosition.longitude || currentPosition.lng,
+                        accuracy: currentPosition.accuracy || 1
+                    });
+                }
+                
+                // Force update player marker on map engine
+                if (window.mapEngine && typeof window.mapEngine.updatePlayerPosition === 'function') {
+                    window.mapEngine.updatePlayerPosition(currentPosition);
+                }
+                
+                // Force update player marker via WebGL renderer if available
+                if (window.webglMapRenderer && typeof window.webglMapRenderer.updatePlayerPosition === 'function') {
+                    window.webglMapRenderer.updatePlayerPosition(currentPosition);
+                }
+                
+                // Force update player marker via map object manager
+                if (window.mapObjectManager && typeof window.mapObjectManager.updatePlayerPosition === 'function') {
+                    window.mapObjectManager.updatePlayerPosition(currentPosition);
+                }
+                
+                // Force refresh player marker HTML if it exists
+                const playerMarkerElement = document.querySelector('.player-marker');
+                if (playerMarkerElement && window.mapLayer && typeof window.mapLayer.updatePlayerMarkerHTML === 'function') {
+                    window.mapLayer.updatePlayerMarkerHTML(currentPosition);
+                }
+            }
+            
+        } catch (error) {
+            console.error('🌸 LayerManager: Error refreshing player position on map:', error);
+        }
+    }
+    
+    /**
+     * 🌸 PERIODIC REFRESH SYSTEM
+     * Handle periodic updates for multiplayer elements
+     */
+    updatePeriodicRefresh() {
+        const now = Date.now();
+        
+        // Initialize refresh timers if not exists
+        if (!this.refreshTimers) {
+            this.refreshTimers = {
+                otherBases: 0,
+                stepSync: 0
+            };
+        }
+        
+        // Refresh other players' bases every 10 seconds
+        if (now - this.refreshTimers.otherBases >= 10000) {
+            this.refreshTimers.otherBases = now;
+            this.refreshOtherPlayersBases();
+        }
+        
+        // Sync steps with server every 30 seconds
+        if (now - this.refreshTimers.stepSync >= 30000) {
+            this.refreshTimers.stepSync = now;
+            this.syncStepsWithServer();
+        }
+    }
+    
+    /**
+     * 🌸 REFRESH OTHER PLAYERS' BASES
+     * Request fresh base data from server
+     */
+    refreshOtherPlayersBases() {
+        try {
+            console.log('🌸 LayerManager: Refreshing other players bases...');
+            
+            // Use the existing showOtherBases function
+            if (typeof window.showOtherBases === 'function') {
+                window.showOtherBases();
+            }
+            
+            // Also request marker data directly if websocket client is available
+            if (window.websocketClient && typeof window.websocketClient.requestMarkerData === 'function') {
+                window.websocketClient.requestMarkerData();
+            }
+            
+        } catch (error) {
+            console.error('🌸 LayerManager: Error refreshing other players bases:', error);
+        }
+    }
+    
+    /**
+     * 🌸 SYNC STEPS WITH SERVER
+     * Periodically sync step count with server
+     */
+    syncStepsWithServer() {
+        try {
+            if (window.stepCurrencySystem && window.websocketClient) {
+                const totalSteps = window.stepCurrencySystem.totalSteps || 0;
+                const sessionSteps = window.stepCurrencySystem.sessionSteps || 0;
+                
+                console.log(`🌸 LayerManager: Syncing steps with server - Total: ${totalSteps}, Session: ${sessionSteps}`);
+                
+                // Send step sync to server
+                if (typeof window.websocketClient.sendStepSync === 'function') {
+                    window.websocketClient.sendStepSync(totalSteps, sessionSteps);
+                }
+            }
+        } catch (error) {
+            console.error('🌸 LayerManager: Error syncing steps with server:', error);
         }
     }
 
