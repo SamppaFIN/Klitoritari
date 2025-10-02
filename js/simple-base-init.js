@@ -380,16 +380,17 @@ class SimpleBaseInit {
      * @returns {string} - Current player ID
      */
     getCurrentPlayerId() {
-        // Try to get player ID from various sources
-        const playerId = localStorage.getItem('playerId') || 
+        // Consciousness-serving: Use consistent player ID key
+        const playerId = localStorage.getItem('eldritch_player_id') || 
+                        localStorage.getItem('playerId') || 
                         localStorage.getItem('eldritch-player-id') ||
                         localStorage.getItem('player_id') ||
                         'default-player';
         
-        // If no player ID exists, generate one
-        if (!localStorage.getItem('playerId')) {
+        // If no player ID exists, generate one using the consistent key
+        if (!localStorage.getItem('eldritch_player_id')) {
             const newPlayerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            localStorage.setItem('playerId', newPlayerId);
+            localStorage.setItem('eldritch_player_id', newPlayerId);
             console.log('🆔 Generated new player ID:', newPlayerId);
             return newPlayerId;
         }
@@ -506,6 +507,16 @@ class SimpleBaseInit {
         // Save base data
         this.baseData = baseData;
         localStorage.setItem('playerBase', JSON.stringify(baseData));
+        
+        // Save additional base state for restoration
+        const baseState = {
+            established: true,
+            location: position,
+            data: baseData,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('player_base_state', JSON.stringify(baseState));
+        
         console.log('🏗️ Base data saved to localStorage');
         
         // Create base marker

@@ -1,0 +1,57 @@
+# Sacred Knowledge Protection Rules
+# .gitignore must always be kept clean from project documents
+
+# Consciousness-aware development artifacts
+*.log
+*.tmp
+*.cache
+node_modules/
+.env
+.env.local
+.env.production
+
+# Sacred knowledge protection
+secrets/
+private/
+confidential/
+
+# Auto-generated safe READMEs
+README.safe.md
+README.auto.md
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Test artifacts
+coverage/
+.nyc_output/
+.pytest_cache/
+
+# Sacred knowledge protection - never commit these
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+config.prod.json

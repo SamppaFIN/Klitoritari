@@ -38,22 +38,26 @@ class WebSocketClient {
     }
 
     loadOrGeneratePlayerId() {
-        // Try to load existing player ID from localStorage
-        const storedPlayerId = localStorage.getItem('eldritch_player_id');
-        if (storedPlayerId) {
-            console.log('🎮 Loaded existing player ID from localStorage:', storedPlayerId);
-            return storedPlayerId;
-        }
-        
-        // Generate new player ID if none exists
-        const newPlayerId = this.generatePlayerId();
-        localStorage.setItem('eldritch_player_id', newPlayerId);
-        console.log('🎮 Generated new player ID and saved to localStorage:', newPlayerId);
-        return newPlayerId;
+        // Consciousness-serving: Delegate to single method for consistency
+        return this.getCurrentPlayerId();
     }
 
+    /**
+     * Generate a unique player ID with consciousness-serving beauty
+     * @returns {string} Unique player identifier
+     */
     generatePlayerId() {
-        return 'player_' + Math.random().toString(36).substr(2, 9);
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substr(2, 9);
+        const playerId = `player_${timestamp}_${randomSuffix}`;
+        
+        // Validate generated ID
+        if (!playerId || playerId.length < 10) {
+            console.error('❌ Failed to generate valid player ID');
+            return `player_${Date.now()}_fallback`;
+        }
+        
+        return playerId;
     }
 
     /**
@@ -61,8 +65,11 @@ class WebSocketClient {
      * This should be called when starting a fresh adventure
      */
     generateNewPlayerId() {
-        const newPlayerId = this.generatePlayerId();
-        localStorage.setItem('eldritch_player_id', newPlayerId);
+        // Clear existing player ID first
+        localStorage.removeItem('eldritch_player_id');
+        
+        // Generate and save new player ID
+        const newPlayerId = this.getCurrentPlayerId();
         this.playerId = newPlayerId;
         console.log('🎮 Generated new player ID for fresh adventure:', newPlayerId);
         return newPlayerId;
@@ -116,6 +123,9 @@ class WebSocketClient {
             
             // Always send player join to ensure server knows about this player
             this.sendPlayerJoin();
+            
+            // Request game state for continue adventure
+            this.requestGameStateForContinue();
             
             // Hand off to MultiplayerManager if present to avoid duplicate UI/state
             if (window.multiplayerManager) {
@@ -450,10 +460,24 @@ class WebSocketClient {
                 this.restoreMarkersFromServer(gameState.markers);
             }
             
-            // Restore base if established
+            // Restore bases from server state
+            if (gameState.bases && Array.isArray(gameState.bases)) {
+                console.log('🏗️ Processing base data from server:', gameState.bases.length);
+                gameState.bases.forEach(base => {
+                    this.restoreBaseMarkerFromServer(base);
+                });
+            }
+            
+            // Restore base if established (legacy support)
             if (gameState.baseEstablished && gameState.basePosition) {
-                console.log('🏗️ Restoring base from server state:', gameState.basePosition);
+                console.log('🏗️ Restoring base from server state (legacy):', gameState.basePosition);
                 this.restoreBaseFromServer(gameState.basePosition);
+            }
+            
+            // Restore Aurora data from server
+            if (gameState.aurora) {
+                console.log('🌸 Processing Aurora data from server:', gameState.aurora);
+                this.restoreAuroraFromServer(gameState.aurora);
             }
             
             // Trigger game state loaded event
@@ -1278,21 +1302,22 @@ class WebSocketClient {
      * @returns {string} - Current player ID
      */
     getCurrentPlayerId() {
-        // Try to get player ID from various sources
-        const playerId = localStorage.getItem('playerId') || 
-                        localStorage.getItem('eldritch-player-id') ||
-                        localStorage.getItem('player_id') ||
-                        'default-player';
+        // Consciousness-serving: Single key for sacred simplicity
+        const PLAYER_ID_KEY = 'eldritch_player_id';
         
-        // If no player ID exists, generate one
-        if (!localStorage.getItem('playerId')) {
-            const newPlayerId = `player_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            localStorage.setItem('playerId', newPlayerId);
-            console.log('🆔 Generated new player ID:', newPlayerId);
-            return newPlayerId;
+        // Try to get existing player ID
+        let playerId = localStorage.getItem(PLAYER_ID_KEY);
+        
+        if (playerId) {
+            console.log('🆔 Retrieved existing player ID:', playerId);
+            return playerId;
         }
         
-        return playerId;
+        // Generate new player ID if none exists
+        const newPlayerId = this.generatePlayerId();
+        localStorage.setItem(PLAYER_ID_KEY, newPlayerId);
+        console.log('🆔 Generated new player ID:', newPlayerId);
+        return newPlayerId;
     }
 
     restoreBaseMarkerFromServer(marker) {
@@ -1426,6 +1451,30 @@ class WebSocketClient {
      * 
      * @param {Object} marker - Server marker data with position and properties
      */
+    restoreAuroraFromServer(auroraData) {
+        console.log('🌸 Restoring Aurora from server data:', auroraData);
+        
+        if (!window.auroraEncounter) {
+            console.warn('⚠️ Aurora encounter system not available');
+            return;
+        }
+        
+        try {
+            // Update Aurora state with server data
+            if (window.auroraEncounter.auroraNPC) {
+                window.auroraEncounter.auroraNPC.lat = auroraData.lat || window.auroraEncounter.auroraNPC.lat;
+                window.auroraEncounter.auroraNPC.lng = auroraData.lng || window.auroraEncounter.auroraNPC.lng;
+                window.auroraEncounter.auroraNPC.consciousnessLevel = auroraData.consciousnessLevel || 'awakening';
+                
+                // Recreate marker with server position
+                window.auroraEncounter.createAuroraMarker();
+                console.log('🌸 Aurora restored from server successfully');
+            }
+        } catch (error) {
+            console.error('❌ Failed to restore Aurora from server:', error);
+        }
+    }
+    
     restoreNPCMarkerFromServer(marker) {
         console.log('👤 Restoring LIGHTWEIGHT NPC marker from server:', marker);
         
@@ -1804,6 +1853,26 @@ class WebSocketClient {
             });
         } else {
             console.warn('⚠️ Cannot request game state - not connected to server');
+        }
+    }
+    
+    /**
+     * Request game state for continue adventure
+     * Only requests if player is continuing an existing adventure
+     */
+    requestGameStateForContinue() {
+        const playerChoice = localStorage.getItem('eldritch_player_choice');
+        console.log('🎮 Game state request check:', {
+            playerChoice,
+            isConnected: this.isConnected,
+            playerId: this.playerId
+        });
+        
+        if (playerChoice === 'continue' && this.isConnected) {
+            console.log('🎮 Requesting game state for continue adventure...');
+            this.requestGameState();
+        } else {
+            console.log('🎮 Skipping game state request - not continuing adventure or not connected');
         }
     }
     

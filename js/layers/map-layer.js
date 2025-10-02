@@ -693,14 +693,21 @@ class MapLayer extends BaseLayer {
     initializePlayerMarker() {
         console.log('🗺️ MapLayer: Initializing player marker...');
         
+        // Initialize player marker persistence system
+        this.playerMarkerPersistence = new PlayerMarkerPersistence();
+        
         // Listen for position updates from lazy loading gate
         if (this.eventBus) {
             this.eventBus.on('player:position:updated', this.handlePositionUpdate.bind(this));
             this.eventBus.on('geolocation:position:update', this.handlePositionUpdate.bind(this)); // Legacy support
         }
         
-        // Consciousness-Serving: Always create player marker
-        if (this.initialPosition) {
+        // Consciousness-Serving: Try to restore from saved data first, then use initial position
+        const savedPosition = this.playerMarkerPersistence.loadMarkerPosition();
+        if (savedPosition) {
+            console.log('📍 MapLayer: Restoring player marker from saved position:', savedPosition);
+            this.createPlayerMarker(savedPosition);
+        } else if (this.initialPosition) {
             this.createPlayerMarker(this.initialPosition);
         } else {
             // Try to create marker from saved position

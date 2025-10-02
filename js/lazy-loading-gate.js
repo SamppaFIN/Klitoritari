@@ -1132,6 +1132,8 @@ class LazyLoadingGate {
                     choice = 'new';
                 } else {
                     console.log('🚪 Continuing with existing player:', existingPlayerId);
+                    // Restore game state for continue adventure
+                    this.restoreGameStateForContinue();
                 }
             }
             
@@ -1143,10 +1145,207 @@ class LazyLoadingGate {
             
             console.log('🚪 Calling passGate with choice:', choice);
             this.passGate('playerChoice', `Player chose: ${choice === 'continue' ? 'Continue Adventure' : 'Start New Adventure'}`);
+            
+            // Show welcome notification for new adventures only
+            if (choice === 'new') {
+                console.log('🌟 New adventure selected - will show welcome notification after initialization');
+                // Store flag to show welcome notification after systems initialize
+                localStorage.setItem('show_new_adventure_welcome', 'true');
+            }
         } catch (error) {
             console.error('🚪 Error handling player choice:', error);
             alert('Error saving your choice. Please try again.');
         }
+    }
+    
+    /**
+     * Restore complete game state for continue adventure
+     * Consciousness-serving: Systematic restoration with error handling
+     */
+    restoreGameStateForContinue() {
+        console.log('🚪 Restoring game state for continue adventure...');
+        
+        // Wait for systems to be fully initialized
+        setTimeout(() => {
+            this.performGameStateRestoration();
+        }, 5000); // Increased delay for system initialization
+    }
+    
+    /**
+     * Perform game state restoration with system readiness checks
+     */
+    performGameStateRestoration() {
+        // Check if all systems are ready
+        if (!this.areSystemsReady()) {
+            console.warn('⚠️ Systems not ready, retrying in 2 seconds...');
+            setTimeout(() => this.performGameStateRestoration(), 2000);
+            return;
+        }
+        
+        console.log('🚪 All systems ready, performing restoration...');
+        
+        // Log current restoration status
+        this.logRestorationStatus();
+        
+        // Perform restoration tasks
+        const restorationTasks = [
+            () => this.restorePlayerMarkers(),
+            () => this.restoreAuroraNPC(),
+            () => this.restoreStepDetection(),
+            () => this.forceRequestGameState()
+        ];
+        
+        restorationTasks.forEach((task, index) => {
+            try {
+                task();
+                console.log(`🚪 Restoration task ${index + 1} completed successfully`);
+            } catch (error) {
+                console.error(`❌ Restoration task ${index + 1} failed:`, error);
+            }
+        });
+        
+        console.log('🚪 Game state restoration process completed');
+    }
+    
+    /**
+     * Check if all required systems are ready
+     */
+    areSystemsReady() {
+        const systemsReady = {
+            mapLayer: !!window.mapLayer,
+            websocketClient: !!window.websocketClient,
+            stepCurrencySystem: !!window.stepCurrencySystem,
+            auroraEncounter: !!window.auroraEncounter
+        };
+        
+        console.log('🚪 System readiness check:', systemsReady);
+        
+        return systemsReady.mapLayer && 
+               systemsReady.websocketClient && 
+               systemsReady.stepCurrencySystem &&
+               systemsReady.auroraEncounter;
+    }
+    
+    /**
+     * Log current restoration status for debugging
+     */
+    logRestorationStatus() {
+        console.log('🚪 === GAME STATE RESTORATION STATUS ===');
+        console.log('🚪 Player ID:', localStorage.getItem('eldritch_player_id'));
+        console.log('🚪 Player Choice:', localStorage.getItem('eldritch_player_choice'));
+        console.log('🚪 Steps:', localStorage.getItem('eldritch_steps'));
+        console.log('🚪 Aurora State:', localStorage.getItem('aurora_npc_state'));
+        console.log('🚪 Base State:', localStorage.getItem('player_base_state'));
+        console.log('🚪 WebSocket Connected:', window.websocketClient?.isConnected);
+        console.log('🚪 Map Layer Ready:', !!window.mapLayer);
+        console.log('🚪 Aurora System Ready:', !!window.auroraEncounter);
+        console.log('🚪 ======================================');
+    }
+    
+    /**
+     * Restore player markers with consciousness-serving validation
+     */
+    restorePlayerMarkers() {
+        if (!window.mapLayer?.playerMarkerPersistence) {
+            console.warn('⚠️ MapLayer or player marker persistence not available');
+            return;
+        }
+        
+        const savedPosition = window.mapLayer.playerMarkerPersistence.loadMarkerPosition();
+        if (savedPosition) {
+            console.log('🚪 Restoring player marker position:', savedPosition);
+        } else {
+            console.log('🚪 No saved player marker position found');
+        }
+    }
+    
+    /**
+     * Restore Aurora NPC with consciousness-serving validation
+     */
+    restoreAuroraNPC() {
+        if (!window.auroraEncounter?.handleAppStarted) {
+            console.warn('⚠️ Aurora encounter system not available');
+            return;
+        }
+        
+        console.log('🚪 Ensuring Aurora NPC is spawned for continue adventure');
+        
+        // Emit continue adventure event for Aurora system
+        if (window.EventBus && typeof window.EventBus.emit === 'function') {
+            window.EventBus.emit('game:continue:adventure');
+        }
+        
+        window.auroraEncounter.handleAppStarted();
+    }
+    
+    /**
+     * Restore step detection with consciousness-serving validation
+     */
+    restoreStepDetection() {
+        if (!window.stepCurrencySystem?.enableStepDetection) {
+            console.warn('⚠️ Step currency system not available');
+            return;
+        }
+        
+        console.log('🚪 Enabling step detection for continue adventure');
+        window.stepCurrencySystem.enableStepDetection();
+    }
+    
+    /**
+     * Request server game state with consciousness-serving validation
+     */
+    requestServerGameState() {
+        if (!window.websocketClient?.isConnected || !window.websocketClient.isConnected()) {
+            console.warn('⚠️ WebSocket client not connected, will retry when connection is ready');
+            // Set up a retry mechanism for when WebSocket connects
+            this.setupWebSocketRetry();
+            return;
+        }
+        
+        console.log('🚪 Requesting full game state from server...');
+        window.websocketClient.requestGameState();
+    }
+    
+    /**
+     * Force request game state for continue adventure
+     */
+    forceRequestGameState() {
+        console.log('🚪 Force requesting game state for continue adventure...');
+        
+        // Ensure player choice is set
+        localStorage.setItem('eldritch_player_choice', 'continue');
+        
+        // Request game state if WebSocket is connected
+        if (window.websocketClient?.isConnected && window.websocketClient.isConnected()) {
+            console.log('🚪 WebSocket connected, requesting game state...');
+            window.websocketClient.requestGameState();
+        } else {
+            console.log('🚪 WebSocket not connected, will retry...');
+            this.setupWebSocketRetry();
+        }
+    }
+    
+    /**
+     * Setup retry mechanism for WebSocket connection
+     */
+    setupWebSocketRetry() {
+        const maxRetries = 20; // Increased retries
+        let retryCount = 0;
+        
+        const retryInterval = setInterval(() => {
+            retryCount++;
+            
+            if (window.websocketClient?.isConnected && window.websocketClient.isConnected()) {
+                console.log('🚪 WebSocket connected, requesting game state...');
+                window.websocketClient.requestGameState();
+                clearInterval(retryInterval);
+            } else if (retryCount >= maxRetries) {
+                console.warn('⚠️ Max retries reached for WebSocket game state request');
+                clearInterval(retryInterval);
+            } else {
+                console.log(`🚪 Retrying WebSocket game state request (${retryCount}/${maxRetries})`);
+            }
+        }, 500); // Faster retry interval
     }
     
     // User consent no longer needed - adventure choice buttons instantly load game
@@ -1258,6 +1457,9 @@ class LazyLoadingGate {
         // Map readiness not required - map will be initialized after gate completes
         const mapPassed = true; // Always true since map is initialized after gate
         
+        // Note: Removed auto-passing player choice to allow user selection
+        // Players must manually choose between Continue Adventure or Start New Adventure
+        
         console.log('🚪 Checking if all gates passed:', {
             gpsPermission: gpsPassed,
             playerChoice: playerPassed,
@@ -1329,6 +1531,12 @@ class LazyLoadingGate {
         const playerChoice = localStorage.getItem('eldritch_player_choice');
         console.log('🚪 Player choice for initialization:', playerChoice);
         
+        // Trigger game state restoration for continue adventure
+        if (playerChoice === 'continue') {
+            console.log('🚪 Continue adventure detected - triggering game state restoration...');
+            this.restoreGameStateForContinue();
+        }
+        
         // The main game initialization is handled by the HTML script
         // We just need to mark that we're ready for it
         console.log('🚪 Game systems ready for main initialization');
@@ -1396,5 +1604,15 @@ console.log('🚪 LazyLoadingGate instance created:', !!window.lazyLoadingGate);
 
 // Export for use in other modules
 window.LazyLoadingGate = LazyLoadingGate;
+
+// Global function to manually trigger game state restoration (for testing)
+window.triggerGameStateRestoration = () => {
+    if (window.lazyLoadingGate) {
+        console.log('🚪 Manual game state restoration triggered');
+        window.lazyLoadingGate.restoreGameStateForContinue();
+    } else {
+        console.error('❌ LazyLoadingGate not available');
+    }
+};
 
 console.log('🚪 Lazy Loading Gate System loaded');

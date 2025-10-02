@@ -545,38 +545,10 @@ class MobileDebugSystem {
         console.log('🔧 Debug toggle created');
         
         // Create step tracking debug toggle
-        this.createStepTrackingToggle();
+        // Step tracking toggle removed - consciousness-serving simplified approach
     }
     
-    /**
-     * Create step tracking debug toggle button
-     */
-    createStepTrackingToggle() {
-        const stepToggle = document.createElement('button');
-        stepToggle.className = 'debug-toggle';
-        stepToggle.style.top = '70px'; // Position below main debug toggle
-        stepToggle.innerHTML = '🚶‍♂️';
-        stepToggle.title = 'Toggle Step Tracking Debug';
-        
-        stepToggle.addEventListener('click', () => {
-            if (window.stepTrackingDebug) {
-                window.stepTrackingDebug.toggleDebugPanel();
-            } else {
-                console.warn('Step tracking debug system not available');
-            }
-        });
-        
-        // Add touch events for mobile
-        stepToggle.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            if (window.stepTrackingDebug) {
-                window.stepTrackingDebug.toggleDebugPanel();
-            }
-        });
-        
-        document.body.appendChild(stepToggle);
-        console.log('🔧 Step tracking debug toggle created');
-    }
+    // Step tracking debug toggle method removed - consciousness-serving simplified approach
     
     /**
      * Set up debug event listeners

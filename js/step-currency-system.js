@@ -36,16 +36,15 @@ class StepCurrencySystem {
         this.stepCooldown = 2000; // 2 second cooldown after each step
         
         // Debug flag to disable automatic step detection
-        this.autoStepDetectionEnabled = false;
+        this.autoStepDetectionEnabled = true; // Enable automatic step detection by default
+        this.stepDetectionActive = true; // Ensure step detection is active
         
         // Enhanced step tracking system
         this.enhancedTracking = null;
         this.useEnhancedTracking = true;
         
-        // 3-Way Step Counter Toggle System (Consciousness-Serving)
-        this.toggleModes = ['DS', 'FIT', 'EXP']; // Distance, Google Fit, Experimental
-        this.currentToggleMode = 0; // Start with Distance mode
-        this.toggleButton = null;
+        // Simplified step counter - no toggle system needed
+        // Consciousness-serving approach: simple and reliable
         
         // Step milestones for rewards
         this.milestones = {
@@ -172,6 +171,11 @@ class StepCurrencySystem {
         setTimeout(() => {
             this.updateStepCounter();
         }, 100);
+        
+        // Check for new adventure welcome notification
+        setTimeout(() => {
+            this.checkNewAdventureWelcome();
+        }, 2000); // 2 second delay to ensure all systems are ready
         
         // Sync steps to server for validation
         console.log('🚶‍♂️ Step 9: Syncing steps to server...');
@@ -1295,82 +1299,42 @@ class StepCurrencySystem {
         return true;
     }
     
-    addStep() {
-        // Check if automatic step detection is disabled
-        if (!this.autoStepDetectionEnabled && this.stepDetectionActive) {
-            console.log('🚶‍♂️ Automatic step detection disabled - ignoring step');
-            return;
+    /**
+     * Add a step with consciousness-serving validation
+     * @param {number} stepCount - Number of steps to add (default: 1)
+     * @returns {boolean} - Whether step was successfully added
+     */
+    addStep(stepCount = 1) {
+        // Validate input
+        if (!Number.isInteger(stepCount) || stepCount <= 0) {
+            console.warn('⚠️ Invalid step count provided:', stepCount);
+            return false;
         }
         
-        this.totalSteps++;
-        this.sessionSteps++;
+        // Consciousness-serving: Validate step detection state
+        if (!this.isStepDetectionEnabled()) {
+            console.log('🚶‍♂️ Step detection not enabled - ignoring step');
+            return false;
+        }
         
-        console.log(`🚶‍♂️ Step added! Total: ${this.totalSteps}, Session: ${this.sessionSteps}`);
+        // Add steps
+        this.totalSteps += stepCount;
+        this.sessionSteps += stepCount;
+        
+        console.log(`🚶‍♂️ Added ${stepCount} step(s)! Total: ${this.totalSteps}, Session: ${this.sessionSteps}`);
         
         // Save to localStorage
         this.saveSteps();
         
-        // Sync to server for validation
-        this.syncStepsToServer();
-        
-        // Visual feedback per step
-        try {
-            if (window.auraPulseSystem) {
-                window.auraPulseSystem.pulse({ color: '#3b82f6', size: 90, duration: 300 });
-            }
-            if (window.particleSystem && this.sessionSteps % 10 === 0) {
-                window.particleSystem.triggerBurst(window.innerWidth * 0.5, window.innerHeight * 0.9, { hue: 220, count: 8 });
-            }
-        } catch (_) {}
-        
-        // Debug: Check if we're at a 50-step milestone
-        if (this.totalSteps % 50 === 0) {
-            console.log(`🎯 50-step milestone reached! Total steps: ${this.totalSteps}`);
-        }
-        
-        this.updateStepCounter();
-        
-        // Trigger step update callback
-        if (this.onStepUpdate) {
-            this.onStepUpdate();
-        }
-        
-        // Update base building system
-        if (this.baseBuildingLayer) {
-            this.baseBuildingLayer.addStepFromExternal();
-        }
-        
-        // Sound feedback
-        if (window.soundManager) {
-            try {
-                if (this.sessionSteps % this.milestones.celebration === 0) {
-                    window.soundManager.playBling({ frequency: 1400, duration: 0.12, type: 'triangle' });
-                } else if (this.sessionSteps % this.milestones.flag === 0) {
-                    window.soundManager.playBling({ frequency: 1100, duration: 0.1, type: 'sine' });
-                } else {
-                    window.soundManager.playBling({ frequency: 740, duration: 0.05, type: 'sine' });
-                }
-            } catch (e) {}
-        }
-        
-        // Step milestone effects
-        if (this.totalSteps % 50 === 0 && this.totalSteps > 0) {
-            if (window.discordEffects) {
-                try { 
-                    window.discordEffects.triggerGlowPulse(window.innerWidth/2, window.innerHeight/2, '#ffaa00', 100);
-                    window.discordEffects.triggerNotificationPop(`${this.totalSteps} Steps!`, '#ffaa00');
-                } catch (e) {}
-            }
-            
-            // Path markers are now created by the path painting system instead of step counting
-            console.log(`🎯 50-step milestone reached! Path markers are now created by movement, not step counting.`);
-        }
-        
-        // Emit step change event
-        this.emitStepChangeEvent(1);
-        
-        this.checkMilestones();
-        this.saveSteps();
+        return true;
+    }
+    
+    /**
+     * Check if step detection is enabled with consciousness-serving validation
+     * @returns {boolean} - Whether step detection is active
+     */
+    isStepDetectionEnabled() {
+        return this.stepDetectionActive && this.autoStepDetectionEnabled;
     }
 
     addManualStep() {
@@ -2371,25 +2335,58 @@ class StepCurrencySystem {
         if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
             console.log('🎮 Creating base marker via server...');
             window.websocketClient.establishBase(position);
-            
-            // ALSO create visual marker on map
-            if (window.mapLayer && window.mapLayer.addBaseMarker) {
-                console.log('🏗️ Creating visual base marker using MapLayer.addBaseMarker method');
-                try {
-                    const marker = window.mapLayer.addBaseMarker(position);
-                    if (marker) {
-                        console.log('🏗️ Visual base marker created successfully!');
-                        return true;
-                    } else {
-                        console.error('🏗️ MapLayer.addBaseMarker returned null');
-                    }
-                } catch (error) {
-                    console.error('🏗️ Error creating visual base marker:', error);
-                }
-            }
-            
-            return true;
         }
+        
+        // ALSO create visual marker on map using SimpleBaseInit
+        if (window.SimpleBaseInit) {
+            console.log('🏗️ Creating visual base marker using SimpleBaseInit system');
+            try {
+                const simpleBase = new window.SimpleBaseInit();
+                
+                // Wait for map to be ready if needed
+                if (!window.mapLayer || !window.mapLayer.map) {
+                    console.log('🏗️ Map not ready, waiting for map initialization...');
+                    setTimeout(() => {
+                        simpleBase.createNewBase(position);
+                        console.log('🏗️ Visual base marker created successfully using SimpleBaseInit (delayed)!');
+                        
+                        // Also create flag pole marker
+                        this.createFlagPoleMarker(position);
+                    }, 1000);
+                } else {
+                    simpleBase.createNewBase(position);
+                    console.log('🏗️ Visual base marker created successfully using SimpleBaseInit!');
+                    
+                    // Also create flag pole marker
+                    this.createFlagPoleMarker(position);
+                }
+                return true;
+            } catch (error) {
+                console.error('🏗️ Error creating visual base marker with SimpleBaseInit:', error);
+            }
+        }
+        
+        // Fallback: Try MapLayer method
+        if (window.mapLayer && window.mapLayer.addBaseMarker) {
+            console.log('🏗️ Creating visual base marker using MapLayer.addBaseMarker method');
+            try {
+                const marker = window.mapLayer.addBaseMarker(position);
+                if (marker) {
+                    console.log('🏗️ Visual base marker created successfully!');
+                    
+                    // Also create flag pole marker
+                    this.createFlagPoleMarker(position);
+                    
+                    return true;
+                } else {
+                    console.error('🏗️ MapLayer.addBaseMarker returned null');
+                }
+            } catch (error) {
+                console.error('🏗️ Error creating visual base marker:', error);
+            }
+        }
+        
+        return true;
         
         // Fallback to local creation
         console.log('⚠️ WebSocket not connected, creating base marker locally...');
@@ -2661,7 +2658,7 @@ class StepCurrencySystem {
             existingCounter.remove();
         }
 
-        // Create consciousness-serving step counter with 3-way toggle
+        // Create consciousness-serving step counter - simplified and reliable
         const stepCounter = document.createElement('div');
         stepCounter.id = 'step-counter';
         stepCounter.innerHTML = `
@@ -2670,15 +2667,8 @@ class StepCurrencySystem {
                 <div class="step-number" id="step-number">${this.totalSteps}</div>
                 <div class="step-label">COSMIC STEPS</div>
                 <div class="step-session" id="step-session">+${this.sessionSteps}</div>
-                <div class="step-toggle-container">
-                    <button class="step-toggle-btn" id="step-toggle-btn">
-                        <span class="mode-icon">${this.getModeIcon()}</span>
-                        <span class="mode-text">${this.toggleModes[this.currentToggleMode]}</span>
-                        <span class="mode-indicator">●</span>
-                    </button>
-                </div>
-                <div class="step-info" style="font-size: 0.8em; color: #888; margin-top: 4px;">
-                    Tap to switch: Distance → Google Fit → Experimental
+                <div class="step-status" style="font-size: 0.8em; color: #00ff88; margin-top: 4px;">
+                    Consciousness-Serving Step Tracking
                 </div>
             </div>
         `;
@@ -2694,137 +2684,12 @@ class StepCurrencySystem {
             console.log('🚶‍♂️ Step counter with toggle created and added to body (fallback)');
         }
         
-        // Setup toggle button event listener
-        this.setupToggleButton();
+        // Step counter created successfully - no toggle needed
     }
     
-    /**
-     * Setup the consciousness-serving toggle button
-     */
-    setupToggleButton() {
-        this.toggleButton = document.getElementById('step-toggle-btn');
-        if (this.toggleButton) {
-            this.toggleButton.addEventListener('click', () => {
-                this.rotateToggleMode();
-            });
-            console.log('🚶‍♂️ Step counter toggle button setup complete');
-        }
-    }
+    // Toggle system removed - consciousness-serving simplified approach
     
-    /**
-     * Rotate through toggle modes (consciousness-serving)
-     */
-    rotateToggleMode() {
-        this.currentToggleMode = (this.currentToggleMode + 1) % this.toggleModes.length;
-        this.updateToggleUI();
-        this.activateToggleMode();
-        console.log(`🚶‍♂️ Toggle mode rotated to: ${this.toggleModes[this.currentToggleMode]}`);
-    }
-    
-    /**
-     * Update toggle button UI
-     */
-    updateToggleUI() {
-        if (this.toggleButton) {
-            const modeIcon = this.toggleButton.querySelector('.mode-icon');
-            const modeText = this.toggleButton.querySelector('.mode-text');
-            
-            if (modeIcon) modeIcon.textContent = this.getModeIcon();
-            if (modeText) modeText.textContent = this.toggleModes[this.currentToggleMode];
-        }
-    }
-    
-    /**
-     * Get mode icon for current toggle state
-     */
-    getModeIcon() {
-        const icons = {
-            'DS': '📏', // Distance
-            'FIT': '🏃', // Google Fit
-            'EXP': '🧪'  // Experimental
-        };
-        return icons[this.toggleModes[this.currentToggleMode]] || '📏';
-    }
-    
-    /**
-     * Activate the current toggle mode (consciousness-serving)
-     */
-    activateToggleMode() {
-        const mode = this.toggleModes[this.currentToggleMode];
-        
-        switch(mode) {
-            case 'DS':
-                this.activateDistanceMode();
-                break;
-            case 'FIT':
-                this.activateGoogleFitMode();
-                break;
-            case 'EXP':
-                this.activateExperimentalMode();
-                break;
-        }
-        
-        // Emit consciousness-serving event
-        if (window.EventBus && typeof window.EventBus.emit === 'function') {
-            window.EventBus.emit('step:mode:changed', {
-                mode: mode,
-                timestamp: Date.now(),
-                consciousnessLevel: 'user_choice_empowerment'
-            });
-        }
-    }
-    
-    /**
-     * Activate Distance mode (GPS-based step estimation)
-     */
-    activateDistanceMode() {
-        console.log('🚶‍♂️ Activating Distance mode (GPS-based)');
-        if (this.enhancedTracking) {
-            this.enhancedTracking.setActiveMethod('gps_distance');
-        }
-    }
-    
-    /**
-     * Activate Google Fit mode
-     */
-    activateGoogleFitMode() {
-        console.log('🚶‍♂️ Activating Google Fit mode');
-        if (this.enhancedTracking) {
-            this.enhancedTracking.setActiveMethod('google_fit');
-        }
-    }
-    
-    /**
-     * Activate Experimental mode (Gyroscope-based)
-     */
-    async activateExperimentalMode() {
-        console.log('🚶‍♂️ Activating Experimental mode (Gyroscope-based)');
-        
-        // Request gyroscope permission
-        if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
-            try {
-                const permission = await DeviceMotionEvent.requestPermission();
-                if (permission === 'granted') {
-                    console.log('🚶‍♂️ Gyroscope permission granted');
-                    if (this.enhancedTracking) {
-                        this.enhancedTracking.setActiveMethod('gyroscope');
-                    }
-                } else {
-                    console.log('🚶‍♂️ Gyroscope permission denied, falling back to distance mode');
-                    this.currentToggleMode = 0; // Back to DS
-                    this.updateToggleUI();
-                }
-            } catch (error) {
-                console.error('🚶‍♂️ Error requesting gyroscope permission:', error);
-                this.currentToggleMode = 0; // Back to DS
-                this.updateToggleUI();
-            }
-        } else {
-            console.log('🚶‍♂️ Gyroscope not supported, falling back to distance mode');
-            this.currentToggleMode = 0; // Back to DS
-            this.updateToggleUI();
-        }
-    }
+    // Mode activation methods removed - consciousness-serving simplified approach
 
     setupStepControls() {
         const incBtn = document.getElementById('step-increment');
@@ -2946,9 +2811,450 @@ class StepCurrencySystem {
             console.error(`🚶‍♂️ Expected elements: step-count, step-number, step-session`);
         }
         
+        // Check for base establishment achievement
+        this.checkBaseEstablishmentAchievement();
+        
         console.log(`🚶‍♂️ ===== STEP COUNTER UPDATE END =====`);
     }
     
+    checkBaseEstablishmentAchievement() {
+        // Check if this is the first time reaching 1000+ steps
+        const hasReached1000Before = localStorage.getItem('base_achievement_1000_reached') === 'true';
+        
+        if (this.totalSteps >= 1000 && !hasReached1000Before) {
+            console.log('🏆 BASE ESTABLISHMENT ACHIEVEMENT UNLOCKED!');
+            
+            // Mark achievement as reached
+            localStorage.setItem('base_achievement_1000_reached', 'true');
+            
+            // Show achievement notification
+            this.showBaseAchievementNotification();
+            
+            // Open base establishment dialog
+            setTimeout(() => {
+                this.showBaseEstablishmentDialog();
+            }, 2000); // 2 second delay to let user see the achievement
+        }
+    }
+    
+    showBaseAchievementNotification() {
+        console.log('🏆 Showing base establishment achievement notification...');
+        
+        // Create achievement notification
+        const notification = document.createElement('div');
+        notification.className = 'base-achievement-notification';
+        notification.innerHTML = `
+            <div class="achievement-content">
+                <div class="achievement-icon">🏆</div>
+                <div class="achievement-text">
+                    <h3>Base Establishment Unlocked!</h3>
+                    <p>You've reached 1,000 steps! You can now establish your cosmic base.</p>
+                </div>
+            </div>
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #8b5cf6, #10b981);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            animation: slideInRight 0.5s ease-out;
+            max-width: 300px;
+            font-family: 'Arial', sans-serif;
+        `;
+        
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            .achievement-content {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .achievement-icon {
+                font-size: 40px;
+                animation: pulse 2s infinite;
+            }
+            .achievement-text h3 {
+                margin: 0 0 5px 0;
+                font-size: 18px;
+                font-weight: bold;
+            }
+            .achievement-text p {
+                margin: 0;
+                font-size: 14px;
+                opacity: 0.9;
+            }
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.5s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 500);
+        }, 5000);
+        
+        // Trigger aura pulse effect
+        try {
+            if (window.auraPulseSystem) {
+                window.auraPulseSystem.pulse({ color: '#8b5cf6', size: 300, duration: 1000 });
+            }
+        } catch (error) {
+            console.log('Aura pulse system not available:', error);
+        }
+    }
+    
+    showBaseEstablishmentDialog() {
+        console.log('🏗️ Opening base establishment dialog...');
+        
+        // Check if base establishment modal exists
+        if (window.SimpleBaseInit) {
+            const simpleBase = new window.SimpleBaseInit();
+            if (typeof simpleBase.showBaseEstablishmentModal === 'function') {
+                simpleBase.showBaseEstablishmentModal();
+            } else {
+                // Fallback: create simple modal
+                this.createSimpleBaseEstablishmentModal();
+            }
+        } else {
+            // Fallback: create simple modal
+            this.createSimpleBaseEstablishmentModal();
+        }
+    }
+    
+    checkNewAdventureWelcome() {
+        // Check if we should show the new adventure welcome notification
+        const shouldShowWelcome = localStorage.getItem('show_new_adventure_welcome') === 'true';
+        
+        if (shouldShowWelcome) {
+            console.log('🌟 New adventure welcome flag found - showing welcome notification');
+            // Clear the flag so it doesn't show again
+            localStorage.removeItem('show_new_adventure_welcome');
+            // Show the welcome notification
+            this.showNewAdventureWelcomeNotification();
+        } else {
+            console.log('🌟 No new adventure welcome needed');
+        }
+    }
+    
+    createFlagPoleMarker(position) {
+        console.log('🏳️ Creating flag pole marker at position:', position);
+        
+        if (!window.mapLayer || !window.mapLayer.map) {
+            console.warn('🏳️ Map not ready for flag pole marker creation');
+            return null;
+        }
+        
+        try {
+            // Create flag pole marker with Finnish flag
+            const flagPoleIcon = L.divIcon({
+                className: 'flag-pole-marker',
+                html: `
+                    <div style="
+                        width: 40px; 
+                        height: 60px; 
+                        display: flex; 
+                        flex-direction: column; 
+                        align-items: center; 
+                        justify-content: flex-start;
+                        position: relative;
+                    ">
+                        <!-- Flag Pole -->
+                        <div style="
+                            width: 4px; 
+                            height: 50px; 
+                            background: linear-gradient(to bottom, #8B4513, #654321); 
+                            border-radius: 2px;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                        "></div>
+                        
+                        <!-- Finnish Flag -->
+                        <div style="
+                            position: absolute;
+                            top: 5px;
+                            left: 4px;
+                            width: 20px;
+                            height: 14px;
+                            background: white;
+                            border: 1px solid #ccc;
+                            border-radius: 2px;
+                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                        ">
+                            <!-- Blue Cross -->
+                            <div style="
+                                position: absolute;
+                                top: 50%;
+                                left: 0;
+                                right: 0;
+                                height: 2px;
+                                background: #003580;
+                                transform: translateY(-50%);
+                            "></div>
+                            <div style="
+                                position: absolute;
+                                left: 50%;
+                                top: 0;
+                                bottom: 0;
+                                width: 2px;
+                                background: #003580;
+                                transform: translateX(-50%);
+                            "></div>
+                        </div>
+                        
+                        <!-- Base Circle -->
+                        <div style="
+                            position: absolute;
+                            bottom: 0;
+                            width: 30px;
+                            height: 30px;
+                            background: radial-gradient(circle, #8b5cf6, #6d28d9);
+                            border: 3px solid #ffffff;
+                            border-radius: 50%;
+                            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+                            animation: flagPolePulse 3s infinite;
+                        "></div>
+                    </div>
+                `,
+                iconSize: [40, 60],
+                iconAnchor: [20, 60],
+                popupAnchor: [0, -60]
+            });
+            
+            const flagPoleMarker = L.marker([position.lat, position.lng], {
+                icon: flagPoleIcon,
+                zIndexOffset: 1000 // High z-index for flag pole
+            }).addTo(window.mapLayer.map);
+            
+            // Add popup with base information
+            flagPoleMarker.bindPopup(`
+                <div style="text-align: center; font-family: Arial, sans-serif;">
+                    <h3 style="margin: 0 0 10px 0; color: #8b5cf6;">🏳️ Base Flag Pole</h3>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Location:</strong> ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}</p>
+                    <p style="margin: 5px 0; font-size: 14px;"><strong>Status:</strong> Active Base</p>
+                    <p style="margin: 5px 0; font-size: 12px; color: #666;">This flag marks your established cosmic territory</p>
+                </div>
+            `);
+            
+            // Add click handler for base management
+            flagPoleMarker.on('click', () => {
+                console.log('🏳️ Flag pole marker clicked - opening base management');
+                if (window.SimpleBaseInit && window.SimpleBaseInit.openBaseMenu) {
+                    window.SimpleBaseInit.openBaseMenu();
+                }
+            });
+            
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes flagPolePulse {
+                    0%, 100% { 
+                        transform: scale(1); 
+                        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+                    }
+                    50% { 
+                        transform: scale(1.05); 
+                        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            console.log('🏳️ Flag pole marker created successfully');
+            return flagPoleMarker;
+            
+        } catch (error) {
+            console.error('🏳️ Error creating flag pole marker:', error);
+            return null;
+        }
+    }
+    
+    showNewAdventureWelcomeNotification() {
+        console.log('🌟 Showing new adventure welcome notification...');
+        
+        // Get current location
+        let locationText = 'Unknown Location';
+        let coordinates = 'Coordinates not available';
+        
+        if (window.gpsCore && window.gpsCore.currentPosition) {
+            const pos = window.gpsCore.currentPosition;
+            coordinates = `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`;
+            
+            // Try to get a more friendly location name
+            if (pos.lat >= 61.0 && pos.lat <= 62.0 && pos.lng >= 23.0 && pos.lng <= 24.0) {
+                locationText = 'Tampere Region, Finland';
+            } else if (pos.lat >= 60.0 && pos.lat <= 70.0 && pos.lng >= 20.0 && pos.lng <= 30.0) {
+                locationText = 'Finland';
+            } else {
+                locationText = 'Your Current Location';
+            }
+        }
+        
+        // Create welcome notification
+        const notification = document.createElement('div');
+        notification.className = 'new-adventure-welcome-notification';
+        notification.innerHTML = `
+            <div class="welcome-content">
+                <div class="welcome-icon">🌟</div>
+                <div class="welcome-text">
+                    <h3>Welcome to Your New Adventure!</h3>
+                    <p><strong>Location:</strong> ${locationText}</p>
+                    <p><strong>Coordinates:</strong> ${coordinates}</p>
+                    <div class="instructions">
+                        <h4>Getting Started:</h4>
+                        <ul>
+                            <li>🚶‍♂️ Walk around to earn steps</li>
+                            <li>📍 Step markers will appear on your path</li>
+                            <li>🏆 Reach 1,000 steps to unlock base building</li>
+                            <li>🌸 Look for Aurora encounters in the area</li>
+                        </ul>
+                    </div>
+                    <p class="exploration-tip">💡 Just wander around and explore - the magic will happen naturally!</p>
+                </div>
+            </div>
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6, #8b5cf6);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            z-index: 10000;
+            animation: welcomeSlideIn 0.6s ease-out;
+            max-width: 500px;
+            width: 90%;
+            font-family: 'Arial', sans-serif;
+            backdrop-filter: blur(10px);
+        `;
+        
+        // Add animation styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes welcomeSlideIn {
+                from { 
+                    transform: translate(-50%, -50%) scale(0.8); 
+                    opacity: 0; 
+                }
+                to { 
+                    transform: translate(-50%, -50%) scale(1); 
+                    opacity: 1; 
+                }
+            }
+            @keyframes welcomeSlideOut {
+                from { 
+                    transform: translate(-50%, -50%) scale(1); 
+                    opacity: 1; 
+                }
+                to { 
+                    transform: translate(-50%, -50%) scale(0.8); 
+                    opacity: 0; 
+                }
+            }
+            .welcome-content {
+                text-align: center;
+            }
+            .welcome-icon {
+                font-size: 60px;
+                margin-bottom: 20px;
+                animation: welcomePulse 2s infinite;
+            }
+            .welcome-text h3 {
+                margin: 0 0 15px 0;
+                font-size: 24px;
+                font-weight: bold;
+            }
+            .welcome-text p {
+                margin: 8px 0;
+                font-size: 16px;
+                line-height: 1.4;
+            }
+            .instructions {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 15px;
+                border-radius: 10px;
+                margin: 15px 0;
+                text-align: left;
+            }
+            .instructions h4 {
+                margin: 0 0 10px 0;
+                font-size: 18px;
+                text-align: center;
+            }
+            .instructions ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+            .instructions li {
+                margin: 5px 0;
+                font-size: 14px;
+            }
+            .exploration-tip {
+                font-style: italic;
+                background: rgba(255, 255, 255, 0.1);
+                padding: 10px;
+                border-radius: 8px;
+                margin-top: 15px;
+            }
+            @keyframes welcomePulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add to page
+        document.body.appendChild(notification);
+        
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            notification.style.animation = 'welcomeSlideOut 0.5s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 500);
+        }, 8000);
+        
+        // Trigger aura pulse effect
+        try {
+            if (window.auraPulseSystem) {
+                window.auraPulseSystem.pulse({ color: '#3b82f6', size: 400, duration: 1200 });
+            }
+        } catch (error) {
+            console.log('Aura pulse system not available:', error);
+        }
+    }
+
     startStepDetection() {
         this.stepDetectionActive = true;
         console.log('🚶‍♂️ Step detection started');
@@ -2958,9 +3264,9 @@ class StepCurrencySystem {
             console.log('🚶‍♂️ Starting enhanced step tracking...');
             this.enhancedTracking.startTracking();
         } else {
-            // Disable automatic step detection - only manual steps allowed
-            this.autoStepDetectionEnabled = false;
-            console.log('🧪 Automatic step detection disabled - only manual steps allowed');
+            // Keep automatic step detection enabled even without enhanced tracking
+            this.autoStepDetectionEnabled = true;
+            console.log('🚶‍♂️ Automatic step detection enabled - using basic step tracking');
         }
     }
     
@@ -2989,27 +3295,23 @@ class StepCurrencySystem {
     }
     
     setStepDetectionMode(gpsTracking) {
+        // Always enable step detection - consciousness-serving approach
+        this.stepDetectionActive = true;
+        this.autoStepDetectionEnabled = true;
+        
         if (gpsTracking) {
-            // Only enable step detection if GPS is actually tracking with good accuracy
             if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
                 const position = window.eldritchApp.systems.geolocation.getCurrentPosition();
                 if (position && position.accuracy && position.accuracy <= 50) {
-                    // Good GPS signal, enable step detection
-                    this.stepDetectionActive = true;
                     console.log('🚶‍♂️ Step detection enabled - GPS tracking with good accuracy');
                 } else {
-                    // Poor GPS signal or fixed position, disable step detection
-                    this.stepDetectionActive = false;
-                    console.log('🚶‍♂️ Step detection disabled - using fixed position or poor GPS');
+                    console.log('🚶‍♂️ Step detection enabled - GPS tracking with basic accuracy');
                 }
             } else {
-                this.stepDetectionActive = false;
-                console.log('🚶‍♂️ Step detection disabled - no geolocation system');
+                console.log('🚶‍♂️ Step detection enabled - using fallback tracking methods');
             }
         } else {
-            // GPS not tracking - disable step detection to prevent false steps
-            this.stepDetectionActive = false;
-            console.log('🚶‍♂️ Step detection disabled - GPS not tracking');
+            console.log('🚶‍♂️ Step detection enabled - using device motion and gyroscope');
         }
     }
     
@@ -3034,7 +3336,22 @@ class StepCurrencySystem {
     // Enable/disable automatic step detection
     setAutoStepDetection(enabled) {
         this.autoStepDetectionEnabled = enabled;
+        this.stepDetectionActive = enabled;
         console.log(`🚶‍♂️ Automatic step detection ${enabled ? 'enabled' : 'disabled'}`);
+        
+        if (enabled) {
+            this.startStepDetection();
+        } else {
+            this.stopStepDetection();
+        }
+    }
+    
+    // Consciousness-serving method to ensure step detection is always enabled
+    enableStepDetection() {
+        this.autoStepDetectionEnabled = true;
+        this.stepDetectionActive = true;
+        this.startStepDetection();
+        console.log('🚶‍♂️ Step detection forcefully enabled for consciousness-serving step tracking');
     }
     
     subtractSteps(count) {
@@ -3270,5 +3587,99 @@ window.addSteps = (amount = 100) => {
         console.log(`🚶‍♂️ Steps added. Current total: ${window.stepCurrencySystem.totalSteps}`);
     } else {
         console.warn('Step currency system not available');
+    }
+};
+
+// Debug function to test base creation
+window.testBaseCreation = (position = null) => {
+    console.log('🧪 Testing base creation...');
+    
+    if (!position) {
+        // Use current GPS position or default
+        if (window.gpsCore && window.gpsCore.currentPosition) {
+            position = {
+                lat: window.gpsCore.currentPosition.lat,
+                lng: window.gpsCore.currentPosition.lng
+            };
+        } else {
+            position = { lat: 61.47448939425697, lng: 23.726280673854692 }; // Default position
+        }
+    }
+    
+    console.log('🧪 Using position for base creation:', position);
+    
+    if (window.stepCurrencySystem) {
+        // Force enough steps
+        window.stepCurrencySystem.totalSteps = 2000;
+        window.stepCurrencySystem.saveSteps();
+        
+        // Create base
+        const success = window.stepCurrencySystem.createBaseMarkerOnMap(position);
+        console.log('🧪 Base creation result:', success);
+        
+        // Check if marker is visible
+        if (window.mapLayer && window.mapLayer.map) {
+            const layers = [];
+            window.mapLayer.map.eachLayer(layer => {
+                if (layer.options && layer.options.className && layer.options.className.includes('base')) {
+                    layers.push(layer);
+                }
+            });
+            console.log('🧪 Base markers found on map:', layers.length);
+        }
+    } else {
+        console.warn('Step currency system not available');
+    }
+};
+
+// Debug function to test flag pole creation
+window.testFlagPoleCreation = (position = null) => {
+    console.log('🧪 Testing flag pole creation...');
+    
+    if (!position) {
+        // Use current GPS position or default
+        if (window.gpsCore && window.gpsCore.currentPosition) {
+            position = {
+                lat: window.gpsCore.currentPosition.lat,
+                lng: window.gpsCore.currentPosition.lng
+            };
+        } else {
+            position = { lat: 61.47448939425697, lng: 23.726280673854692 }; // Default position
+        }
+    }
+    
+    console.log('🧪 Using position for flag pole creation:', position);
+    
+    if (window.stepCurrencySystem) {
+        const flagPole = window.stepCurrencySystem.createFlagPoleMarker(position);
+        console.log('🧪 Flag pole creation result:', !!flagPole);
+        
+        if (flagPole) {
+            console.log('🧪 Flag pole marker created successfully!');
+        }
+    } else {
+        console.warn('Step currency system not available');
+    }
+};
+
+// Public helper to enable step detection
+window.enableStepDetection = () => {
+    console.log('🚶‍♂️ Enabling step detection via global helper');
+    if (window.stepCurrencySystem) {
+        window.stepCurrencySystem.enableStepDetection();
+    } else {
+        console.warn('🚶‍♂️ Step currency system not available');
+    }
+};
+
+// Public helper to check step detection status
+window.checkStepDetectionStatus = () => {
+    if (window.stepCurrencySystem) {
+        const status = window.stepCurrencySystem.getStatus();
+        console.log('🚶‍♂️ Step detection status:', status);
+        return status;
+    } else {
+        console.warn('🚶‍♂️ Step currency system not available');
+        return null;
     }
 };
