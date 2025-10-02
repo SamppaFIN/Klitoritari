@@ -836,8 +836,8 @@ window.togglePlayerTrails = () => {
 window.showOtherBases = () => {
     console.log('🏗️ Refreshing other players bases...');
     if (window.websocketClient && window.websocketClient.isConnectedToServer()) {
-        // Request fresh marker data from server
-        window.websocketClient.requestMarkerData();
+        // Request fresh game state from server (includes marker data)
+        window.websocketClient.requestGameState();
     }
 };
 

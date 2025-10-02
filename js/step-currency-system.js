@@ -107,15 +107,19 @@ class StepCurrencySystem {
                 this.enhancedTracking = new EnhancedStepTracking();
                 console.log('🚶‍♂️ Enhanced step tracking system initialized successfully');
                 
-                // Set up event listeners for step updates
-                this.enhancedTracking.on('stepDetected', (data) => {
-                    console.log('🚶‍♂️ Enhanced tracking detected step:', data);
-                    this.addStep('enhanced-tracking');
-                });
-                
-                this.enhancedTracking.on('trackingStatusChanged', (status) => {
-                    console.log('🚶‍♂️ Enhanced tracking status changed:', status);
-                });
+                // Set up event listeners for step updates if the method exists
+                if (this.enhancedTracking && typeof this.enhancedTracking.on === 'function') {
+                    this.enhancedTracking.on('stepDetected', (data) => {
+                        console.log('🚶‍♂️ Enhanced tracking detected step:', data);
+                        this.addStep('enhanced-tracking');
+                    });
+                    
+                    this.enhancedTracking.on('trackingStatusChanged', (status) => {
+                        console.log('🚶‍♂️ Enhanced tracking status changed:', status);
+                    });
+                } else {
+                    console.log('🚶‍♂️ Enhanced tracking initialized but no event system available');
+                }
                 
                 // Initialize the enhanced tracking
                 this.enhancedTracking.init();
