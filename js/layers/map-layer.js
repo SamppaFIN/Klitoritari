@@ -702,20 +702,30 @@ class MapLayer extends BaseLayer {
             this.eventBus.on('geolocation:position:update', this.handlePositionUpdate.bind(this)); // Legacy support
         }
         
-        // Consciousness-Serving: Try to restore from saved data first, then use initial position
-        const savedPosition = this.playerMarkerPersistence.loadMarkerPosition();
-        if (savedPosition) {
-            console.log('📍 MapLayer: Restoring player marker from saved position:', savedPosition);
-            this.createPlayerMarker(savedPosition);
-        } else if (this.initialPosition) {
-            this.createPlayerMarker(this.initialPosition);
+        // Consciousness-Serving: Create player marker immediately with current position
+        let playerPosition = null;
+        
+        // Try GPS Core first
+        if (window.gpsCore && window.gpsCore.currentPosition) {
+            playerPosition = window.gpsCore.currentPosition;
+            console.log('📍 MapLayer: Using GPS Core position for player marker:', playerPosition);
+        }
+        // Try saved position
+        else if (this.playerMarkerPersistence.loadMarkerPosition()) {
+            playerPosition = this.playerMarkerPersistence.loadMarkerPosition();
+            console.log('📍 MapLayer: Using saved position for player marker:', playerPosition);
+        }
+        // Try initial position
+        else if (this.initialPosition) {
+            playerPosition = this.initialPosition;
+            console.log('📍 MapLayer: Using initial position for player marker:', playerPosition);
+        }
+        
+        // Create player marker immediately if we have a position
+        if (playerPosition) {
+            this.createPlayerMarker(playerPosition);
         } else {
-            // Try to create marker from saved position
-            const savedMarker = this.playerMarkerPersistence.createPlayerMarker(this.map);
-            if (savedMarker) {
-                this.markers.set('player', savedMarker);
-                console.log('📍 Player marker created from saved position');
-            }
+            console.warn('📍 MapLayer: No position available for player marker, will create when position is available');
         }
         
         // If GPS position is available, update the marker immediately

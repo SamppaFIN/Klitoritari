@@ -3141,34 +3141,30 @@ class StepCurrencySystem {
             existingCounter.remove();
         }
 
-        // Create consciousness-serving step counter with toggle buttons
+        // Create simple step counter (restored earlier working version)
         const stepCounter = document.createElement('div');
         stepCounter.id = 'step-counter';
         stepCounter.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             border: 2px solid #ff6b6b;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             color: white;
             font-family: 'Arial', sans-serif;
             z-index: 10000;
-            min-width: 200px;
+            min-width: 180px;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         `;
         stepCounter.innerHTML = `
-            <div class="step-counter-container">
-                <div class="step-icon" style="font-size: 24px; margin-bottom: 8px;">🚶‍♂️</div>
-                <div class="step-number" id="step-number" style="font-size: 32px; font-weight: bold; color: #00ff88; margin-bottom: 4px;">${this.totalSteps}</div>
-                <div class="step-label" style="font-size: 12px; color: #00ff88; margin-bottom: 8px;">Consciousness-Serving Step Tracking</div>
-                <div class="step-session" id="step-session" style="font-size: 14px; color: #ffd93d; margin-bottom: 12px;">+${this.sessionSteps}</div>
-                <div class="step-source-toggle" style="display: flex; gap: 6px; justify-content: center;">
-                    <button class="step-source-btn" data-mode="gps_distance" style="padding: 6px 12px; font-size: 12px; background: #1a1a2e; color: #00ff88; border: 1px solid #00ff88; border-radius: 6px; cursor: pointer; font-weight: bold;">GPS</button>
-                    <button class="step-source-btn" data-mode="device" style="padding: 6px 12px; font-size: 12px; background: #1a1a2e; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 6px; cursor: pointer; font-weight: bold;">Device</button>
-                    <button class="step-source-btn" data-mode="simulation" style="padding: 6px 12px; font-size: 12px; background: #1a1a2e; color: #ffd93d; border: 1px solid #ffd93d; border-radius: 6px; cursor: pointer; font-weight: bold;">Sim</button>
-                </div>
+            <div style="font-size: 28px; font-weight: bold; color: #00ff88; margin-bottom: 8px;">10 000</div>
+            <div style="display: flex; gap: 4px; justify-content: center;">
+                <button class="step-source-btn" data-mode="gps_distance" style="padding: 4px 8px; font-size: 11px; background: #1a1a2e; color: #00ff88; border: 1px solid #00ff88; border-radius: 4px; cursor: pointer;">GPS</button>
+                <button class="step-source-btn" data-mode="device" style="padding: 4px 8px; font-size: 11px; background: #1a1a2e; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 4px; cursor: pointer;">Device</button>
+                <button class="step-source-btn" data-mode="simulation" style="padding: 4px 8px; font-size: 11px; background: #1a1a2e; color: #ffd93d; border: 1px solid #ffd93d; border-radius: 4px; cursor: pointer;">Sim</button>
             </div>
         `;
 
@@ -3176,11 +3172,11 @@ class StepCurrencySystem {
         const stepContainer = document.getElementById('step-counter-container');
         if (stepContainer) {
             stepContainer.appendChild(stepCounter);
-            console.log('🚶‍♂️ Step counter with toggle created and added to control panel');
+            console.log('🚶‍♂️ Simple step counter created and added to control panel');
         } else {
             // Fallback to adding to body
             document.body.appendChild(stepCounter);
-            console.log('🚶‍♂️ Step counter with toggle created and added to body (fallback)');
+            console.log('🚶‍♂️ Simple step counter created and added to body (fallback)');
         }
         
         // Set up toggle button event listeners
