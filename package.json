@@ -7,7 +7,12 @@
     "start": "node server.js",
     "dev": "node server.js",
     "build": "echo 'No build step needed for vanilla JS'",
-    "test": "echo 'Tests will be added'"
+    "test": "python veritas_demo.py",
+    "test:consciousness": "python veritas_demo.py",
+    "test:full": "python veritas_test_suite.py",
+    "quality:check": "python veritas_demo.py",
+    "quality:gate": "python veritas_demo.py && echo '✅ Quality gate passed'",
+    "veritas": "python veritas_demo.py"
   },
   "keywords": ["cosmic", "map", "mystery", "investigation", "paranormal", "community"],
   "author": "Infinite & Aurora",

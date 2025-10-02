@@ -33,45 +33,17 @@ jobs:
         npx eslint js/ --format json --output-file lint-results.json || true
         python qa_guru_orchestrator.py commit-check ${{ github.sha }}
     
-    - name: 🌸 Run Consciousness Validation
+    - name: 🌸 Run Veritas Consciousness Analysis
       run: |
-        echo "🔍 QA Guru: Validating consciousness alignment..."
-        python -c "
-        from qa_guru_orchestrator import ConsciousnessValidator
-        validator = ConsciousnessValidator()
+        echo "🔍 Veritas: Running consciousness-aware analysis..."
+        python veritas_demo.py
         
-        # Analyze recent changes
-        import subprocess
-        result = subprocess.run(['git', 'diff', '--name-only', 'HEAD~1'], capture_output=True, text=True)
-        changed_files = result.stdout.strip().split('\n')
-        
-        total_score = 0
-        files_analyzed = 0
-        
-        for file in changed_files:
-            if file.endswith('.js'):
-                try:
-                    with open(file, 'r') as f:
-                        content = f.read()
-                    scores = validator.analyze_code_consciousness(content)
-                    score = validator.calculate_consciousness_score(scores)
-                    total_score += score
-                    files_analyzed += 1
-                    print(f'File: {file}, Consciousness Score: {score:.2f}')
-                except Exception as e:
-                    print(f'Error analyzing {file}: {e}')
-        
-        if files_analyzed > 0:
-            avg_score = total_score / files_analyzed
-            print(f'Average Consciousness Score: {avg_score:.2f}')
-            if avg_score < 0.7:
-                print('❌ Consciousness alignment below threshold (0.7)')
-                exit(1)
-            else:
-                print('✅ Consciousness alignment acceptable')
-        else:
-            print('No JavaScript files changed')
-        "
+        if [ $? -eq 0 ]; then
+          echo "✅ Veritas: Consciousness alignment approved!"
+        else
+          echo "❌ Veritas: Consciousness alignment below threshold!"
+          exit 1
+        fi
     
     - name: 🌸 Run Unit Tests
       run: |
