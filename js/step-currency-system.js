@@ -2816,9 +2816,29 @@ class StepCurrencySystem {
             window.websocketClient.establishBase(position);
         }
         
-        // ALSO create visual marker on map using SimpleBaseInit
+        // Create visual marker immediately using MapLayer (most reliable)
+        if (window.mapLayer && window.mapLayer.map && window.mapLayer.addBaseMarker) {
+            console.log('🏗️ Creating visual base marker immediately using MapLayer.addBaseMarker method');
+            try {
+                const marker = window.mapLayer.addBaseMarker(position);
+                if (marker) {
+                    console.log('🏗️ Visual base marker created successfully!');
+                    
+                    // Also create flag pole marker
+                    this.createFlagPoleMarker(position);
+                    
+                    return true;
+                } else {
+                    console.error('🏗️ MapLayer.addBaseMarker returned null');
+                }
+            } catch (error) {
+                console.error('🏗️ Error creating visual base marker:', error);
+            }
+        }
+        
+        // Fallback: Try SimpleBaseInit if MapLayer not available
         if (window.SimpleBaseInit) {
-            console.log('🏗️ Creating visual base marker using SimpleBaseInit system');
+            console.log('🏗️ Creating visual base marker using SimpleBaseInit system (fallback)');
             try {
                 const simpleBase = new window.SimpleBaseInit();
                 
@@ -2842,26 +2862,6 @@ class StepCurrencySystem {
                 return true;
             } catch (error) {
                 console.error('🏗️ Error creating visual base marker with SimpleBaseInit:', error);
-            }
-        }
-        
-        // Fallback: Try MapLayer method
-        if (window.mapLayer && window.mapLayer.addBaseMarker) {
-            console.log('🏗️ Creating visual base marker using MapLayer.addBaseMarker method');
-            try {
-                const marker = window.mapLayer.addBaseMarker(position);
-                if (marker) {
-                    console.log('🏗️ Visual base marker created successfully!');
-                    
-                    // Also create flag pole marker
-                    this.createFlagPoleMarker(position);
-                    
-                    return true;
-                } else {
-                    console.error('🏗️ MapLayer.addBaseMarker returned null');
-                }
-            } catch (error) {
-                console.error('🏗️ Error creating visual base marker:', error);
             }
         }
         

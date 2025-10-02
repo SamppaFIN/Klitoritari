@@ -982,11 +982,12 @@ class EldritchSanctuaryApp {
         console.log('🎮 Initializing game systems...');
         
         // The game systems are already initialized in the constructor
-        // This method is called by the welcome screen when continuing adventure
+        // This method is called by the welcome screen for both new and continuing adventures
         
-        // Request game state from server when continuing adventure
+        // Request game state from server for both new and continuing adventures
+        // This ensures other players' bases and markers are loaded
         if (window.stepCurrencySystem && typeof window.stepCurrencySystem.requestGameStateFromServer === 'function') {
-            console.log('🎮 Requesting game state from server for continuing adventure...');
+            console.log('🎮 Requesting game state from server to load other players bases and markers...');
             window.stepCurrencySystem.requestGameStateFromServer();
         } else {
             console.warn('🎮 Step currency system not available for game state request');
