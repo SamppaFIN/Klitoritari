@@ -18,10 +18,16 @@ class MapObjectManager {
         this.selectedType = 'BASE';
         this.eventBus = null;
         
+        // Performance optimization for high object counts
+        this.performanceMode = false;
+        this.batchSize = 100; // Process objects in batches
+        this.renderThrottle = 16; // 60 FPS max
+        this.lastRenderTime = 0;
+        
         // Initialize object type registry
         this.objectTypes = this.initializeObjectTypes();
         
-        console.log('🗺️ Map Object Manager initialized');
+        console.log('🗺️ Map Object Manager initialized with performance optimizations');
     }
 
     /**
@@ -118,7 +124,7 @@ class MapObjectManager {
     }
 
     /**
-     * Create a new map object at the specified position
+     * Create a new map object at the specified position with performance optimization
      */
     createObject(type, position, options = {}) {
         if (!this.objectTypes[type]) {
@@ -129,6 +135,12 @@ class MapObjectManager {
         if (!this.isMapAvailable()) {
             console.error('❌ Map not available for object creation');
             return null;
+        }
+
+        // Enable performance mode for high object counts
+        if (this.objects.size > 500) {
+            this.performanceMode = true;
+            console.log('🗺️ Performance mode enabled for high object count');
         }
 
         const objectType = this.objectTypes[type];
@@ -143,7 +155,7 @@ class MapObjectManager {
             ...options
         };
 
-        // Create the visual marker
+        // Create the visual marker with performance optimization
         const marker = this.createMarkerVisual(objectType, position, objectData);
         if (!marker) {
             console.error(`❌ Failed to create marker for ${type}`);
@@ -155,6 +167,11 @@ class MapObjectManager {
             ...objectData,
             marker: marker
         });
+
+        // Throttle rendering for performance
+        if (this.performanceMode) {
+            this.throttledRender();
+        }
 
         // Emit creation event
         if (this.eventBus) {
@@ -270,6 +287,35 @@ class MapObjectManager {
             console.error('❌ Error creating marker visual:', error);
             return null;
         }
+    }
+
+    /**
+     * Throttled rendering for performance optimization
+     */
+    throttledRender() {
+        const now = performance.now();
+        if (now - this.lastRenderTime < this.renderThrottle) {
+            return; // Skip this render cycle
+        }
+        
+        this.lastRenderTime = now;
+        
+        // Force map to update
+        if (window.map && window.map.invalidateSize) {
+            window.map.invalidateSize();
+        }
+    }
+    
+    /**
+     * Get performance statistics
+     */
+    getPerformanceStats() {
+        return {
+            objectCount: this.objects.size,
+            performanceMode: this.performanceMode,
+            batchSize: this.batchSize,
+            renderThrottle: this.renderThrottle
+        };
     }
 
     /**

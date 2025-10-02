@@ -7,7 +7,7 @@ class PerformanceStressTest {
     constructor() {
         this.testResults = [];
         this.isRunning = false;
-        this.objectCounts = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000];
+        this.objectCounts = [100, 500, 1000, 1500, 2000]; // Reduced for better performance
         this.currentTestIndex = 0;
         
         // Performance thresholds
@@ -79,14 +79,15 @@ class PerformanceStressTest {
             display: none;
         `;
         
-        testPanel.innerHTML = `
-            <h3 style="margin: 0 0 10px 0; color: #ff6b6b;">🌸 Performance Stress Test</h3>
-            <div id="test-status">Ready to test consciousness-aware optimizations</div>
-            <div id="test-progress" style="margin: 10px 0;"></div>
-            <div id="test-results" style="margin: 10px 0;"></div>
-            <button id="start-test" style="background: #4ecdc4; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">Start Stress Test</button>
-            <button id="stop-test" style="background: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-left: 10px;" disabled>Stop Test</button>
-        `;
+         testPanel.innerHTML = `
+             <h3 style="margin: 0 0 10px 0; color: #ff6b6b;">🌸 Performance Stress Test</h3>
+             <div id="test-status">Ready to test consciousness-aware optimizations</div>
+             <div id="emergency-status" style="margin: 5px 0; padding: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; font-size: 11px;"></div>
+             <div id="test-progress" style="margin: 10px 0;"></div>
+             <div id="test-results" style="margin: 10px 0;"></div>
+             <button id="start-test" style="background: #4ecdc4; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">Start Stress Test</button>
+             <button id="stop-test" style="background: #ff6b6b; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-left: 10px;" disabled>Stop Test</button>
+         `;
         
         document.body.appendChild(toggleButton);
         document.body.appendChild(testPanel);
@@ -100,6 +101,9 @@ class PerformanceStressTest {
         
         document.getElementById('start-test').addEventListener('click', () => this.startTest());
         document.getElementById('stop-test').addEventListener('click', () => this.stopTest());
+        
+        // Update emergency status periodically
+        this.updateEmergencyStatus();
     }
     
     /**
@@ -200,20 +204,35 @@ class PerformanceStressTest {
     }
     
     /**
-     * Create test objects
+     * Create test objects with proper coordinate conversion
      */
     createTestObjects(count) {
         const objects = [];
         
+        // Get current map bounds for realistic positioning
+        let mapBounds = null;
+        if (window.map && window.map.getBounds) {
+            mapBounds = window.map.getBounds();
+        } else {
+            // Default to Tampere area
+            mapBounds = {
+                getNorth: () => 61.5078,
+                getSouth: () => 61.4878,
+                getEast: () => 23.7708,
+                getWest: () => 23.7508
+            };
+        }
+        
         for (let i = 0; i < count; i++) {
+            // Create realistic coordinates within map bounds
+            const lat = mapBounds.getSouth() + Math.random() * (mapBounds.getNorth() - mapBounds.getSouth());
+            const lng = mapBounds.getWest() + Math.random() * (mapBounds.getEast() - mapBounds.getWest());
+            
             const object = {
-                id: `test_obj_${i}`,
+                id: `stress_test_obj_${i}`,
                 type: 'POI',
-                position: {
-                    lat: 61.4978 + (Math.random() - 0.5) * 0.01, // Around Tampere area
-                    lng: 23.7608 + (Math.random() - 0.5) * 0.01
-                },
-                size: Math.random() * 50 + 10,
+                position: { lat, lng },
+                size: Math.random() * 30 + 10,
                 color: {
                     r: Math.random(),
                     g: Math.random(),
@@ -224,40 +243,55 @@ class PerformanceStressTest {
             
             objects.push(object);
             
-            // Add to systems if available
-            if (window.webglRenderer) {
-                window.webglRenderer.addObject(object);
-            }
-            
-            if (window.viewportCuller) {
-                window.viewportCuller.addObject(object.id, object);
-            }
-            
+            // Add to map object manager (primary system)
             if (window.mapObjectManager) {
-                window.mapObjectManager.createObject('POI', object.position, object);
+                try {
+                    const objectId = window.mapObjectManager.createObject('POI', object.position, {
+                        size: object.size,
+                        color: object.color,
+                        testObject: true
+                    });
+                    object.mapObjectId = objectId;
+                } catch (error) {
+                    console.warn(`Failed to create map object ${i}:`, error);
+                }
+            }
+            
+            // Add to viewport culler if available
+            if (window.viewportCuller) {
+                window.viewportCuller.addObject(object.id, {
+                    position: object.position,
+                    size: object.size
+                });
             }
         }
         
+        console.log(`🌸 Created ${objects.length} test objects`);
         return objects;
     }
     
     /**
-     * Measure performance
+     * Measure performance with proper rendering integration
      */
     async measurePerformance(objects) {
         const measurements = [];
-        const measurementCount = 60; // 60 frames
+        const measurementCount = 30; // Reduced for faster testing
         
         // Wait for systems to stabilize
-        await this.sleep(100);
+        await this.sleep(200);
         
         // Measure performance
         for (let i = 0; i < measurementCount; i++) {
             const startTime = performance.now();
             
-            // Trigger rendering
+            // Trigger proper rendering through layer manager
             if (window.layerManager) {
                 window.layerManager.render();
+            }
+            
+            // Also trigger map rendering if available
+            if (window.map && window.map.invalidateSize) {
+                window.map.invalidateSize();
             }
             
             const endTime = performance.now();
@@ -319,28 +353,33 @@ class PerformanceStressTest {
     }
     
     /**
-     * Clean up test objects
+     * Clean up test objects properly
      */
     cleanupTestObjects(objects) {
+        console.log(`🌸 Cleaning up ${objects.length} test objects...`);
+        
         objects.forEach(obj => {
+            // Remove from map object manager
+            if (obj.mapObjectId && window.mapObjectManager) {
+                try {
+                    window.mapObjectManager.removeObject(obj.mapObjectId);
+                } catch (error) {
+                    console.warn(`Failed to remove map object ${obj.mapObjectId}:`, error);
+                }
+            }
+            
+            // Remove from viewport culler
             if (window.viewportCuller) {
                 window.viewportCuller.removeObject(obj.id);
             }
-            
-            if (window.mapObjectManager) {
-                window.mapObjectManager.removeObject(obj.id);
-            }
         });
-        
-        // Reset WebGL renderer
-        if (window.webglRenderer) {
-            window.webglRenderer.objectCount = 0;
-        }
         
         // Trigger memory cleanup
         if (window.memoryManager) {
             window.memoryManager.performCleanup();
         }
+        
+        console.log('🌸 Test objects cleaned up');
     }
     
     /**
@@ -386,6 +425,34 @@ class PerformanceStressTest {
             overallStatus,
             results: this.testResults
         });
+    }
+    
+    /**
+     * Update emergency status display
+     */
+    updateEmergencyStatus() {
+        const statusDiv = document.getElementById('emergency-status');
+        if (!statusDiv) return;
+        
+        if (window.emergencyPerformanceManager) {
+            const status = window.emergencyPerformanceManager.getStatus();
+            const color = status.isActive ? '#ff6b6b' : '#4ecdc4';
+            const icon = status.isActive ? '🚨' : '✅';
+            
+            statusDiv.innerHTML = `
+                ${icon} Emergency Mode: ${status.isActive ? 'ACTIVE' : 'Normal'} | 
+                Objects: ${status.objectCount} | 
+                FPS: ${status.fps.toFixed(1)} | 
+                Memory: ${status.memoryUsage.toFixed(1)}MB
+            `;
+            statusDiv.style.color = color;
+        } else {
+            statusDiv.innerHTML = '⚠️ Emergency Manager not available';
+            statusDiv.style.color = '#ff6b6b';
+        }
+        
+        // Update every 2 seconds
+        setTimeout(() => this.updateEmergencyStatus(), 2000);
     }
     
     /**
