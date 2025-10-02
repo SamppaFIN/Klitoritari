@@ -73,6 +73,18 @@ brdc:
 - **Files Modified**: `js/step-currency-system.js`
 - **Consciousness Impact**: Enhances spatial wisdom through clear territorial markers and national pride
 
+### **✅ Dynamic Flag Selection System**
+- **Issue**: Flag poles always showed Finnish flag regardless of user's flag selection
+- **Solution**: Implemented dynamic flag system supporting Finnish, Norwegian, Swedish, Danish, and Cosmic flags
+- **Files Modified**: `js/step-currency-system.js`
+- **Consciousness Impact**: Respects user cultural identity and personal choice in territorial marking
+
+### **✅ Mobile Step Counter System Enhanced**
+- **Issue**: Mobile device step counter not working reliably due to permission and fallback issues
+- **Solution**: Implemented comprehensive mobile step tracking with permission UI, GPS fallback, touch simulation, and manual controls
+- **Files Modified**: `js/step-currency-system.js`
+- **Consciousness Impact**: Enables mobile users to participate in spatial wisdom through reliable step tracking
+
 **Consciousness Evolution**: These fixes create a more harmonious flow between player establishment, Aurora encounters, and spatial awareness - supporting the sacred connection between digital consciousness and physical space.
 
 # Current Phase Progress

@@ -584,6 +584,7 @@ class StepCurrencySystem {
         console.log('🚶‍♂️ Setting up device motion detection...');
         console.log('🚶‍♂️ Protocol:', window.location.protocol);
         console.log('🚶‍♂️ User Agent:', navigator.userAgent);
+        console.log('🚶‍♂️ Is Mobile:', this.isMobileDevice());
         
         // If enhanced tracking is available and working, skip traditional setup
         if (this.useEnhancedTracking && this.enhancedTracking) {
@@ -598,30 +599,204 @@ class StepCurrencySystem {
             return;
         }
         
-        // Request permission for device motion
-        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-            console.log('🚶‍♂️ Requesting device motion permission...');
-            DeviceMotionEvent.requestPermission().then(response => {
-                console.log('🚶‍♂️ Device motion permission response:', response);
-                if (response === 'granted') {
-                    console.log('🚶‍♂️ Device motion permission granted!');
-                    this.enableDeviceMotion();
-                } else {
-                    console.log('🚶‍♂️ Device motion permission denied, using fallback');
-                    this.enableFallbackMode();
-                }
-            }).catch(error => {
-                console.warn('🚶‍♂️ Device motion permission error:', error);
-                this.enableFallbackMode();
-            });
+        // For mobile devices, show permission request UI
+        if (this.isMobileDevice()) {
+            this.showMobilePermissionRequest();
         } else {
-            console.log('🚶‍♂️ Direct device motion access (older browsers)');
-            // Direct access (older browsers)
+            // Desktop - try direct access
             this.enableDeviceMotion();
         }
         
         // Also try to access step counting if available
         this.setupStepCountingAPI();
+    }
+    
+    isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+    }
+    
+    showMobilePermissionRequest() {
+        console.log('🚶‍♂️ Showing mobile permission request UI...');
+        
+        // Create permission request UI
+        const permissionModal = document.createElement('div');
+        permissionModal.className = 'mobile-permission-modal';
+        permissionModal.innerHTML = `
+            <div class="permission-content">
+                <div class="permission-icon">🚶‍♂️</div>
+                <h3>Enable Step Tracking</h3>
+                <p>To count your steps accurately, we need access to your device's motion sensors.</p>
+                <div class="permission-buttons">
+                    <button id="grant-motion-permission" class="permission-btn grant">Enable Motion Sensors</button>
+                    <button id="skip-motion-permission" class="permission-btn skip">Use Fallback Mode</button>
+                </div>
+                <p class="permission-note">You can change this later in your browser settings.</p>
+            </div>
+        `;
+        
+        // Add styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .mobile-permission-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+            }
+            .permission-content {
+                background: white;
+                padding: 30px;
+                border-radius: 15px;
+                text-align: center;
+                max-width: 400px;
+                margin: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }
+            .permission-icon {
+                font-size: 48px;
+                margin-bottom: 20px;
+            }
+            .permission-content h3 {
+                margin: 0 0 15px 0;
+                color: #333;
+                font-size: 24px;
+            }
+            .permission-content p {
+                margin: 0 0 20px 0;
+                color: #666;
+                line-height: 1.5;
+            }
+            .permission-buttons {
+                display: flex;
+                gap: 15px;
+                margin: 25px 0;
+            }
+            .permission-btn {
+                flex: 1;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .permission-btn.grant {
+                background: #10b981;
+                color: white;
+            }
+            .permission-btn.grant:hover {
+                background: #059669;
+            }
+            .permission-btn.skip {
+                background: #6b7280;
+                color: white;
+            }
+            .permission-btn.skip:hover {
+                background: #4b5563;
+            }
+            .permission-note {
+                font-size: 12px;
+                color: #999;
+                margin-top: 15px;
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(permissionModal);
+        
+        // Add event listeners
+        document.getElementById('grant-motion-permission').addEventListener('click', () => {
+            this.requestDeviceMotionPermission();
+            permissionModal.remove();
+        });
+        
+        document.getElementById('skip-motion-permission').addEventListener('click', () => {
+            console.log('🚶‍♂️ User skipped motion permission, using fallback mode');
+            this.enableFallbackMode();
+            permissionModal.remove();
+        });
+    }
+    
+    requestDeviceMotionPermission() {
+        console.log('🚶‍♂️ Requesting device motion permission...');
+        
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission().then(response => {
+                console.log('🚶‍♂️ Device motion permission response:', response);
+                if (response === 'granted') {
+                    console.log('🚶‍♂️ Device motion permission granted!');
+                    this.enableDeviceMotion();
+                    this.showPermissionSuccess();
+                } else {
+                    console.log('🚶‍♂️ Device motion permission denied, using fallback');
+                    this.enableFallbackMode();
+                    this.showPermissionFallback();
+                }
+            }).catch(error => {
+                console.warn('🚶‍♂️ Device motion permission error:', error);
+                this.enableFallbackMode();
+                this.showPermissionError();
+            });
+        } else {
+            console.log('🚶‍♂️ Direct device motion access (older browsers)');
+            this.enableDeviceMotion();
+        }
+    }
+    
+    showPermissionSuccess() {
+        this.showNotification('✅ Motion sensors enabled! Step tracking is now active.', 'success');
+    }
+    
+    showPermissionFallback() {
+        this.showNotification('⚠️ Using fallback step tracking. You can enable motion sensors later.', 'warning');
+    }
+    
+    showPermissionError() {
+        this.showNotification('❌ Permission request failed. Using fallback step tracking.', 'error');
+    }
+    
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `step-notification ${type}`;
+        notification.textContent = message;
+        
+        const style = document.createElement('style');
+        style.textContent = `
+            .step-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                z-index: 10001;
+                animation: slideIn 0.3s ease-out;
+            }
+            .step-notification.success { background: #10b981; }
+            .step-notification.warning { background: #f59e0b; }
+            .step-notification.error { background: #ef4444; }
+            .step-notification.info { background: #3b82f6; }
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideIn 0.3s ease-out reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
     
     setupStepCountingAPI() {
@@ -1049,17 +1224,260 @@ class StepCurrencySystem {
     }
     
     enableFallbackMode() {
-        console.log('🚶‍♂️ Using fallback step detection mode');
+        console.log('🚶‍♂️ Enabling fallback step tracking mode');
+        this.fallbackMode = true;
+        this.stepDetectionActive = true;
+        
         // Clear any existing fallback interval
         if (this.fallbackInterval) {
             clearInterval(this.fallbackInterval);
         }
-        // Simulate steps for testing (slower rate for easier testing)
-        this.fallbackInterval = setInterval(() => {
-            if (this.stepDetectionActive) {
-                this.addStep();
+        
+        // Use GPS-based step estimation as primary fallback
+        this.startGPSStepEstimation();
+        
+        // Start enhanced mobile fallback with multiple methods
+        this.startMobileFallback();
+        
+        // Show fallback mode notification
+        this.showNotification('🔄 Using fallback step tracking. Walk around to count steps!', 'info');
+    }
+    
+    startMobileFallback() {
+        console.log('🚶‍♂️ Starting mobile fallback step tracking...');
+        
+        // Method 1: GPS distance-based estimation
+        this.gpsStepEstimation = {
+            lastPosition: null,
+            totalDistance: 0,
+            stepCount: 0,
+            isActive: false
+        };
+        
+        // Method 2: Touch-based step simulation (for testing)
+        this.touchStepSimulation = {
+            lastTouchTime: 0,
+            touchCount: 0,
+            isActive: false
+        };
+        
+        // Method 3: Timer-based step simulation (for testing)
+        this.timerStepSimulation = {
+            interval: null,
+            stepRate: 2, // steps per second when walking
+            isActive: false
+        };
+        
+        // Start GPS-based estimation
+        this.startGPSStepEstimation();
+        
+        // Start touch-based simulation for testing
+        this.startTouchStepSimulation();
+        
+        // Add mobile-specific UI controls
+        this.addMobileStepControls();
+    }
+    
+    startGPSStepEstimation() {
+        console.log('🚶‍♂️ Starting GPS-based step estimation...');
+        
+        if (!window.gpsCore) {
+            console.warn('🚶‍♂️ GPS Core not available for step estimation');
+            return;
+        }
+        
+        this.gpsStepEstimation.isActive = true;
+        
+        // Listen for GPS position updates
+        window.gpsCore.on('gps:position:updated', (position) => {
+            if (!this.gpsStepEstimation.isActive) return;
+            
+            if (this.gpsStepEstimation.lastPosition) {
+                // Calculate distance moved
+                const distance = this.calculateDistance(
+                    this.gpsStepEstimation.lastPosition,
+                    position
+                );
+                
+                // Estimate steps based on distance (average step length ~0.7m)
+                const estimatedSteps = Math.floor(distance / 0.7);
+                
+                if (estimatedSteps > 0) {
+                    console.log(`🚶‍♂️ GPS estimated ${estimatedSteps} steps (distance: ${distance.toFixed(2)}m)`);
+                    for (let i = 0; i < estimatedSteps; i++) {
+                        this.addStep('gps_fallback');
+                    }
+                }
             }
-        }, 5000); // Add step every 5 seconds for testing
+            
+            this.gpsStepEstimation.lastPosition = position;
+        });
+    }
+    
+    startTouchStepSimulation() {
+        console.log('🚶‍♂️ Starting touch-based step simulation...');
+        
+        this.touchStepSimulation.isActive = true;
+        
+        // Add touch event listeners for step simulation
+        document.addEventListener('touchstart', (event) => {
+            if (!this.touchStepSimulation.isActive) return;
+            
+            const now = Date.now();
+            const timeSinceLastTouch = now - this.touchStepSimulation.lastTouchTime;
+            
+            // If touch is within reasonable walking pace (300-2000ms between touches)
+            if (timeSinceLastTouch > 300 && timeSinceLastTouch < 2000) {
+                this.touchStepSimulation.touchCount++;
+                
+                // Every 2 touches = 1 step (left foot, right foot)
+                if (this.touchStepSimulation.touchCount >= 2) {
+                    this.addStep('touch_simulation');
+                    this.touchStepSimulation.touchCount = 0;
+                    console.log('🚶‍♂️ Touch simulation step added');
+                }
+            }
+            
+            this.touchStepSimulation.lastTouchTime = now;
+        });
+    }
+    
+    addMobileStepControls() {
+        console.log('🚶‍♂️ Adding mobile step controls...');
+        
+        // Create mobile step control panel
+        const controlPanel = document.createElement('div');
+        controlPanel.className = 'mobile-step-controls';
+        controlPanel.innerHTML = `
+            <div class="step-control-content">
+                <h4>🚶‍♂️ Step Tracking</h4>
+                <div class="step-status">
+                    <span id="step-status-text">Fallback Mode Active</span>
+                </div>
+                <div class="step-controls">
+                    <button id="add-step-btn" class="step-btn">+ Add Step</button>
+                    <button id="reset-steps-btn" class="step-btn reset">Reset Steps</button>
+                </div>
+                <div class="step-info">
+                    <p>Walk around or tap "Add Step" to count steps</p>
+                </div>
+            </div>
+        `;
+        
+        // Add styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .mobile-step-controls {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 15px;
+                padding: 20px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                z-index: 1000;
+                font-family: Arial, sans-serif;
+            }
+            .step-control-content h4 {
+                margin: 0 0 15px 0;
+                color: #333;
+                text-align: center;
+            }
+            .step-status {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            #step-status-text {
+                background: #e5e7eb;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-size: 14px;
+                color: #374151;
+            }
+            .step-controls {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            .step-btn {
+                flex: 1;
+                padding: 12px;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            .step-btn:not(.reset) {
+                background: #10b981;
+                color: white;
+            }
+            .step-btn:not(.reset):hover {
+                background: #059669;
+            }
+            .step-btn.reset {
+                background: #ef4444;
+                color: white;
+            }
+            .step-btn.reset:hover {
+                background: #dc2626;
+            }
+            .step-info {
+                text-align: center;
+                font-size: 12px;
+                color: #666;
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(controlPanel);
+        
+        // Add event listeners
+        document.getElementById('add-step-btn').addEventListener('click', () => {
+            this.addStep('manual');
+            this.showNotification('✅ Step added manually!', 'success');
+        });
+        
+        document.getElementById('reset-steps-btn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset your steps?')) {
+                this.resetSteps();
+                this.showNotification('🔄 Steps reset!', 'info');
+            }
+        });
+        
+        // Update status text
+        this.updateMobileStepStatus();
+    }
+    
+    updateMobileStepStatus() {
+        const statusText = document.getElementById('step-status-text');
+        if (statusText) {
+            if (this.fallbackMode) {
+                statusText.textContent = 'Fallback Mode Active';
+                statusText.style.background = '#fef3c7';
+                statusText.style.color = '#92400e';
+            } else {
+                statusText.textContent = 'Motion Sensors Active';
+                statusText.style.background = '#d1fae5';
+                statusText.style.color = '#065f46';
+            }
+        }
+    }
+    
+    calculateDistance(pos1, pos2) {
+        const R = 6371000; // Earth's radius in meters
+        const lat1 = pos1.lat * Math.PI / 180;
+        const lat2 = pos2.lat * Math.PI / 180;
+        const deltaLat = (pos2.lat - pos1.lat) * Math.PI / 180;
+        const deltaLng = (pos2.lng - pos1.lng) * Math.PI / 180;
+        
+        const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+                  Math.cos(lat1) * Math.cos(lat2) *
+                  Math.sin(deltaLng / 2) * Math.sin(deltaLng / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        
+        return R * c;
     }
     
     disableFallbackMode() {
@@ -2278,7 +2696,7 @@ class StepCurrencySystem {
             this.syncStepsToServer();
             
             return true;
-            } else {
+        } else {
             console.warn('⚠️ Could not get position for base establishment');
             return false;
         }
@@ -2658,7 +3076,7 @@ class StepCurrencySystem {
             existingCounter.remove();
         }
 
-        // Create consciousness-serving step counter - simplified and reliable
+        // Create consciousness-serving step counter with toggle buttons
         const stepCounter = document.createElement('div');
         stepCounter.id = 'step-counter';
         stepCounter.innerHTML = `
@@ -2669,6 +3087,11 @@ class StepCurrencySystem {
                 <div class="step-session" id="step-session">+${this.sessionSteps}</div>
                 <div class="step-status" style="font-size: 0.8em; color: #00ff88; margin-top: 4px;">
                     Consciousness-Serving Step Tracking
+                </div>
+                <div class="step-source-toggle" style="margin-top: 8px; display: flex; gap: 4px; justify-content: center;">
+                    <button class="step-source-btn" data-mode="gps_distance" style="padding: 4px 8px; font-size: 0.7em; background: #1a1a2e; color: #00ff88; border: 1px solid #00ff88; border-radius: 4px; cursor: pointer;">GPS</button>
+                    <button class="step-source-btn" data-mode="device" style="padding: 4px 8px; font-size: 0.7em; background: #1a1a2e; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 4px; cursor: pointer;">Device</button>
+                    <button class="step-source-btn" data-mode="simulation" style="padding: 4px 8px; font-size: 0.7em; background: #1a1a2e; color: #ffd93d; border: 1px solid #ffd93d; border-radius: 4px; cursor: pointer;">Sim</button>
                 </div>
             </div>
         `;
@@ -2684,12 +3107,78 @@ class StepCurrencySystem {
             console.log('🚶‍♂️ Step counter with toggle created and added to body (fallback)');
         }
         
-        // Step counter created successfully - no toggle needed
+        // Set up toggle button event listeners
+        this.setupStepSourceToggleButtons();
     }
     
-    // Toggle system removed - consciousness-serving simplified approach
+    /**
+     * Set up step source toggle button event listeners
+     */
+    setupStepSourceToggleButtons() {
+        const toggleButtons = document.querySelectorAll('.step-source-btn');
+        
+        toggleButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const mode = button.getAttribute('data-mode');
+                console.log(`🚶‍♂️ Step source toggle clicked: ${mode}`);
+                
+                // Switch to the selected mode
+                if (this.setEngineMode(mode)) {
+                    // Update button styles to show active state
+                    this.updateStepSourceButtonStyles(mode);
+                }
+            });
+            
+            // Add hover effects
+            button.addEventListener('mouseenter', () => {
+                button.style.opacity = '0.8';
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                button.style.opacity = '1';
+            });
+        });
+        
+        // Set initial active state
+        this.updateStepSourceButtonStyles(this.getCurrentStepMode());
+    }
     
-    // Mode activation methods removed - consciousness-serving simplified approach
+    /**
+     * Update step source button styles to show active state
+     */
+    updateStepSourceButtonStyles(activeMode) {
+        const toggleButtons = document.querySelectorAll('.step-source-btn');
+        
+        toggleButtons.forEach(button => {
+            const mode = button.getAttribute('data-mode');
+            
+            if (mode === activeMode) {
+                // Active button - brighter colors
+                button.style.opacity = '1';
+                button.style.fontWeight = 'bold';
+                button.style.boxShadow = '0 0 8px currentColor';
+            } else {
+                // Inactive button - dimmer colors
+                button.style.opacity = '0.6';
+                button.style.fontWeight = 'normal';
+                button.style.boxShadow = 'none';
+            }
+        });
+    }
+    
+    /**
+     * Get current step detection mode
+     */
+    getCurrentStepMode() {
+        if (this.fallbackMode) {
+            return 'simulation';
+        } else if (this.useEnhancedTracking) {
+            return 'device';
+        } else {
+            return 'gps_distance';
+        }
+    }
 
     setupStepControls() {
         const incBtn = document.getElementById('step-increment');
@@ -2971,75 +3460,14 @@ class StepCurrencySystem {
         }
         
         try {
-            // Create flag pole marker with Finnish flag
+            // Get the player's selected flag type
+            const flagType = localStorage.getItem('eldritch_player_base_logo') || 'finnish';
+            console.log('🏳️ Using flag type:', flagType);
+            
+            // Create flag pole marker with user's selected flag
             const flagPoleIcon = L.divIcon({
                 className: 'flag-pole-marker',
-                html: `
-                    <div style="
-                        width: 40px; 
-                        height: 60px; 
-                        display: flex; 
-                        flex-direction: column; 
-                        align-items: center; 
-                        justify-content: flex-start;
-                        position: relative;
-                    ">
-                        <!-- Flag Pole -->
-                        <div style="
-                            width: 4px; 
-                            height: 50px; 
-                            background: linear-gradient(to bottom, #8B4513, #654321); 
-                            border-radius: 2px;
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-                        "></div>
-                        
-                        <!-- Finnish Flag -->
-                        <div style="
-                            position: absolute;
-                            top: 5px;
-                            left: 4px;
-                            width: 20px;
-                            height: 14px;
-                            background: white;
-                            border: 1px solid #ccc;
-                            border-radius: 2px;
-                            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                        ">
-                            <!-- Blue Cross -->
-                            <div style="
-                                position: absolute;
-                                top: 50%;
-                                left: 0;
-                                right: 0;
-                                height: 2px;
-                                background: #003580;
-                                transform: translateY(-50%);
-                            "></div>
-                            <div style="
-                                position: absolute;
-                                left: 50%;
-                                top: 0;
-                                bottom: 0;
-                                width: 2px;
-                                background: #003580;
-                                transform: translateX(-50%);
-                            "></div>
-                        </div>
-                        
-                        <!-- Base Circle -->
-                        <div style="
-                            position: absolute;
-                            bottom: 0;
-                            width: 30px;
-                            height: 30px;
-                            background: radial-gradient(circle, #8b5cf6, #6d28d9);
-                            border: 3px solid #ffffff;
-                            border-radius: 50%;
-                            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-                            animation: flagPolePulse 3s infinite;
-                        "></div>
-                    </div>
-                `,
+                html: this.createFlagPoleHTML(flagType),
                 iconSize: [40, 60],
                 iconAnchor: [20, 60],
                 popupAnchor: [0, -60]
@@ -3081,6 +3509,14 @@ class StepCurrencySystem {
                         box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
                     }
                 }
+                @keyframes cosmicFlagShimmer {
+                    0%, 100% { 
+                        background: linear-gradient(45deg, #8b5cf6, #3b82f6, #06b6d4);
+                    }
+                    50% { 
+                        background: linear-gradient(45deg, #06b6d4, #8b5cf6, #3b82f6);
+                    }
+                }
             `;
             document.head.appendChild(style);
             
@@ -3091,6 +3527,286 @@ class StepCurrencySystem {
             console.error('🏳️ Error creating flag pole marker:', error);
             return null;
         }
+    }
+    
+    createFlagPoleHTML(flagType) {
+        console.log('🏳️ Creating flag pole HTML for flag type:', flagType);
+        
+        let flagHTML = '';
+        
+        switch (flagType) {
+            case 'finnish':
+                flagHTML = `
+                    <!-- Finnish Flag -->
+                    <div style="
+                        position: absolute;
+                        top: 5px;
+                        left: 4px;
+                        width: 20px;
+                        height: 14px;
+                        background: white;
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    ">
+                        <!-- Blue Cross -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            right: 0;
+                            height: 2px;
+                            background: #003580;
+                            transform: translateY(-50%);
+                        "></div>
+                        <div style="
+                            position: absolute;
+                            left: 50%;
+                            top: 0;
+                            bottom: 0;
+                            width: 2px;
+                            background: #003580;
+                            transform: translateX(-50%);
+                        "></div>
+                    </div>
+                `;
+                break;
+                
+            case 'norwegian':
+                flagHTML = `
+                    <!-- Norwegian Flag -->
+                    <div style="
+                        position: absolute;
+                        top: 5px;
+                        left: 4px;
+                        width: 20px;
+                        height: 14px;
+                        background: white;
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    ">
+                        <!-- Red Cross -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            right: 0;
+                            height: 2px;
+                            background: #EF2B2D;
+                            transform: translateY(-50%);
+                        "></div>
+                        <div style="
+                            position: absolute;
+                            left: 50%;
+                            top: 0;
+                            bottom: 0;
+                            width: 2px;
+                            background: #EF2B2D;
+                            transform: translateX(-50%);
+                        "></div>
+                        <!-- Blue Cross -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            right: 0;
+                            height: 1px;
+                            background: #002868;
+                            transform: translateY(-50%);
+                        "></div>
+                        <div style="
+                            position: absolute;
+                            left: 50%;
+                            top: 0;
+                            bottom: 0;
+                            width: 1px;
+                            background: #002868;
+                            transform: translateX(-50%);
+                        "></div>
+                    </div>
+                `;
+                break;
+                
+            case 'swedish':
+                flagHTML = `
+                    <!-- Swedish Flag -->
+                    <div style="
+                        position: absolute;
+                        top: 5px;
+                        left: 4px;
+                        width: 20px;
+                        height: 14px;
+                        background: #006AA7;
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    ">
+                        <!-- Yellow Cross -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            right: 0;
+                            height: 2px;
+                            background: #FECC00;
+                            transform: translateY(-50%);
+                        "></div>
+                        <div style="
+                            position: absolute;
+                            left: 50%;
+                            top: 0;
+                            bottom: 0;
+                            width: 2px;
+                            background: #FECC00;
+                            transform: translateX(-50%);
+                        "></div>
+                    </div>
+                `;
+                break;
+                
+            case 'danish':
+                flagHTML = `
+                    <!-- Danish Flag -->
+                    <div style="
+                        position: absolute;
+                        top: 5px;
+                        left: 4px;
+                        width: 20px;
+                        height: 14px;
+                        background: #C60C30;
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    ">
+                        <!-- White Cross -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            right: 0;
+                            height: 2px;
+                            background: white;
+                            transform: translateY(-50%);
+                        "></div>
+                        <div style="
+                            position: absolute;
+                            left: 50%;
+                            top: 0;
+                            bottom: 0;
+                            width: 2px;
+                            background: white;
+                            transform: translateX(-50%);
+                        "></div>
+                    </div>
+                `;
+                break;
+                
+            case 'cosmic':
+                flagHTML = `
+                    <!-- Cosmic Flag -->
+                    <div style="
+                        position: absolute;
+                        top: 5px;
+                        left: 4px;
+                        width: 20px;
+                        height: 14px;
+                        background: linear-gradient(45deg, #8b5cf6, #3b82f6, #06b6d4);
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                        animation: cosmicFlagShimmer 2s infinite;
+                    ">
+                        <!-- Cosmic Symbol -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            width: 8px;
+                            height: 8px;
+                            background: white;
+                            border-radius: 50%;
+                            transform: translate(-50%, -50%);
+                            box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
+                        "></div>
+                    </div>
+                `;
+                break;
+                
+            default:
+                // Default to Finnish flag
+                flagHTML = `
+                    <!-- Finnish Flag (Default) -->
+                    <div style="
+                        position: absolute;
+                        top: 5px;
+                        left: 4px;
+                        width: 20px;
+                        height: 14px;
+                        background: white;
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    ">
+                        <!-- Blue Cross -->
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 0;
+                            right: 0;
+                            height: 2px;
+                            background: #003580;
+                            transform: translateY(-50%);
+                        "></div>
+                        <div style="
+                            position: absolute;
+                            left: 50%;
+                            top: 0;
+                            bottom: 0;
+                            width: 2px;
+                            background: #003580;
+                            transform: translateX(-50%);
+                        "></div>
+                    </div>
+                `;
+                break;
+        }
+        
+        return `
+            <div style="
+                width: 40px; 
+                height: 60px; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: flex-start;
+                position: relative;
+            ">
+                <!-- Flag Pole -->
+                <div style="
+                    width: 4px; 
+                    height: 50px; 
+                    background: linear-gradient(to bottom, #8B4513, #654321); 
+                    border-radius: 2px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                "></div>
+                
+                ${flagHTML}
+                
+                <!-- Base Circle -->
+                <div style="
+                    position: absolute;
+                    bottom: 0;
+                    width: 30px;
+                    height: 30px;
+                    background: radial-gradient(circle, #8b5cf6, #6d28d9);
+                    border: 3px solid #ffffff;
+                    border-radius: 50%;
+                    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+                    animation: flagPolePulse 3s infinite;
+                "></div>
+            </div>
+        `;
     }
     
     showNewAdventureWelcomeNotification() {
@@ -3376,10 +4092,62 @@ class StepCurrencySystem {
             detectionActive: this.stepDetectionActive
         };
     }
+
+    /**
+     * Set the step engine mode (for mobile toggle functionality)
+     * @param {string} mode - The step detection mode ('gps_distance', 'device', 'simulation')
+     */
+    setEngineMode(mode) {
+        console.log(`🚶‍♂️ Setting step engine mode to: ${mode}`);
+        
+        switch (mode) {
+            case 'gps_distance':
+                console.log('🚶‍♂️ Switching to GPS distance-based step tracking');
+                this.useEnhancedTracking = false;
+                this.fallbackMode = false;
+                break;
+                
+            case 'device':
+                console.log('🚶‍♂️ Switching to device motion step tracking');
+                this.useEnhancedTracking = true;
+                this.fallbackMode = false;
+                this.setupDeviceMotion();
+                break;
+                
+            case 'simulation':
+                console.log('🚶‍♂️ Switching to simulation mode');
+                this.useEnhancedTracking = false;
+                this.fallbackMode = true;
+                this.enableFallbackMode();
+                break;
+                
+            default:
+                console.warn(`🚶‍♂️ Unknown step engine mode: ${mode}`);
+                return false;
+        }
+        
+        // Update UI to reflect the change
+        this.updateStepCounter();
+        
+        // Show notification
+        this.showNotification(`Step tracking mode: ${mode}`, 'info');
+        
+        return true;
+    }
 }
 
 // Step currency system will be initialized by app.js
 console.log('🚶‍♂️ Step currency system script loaded - will be initialized by app.js');
+
+// Global function for step engine mode switching (used by settings and mobile testing)
+window.setStepEngineMode = (mode) => {
+    if (window.stepCurrencySystem && typeof window.stepCurrencySystem.setEngineMode === 'function') {
+        return window.stepCurrencySystem.setEngineMode(mode);
+    } else {
+        console.warn('🚶‍♂️ Step currency system not available for mode switching');
+        return false;
+    }
+};
 
 // Make functions available globally for debugging
 window.addTestSteps = (amount) => {
@@ -3633,7 +4401,7 @@ window.testBaseCreation = (position = null) => {
 };
 
 // Debug function to test flag pole creation
-window.testFlagPoleCreation = (position = null) => {
+window.testFlagPoleCreation = (position = null, flagType = null) => {
     console.log('🧪 Testing flag pole creation...');
     
     if (!position) {
@@ -3648,7 +4416,14 @@ window.testFlagPoleCreation = (position = null) => {
         }
     }
     
+    // Set flag type if provided
+    if (flagType) {
+        localStorage.setItem('eldritch_player_base_logo', flagType);
+        console.log('🧪 Set flag type to:', flagType);
+    }
+    
     console.log('🧪 Using position for flag pole creation:', position);
+    console.log('🧪 Current flag type:', localStorage.getItem('eldritch_player_base_logo'));
     
     if (window.stepCurrencySystem) {
         const flagPole = window.stepCurrencySystem.createFlagPoleMarker(position);
@@ -3659,6 +4434,63 @@ window.testFlagPoleCreation = (position = null) => {
         }
     } else {
         console.warn('Step currency system not available');
+    }
+};
+
+// Debug function to test all flag types
+window.testAllFlagTypes = (position = null) => {
+    console.log('🧪 Testing all flag types...');
+    
+    const flagTypes = ['finnish', 'norwegian', 'swedish', 'danish', 'cosmic'];
+    
+    flagTypes.forEach((flagType, index) => {
+        setTimeout(() => {
+            console.log(`🧪 Testing flag type: ${flagType}`);
+            window.testFlagPoleCreation(position, flagType);
+        }, index * 2000); // 2 second delay between each flag
+    });
+};
+
+// Debug function to test mobile step counter
+window.testMobileStepCounter = () => {
+    console.log('🧪 Testing mobile step counter...');
+    
+    if (window.stepCurrencySystem) {
+        const system = window.stepCurrencySystem;
+        
+        console.log('🧪 Current step counter status:', {
+            isMobile: system.isMobileDevice(),
+            fallbackMode: system.fallbackMode,
+            stepDetectionActive: system.stepDetectionActive,
+            totalSteps: system.totalSteps,
+            sessionSteps: system.sessionSteps,
+            accelerationDataLength: system.accelerationData?.length || 0
+        });
+        
+        // Test mobile permission request
+        if (system.isMobileDevice()) {
+            console.log('🧪 Mobile device detected - testing permission request');
+            system.showMobilePermissionRequest();
+        } else {
+            console.log('🧪 Desktop device - testing fallback mode');
+            system.enableFallbackMode();
+        }
+        
+        // Test manual step addition
+        console.log('🧪 Adding test step...');
+        system.addStep('debug_test');
+        
+        return {
+            success: true,
+            message: 'Mobile step counter test completed',
+            status: system.debugStepCounter?.getStatus()
+        };
+    } else {
+        console.warn('Step currency system not available');
+        return {
+            success: false,
+            message: 'Step currency system not available'
+        };
     }
 };
 

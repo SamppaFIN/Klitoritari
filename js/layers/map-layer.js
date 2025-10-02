@@ -913,7 +913,8 @@ class MapLayer extends BaseLayer {
         
         // Calculate distance and number of steps
         const distance = this.calculateDistance(fromPosition.lat, fromPosition.lng, toPosition.lat, toPosition.lng);
-        const stepCount = Math.max(1, Math.floor(distance / 10)); // One marker every 10 meters
+        const maxMarkers = 10; // Limit to 10 markers maximum
+        const stepCount = Math.min(maxMarkers, Math.max(1, Math.floor(distance / 10))); // One marker every 10 meters, max 10
         
         const stepMarkers = [];
         
@@ -927,6 +928,7 @@ class MapLayer extends BaseLayer {
             stepMarkers.push(marker);
         }
         
+        console.log(`👣 Created ${stepMarkers.length} step markers (limited to ${maxMarkers})`);
         return stepMarkers;
     }
 
