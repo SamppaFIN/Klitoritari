@@ -308,9 +308,9 @@ class LayerManager {
      */
     updatePlayerPositionAndSteps() {
         try {
-            // Update player position from geolocation if available
-            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-                const geo = window.eldritchApp.systems.geolocation;
+            // Update player position from GPS Core if available
+            if (window.gpsCore && window.gpsCore.currentPosition) {
+                const geo = window.gpsCore;
                 if (geo.currentPosition && geo.deviceGPSEnabled) {
                     // Update map engine with current position
                     if (window.mapEngine && typeof window.mapEngine.updatePlayerPosition === 'function') {
@@ -380,9 +380,9 @@ class LayerManager {
             // Get current player position from multiple sources
             let currentPosition = null;
             
-            // Try to get position from geolocation system
-            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-                const geo = window.eldritchApp.systems.geolocation;
+            // Try to get position from GPS Core system
+            if (window.gpsCore) {
+                const geo = window.gpsCore;
                 if (geo.currentPosition) {
                     currentPosition = geo.currentPosition;
                 } else if (geo.lastValidPosition) {

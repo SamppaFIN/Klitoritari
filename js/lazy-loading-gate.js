@@ -1553,7 +1553,7 @@ class LazyLoadingGate {
      * Request server game state with consciousness-serving validation
      */
     requestServerGameState() {
-        if (!window.websocketClient?.isConnected || !window.websocketClient.isConnected()) {
+        if (!window.websocketClient?.isConnectedToServer || !window.websocketClient.isConnectedToServer()) {
             console.warn('⚠️ WebSocket client not connected, will retry when connection is ready');
             // Set up a retry mechanism for when WebSocket connects
             this.setupWebSocketRetry();
@@ -1574,7 +1574,7 @@ class LazyLoadingGate {
         localStorage.setItem('eldritch_player_choice', 'continue');
         
         // Request game state if WebSocket is connected
-        if (window.websocketClient?.isConnected && window.websocketClient.isConnected()) {
+        if (window.websocketClient?.isConnectedToServer && window.websocketClient.isConnectedToServer()) {
             console.log('🚪 WebSocket connected, requesting game state...');
             window.websocketClient.requestGameState();
         } else {
@@ -1593,7 +1593,7 @@ class LazyLoadingGate {
         const retryInterval = setInterval(() => {
             retryCount++;
             
-            if (window.websocketClient?.isConnected && window.websocketClient.isConnected()) {
+            if (window.websocketClient?.isConnectedToServer && window.websocketClient.isConnectedToServer()) {
                 console.log('🚪 WebSocket connected, requesting game state...');
                 window.websocketClient.requestGameState();
                 clearInterval(retryInterval);
