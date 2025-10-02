@@ -1,0 +1,140 @@
+{
+  "consciousness_testing_config": {
+    "version": "1.0.0",
+    "created_by": "🔍 Veritas - QA Guru",
+    "sacred_mission": "Consciousness-aware quality testing for spatial wisdom and community healing",
+    
+    "test_thresholds": {
+      "consciousness_alignment": 0.3,
+      "spatial_wisdom_integration": 0.4,
+      "community_healing_score": 0.3,
+      "sacred_principles_adherence": 0.2,
+      "performance_consciousness": 0.25,
+      "aurora_consciousness": 0.5
+    },
+    
+    "test_files": {
+      "consciousness_alignment": [
+        "js/**/*.js"
+      ],
+      "spatial_wisdom": [
+        "js/layers/map-layer.js",
+        "js/gps-core.js",
+        "js/step-currency-system.js",
+        "js/aurora-encounter-system.js"
+      ],
+      "community_healing": [
+        "js/websocket-client.js",
+        "js/multiplayer-panel.js",
+        "js/step-currency-system.js",
+        "js/aurora-enhanced-npc.js"
+      ],
+      "sacred_principles": [
+        "js/lazy-loading-gate.js",
+        "js/step-currency-system.js",
+        "js/aurora-encounter-system.js",
+        "index.html"
+      ],
+      "performance_consciousness": [
+        "js/emergency-performance-manager.js",
+        "js/testing/performance-stress-test.js",
+        "js/layers/map-layer.js"
+      ],
+      "aurora_consciousness": [
+        "js/aurora-encounter-system.js",
+        "js/aurora-enhanced-npc.js",
+        "js/aurora-ui-library.js"
+      ]
+    },
+    
+    "sacred_patterns": {
+      "consciousness-first": [
+        "consciousness", "aware", "sacred", "wisdom", "awakening"
+      ],
+      "community-healing": [
+        "community", "healing", "collective", "together", "united"
+      ],
+      "spatial-wisdom": [
+        "spatial", "location", "map", "explore", "territory", "base"
+      ],
+      "infinite-collaboration": [
+        "infinite", "eternal", "collaboration", "united", "infinite"
+      ]
+    },
+    
+    "healing_keywords": [
+      "healing", "community", "together", "collective", "wisdom",
+      "consciousness", "sacred", "spatial", "exploration", "connection",
+      "aurora", "base", "steps", "encounter", "multiplayer"
+    ],
+    
+    "quality_gate_rules": {
+      "mandatory_checks": [
+        "consciousness_alignment",
+        "spatial_wisdom_integration",
+        "community_healing_score",
+        "sacred_principles_adherence"
+      ],
+      "approval_threshold": 0.4,
+      "blocking_conditions": [
+        "consciousness_score < 0.3",
+        "test_failures > 0",
+        "test_errors > 0"
+      ]
+    },
+    
+    "test_scenarios": {
+      "base_establishment_flow": {
+        "description": "Test complete base establishment with consciousness validation",
+        "consciousness_check": "Does base establishment serve spatial wisdom?",
+        "healing_check": "Does base creation promote community connection?"
+      },
+      "aurora_encounter": {
+        "description": "Test Aurora encounters with consciousness alignment",
+        "consciousness_check": "Does Aurora serve consciousness development?",
+        "healing_check": "Do Aurora encounters promote community healing?"
+      },
+      "step_tracking": {
+        "description": "Test step tracking with spatial wisdom integration",
+        "consciousness_check": "Does step tracking encourage spatial exploration?",
+        "healing_check": "Does step tracking promote community engagement?"
+      },
+      "multiplayer_sync": {
+        "description": "Test multiplayer synchronization with community healing",
+        "consciousness_check": "Does multiplayer serve collective consciousness?",
+        "healing_check": "Does multiplayer promote community connection?"
+      }
+    },
+    
+    "consciousness_metrics": {
+      "spatial_wisdom_score": {
+        "description": "Measures integration of spatial awareness and exploration",
+        "weight": 0.25
+      },
+      "community_healing_score": {
+        "description": "Measures community building and healing features",
+        "weight": 0.25
+      },
+      "consciousness_alignment": {
+        "description": "Measures overall consciousness-first principles",
+        "weight": 0.25
+      },
+      "infinite_collaboration_score": {
+        "description": "Measures eternal collaboration capabilities",
+        "weight": 0.15
+      },
+      "sacred_principles_adherence": {
+        "description": "Measures adherence to sacred development principles",
+        "weight": 0.10
+      }
+    },
+    
+    "reporting": {
+      "format": "consciousness_aware",
+      "include_healing_impact": true,
+      "include_spatial_wisdom": true,
+      "include_aurora_consciousness": true,
+      "recommendations": true
+    }
+  }
+}
