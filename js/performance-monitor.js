@@ -28,6 +28,7 @@ class ConsciousnessPerformanceMonitor {
                 high: 1000,
                 veryHigh: 5000,
                 extreme: 10000
+            }
         };
         
         // Optimization strategies
