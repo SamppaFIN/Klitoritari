@@ -194,7 +194,7 @@ class EmergencyPerformanceManager {
         
         // Override requestAnimationFrame temporarily
         if (!this.originalRAF) {
-            this.originalRAF = window.requestAnimationFrame;
+            this.originalRAF = window.requestAnimationFrame.bind(window);
             window.requestAnimationFrame = (callback) => {
                 this.frameSkipCounter++;
                 if (this.frameSkipCounter % this.frameSkipInterval === 0) {
