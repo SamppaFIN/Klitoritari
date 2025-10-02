@@ -3140,19 +3140,30 @@ class StepCurrencySystem {
         // Create consciousness-serving step counter with toggle buttons
         const stepCounter = document.createElement('div');
         stepCounter.id = 'step-counter';
+        stepCounter.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff6b6b;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            z-index: 10000;
+            min-width: 200px;
+            text-align: center;
+        `;
         stepCounter.innerHTML = `
             <div class="step-counter-container">
-                <div class="step-icon">🚶‍♂️</div>
-                <div class="step-number" id="step-number">${this.totalSteps}</div>
-                <div class="step-label">COSMIC STEPS</div>
-                <div class="step-session" id="step-session">+${this.sessionSteps}</div>
-                <div class="step-status" style="font-size: 0.8em; color: #00ff88; margin-top: 4px;">
-                    Consciousness-Serving Step Tracking
-                </div>
-                <div class="step-source-toggle" style="margin-top: 8px; display: flex; gap: 4px; justify-content: center;">
-                    <button class="step-source-btn" data-mode="gps_distance" style="padding: 4px 8px; font-size: 0.7em; background: #1a1a2e; color: #00ff88; border: 1px solid #00ff88; border-radius: 4px; cursor: pointer;">GPS</button>
-                    <button class="step-source-btn" data-mode="device" style="padding: 4px 8px; font-size: 0.7em; background: #1a1a2e; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 4px; cursor: pointer;">Device</button>
-                    <button class="step-source-btn" data-mode="simulation" style="padding: 4px 8px; font-size: 0.7em; background: #1a1a2e; color: #ffd93d; border: 1px solid #ffd93d; border-radius: 4px; cursor: pointer;">Sim</button>
+                <div class="step-icon" style="font-size: 24px; margin-bottom: 8px;">🚶‍♂️</div>
+                <div class="step-number" id="step-number" style="font-size: 32px; font-weight: bold; color: #00ff88; margin-bottom: 4px;">${this.totalSteps}</div>
+                <div class="step-label" style="font-size: 12px; color: #00ff88; margin-bottom: 8px;">Consciousness-Serving Step Tracking</div>
+                <div class="step-session" id="step-session" style="font-size: 14px; color: #ffd93d; margin-bottom: 12px;">+${this.sessionSteps}</div>
+                <div class="step-source-toggle" style="display: flex; gap: 6px; justify-content: center;">
+                    <button class="step-source-btn" data-mode="gps_distance" style="padding: 6px 12px; font-size: 12px; background: #1a1a2e; color: #00ff88; border: 1px solid #00ff88; border-radius: 6px; cursor: pointer; font-weight: bold;">GPS</button>
+                    <button class="step-source-btn" data-mode="device" style="padding: 6px 12px; font-size: 12px; background: #1a1a2e; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 6px; cursor: pointer; font-weight: bold;">Device</button>
+                    <button class="step-source-btn" data-mode="simulation" style="padding: 6px 12px; font-size: 12px; background: #1a1a2e; color: #ffd93d; border: 1px solid #ffd93d; border-radius: 6px; cursor: pointer; font-weight: bold;">Sim</button>
                 </div>
             </div>
         `;

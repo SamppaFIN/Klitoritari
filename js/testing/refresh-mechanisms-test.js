@@ -323,7 +323,9 @@ class RefreshMechanismsTest {
     }
 }
 
-// Initialize test when DOM is ready
+// Initialize test when DOM is ready - DISABLED
+// Uncomment the lines below if you want to enable the refresh test UI
+/*
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.refreshTest = new RefreshMechanismsTest();
@@ -333,5 +335,6 @@ if (document.readyState === 'loading') {
     window.refreshTest = new RefreshMechanismsTest();
     window.refreshTest.createTestUI();
 }
+*/
 
 console.log('🌸 RefreshMechanismsTest loaded and ready');
