@@ -11,10 +11,27 @@ class WebGLMapRenderer {
         this.program = null;
         this.buffer = null;
         this.objectData = null;
-        this.maxObjects = 10000; // Maximum objects supported
+        // Dynamic object limit based on device capability
+        const deviceMemory = navigator.deviceMemory || 4;
+        const baseLimit = 10000;
+        this.maxObjects = Math.min(50000, baseLimit * Math.min(deviceMemory, 8)); // Scale up to 50k max
+        console.log(`🌌 WebGL: Dynamic object limit set to ${this.maxObjects} (device memory: ${deviceMemory}GB)`);
         this.objectStride = 16; // 16 floats per object (64 bytes)
         this.currentZoom = 15;
         this.mapBounds = null;
+        
+        // Performance monitoring
+        this.performanceStats = {
+            frameTime: 0,
+            fps: 60,
+            objectCount: 0,
+            renderQuality: 'high',
+            skipAnimations: false
+        };
+        
+        // Frame rate monitoring
+        this.frameTimes = [];
+        this.lastFrameTime = performance.now();
         // Initialize matrices with fallback if GLMatrix not available
         if (typeof mat4 !== 'undefined') {
             this.projectionMatrix = mat4.create();
@@ -342,9 +359,12 @@ class WebGLMapRenderer {
     // Add object to the render queue
     addObject(object) {
         if (this.objectCount >= this.maxObjects) {
-            console.warn('Œ Maximum object count reached');
+            console.warn(`🌌 Maximum object count reached (${this.maxObjects}). Consider enabling aggressive culling.`);
             return false;
         }
+        
+        // Update performance stats
+        this.performanceStats.objectCount = this.objectCount + 1;
         
         const index = this.objectCount * this.objectStride;
         
@@ -375,7 +395,48 @@ class WebGLMapRenderer {
         this.objectData[index + 15] = 0; // Reserved
         
         this.objectCount++;
+        this.performanceStats.objectCount = this.objectCount;
+        
+        // Enable aggressive culling for high object counts
+        if (this.objectCount > 1000 && window.viewportCuller) {
+            window.viewportCuller.cullingEnabled = true;
+            window.viewportCuller.margin = Math.max(50, 100 - (this.objectCount / 100)); // Tighter culling
+        }
+        
         return true;
+    }
+    
+    /**
+     * Update performance monitoring and adjust quality
+     */
+    updatePerformanceStats() {
+        const now = performance.now();
+        const frameTime = now - this.lastFrameTime;
+        this.lastFrameTime = now;
+        
+        // Track frame times
+        this.frameTimes.push(frameTime);
+        if (this.frameTimes.length > 60) {
+            this.frameTimes.shift();
+        }
+        
+        // Calculate average FPS
+        const avgFrameTime = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
+        this.performanceStats.fps = Math.round(1000 / avgFrameTime);
+        this.performanceStats.frameTime = avgFrameTime;
+        
+        // Adjust quality based on performance
+        if (this.performanceStats.fps < 30) {
+            this.performanceStats.renderQuality = 'low';
+            this.performanceStats.skipAnimations = true;
+            console.log('🌌 Performance: Switching to low quality mode (FPS:', this.performanceStats.fps, ')');
+        } else if (this.performanceStats.fps < 45) {
+            this.performanceStats.renderQuality = 'medium';
+            this.performanceStats.skipAnimations = false;
+        } else {
+            this.performanceStats.renderQuality = 'high';
+            this.performanceStats.skipAnimations = false;
+        }
     }
     
     // Update object data

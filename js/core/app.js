@@ -24,6 +24,9 @@ class EldritchSanctuaryApp {
         this.viewportCuller = null;
         this.memoryManager = null;
         
+        // Consciousness-aware performance monitoring
+        this.performanceMonitor = null;
+        
         // Canvas and rendering
         this.canvas = null;
         this.ctx = null;
@@ -377,6 +380,13 @@ class EldritchSanctuaryApp {
         if (window.MemoryManager) {
             this.memoryManager = new MemoryManager();
             console.log('📱 Memory manager initialized');
+        }
+        
+        // Initialize consciousness-aware performance monitor
+        if (window.ConsciousnessPerformanceMonitor) {
+            this.performanceMonitor = new ConsciousnessPerformanceMonitor();
+            this.performanceMonitor.startMonitoring();
+            console.log('🌸 Consciousness performance monitor initialized');
         }
         
         // Set up mobile-specific event listeners
@@ -864,6 +874,9 @@ class EldritchSanctuaryApp {
         if (this.memoryManager) {
             this.memoryManager.destroy();
         }
+        if (this.performanceMonitor) {
+            this.performanceMonitor.destroy();
+        }
         
         // Legacy systems disabled - no cleanup needed
         // Object.values(this.legacySystems).forEach(system => {
@@ -879,6 +892,7 @@ class EldritchSanctuaryApp {
         this.mobileOptimizer = null;
         this.viewportCuller = null;
         this.memoryManager = null;
+        this.performanceMonitor = null;
         this.canvas = null;
         this.ctx = null;
         

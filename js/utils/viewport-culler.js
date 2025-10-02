@@ -14,6 +14,7 @@ class ViewportCuller {
         
         this.cullingEnabled = true;
         this.margin = 100; // Extra margin around viewport
+        this.adaptiveCulling = true; // Enable adaptive culling for high object counts
         this.objects = new Map();
         this.visibleObjects = new Set();
         this.lastCullTime = 0;
@@ -79,13 +80,19 @@ class ViewportCuller {
     }
 
     /**
-     * Perform viewport culling
+     * Perform viewport culling with consciousness-aware optimization
      */
     performCulling() {
         if (!this.cullingEnabled) {
             this.visibleObjects.clear();
             this.objects.forEach((_, id) => this.visibleObjects.add(id));
             return;
+        }
+        
+        // Adaptive culling for high object counts
+        if (this.adaptiveCulling && this.objects.size > 1000) {
+            this.margin = Math.max(50, 100 - (this.objects.size / 100)); // Tighter culling
+            this.cullInterval = Math.max(50, 100 - (this.objects.size / 200)); // More frequent culling
         }
 
         const startTime = performance.now();
@@ -115,6 +122,12 @@ class ViewportCuller {
         this.stats.culledObjects = culledCount;
         this.stats.cullTime = performance.now() - startTime;
         this.lastCullTime = Date.now();
+        
+        // Log performance improvements
+        if (this.objects.size > 1000) {
+            const cullRatio = (culledCount / this.objects.size * 100).toFixed(1);
+            console.log(`🌌 Viewport Culling: ${visibleCount}/${this.objects.size} visible (${cullRatio}% culled) in ${this.stats.cullTime.toFixed(2)}ms`);
+        }
     }
 
     /**

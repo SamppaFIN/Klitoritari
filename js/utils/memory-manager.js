@@ -4,9 +4,13 @@
  */
 class MemoryManager {
     constructor() {
-        this.memoryThreshold = 100; // MB
-        this.cleanupThreshold = 80; // MB
-        this.maxCleanupInterval = 30000; // 30 seconds
+        // Dynamic memory thresholds based on device capability
+        const deviceMemory = navigator.deviceMemory || 4;
+        this.memoryThreshold = Math.min(500, deviceMemory * 100); // Scale with device memory
+        this.cleanupThreshold = this.memoryThreshold * 0.8; // 80% of threshold
+        this.maxCleanupInterval = 60000; // 60 seconds (less frequent cleanup)
+        
+        console.log(`🧠 MemoryManager: Dynamic thresholds - ${this.memoryThreshold}MB limit, ${this.cleanupThreshold}MB cleanup`);
         this.lastCleanup = 0;
         
         // Memory tracking
@@ -86,17 +90,29 @@ class MemoryManager {
      * Set up object pools for common objects
      */
     setupObjectPools() {
+        // Dynamic pool sizes based on device capability
+        const deviceMemory = navigator.deviceMemory || 4;
+        const poolMultiplier = Math.min(deviceMemory, 8);
+        
         // Vector2 pool
-        this.createObjectPool('Vector2', () => ({ x: 0, y: 0 }), 100);
+        this.createObjectPool('Vector2', () => ({ x: 0, y: 0 }), 100 * poolMultiplier);
         
         // Vector3 pool
-        this.createObjectPool('Vector3', () => ({ x: 0, y: 0, z: 0 }), 100);
+        this.createObjectPool('Vector3', () => ({ x: 0, y: 0, z: 0 }), 100 * poolMultiplier);
         
         // Color pool
-        this.createObjectPool('Color', () => ({ r: 0, g: 0, b: 0, a: 1 }), 50);
+        this.createObjectPool('Color', () => ({ r: 0, g: 0, b: 0, a: 1 }), 50 * poolMultiplier);
         
         // Rectangle pool
-        this.createObjectPool('Rectangle', () => ({ x: 0, y: 0, width: 0, height: 0 }), 50);
+        this.createObjectPool('Rectangle', () => ({ x: 0, y: 0, width: 0, height: 0 }), 50 * poolMultiplier);
+        
+        // Map object pool for high-density scenarios
+        this.createObjectPool('MapObject', () => ({
+            id: '',
+            type: 'POI',
+            position: { x: 0, y: 0 },
+            created: Date.now()
+        }), 1000 * poolMultiplier);
         
         // Event data pool
         this.createObjectPool('EventData', () => ({}), 200);
@@ -199,7 +215,7 @@ class MemoryManager {
     }
 
     /**
-     * Perform memory cleanup
+     * Perform memory cleanup with consciousness-aware optimization
      */
     performCleanup() {
         const now = Date.now();
@@ -207,8 +223,14 @@ class MemoryManager {
             return; // Too soon for another cleanup
         }
 
-        console.log('🧠 Performing memory cleanup...');
+        console.log('🧠 Performing consciousness-aware memory cleanup...');
         const startTime = performance.now();
+        
+        // Check if cleanup is actually needed
+        if (this.memoryUsage < this.cleanupThreshold * 0.9) {
+            console.log('🧠 Memory usage acceptable, skipping cleanup');
+            return;
+        }
         
         // Force garbage collection if available
         if (window.gc) {
