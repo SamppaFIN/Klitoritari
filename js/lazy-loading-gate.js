@@ -1190,6 +1190,10 @@ class LazyLoadingGate {
         // Perform restoration tasks
         const restorationTasks = [
             () => this.restorePlayerMarkers(),
+            () => this.restorePlayerBase(),
+            () => this.restoreQuestMarkers(),
+            () => this.restorePathMarkers(),
+            () => this.restoreMapObjects(),
             () => this.restoreAuroraNPC(),
             () => this.restoreStepDetection(),
             () => this.forceRequestGameState()
@@ -1259,6 +1263,260 @@ class LazyLoadingGate {
         }
     }
     
+    /**
+     * Restore player base with consciousness-serving validation
+     */
+    restorePlayerBase() {
+        console.log('🚪 Restoring player base...');
+        
+        // Try to restore from base system
+        if (window.baseSystem && typeof window.baseSystem.loadPlayerBase === 'function') {
+            try {
+                window.baseSystem.loadPlayerBase();
+                console.log('🚪 Player base restoration attempted via base system');
+            } catch (error) {
+                console.warn('⚠️ Base system restoration failed:', error);
+            }
+        }
+        
+        // Try to restore from step currency system
+        if (window.stepCurrencySystem && typeof window.stepCurrencySystem.restorePlayerBase === 'function') {
+            try {
+                window.stepCurrencySystem.restorePlayerBase();
+                console.log('🚪 Player base restoration attempted via step currency system');
+            } catch (error) {
+                console.warn('⚠️ Step currency system base restoration failed:', error);
+            }
+        }
+        
+        // Try to restore from localStorage directly
+        this.restoreBaseFromStorage();
+    }
+    
+    /**
+     * Restore base from localStorage
+     */
+    restoreBaseFromStorage() {
+        try {
+            // Try multiple localStorage keys for base data
+            let savedBase = localStorage.getItem('eldritch-player-base');
+            if (!savedBase) {
+                savedBase = localStorage.getItem('playerBase');
+            }
+            if (!savedBase) {
+                savedBase = localStorage.getItem('base_bases');
+            }
+            
+            if (savedBase) {
+                const baseData = JSON.parse(savedBase);
+                console.log('🚪 Found saved base data:', baseData);
+                
+                // Create base marker if map is available
+                if (window.map && baseData.position) {
+                    this.createBaseMarkerFromData(baseData);
+                }
+            } else {
+                console.log('🚪 No saved base data found');
+            }
+        } catch (error) {
+            console.warn('⚠️ Error restoring base from storage:', error);
+        }
+    }
+    
+    /**
+     * Create base marker from saved data
+     */
+    createBaseMarkerFromData(baseData) {
+        try {
+            if (window.mapObjectManager && baseData.position) {
+                const objectId = window.mapObjectManager.createObject('BASE', baseData.position, {
+                    size: baseData.size || 40,
+                    color: baseData.color || '#8b5cf6',
+                    restored: true
+                });
+                console.log('🚪 Base marker restored with ID:', objectId);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error creating base marker:', error);
+        }
+    }
+    
+    /**
+     * Restore quest markers with consciousness-serving validation
+     */
+    restoreQuestMarkers() {
+        console.log('🚪 Restoring quest markers...');
+        
+        // Try to restore from quest system
+        if (window.unifiedQuestSystem && typeof window.unifiedQuestSystem.restoreQuestMarkers === 'function') {
+            try {
+                window.unifiedQuestSystem.restoreQuestMarkers();
+                console.log('🚪 Quest markers restoration attempted via quest system');
+            } catch (error) {
+                console.warn('⚠️ Quest system restoration failed:', error);
+            }
+        }
+        
+        // Try to restore from session persistence
+        if (window.sessionPersistence && typeof window.sessionPersistence.restoreQuestState === 'function') {
+            try {
+                const questState = window.sessionPersistence.restoreQuestState();
+                if (questState && questState.markers) {
+                    this.restoreQuestMarkersFromData(questState.markers);
+                }
+            } catch (error) {
+                console.warn('⚠️ Session persistence quest restoration failed:', error);
+            }
+        }
+    }
+    
+    /**
+     * Restore quest markers from data
+     */
+    restoreQuestMarkersFromData(markers) {
+        try {
+            if (Array.isArray(markers) && window.mapObjectManager) {
+                markers.forEach(markerData => {
+                    if (markerData.position) {
+                        window.mapObjectManager.createObject('QUEST', markerData.position, {
+                            size: markerData.size || 30,
+                            color: markerData.color || '#00bfff',
+                            restored: true,
+                            questId: markerData.questId
+                        });
+                    }
+                });
+                console.log(`🚪 Restored ${markers.length} quest markers`);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error restoring quest markers from data:', error);
+        }
+    }
+    
+    /**
+     * Restore path markers with consciousness-serving validation
+     */
+    restorePathMarkers() {
+        console.log('🚪 Restoring path markers...');
+        
+        // Try to restore from session persistence
+        if (window.sessionPersistence && typeof window.sessionPersistence.restorePathMarkers === 'function') {
+            try {
+                const pathMarkers = window.sessionPersistence.restorePathMarkers();
+                if (pathMarkers && Array.isArray(pathMarkers)) {
+                    this.restorePathMarkersFromData(pathMarkers);
+                }
+            } catch (error) {
+                console.warn('⚠️ Session persistence path marker restoration failed:', error);
+            }
+        }
+        
+        // Try to restore from localStorage
+        this.restorePathMarkersFromStorage();
+    }
+    
+    /**
+     * Restore path markers from localStorage
+     */
+    restorePathMarkersFromStorage() {
+        try {
+            const savedMarkers = localStorage.getItem('eldritch_path_markers');
+            if (savedMarkers) {
+                const markers = JSON.parse(savedMarkers);
+                if (Array.isArray(markers)) {
+                    this.restorePathMarkersFromData(markers);
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Error restoring path markers from storage:', error);
+        }
+    }
+    
+    /**
+     * Restore path markers from data
+     */
+    restorePathMarkersFromData(markers) {
+        try {
+            if (Array.isArray(markers) && window.mapObjectManager) {
+                markers.forEach(markerData => {
+                    if (markerData.position) {
+                        window.mapObjectManager.createObject('POI', markerData.position, {
+                            size: markerData.size || 20,
+                            color: markerData.color || '#ff6b6b',
+                            restored: true,
+                            pathMarker: true
+                        });
+                    }
+                });
+                console.log(`🚪 Restored ${markers.length} path markers`);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error restoring path markers from data:', error);
+        }
+    }
+    
+    /**
+     * Restore other map objects with consciousness-serving validation
+     */
+    restoreMapObjects() {
+        console.log('🚪 Restoring other map objects...');
+        
+        // Try to restore from session persistence
+        if (window.sessionPersistence && typeof window.sessionPersistence.restoreMapObjects === 'function') {
+            try {
+                const mapObjects = window.sessionPersistence.restoreMapObjects();
+                if (mapObjects && Array.isArray(mapObjects)) {
+                    this.restoreMapObjectsFromData(mapObjects);
+                }
+            } catch (error) {
+                console.warn('⚠️ Session persistence map object restoration failed:', error);
+            }
+        }
+        
+        // Try to restore from localStorage
+        this.restoreMapObjectsFromStorage();
+    }
+    
+    /**
+     * Restore map objects from localStorage
+     */
+    restoreMapObjectsFromStorage() {
+        try {
+            const savedObjects = localStorage.getItem('eldritch_map_objects');
+            if (savedObjects) {
+                const objects = JSON.parse(savedObjects);
+                if (Array.isArray(objects)) {
+                    this.restoreMapObjectsFromData(objects);
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Error restoring map objects from storage:', error);
+        }
+    }
+    
+    /**
+     * Restore map objects from data
+     */
+    restoreMapObjectsFromData(objects) {
+        try {
+            if (Array.isArray(objects) && window.mapObjectManager) {
+                objects.forEach(objectData => {
+                    if (objectData.position && objectData.type) {
+                        window.mapObjectManager.createObject(objectData.type, objectData.position, {
+                            size: objectData.size || 25,
+                            color: objectData.color || '#4ecdc4',
+                            restored: true,
+                            ...objectData.options
+                        });
+                    }
+                });
+                console.log(`🚪 Restored ${objects.length} map objects`);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error restoring map objects from data:', error);
+        }
+    }
+
     /**
      * Restore Aurora NPC with consciousness-serving validation
      */

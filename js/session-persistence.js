@@ -141,6 +141,94 @@ class SessionPersistenceManager {
         } catch (_) { return null; }
     }
 
+    // Map objects persistence
+    saveMapObjects(objects) {
+        try {
+            if (!Array.isArray(objects)) return;
+            const compact = objects.map(obj => ({
+                type: obj.type,
+                position: obj.position,
+                size: obj.size,
+                color: obj.color,
+                options: obj.options || {},
+                created: obj.created || Date.now()
+            }));
+            localStorage.setItem(this.key('mapObjects'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restoreMapObjects() {
+        try {
+            const raw = localStorage.getItem(this.key('mapObjects'));
+            return raw ? JSON.parse(raw) : [];
+        } catch (_) { return []; }
+    }
+
+    // Path markers persistence
+    savePathMarkers(markers) {
+        try {
+            if (!Array.isArray(markers)) return;
+            const compact = markers.map(marker => ({
+                position: marker.position,
+                size: marker.size,
+                color: marker.color,
+                timestamp: marker.timestamp || Date.now()
+            }));
+            localStorage.setItem(this.key('pathMarkers'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restorePathMarkers() {
+        try {
+            const raw = localStorage.getItem(this.key('pathMarkers'));
+            return raw ? JSON.parse(raw) : [];
+        } catch (_) { return []; }
+    }
+
+    // Quest markers persistence
+    saveQuestMarkers(markers) {
+        try {
+            if (!Array.isArray(markers)) return;
+            const compact = markers.map(marker => ({
+                questId: marker.questId,
+                position: marker.position,
+                size: marker.size,
+                color: marker.color,
+                status: marker.status || 'active'
+            }));
+            localStorage.setItem(this.key('questMarkers'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restoreQuestMarkers() {
+        try {
+            const raw = localStorage.getItem(this.key('questMarkers'));
+            return raw ? JSON.parse(raw) : [];
+        } catch (_) { return []; }
+    }
+
+    // Player base persistence
+    savePlayerBase(baseData) {
+        try {
+            if (!baseData) return;
+            const compact = {
+                position: baseData.position,
+                size: baseData.size,
+                color: baseData.color,
+                established: baseData.established || false,
+                created: baseData.created || Date.now()
+            };
+            localStorage.setItem(this.key('playerBase'), JSON.stringify(compact));
+        } catch (_) {}
+    }
+
+    restorePlayerBase() {
+        try {
+            const raw = localStorage.getItem(this.key('playerBase'));
+            return raw ? JSON.parse(raw) : null;
+        } catch (_) { return null; }
+    }
+
     // Inventory
     saveInventory(items) {
         try {
