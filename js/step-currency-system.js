@@ -619,6 +619,13 @@ class StepCurrencySystem {
     showMobilePermissionRequest() {
         console.log('🚶‍♂️ Showing mobile permission request UI...');
         
+        // Remove any existing permission modal first
+        const existingModal = document.querySelector('.mobile-permission-modal');
+        if (existingModal) {
+            console.log('🚶‍♂️ Removing existing permission modal');
+            existingModal.remove();
+        }
+        
         // Create permission request UI
         const permissionModal = document.createElement('div');
         permissionModal.className = 'mobile-permission-modal';
@@ -632,6 +639,7 @@ class StepCurrencySystem {
                     <button id="skip-motion-permission" class="permission-btn skip">Use Fallback Mode</button>
                 </div>
                 <p class="permission-note">You can change this later in your browser settings.</p>
+                <button id="close-permission-modal" class="permission-btn close" style="background: #ef4444; margin-top: 10px;">Close Dialog</button>
             </div>
         `;
         
@@ -712,17 +720,70 @@ class StepCurrencySystem {
         document.head.appendChild(style);
         document.body.appendChild(permissionModal);
         
-        // Add event listeners
-        document.getElementById('grant-motion-permission').addEventListener('click', () => {
-            this.requestDeviceMotionPermission();
-            permissionModal.remove();
-        });
+        // Add event listeners with error handling
+        const grantBtn = document.getElementById('grant-motion-permission');
+        const skipBtn = document.getElementById('skip-motion-permission');
         
-        document.getElementById('skip-motion-permission').addEventListener('click', () => {
-            console.log('🚶‍♂️ User skipped motion permission, using fallback mode');
-            this.enableFallbackMode();
-            permissionModal.remove();
-        });
+        if (grantBtn) {
+            grantBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🚶‍♂️ Grant motion permission button clicked');
+                this.requestDeviceMotionPermission();
+                permissionModal.remove();
+            });
+            
+            // Add touch event for mobile
+            grantBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                console.log('🚶‍♂️ Grant motion permission button touched');
+                this.requestDeviceMotionPermission();
+                permissionModal.remove();
+            });
+        } else {
+            console.error('🚶‍♂️ Grant motion permission button not found!');
+        }
+        
+        if (skipBtn) {
+            skipBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🚶‍♂️ Skip motion permission button clicked');
+                console.log('🚶‍♂️ User skipped motion permission, using fallback mode');
+                this.enableFallbackMode();
+                permissionModal.remove();
+            });
+            
+            // Add touch event for mobile
+            skipBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                console.log('🚶‍♂️ Skip motion permission button touched');
+                console.log('🚶‍♂️ User skipped motion permission, using fallback mode');
+                this.enableFallbackMode();
+                permissionModal.remove();
+            });
+        } else {
+            console.error('🚶‍♂️ Skip motion permission button not found!');
+        }
+        
+        // Add close button event listener
+        const closeBtn = document.getElementById('close-permission-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🚶‍♂️ Close permission modal button clicked');
+                this.enableFallbackMode(); // Enable fallback mode when closing
+                permissionModal.remove();
+            });
+            
+            // Add touch event for mobile
+            closeBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                console.log('🚶‍♂️ Close permission modal button touched');
+                this.enableFallbackMode(); // Enable fallback mode when closing
+                permissionModal.remove();
+            });
+        } else {
+            console.error('🚶‍♂️ Close permission modal button not found!');
+        }
     }
     
     requestDeviceMotionPermission() {
