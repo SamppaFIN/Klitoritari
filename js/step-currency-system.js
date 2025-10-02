@@ -2104,12 +2104,12 @@ class StepCurrencySystem {
     triggerFlagCreation() {
         console.log('🇫🇮 50 steps reached - creating flag!');
         
-        if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
-            const geo = window.eldritchApp.systems.geolocation;
+        if (window.gpsCore && window.gpsCore.currentPosition) {
+            const geo = window.gpsCore;
             // Prefer a synchronous, cached position
             let position = null;
-            if (typeof geo.getCurrentPositionSafe === 'function') {
-                position = geo.getCurrentPositionSafe();
+            if (geo.currentPosition) {
+                position = geo.currentPosition;
             }
             if (!position && geo.lastValidPosition) {
                 position = geo.lastValidPosition;
@@ -2680,9 +2680,9 @@ class StepCurrencySystem {
             console.log('🏗️ No position provided, trying to get current player position...');
             
             // Try multiple sources for current position
-            if (window.eldritchApp && window.eldritchApp.systems && window.eldritchApp.systems.geolocation) {
-                basePosition = window.eldritchApp.systems.geolocation.getCurrentPosition();
-                console.log('🏗️ Got position from eldritchApp.systems.geolocation:', basePosition);
+            if (window.gpsCore && window.gpsCore.currentPosition) {
+                basePosition = window.gpsCore.currentPosition;
+                console.log('🏗️ Got position from gpsCore:', basePosition);
             } else if (window.geolocationManager) {
                 basePosition = window.geolocationManager.getCurrentPosition();
                 console.log('🏗️ Got position from geolocationManager:', basePosition);
@@ -4088,8 +4088,8 @@ class StepCurrencySystem {
         this.autoStepDetectionEnabled = true;
         
         if (gpsTracking) {
-            if (window.eldritchApp && window.eldritchApp.systems.geolocation) {
-                const position = window.eldritchApp.systems.geolocation.getCurrentPosition();
+            if (window.gpsCore && window.gpsCore.currentPosition) {
+                const position = window.gpsCore.currentPosition;
                 if (position && position.accuracy && position.accuracy <= 50) {
                     console.log('🚶‍♂️ Step detection enabled - GPS tracking with good accuracy');
                 } else {
